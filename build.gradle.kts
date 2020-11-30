@@ -36,6 +36,9 @@ dependencies {
 	implementation("org.springdoc:springdoc-openapi-kotlin:${property("springdocVersion")}")
 	implementation("org.springdoc:springdoc-openapi-security:${property("springdocVersion")}")
 
+	implementation("org.springframework.integration:spring-integration-webflux")
+	implementation("org.springframework.integration:spring-integration-amqp")
+
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
