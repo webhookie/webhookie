@@ -1,0 +1,36 @@
+GET {{host}}/
+Authorization: Basic {{basicAuthUser}} {{basicAuthPass}}
+
+###
+
+POST {{host}}/bar
+Authorization: Basic {{basicAuthUser}} {{basicAuthPass}}
+Accept: text/plain
+Content-Type: application/json
+
+{
+    "name": "Test WebFlux inbound"
+}
+
+###
+
+POST {{host}}/create
+Authorization: Basic {{basicAuthUser}} {{basicAuthPass}}
+Accept: text/plain
+Content-Type: application/json
+
+{
+    "name": "Me new Endpoint - 5",
+    "path": "/foo-5"
+}
+
+###
+
+POST {{host}}/foo-5
+Authorization: Basic {{basicAuthUser}} {{basicAuthPass}}
+Accept: text/plain
+Content-Type: application/json
+
+{
+    "name": "Test WebFlux inbound"
+}
