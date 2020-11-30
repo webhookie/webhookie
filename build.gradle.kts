@@ -38,6 +38,7 @@ dependencies {
 
 	implementation("org.springframework.integration:spring-integration-webflux")
 	implementation("org.springframework.integration:spring-integration-amqp")
+	implementation("org.springframework.integration:spring-integration-mongodb")
 
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
