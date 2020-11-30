@@ -4,7 +4,6 @@ import com.hookiesolutions.webhookie.model.AbstractEntity
 import org.springframework.data.annotation.TypeAlias
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
-import org.springframework.http.MediaType
 
 /**
  *
