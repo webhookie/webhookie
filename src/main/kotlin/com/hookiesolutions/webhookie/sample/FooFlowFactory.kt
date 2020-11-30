@@ -21,7 +21,7 @@ class FooFlowFactory(
 				it
 					.methods(HttpMethod.POST)
 					.produces(MediaType.TEXT_PLAIN_VALUE)
-					.consumes(fooPublisher.mediaType.toString())
+					.consumes(fooPublisher.mediaType)
 			}
 			.requestPayloadType(Foo::class.java)
 

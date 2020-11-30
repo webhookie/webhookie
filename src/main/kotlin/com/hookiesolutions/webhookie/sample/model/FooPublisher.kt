@@ -22,5 +22,5 @@ data class FooPublisher(
 
   val enabled: Boolean,
 
-  val mediaType: MediaType
+  val mediaType: String
 ): AbstractEntity()

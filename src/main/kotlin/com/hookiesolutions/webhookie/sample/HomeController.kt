@@ -14,7 +14,6 @@ import javax.validation.Valid
 
 @RestController
 class HomeController(
-	private val fooFlowFactory: FooFlowFactory,
 	private val log: Logger,
 	private val repository: FooPublisherRepository
 ) {
@@ -22,7 +21,6 @@ class HomeController(
 	fun createFlow(@RequestBody @Valid body: FooPublisherRequest): Mono<String> {
 		return repository.save(body.publisher())
 			.doOnNext { log.info("Saving publisher: '{}'", it) }
-			.doOnNext { fooFlowFactory.register(it) }
 			.map { it.id!! }
 	}
 
@@ -38,6 +36,6 @@ data class FooPublisherRequest(
 	val mediaType: String = MediaType.APPLICATION_JSON_VALUE
 ) {
 	fun publisher(): FooPublisher {
-		return FooPublisher(name, path, true, MediaType.parseMediaType(mediaType))
+		return FooPublisher(name, path, true, mediaType)
 	}
 }
