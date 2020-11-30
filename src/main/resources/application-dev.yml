@@ -1,0 +1,8 @@
+spring:
+  security:
+    user:
+      name: wh-user
+      password: password
+logging:
+  level:
+    web: DEBUG
