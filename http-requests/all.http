@@ -1,10 +1,10 @@
 GET {{host}}/
-Authorization: Basic {{basicAuthUser}} {{basicAuthPass}}
+#Authorization: Basic {{basicAuthUser}} {{basicAuthPass}}
 
 ###
 
 POST {{host}}/bar
-Authorization: Basic {{basicAuthUser}} {{basicAuthPass}}
+#Authorization: Basic {{basicAuthUser}} {{basicAuthPass}}
 Accept: text/plain
 Content-Type: application/json
 
@@ -27,7 +27,7 @@ Content-Type: application/json
 ###
 
 POST {{host}}/foo-5
-Authorization: Basic {{basicAuthUser}} {{basicAuthPass}}
+#Authorization: Basic {{basicAuthUser}} {{basicAuthPass}}
 Accept: text/plain
 Content-Type: application/json
 

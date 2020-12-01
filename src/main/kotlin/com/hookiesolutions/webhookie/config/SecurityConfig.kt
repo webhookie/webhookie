@@ -21,6 +21,7 @@ class SecurityConfig {
   internal fun springWebFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain {
     http
       .csrf().disable()
+      .authorizeExchange { it.anyExchange().permitAll() }
     return http.build()
   }
 }
