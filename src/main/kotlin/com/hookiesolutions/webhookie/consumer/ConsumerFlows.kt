@@ -1,6 +1,5 @@
 package com.hookiesolutions.webhookie.consumer
 
-import org.slf4j.Logger
 import org.springframework.amqp.core.AmqpTemplate
 import org.springframework.amqp.rabbit.connection.ConnectionFactory
 import org.springframework.context.annotation.Bean
@@ -8,8 +7,6 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.integration.amqp.dsl.Amqp
 import org.springframework.integration.dsl.IntegrationFlow
 import org.springframework.integration.dsl.IntegrationFlows
-import org.springframework.messaging.Message
-import org.springframework.messaging.MessageChannel
 import org.springframework.messaging.SubscribableChannel
 import org.springframework.retry.backoff.FixedBackOffPolicy
 import org.springframework.retry.policy.SimpleRetryPolicy
@@ -22,12 +19,10 @@ import org.springframework.retry.support.RetryTemplate
  */
 @Configuration
 class ConsumerFlows(
-  private val log: Logger,
-  private val eventPublisherChannel: MessageChannel,
-  private val subscriptionInChannel: SubscribableChannel
+  private val consumerChannel: SubscribableChannel
 ) {
   @Bean
-  fun customerEventFlow(
+  fun consumerFlow(
     connectionFactory: ConnectionFactory,
     consumerRetryTemplate: RetryTemplate,
     amqpTemplate: AmqpTemplate
@@ -36,12 +31,23 @@ class ConsumerFlows(
       .retryTemplate(consumerRetryTemplate)
     return IntegrationFlows
       .from(inboundGateway)
-      .log<Message<*>> { log.info("{}", it) }
-      .channel(subscriptionInChannel)
+      .channel(consumerChannel)
       .get()
   }
 
+  @Bean
+  fun consumerRetryTemplate(): RetryTemplate {
+    val retryTemplate = RetryTemplate()
+    val fixedBackOffPolicy = FixedBackOffPolicy()
+    fixedBackOffPolicy.backOffPeriod = 2000L
+    retryTemplate.setBackOffPolicy(fixedBackOffPolicy)
+    val retryPolicy = SimpleRetryPolicy()
+    retryPolicy.maxAttempts = 2
+    retryTemplate.setRetryPolicy(retryPolicy)
+    return retryTemplate
+  }
 
+/*
   @Bean
   fun eventPublisherChannelFlow(
     connectionFactory: ConnectionFactory,
@@ -58,19 +64,6 @@ class ConsumerFlows(
   }
 
   @Bean
-  fun consumerRetryTemplate(): RetryTemplate {
-    val retryTemplate = RetryTemplate()
-    val fixedBackOffPolicy = FixedBackOffPolicy()
-    fixedBackOffPolicy.backOffPeriod = 2000L
-    retryTemplate.setBackOffPolicy(fixedBackOffPolicy)
-    val retryPolicy = SimpleRetryPolicy()
-    retryPolicy.maxAttempts = 2
-    retryTemplate.setRetryPolicy(retryPolicy)
-    return retryTemplate
-  }
-
-  /*
-  @Bean
   fun container(
     connectionFactory: ConnectionFactory,
   ): SimpleMessageListenerContainer {
@@ -79,6 +72,7 @@ class ConsumerFlows(
     container.setQueueNames("wh-customer.event")
     return container
   }
+
   @Bean("wh-customer.event.dlq")
   fun dlq(): Queue {
     return QueueBuilder.durable("wh-customer.event.dlq")
@@ -94,9 +88,7 @@ class ConsumerFlows(
   fun dlqBinding(dlqExchange: DirectExchange): Binding {
     return Binding(dlq().name, Binding.DestinationType.QUEUE, dlqExchange.name, "wh-event", emptyMap())
   }
-*/
 
-  /*
   @ServiceActivator(inputChannel = "customerEventInChannel", outputChannel = "subscriptionInChannel")
   fun eventFlowActivator(
     message: Message<*>,
@@ -111,9 +103,7 @@ class ConsumerFlows(
 
     return message
   }
-*/
 
-  /*
   @Bean
   fun customerEventConsumer(): Consumer<Message<Any>> {
     return Consumer {

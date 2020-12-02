@@ -3,7 +3,7 @@ package com.hookiesolutions.webhookie.consumer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.integration.dsl.MessageChannels
-import org.springframework.messaging.MessageChannel
+import org.springframework.messaging.SubscribableChannel
 
 /**
  *
@@ -13,7 +13,7 @@ import org.springframework.messaging.MessageChannel
 @Configuration("consumer-channels")
 class Channels {
   @Bean
-  fun eventPublisherChannel(): MessageChannel {
-    return MessageChannels.direct().get()
+  fun consumerChannel(): SubscribableChannel {
+    return MessageChannels.publishSubscribe().get()
   }
 }

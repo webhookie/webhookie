@@ -5,7 +5,6 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.integration.dsl.IntegrationFlow
 import org.springframework.integration.dsl.integrationFlow
-import org.springframework.messaging.SubscribableChannel
 
 /**
  *
@@ -14,13 +13,12 @@ import org.springframework.messaging.SubscribableChannel
  */
 @Configuration
 class SubscriptionFlows(
-  private val log: Logger,
-  private val subscriptionInChannel: SubscribableChannel
+  private val log: Logger
 ) {
   @Bean
   fun handleSubscriptionEvent(): IntegrationFlow {
     return integrationFlow {
-      channel(subscriptionInChannel)
+      channel("consumerChannel")
       handle {
         log.info("{}", it.payload)
         log.info("{}", it.headers)

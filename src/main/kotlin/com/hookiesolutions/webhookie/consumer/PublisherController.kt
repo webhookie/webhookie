@@ -7,7 +7,7 @@ import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH
 import org.slf4j.Logger
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
-import org.springframework.messaging.MessageChannel
+import org.springframework.messaging.SubscribableChannel
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -24,7 +24,7 @@ import reactor.kotlin.core.publisher.toMono
 @RestController
 class PublisherController(
   private val log: Logger,
-  private val eventPublisherChannel: MessageChannel
+  private val consumerChannel: SubscribableChannel
 ) {
   @PostMapping("/publish", produces = [MediaType.TEXT_PLAIN_VALUE])
   fun publishEvent(
@@ -44,7 +44,7 @@ class PublisherController(
     if(authorizedSubscribers.isNotEmpty()) {
       messageBuilder.setHeader(WH_HEADER_AUTHORIZED_SUBSCRIBER, authorizedSubscribers)
     }
-    eventPublisherChannel
+    consumerChannel
       .send(messageBuilder.build())
     return "OK".toMono()
   }
