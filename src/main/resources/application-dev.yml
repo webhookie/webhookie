@@ -6,4 +6,4 @@ spring:
 logging:
   level:
 #    web: DEBUG
-    org.springframework.cloud: DEBUG
+    org.springframework.amqp: DEBUG
