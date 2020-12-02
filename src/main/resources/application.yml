@@ -1,3 +1,9 @@
+webhookie:
+  consumer:
+    queue: ${WH_CONSUMER_QUEUE:wh-customer.event}
+    missing-header:
+      exchange: ${WH_CONSUMER_MISSING_HEADER_EXCHANGE:wh-customer}
+      routing-key: ${WH_CONSUMER_MISSING_HEADER_ROUTING_KEY:wh-missing-header}
 spring:
   data:
     mongodb:

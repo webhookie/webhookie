@@ -2,6 +2,7 @@ package com.hookiesolutions.webhookie.consumer
 
 import org.springframework.amqp.core.AmqpTemplate
 import org.springframework.amqp.rabbit.connection.ConnectionFactory
+import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.integration.amqp.dsl.Amqp
@@ -18,8 +19,10 @@ import org.springframework.retry.support.RetryTemplate
  * @since 2/12/20 13:36
  */
 @Configuration
+@EnableConfigurationProperties(ConsumerProperties::class)
 class ConsumerFlows(
-  private val consumerChannel: SubscribableChannel
+  private val consumerChannel: SubscribableChannel,
+  private val consumerProperties: ConsumerProperties
 ) {
   @Bean
   fun consumerFlow(
@@ -27,7 +30,7 @@ class ConsumerFlows(
     consumerRetryTemplate: RetryTemplate,
     amqpTemplate: AmqpTemplate
   ): IntegrationFlow {
-    val inboundGateway = Amqp.inboundGateway(connectionFactory, amqpTemplate, "wh-customer.event")
+    val inboundGateway = Amqp.inboundGateway(connectionFactory, amqpTemplate, consumerProperties.queue)
       .retryTemplate(consumerRetryTemplate)
     return IntegrationFlows
       .from(inboundGateway)
