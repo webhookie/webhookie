@@ -20,13 +20,43 @@ Accept: text/plain
 Content-Type: application/json
 
 {
+    "name": "Me new Endpoint - 7",
+    "path": "/foo-7"
+}
+
+###
+
+POST {{host}}/publish
+Accept: text/plain
+Content-Type: application/json
+wh-topic: Foo-json
+wh-trace-id: 32452345dh344553
+wh-authorized-subscriber: Subscriber1
+wh-authorized-subscriber: Subscriber2
+
+{
     "name": "Me new Endpoint - 5",
     "path": "/foo-5"
 }
 
 ###
 
-POST {{host}}/foo-5
+POST {{host}}/publish
+Accept: text/plain
+Content-Type: application/xml
+wh-topic: Foo-xml
+wh-trace-id: 32452345dh344553
+wh-authorized-subscriber: Subscriber1-xml
+wh-authorized-subscriber: Subscriber2-xml
+
+<body>
+    <name>Me new Endpoint - 5</name>
+    <path>/foo-5</path>
+</body>
+
+###
+
+POST {{host}}/foo-7
 #Authorization: Basic {{basicAuthUser}} {{basicAuthPass}}
 Accept: text/plain
 Content-Type: application/json
