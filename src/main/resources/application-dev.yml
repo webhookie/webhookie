@@ -5,4 +5,5 @@ spring:
       password: password
 logging:
   level:
-    web: DEBUG
+#    web: DEBUG
+    org.springframework.cloud: DEBUG

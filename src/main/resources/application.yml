@@ -2,6 +2,11 @@ spring:
   data:
     mongodb:
       uri: mongodb+srv://${DB_USERNAME}:${DB_PASSWORD}@${DB_URI}/${DB_NAME}?retryWrites=true&w=majority
+  rabbitmq:
+    host: ${WH_AMQP_HOST}
+    virtual-host: ${WH_AMQP_V_HOST}
+    username: ${WH_AMQP_USERNAME}
+    password: ${WH_AMQP_PASSWORD}
 management:
   endpoints:
     web:
