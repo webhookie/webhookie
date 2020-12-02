@@ -16,4 +16,9 @@ class Channels {
   fun consumerChannel(): SubscribableChannel {
     return MessageChannels.publishSubscribe().get()
   }
+
+  @Bean
+  fun missingHeadersChannel(): SubscribableChannel {
+    return MessageChannels.publishSubscribe().get()
+  }
 }
