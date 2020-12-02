@@ -1,4 +1,4 @@
-package com.hookiesolutions.webhookie.consumer
+package com.hookiesolutions.webhookie.consumer.web
 
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.HEADER_CONTENT_TYPE
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_AUTHORIZED_SUBSCRIBER

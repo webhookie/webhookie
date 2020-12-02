@@ -1,4 +1,4 @@
-package com.hookiesolutions.webhookie.consumer
+package com.hookiesolutions.webhookie.consumer.config
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

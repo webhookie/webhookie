@@ -1,4 +1,4 @@
-package com.hookiesolutions.webhookie.consumer
+package com.hookiesolutions.webhookie.consumer.config
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConstructorBinding

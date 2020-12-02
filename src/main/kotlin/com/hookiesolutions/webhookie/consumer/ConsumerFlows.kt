@@ -1,5 +1,6 @@
 package com.hookiesolutions.webhookie.consumer
 
+import com.hookiesolutions.webhookie.consumer.config.ConsumerProperties
 import org.springframework.amqp.core.AmqpTemplate
 import org.springframework.amqp.rabbit.connection.ConnectionFactory
 import org.springframework.boot.context.properties.EnableConfigurationProperties

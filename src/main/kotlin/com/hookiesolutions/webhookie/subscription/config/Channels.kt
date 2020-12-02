@@ -1,4 +1,4 @@
-package com.hookiesolutions.webhookie.subscription
+package com.hookiesolutions.webhookie.subscription.config
 
 import org.springframework.context.annotation.Configuration
 

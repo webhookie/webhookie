@@ -1,4 +1,4 @@
-package com.hookiesolutions.webhookie.consumer
+package com.hookiesolutions.webhookie.consumer.config
 
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_REQUIRED_HEADERS
 import org.springframework.context.annotation.Bean
@@ -14,8 +14,8 @@ import org.springframework.retry.support.RetryTemplate
  * @author Arthur Kazemi<bidadh@gmail.com>
  * @since 3/12/20 03:11
  */
-@Configuration("consumer-config")
-class Config {
+@Configuration
+class ConsumerConfig {
   @Bean
   fun missingHeadersSelector(): GenericSelector<Message<*>> {
     return GenericSelector {
