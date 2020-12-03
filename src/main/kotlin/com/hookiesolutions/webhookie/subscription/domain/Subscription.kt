@@ -15,5 +15,5 @@ data class Subscription(
   val topic: String,
   val callbackUrl: String,
   val httpMethod: HttpMethod,
-  val securitySchema: CallbackSecuritySchema
+  val callbackSecurity: CallbackSecurity
 ) : AbstractEntity()
