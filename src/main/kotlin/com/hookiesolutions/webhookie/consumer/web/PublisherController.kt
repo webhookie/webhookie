@@ -28,7 +28,7 @@ class PublisherController(
 ) {
   @PostMapping("/publish", produces = [MediaType.TEXT_PLAIN_VALUE])
   fun publishEvent(
-    @RequestBody body: Any,
+    @RequestBody body: ByteArray,
     @RequestHeader(WH_HEADER_TOPIC, required = true) topic: String,
     @RequestHeader(WH_HEADER_TRACE_ID, required = true) traceId: String,
     @RequestHeader(HttpHeaders.CONTENT_TYPE, required = true) contentType: String,

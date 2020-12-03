@@ -52,7 +52,7 @@ class ConsumerFlows(
   fun internalConsumerFlow(): IntegrationFlow {
     return integrationFlow {
       channel(internalConsumerChannel)
-      transform<Message<*>> { ConsumerMessage.from(it) }
+      transform<Message<ByteArray>> { ConsumerMessage.from(it) }
       channel(consumerChannel)
     }
   }

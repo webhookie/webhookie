@@ -17,16 +17,17 @@ data class ConsumerMessage(
   val traceId: String,
   val contentType: String,
   val authorizedSubscribers: Set<String> = emptySet(),
-  private val message: Message<*>
+  private val message: Message<ByteArray>
 ) {
-  val payload: Any
+  val payload: ByteArray
     get() = message.payload
 
+  @Suppress("unused")
   val headers: MessageHeaders
     get() = message.headers
 
   companion object {
-    fun from(message: Message<*>): ConsumerMessage {
+    fun from(message: Message<ByteArray>): ConsumerMessage {
       val topic = message.headers[WH_HEADER_TOPIC] as String
       val traceId = message.headers[WH_HEADER_TRACE_ID] as String
       val contentType = message.headers[HEADER_CONTENT_TYPE] as String
