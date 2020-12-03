@@ -1,32 +1,46 @@
-GET {{host}}/
-#Authorization: Basic {{basicAuthUser}} {{basicAuthPass}}
-
-###
-
-POST {{host}}/bar
-#Authorization: Basic {{basicAuthUser}} {{basicAuthPass}}
-Accept: text/plain
+POST {{host}}/company
+Accept: application/json
 Content-Type: application/json
 
 {
-    "name": "Test WebFlux inbound"
+    "name": "Hookie Solutions",
+    "subscriptions": [
+        {
+            "name": "Order Subscription",
+            "topic": "Order",
+            "callbackUrl": "http://localhost:9000/wh/order",
+            "httpMethod": "POST",
+            "securitySchema": {
+                "method": "HMAC",
+                "secret": "SECRET-1"
+            }
+        },
+        {
+            "name": "Product Subscription",
+            "topic": "Product",
+            "callbackUrl": "http://localhost:9000/wh/product",
+            "httpMethod": "POST",
+            "securitySchema": {
+                "method": "HMAC",
+                "secret": "SECRET-2"
+            }
+        },
+        {
+            "name": "Weather Subscription",
+            "topic": "Weather",
+            "callbackUrl": "http://localhost:9000/wh/weather",
+            "httpMethod": "POST",
+            "securitySchema": {
+                "method": "HMAC",
+                "secret": "SECRET-3"
+            }
+        }
+    ]
 }
 
 ###
 
-POST {{host}}/create
-Authorization: Basic {{basicAuthUser}} {{basicAuthPass}}
-Accept: text/plain
-Content-Type: application/json
-
-{
-    "name": "Me new Endpoint - 7",
-    "path": "/foo-7"
-}
-
-###
-
-POST {{host}}/publish
+POST {{host}}/consume/publish
 Accept: text/plain
 Content-Type: application/json
 wh-topic: Foo-json
@@ -41,7 +55,7 @@ wh-authorized-subscriber: Subscriber2
 
 ###
 
-POST {{host}}/publish
+POST {{host}}/consume/publish
 Accept: text/plain
 Content-Type: application/xml
 wh-topic: Foo-xml
@@ -55,12 +69,3 @@ wh-authorized-subscriber: Subscriber2-xml
 </body>
 
 ###
-
-POST {{host}}/foo-7
-#Authorization: Basic {{basicAuthUser}} {{basicAuthPass}}
-Accept: text/plain
-Content-Type: application/json
-
-{
-    "name": "Test WebFlux inbound"
-}
