@@ -4,6 +4,9 @@ import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.HE
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_AUTHORIZED_SUBSCRIBER
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_TOPIC
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_TRACE_ID
+import com.hookiesolutions.webhookie.config.OpenAPIConfig
+import com.hookiesolutions.webhookie.consumer.web.PublisherController.Companion.CONSUMER_REQUEST_MAPPING
+import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.slf4j.Logger
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
@@ -12,6 +15,7 @@ import org.springframework.messaging.support.MessageBuilder
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
+import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
@@ -22,6 +26,8 @@ import reactor.kotlin.core.publisher.toMono
  * @since 2/12/20 13:47
  */
 @RestController
+@SecurityRequirement(name = OpenAPIConfig.BASIC_SCHEME)
+@RequestMapping(CONSUMER_REQUEST_MAPPING)
 class PublisherController(
   private val log: Logger,
   private val internalConsumerChannel: SubscribableChannel
@@ -47,5 +53,9 @@ class PublisherController(
     internalConsumerChannel
       .send(messageBuilder.build())
     return "OK".toMono()
+  }
+
+  companion object {
+    const val CONSUMER_REQUEST_MAPPING = "/consumer"
   }
 }
