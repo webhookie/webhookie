@@ -10,7 +10,7 @@ Content-Type: application/json
             "topic": "Order",
             "callbackUrl": "http://localhost:9000/wh/order",
             "httpMethod": "POST",
-            "securitySchema": {
+            "callbackSecurity": {
                 "method": "HMAC",
                 "secret": "SECRET-1"
             }
@@ -20,7 +20,7 @@ Content-Type: application/json
             "topic": "Product",
             "callbackUrl": "http://localhost:9000/wh/product",
             "httpMethod": "POST",
-            "securitySchema": {
+            "callbackSecurity": {
                 "method": "HMAC",
                 "secret": "SECRET-2"
             }
@@ -30,7 +30,7 @@ Content-Type: application/json
             "topic": "Weather",
             "callbackUrl": "http://localhost:9000/wh/weather",
             "httpMethod": "POST",
-            "securitySchema": {
+            "callbackSecurity": {
                 "method": "HMAC",
                 "secret": "SECRET-3"
             }
@@ -40,7 +40,7 @@ Content-Type: application/json
 
 ###
 
-POST {{host}}/consume/publish
+POST {{host}}/consumer/publish
 Accept: text/plain
 Content-Type: application/json
 wh-topic: Foo-json
@@ -55,7 +55,7 @@ wh-authorized-subscriber: Subscriber2
 
 ###
 
-POST {{host}}/consume/publish
+POST {{host}}/consumer/publish
 Accept: text/plain
 Content-Type: application/xml
 wh-topic: Foo-xml
