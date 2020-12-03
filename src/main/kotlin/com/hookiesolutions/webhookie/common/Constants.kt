@@ -12,7 +12,7 @@ class Constants {
         const val WH_HEADER_TOPIC = "wh-topic"
         const val WH_HEADER_TRACE_ID = "wh-trace-id"
         const val WH_HEADER_AUTHORIZED_SUBSCRIBER = "wh-authorized-subscriber"
-        const val HEADER_CONTENT_TYPE = "content-type"
+        const val HEADER_CONTENT_TYPE = "content_type"
 
         val WH_REQUIRED_HEADERS = setOf(
           WH_HEADER_TOPIC,
