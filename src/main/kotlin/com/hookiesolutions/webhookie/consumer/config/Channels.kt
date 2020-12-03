@@ -12,6 +12,12 @@ import org.springframework.messaging.SubscribableChannel
  */
 @Configuration("consumer-channels")
 class Channels {
+  class Subscribable {
+    companion object {
+      const val CONSUMER_CHANNEL_NAME = "consumerChannel"
+    }
+  }
+
   @Bean
   fun consumerChannel(): SubscribableChannel {
     return MessageChannels.publishSubscribe().get()

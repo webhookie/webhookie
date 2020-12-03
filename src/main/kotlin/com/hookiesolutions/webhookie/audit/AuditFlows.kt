@@ -1,4 +1,4 @@
-package com.hookiesolutions.webhookie.subscription
+package com.hookiesolutions.webhookie.audit
 
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.consumer.config.Channels.Subscribable.Companion.CONSUMER_CHANNEL_NAME
@@ -12,18 +12,18 @@ import org.springframework.messaging.MessageHeaders
 /**
  *
  * @author Arthur Kazemi<bidadh@gmail.com>
- * @since 2/12/20 13:43
+ * @since 3/12/20 13:19
  */
 @Configuration
-class SubscriptionFlows(
+class AuditFlows(
   private val log: Logger
 ) {
   @Bean
-  fun subscriptionFlow(): IntegrationFlow {
+  fun logConsumerMessage(): IntegrationFlow {
     return integrationFlow {
       channel(CONSUMER_CHANNEL_NAME)
       handle { payload: ConsumerMessage, _: MessageHeaders ->
-        log.info("{}", payload)
+        log.warn("TOPIC: {}", payload.topic)
       }
     }
   }

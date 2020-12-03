@@ -3,8 +3,8 @@ spring:
     user:
       name: wh-user
       password: password
-logging:
-  level:
-#    web: DEBUG
-    org.springframework.amqp: DEBUG
-    org.springframework.integration: DEBUG
+#logging:
+#  level:
+##    web: DEBUG
+#    org.springframework.amqp: DEBUG
+#    org.springframework.integration: DEBUG
