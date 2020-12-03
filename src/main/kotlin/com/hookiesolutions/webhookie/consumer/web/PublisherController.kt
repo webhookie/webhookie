@@ -24,7 +24,7 @@ import reactor.kotlin.core.publisher.toMono
 @RestController
 class PublisherController(
   private val log: Logger,
-  private val consumerChannel: SubscribableChannel
+  private val internalConsumerChannel: SubscribableChannel
 ) {
   @PostMapping("/publish", produces = [MediaType.TEXT_PLAIN_VALUE])
   fun publishEvent(
@@ -44,7 +44,7 @@ class PublisherController(
     if(authorizedSubscribers.isNotEmpty()) {
       messageBuilder.setHeader(WH_HEADER_AUTHORIZED_SUBSCRIBER, authorizedSubscribers)
     }
-    consumerChannel
+    internalConsumerChannel
       .send(messageBuilder.build())
     return "OK".toMono()
   }

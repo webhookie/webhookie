@@ -1,5 +1,6 @@
 package com.hookiesolutions.webhookie.consumer
 
+import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.consumer.config.ConsumerProperties
 import org.springframework.amqp.core.AmqpTemplate
 import org.springframework.amqp.rabbit.connection.ConnectionFactory
@@ -23,6 +24,7 @@ import org.springframework.retry.support.RetryTemplate
 @Configuration
 @EnableConfigurationProperties(ConsumerProperties::class)
 class ConsumerFlows(
+  private val internalConsumerChannel: SubscribableChannel,
   private val consumerChannel: SubscribableChannel,
   private val missingHeadersChannel: SubscribableChannel,
   private val consumerProperties: ConsumerProperties,
@@ -41,9 +43,18 @@ class ConsumerFlows(
       .routeToRecipients {
         it
           .recipient(missingHeadersChannel, missingHeadersSelector)
-          .defaultOutputChannel(consumerChannel)
+          .defaultOutputChannel(internalConsumerChannel)
       }
       .get()
+  }
+
+  @Bean
+  fun internalConsumerFlow(): IntegrationFlow {
+    return integrationFlow {
+      channel(internalConsumerChannel)
+      transform<Message<*>> { ConsumerMessage.from(it) }
+      channel(consumerChannel)
+    }
   }
 
   @Bean
