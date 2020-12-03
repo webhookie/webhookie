@@ -1,6 +1,6 @@
 package com.hookiesolutions.webhookie.subscription.web
 
-import com.hookiesolutions.webhookie.config.OpenAPIConfig
+import com.hookiesolutions.webhookie.config.web.OpenAPIConfig
 import com.hookiesolutions.webhookie.subscription.domain.Company
 import com.hookiesolutions.webhookie.subscription.domain.CompanyRepository
 import com.hookiesolutions.webhookie.subscription.web.CompanyController.Companion.COMPANY_REQUEST_MAPPING
