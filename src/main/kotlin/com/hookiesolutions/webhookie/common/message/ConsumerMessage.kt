@@ -1,6 +1,7 @@
 package com.hookiesolutions.webhookie.common.message
 
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.HEADER_CONTENT_TYPE
+import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_AUTHORIZED_SUBSCRIBER
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_TOPIC
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_TRACE_ID
 import org.springframework.messaging.Message
@@ -15,6 +16,7 @@ data class ConsumerMessage(
   val topic: String,
   val traceId: String,
   val contentType: String,
+  val authorizedSubscribers: Set<String> = emptySet(),
   private val message: Message<*>
 ) {
   val payload: Any
@@ -28,7 +30,9 @@ data class ConsumerMessage(
       val topic = message.headers[WH_HEADER_TOPIC] as String
       val traceId = message.headers[WH_HEADER_TRACE_ID] as String
       val contentType = message.headers[HEADER_CONTENT_TYPE] as String
-      return ConsumerMessage(topic, traceId, contentType, message)
+      @Suppress("UNCHECKED_CAST")
+      val authorizedSubscribers: Collection<String> = message.headers[WH_HEADER_AUTHORIZED_SUBSCRIBER] as? Collection<String> ?: emptySet()
+      return ConsumerMessage(topic, traceId, contentType, authorizedSubscribers.toSet(), message)
     }
   }
 }
