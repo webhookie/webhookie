@@ -1,4 +1,4 @@
-package com.hookiesolutions.webhookie.model
+package com.hookiesolutions.webhookie.common.model
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.query.Criteria

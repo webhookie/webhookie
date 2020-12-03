@@ -1,7 +1,6 @@
-package com.hookiesolutions.webhookie.model
+package com.hookiesolutions.webhookie.common.model
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import org.springframework.data.annotation.CreatedBy
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedBy
 import org.springframework.data.annotation.LastModifiedDate
