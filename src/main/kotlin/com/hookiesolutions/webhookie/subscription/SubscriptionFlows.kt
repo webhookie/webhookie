@@ -47,4 +47,15 @@ class SubscriptionFlows(
       channel(subscriptionChannel)
     }
   }
+
+  @Bean
+  fun listSubscribersFlow(): IntegrationFlow {
+    return integrationFlow {
+      channel(subscriptionChannel)
+      handle { payload: Any, _: MessageHeaders ->
+        log.info("{}", payload)
+      }
+    }
+  }
+
 }
