@@ -1,8 +1,8 @@
 package com.hookiesolutions.webhookie.subscription
 
+import com.hookiesolutions.webhookie.common.Constants.Channels.Companion.CONSUMER_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.message.SubscriptionMessage
-import com.hookiesolutions.webhookie.consumer.config.Channels.Subscribable.Companion.CONSUMER_CHANNEL_NAME
 import com.hookiesolutions.webhookie.subscription.service.SubscriptionService
 import org.slf4j.Logger
 import org.springframework.context.annotation.Bean
@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.integration.dsl.IntegrationFlow
 import org.springframework.integration.dsl.integrationFlow
 import org.springframework.messaging.MessageChannel
-import org.springframework.messaging.MessageHeaders
 
 /**
  *
@@ -47,15 +46,4 @@ class SubscriptionFlows(
       channel(subscriptionChannel)
     }
   }
-
-  @Bean
-  fun listSubscribersFlow(): IntegrationFlow {
-    return integrationFlow {
-      channel(subscriptionChannel)
-      handle { payload: Any, _: MessageHeaders ->
-        log.info("{}", payload)
-      }
-    }
-  }
-
 }

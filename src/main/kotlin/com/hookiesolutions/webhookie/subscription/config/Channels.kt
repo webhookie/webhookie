@@ -12,12 +12,6 @@ import org.springframework.integration.dsl.MessageChannels
  */
 @Configuration("subscription-channels")
 class Channels {
-  class Subscribable {
-    companion object {
-      const val SUBSCRIPTION_CHANNEL_NAME = "subscriptionChannel"
-    }
-  }
-
   @Bean
   fun subscriptionChannel(): PublishSubscribeChannel = MessageChannels.publishSubscribe().get()
 }
