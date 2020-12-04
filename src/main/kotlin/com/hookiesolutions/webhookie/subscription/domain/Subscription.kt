@@ -2,6 +2,8 @@ package com.hookiesolutions.webhookie.subscription.domain
 
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
 import org.springframework.data.mongodb.core.index.Indexed
+import org.springframework.data.mongodb.core.query.Criteria
+import org.springframework.data.mongodb.core.query.Criteria.where
 import org.springframework.http.HttpMethod
 
 /**
@@ -16,4 +18,12 @@ data class Subscription(
   val callbackUrl: String,
   val httpMethod: HttpMethod,
   val callbackSecurity: CallbackSecurity
-) : AbstractEntity()
+) : AbstractEntity() {
+  class Queries {
+    companion object {
+      fun topicIs(topic: String): Criteria {
+        return where("topic").`is`(topic)
+      }
+    }
+  }
+}

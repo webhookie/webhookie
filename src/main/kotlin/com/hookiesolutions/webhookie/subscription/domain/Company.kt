@@ -16,4 +16,10 @@ data class Company(
   @Indexed(unique = true)
   val name: String,
   val subscriptions: Set<Subscription>
-): AbstractEntity()
+): AbstractEntity() {
+  class Keys {
+    companion object {
+      const val KEY_SUBSCRIPTIONS = "subscriptions"
+    }
+  }
+}

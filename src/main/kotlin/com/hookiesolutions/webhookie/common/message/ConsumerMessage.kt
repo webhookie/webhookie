@@ -17,7 +17,7 @@ data class ConsumerMessage(
   val traceId: String,
   val contentType: String,
   val authorizedSubscribers: Set<String> = emptySet(),
-  private val message: Message<ByteArray>
+  val message: Message<ByteArray>
 ) {
   val payload: ByteArray
     get() = message.payload
