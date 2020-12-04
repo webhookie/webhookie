@@ -3,22 +3,12 @@ Accept: application/json
 Content-Type: application/json
 
 {
-    "name": "Hookie Solutions",
+    "name": "Redpoll Solutions",
     "subscriptions": [
-        {
-            "name": "Order Subscription",
-            "topic": "Order",
-            "callbackUrl": "http://localhost:9000/wh/order",
-            "httpMethod": "POST",
-            "callbackSecurity": {
-                "method": "HMAC",
-                "secret": "SECRET-1"
-            }
-        },
         {
             "name": "Product Subscription",
             "topic": "Product",
-            "callbackUrl": "http://localhost:9000/wh/product",
+            "callbackUrl": "http://localhost:9002/wh/product",
             "httpMethod": "POST",
             "callbackSecurity": {
                 "method": "HMAC",
@@ -28,7 +18,7 @@ Content-Type: application/json
         {
             "name": "Weather Subscription",
             "topic": "Weather",
-            "callbackUrl": "http://localhost:9000/wh/weather",
+            "callbackUrl": "http://localhost:9002/wh/weather",
             "httpMethod": "POST",
             "callbackSecurity": {
                 "method": "HMAC",
@@ -43,10 +33,10 @@ Content-Type: application/json
 POST {{host}}/consumer/publish
 Accept: text/plain
 Content-Type: application/json
-wh-topic: Foo-json
+wh-topic: Product
 wh-trace-id: 32452345dh344553
-wh-authorized-subscriber: Subscriber1
-wh-authorized-subscriber: Subscriber2
+wh-authorized-subscriber: 5fc8de26be1b366fc295b6c1
+wh-authorized-subscriber: 5fc9b096a3b9e573df7fb15f
 
 {
     "name": "Me new Endpoint - 5",
@@ -58,10 +48,10 @@ wh-authorized-subscriber: Subscriber2
 POST {{host}}/consumer/publish
 Accept: text/plain
 Content-Type: application/xml
-wh-topic: Foo-xml
+wh-topic: Weather
 wh-trace-id: 32452345dh344553
-wh-authorized-subscriber: Subscriber1-xml
-wh-authorized-subscriber: Subscriber2-xml
+wh-authorized-subscriber: 5fc8de26be1b366fc295b6c1
+wh-authorized-subscriber: 5fc9c3971995f258e6547743
 
 <body>
     <name>Me new Endpoint - 5</name>
