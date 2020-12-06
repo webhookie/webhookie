@@ -26,4 +26,10 @@ data class Subscription(
       }
     }
   }
+
+  class Keys {
+    companion object {
+      const val KEY_TOPIC = "topic"
+    }
+  }
 }
