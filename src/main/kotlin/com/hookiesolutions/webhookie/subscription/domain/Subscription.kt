@@ -1,5 +1,10 @@
 package com.hookiesolutions.webhookie.subscription.domain
 
+import com.hookiesolutions.webhookie.common.message.ConsumerMessage
+import com.hookiesolutions.webhookie.common.model.dto.CallbackSecurityDTO
+import com.hookiesolutions.webhookie.common.message.subscription.GenericSubscriptionMessage
+import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
+import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionMessage
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.query.Criteria
@@ -17,8 +22,26 @@ data class Subscription(
   val topic: String,
   val callbackUrl: String,
   val httpMethod: HttpMethod,
-  val callbackSecurity: CallbackSecurity
+  val callbackSecurity: CallbackSecurityDTO
 ) : AbstractEntity() {
+  fun subscriptionMessage(consumerMessage: ConsumerMessage, spanId: String): GenericSubscriptionMessage {
+    return SubscriptionMessage(
+      consumerMessage,
+      spanId,
+      dto()
+    )
+  }
+
+  private fun dto(): SubscriptionDTO {
+    return SubscriptionDTO(
+      name,
+      topic,
+      callbackUrl,
+      httpMethod,
+      callbackSecurity
+    )
+  }
+
   class Queries {
     companion object {
       fun topicIs(topic: String): Criteria {
