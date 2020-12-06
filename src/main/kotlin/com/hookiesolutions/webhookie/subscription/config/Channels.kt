@@ -14,4 +14,7 @@ import org.springframework.integration.dsl.MessageChannels
 class Channels {
   @Bean
   fun subscriptionChannel(): PublishSubscribeChannel = MessageChannels.publishSubscribe().get()
+
+  @Bean
+  fun emptySubscriberChannel(): PublishSubscribeChannel = MessageChannels.publishSubscribe().get()
 }
