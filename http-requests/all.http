@@ -47,6 +47,62 @@ wh-authorized-subscriber: 5fc9b096a3b9e573df7fb15f
 
 POST {{host}}/consumer/publish
 Accept: text/plain
+Content-Type: application/json
+wh-topic: Product
+wh-trace-id: 32452345dh344553
+
+{
+    "name": "Me new Endpoint - 5",
+    "path": "/foo-5"
+}
+
+###
+
+POST {{host}}/consumer/publish
+Accept: text/plain
+Content-Type: application/xml
+wh-topic: Product
+wh-trace-id: 32452345dh344553
+
+<body>
+  <name>Me new Endpoint - 5</name>
+  <path>/foo-5</path>
+</body>
+
+###
+
+POST localhost:9002/wh/weather
+Accept: text/plain
+Content-Type: application/json
+wh-topic: Product
+wh-trace-id: 32452345dh344553
+wh-authorized-subscriber: 5fc8de26be1b366fc295b6c1
+wh-authorized-subscriber: 5fc9b096a3b9e573df7fb15f
+
+{
+    "name": "Me new Endpoint - 5",
+    "path": "/foo-5"
+}
+
+###
+
+POST localhost:9000/wh/weather
+Accept: text/plain
+Content-Type: application/xml
+wh-topic: Product
+wh-trace-id: 32452345dh344553
+wh-authorized-subscriber: 5fc8de26be1b366fc295b6c1
+wh-authorized-subscriber: 5fc9b096a3b9e573df7fb15f
+
+<body>
+  <name>Me new Endpoint - 5</name>
+  <path>/foo-5</path>
+</body>
+
+###
+
+POST {{host}}/consumer/publish
+Accept: text/plain
 Content-Type: application/xml
 wh-topic: Weather
 wh-trace-id: 32452345dh344553
