@@ -2,6 +2,7 @@ package com.hookiesolutions.webhookie.subscription.service
 
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.elemMatch
+import com.hookiesolutions.webhookie.subscription.domain.Company.Keys.Companion.KEY_COMPANY_COLLECTION_NAME
 import com.hookiesolutions.webhookie.subscription.domain.Company.Keys.Companion.KEY_SUBSCRIPTIONS
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_TOPIC
@@ -52,7 +53,7 @@ class SubscriptionService(
     )
 
     return mongoTemplate
-      .aggregate(aggregation, "company", Subscription::class.java)
+      .aggregate(aggregation, KEY_COMPANY_COLLECTION_NAME, Subscription::class.java)
   }
 
   private fun matchCriteria(consumerMessage: ConsumerMessage): Criteria {
