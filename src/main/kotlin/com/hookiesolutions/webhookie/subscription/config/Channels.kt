@@ -16,5 +16,5 @@ class Channels {
   fun subscriptionChannel(): PublishSubscribeChannel = MessageChannels.publishSubscribe().get()
 
   @Bean
-  fun emptySubscriberChannel(): PublishSubscribeChannel = MessageChannels.publishSubscribe().get()
+  fun noSubscriptionChannel(): PublishSubscribeChannel = MessageChannels.publishSubscribe().get()
 }

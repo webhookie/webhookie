@@ -9,5 +9,4 @@ import com.hookiesolutions.webhookie.common.message.ConsumerMessage
  */
 interface GenericSubscriptionMessage {
   val originalMessage: ConsumerMessage
-  val spanId: String
 }

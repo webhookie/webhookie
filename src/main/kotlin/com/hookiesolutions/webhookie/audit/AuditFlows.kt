@@ -1,10 +1,10 @@
 package com.hookiesolutions.webhookie.audit
 
 import com.hookiesolutions.webhookie.common.Constants.Channels.Companion.CONSUMER_CHANNEL_NAME
-import com.hookiesolutions.webhookie.common.Constants.Channels.Companion.EMPTY_SUBSCRIBER_CHANNEL_NAME
+import com.hookiesolutions.webhookie.common.Constants.Channels.Companion.NO_SUBSCRIPTION_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Channels.Companion.SUBSCRIPTION_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
-import com.hookiesolutions.webhookie.common.message.subscription.EmptySubscriberMessage
+import com.hookiesolutions.webhookie.common.message.subscription.NoSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionMessage
 import org.slf4j.Logger
 import org.springframework.context.annotation.Bean
@@ -45,8 +45,8 @@ class AuditFlows(
   @Bean
   fun logEmptySubscriberMessage(): IntegrationFlow {
     return integrationFlow {
-      channel(EMPTY_SUBSCRIBER_CHANNEL_NAME)
-      handle { payload: EmptySubscriberMessage, _: MessageHeaders ->
+      channel(NO_SUBSCRIPTION_CHANNEL_NAME)
+      handle { payload: NoSubscriptionMessage, _: MessageHeaders ->
         log.warn("{}", payload)
       }
     }

@@ -10,6 +10,6 @@ import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
  */
 data class SubscriptionMessage(
   override val originalMessage: ConsumerMessage,
-  override val spanId: String,
+  val spanId: String,
   val subscription: SubscriptionDTO,
 ): GenericSubscriptionMessage

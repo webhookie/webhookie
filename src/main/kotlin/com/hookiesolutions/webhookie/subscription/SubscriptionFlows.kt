@@ -1,9 +1,9 @@
 package com.hookiesolutions.webhookie.subscription
 
 import com.hookiesolutions.webhookie.common.Constants.Channels.Companion.CONSUMER_CHANNEL_NAME
-import com.hookiesolutions.webhookie.common.Constants.Channels.Companion.EMPTY_SUBSCRIBER_CHANNEL_NAME
+import com.hookiesolutions.webhookie.common.Constants.Channels.Companion.NO_SUBSCRIPTION_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
-import com.hookiesolutions.webhookie.common.message.subscription.EmptySubscriberMessage
+import com.hookiesolutions.webhookie.common.message.subscription.NoSubscriptionMessage
 import com.hookiesolutions.webhookie.common.service.IdGenerator
 import com.hookiesolutions.webhookie.subscription.service.SubscriptionService
 import org.springframework.context.annotation.Bean
@@ -20,7 +20,7 @@ import reactor.kotlin.core.publisher.toMono
  */
 @Configuration
 class SubscriptionFlows(
-  private val ideGenerator: IdGenerator,
+  private val idGenerator: IdGenerator,
   private val subscriptionService: SubscriptionService,
   private val subscriptionChannel: MessageChannel
 ) {
@@ -30,12 +30,12 @@ class SubscriptionFlows(
       channel(CONSUMER_CHANNEL_NAME)
       transform<ConsumerMessage> { cm ->
         subscriptionService.findSubscriptionsFor(cm)
-          .map { it.subscriptionMessage(cm, ideGenerator.generate()) }
-          .switchIfEmpty(EmptySubscriberMessage(cm, ideGenerator.generate()).toMono())
+          .map { it.subscriptionMessage(cm, idGenerator.generate()) }
+          .switchIfEmpty(NoSubscriptionMessage(cm).toMono())
       }
       split()
       routeToRecipients {
-        this.recipient<Any>(EMPTY_SUBSCRIBER_CHANNEL_NAME) { p -> p is EmptySubscriberMessage }
+        this.recipient<Any>(NO_SUBSCRIPTION_CHANNEL_NAME) { p -> p is NoSubscriptionMessage }
         this.defaultOutputChannel(subscriptionChannel)
       }
     }
