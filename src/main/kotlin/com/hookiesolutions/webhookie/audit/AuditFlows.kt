@@ -43,7 +43,7 @@ class AuditFlows(
   }
 
   @Bean
-  fun logEmptySubscriberMessage(): IntegrationFlow {
+  fun lognoSubscriptionMessage(): IntegrationFlow {
     return integrationFlow {
       channel(NO_SUBSCRIPTION_CHANNEL_NAME)
       handle { payload: NoSubscriptionMessage, _: MessageHeaders ->
