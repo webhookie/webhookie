@@ -50,6 +50,21 @@ Accept: text/plain
 Content-Type: application/json
 wh-topic: Product
 wh-trace-id: 32452345dh344553
+wh-authorized-subscriber: 1
+wh-authorized-subscriber: 2
+
+{
+    "name": "Me new Endpoint - 5",
+    "path": "/foo-5"
+}
+
+###
+
+POST {{host}}/consumer/publish
+Accept: text/plain
+Content-Type: application/json
+wh-topic: Product
+wh-trace-id: 32452345dh344553
 
 {
     "name": "Me new Endpoint - 5",
