@@ -50,6 +50,8 @@ dependencies {
 
 	compileOnly("org.projectlombok:lombok")
 
+	compileOnly("io.projectreactor:reactor-tools")
+
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 
 	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
