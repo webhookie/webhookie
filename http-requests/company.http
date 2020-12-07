@@ -1,0 +1,5 @@
+POST {{host}}/company
+Accept: application/json
+Content-Type: application/json
+
+< company.json

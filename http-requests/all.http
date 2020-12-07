@@ -1,32 +1,20 @@
-POST {{host}}/company
-Accept: application/json
+POST {{host}}/consumer/publish
+Accept: text/plain
 Content-Type: application/json
+wh-topic: Product
+wh-trace-id: 32452345dh344553
 
-{
-    "name": "Redpoll Solutions",
-    "subscriptions": [
-        {
-            "name": "Product Subscription",
-            "topic": "Product",
-            "callbackUrl": "http://localhost:9002/wh/product",
-            "httpMethod": "POST",
-            "callbackSecurity": {
-                "method": "HMAC",
-                "secret": "SECRET-2"
-            }
-        },
-        {
-            "name": "Weather Subscription",
-            "topic": "Weather",
-            "callbackUrl": "http://localhost:9002/wh/weather",
-            "httpMethod": "POST",
-            "callbackSecurity": {
-                "method": "HMAC",
-                "secret": "SECRET-3"
-            }
-        }
-    ]
-}
+< data.json
+
+###
+
+POST {{host}}/consumer/publish
+Accept: text/plain
+Content-Type: application/xml
+wh-topic: Product
+wh-trace-id: 32452345dh344553
+
+< data.xml
 
 ###
 
@@ -38,10 +26,7 @@ wh-trace-id: 32452345dh344553
 wh-authorized-subscriber: 5fc8de26be1b366fc295b6c1
 wh-authorized-subscriber: 5fc9b096a3b9e573df7fb15f
 
-{
-    "name": "Me new Endpoint - 5",
-    "path": "/foo-5"
-}
+< data.json
 
 ###
 
@@ -53,66 +38,7 @@ wh-trace-id: 32452345dh344553
 wh-authorized-subscriber: 1
 wh-authorized-subscriber: 2
 
-{
-    "name": "Me new Endpoint - 5",
-    "path": "/foo-5"
-}
-
-###
-
-POST {{host}}/consumer/publish
-Accept: text/plain
-Content-Type: application/json
-wh-topic: Product
-wh-trace-id: 32452345dh344553
-
-{
-    "name": "Me new Endpoint - 5",
-    "path": "/foo-5"
-}
-
-###
-
-POST {{host}}/consumer/publish
-Accept: text/plain
-Content-Type: application/xml
-wh-topic: Product
-wh-trace-id: 32452345dh344553
-
-<body>
-  <name>Me new Endpoint - 5</name>
-  <path>/foo-5</path>
-</body>
-
-###
-
-POST localhost:9002/wh/weather
-Accept: text/plain
-Content-Type: application/json
-wh-topic: Product
-wh-trace-id: 32452345dh344553
-wh-authorized-subscriber: 5fc8de26be1b366fc295b6c1
-wh-authorized-subscriber: 5fc9b096a3b9e573df7fb15f
-
-{
-    "name": "Me new Endpoint - 5",
-    "path": "/foo-5"
-}
-
-###
-
-POST localhost:9000/wh/weather
-Accept: text/plain
-Content-Type: application/xml
-wh-topic: Product
-wh-trace-id: 32452345dh344553
-wh-authorized-subscriber: 5fc8de26be1b366fc295b6c1
-wh-authorized-subscriber: 5fc9b096a3b9e573df7fb15f
-
-<body>
-  <name>Me new Endpoint - 5</name>
-  <path>/foo-5</path>
-</body>
+< data.json
 
 ###
 
@@ -124,9 +50,6 @@ wh-trace-id: 32452345dh344553
 wh-authorized-subscriber: 5fc8de26be1b366fc295b6c1
 wh-authorized-subscriber: 5fc9c3971995f258e6547743
 
-<body>
-    <name>Me new Endpoint - 5</name>
-    <path>/foo-5</path>
-</body>
+< data.xml
 
 ###

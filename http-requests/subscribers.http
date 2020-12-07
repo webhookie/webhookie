@@ -1,0 +1,21 @@
+POST localhost:9002/wh/weather
+Accept: text/plain
+Content-Type: application/json
+wh-topic: Product
+wh-trace-id: 32452345dh344553
+wh-authorized-subscriber: 5fc8de26be1b366fc295b6c1
+wh-authorized-subscriber: 5fc9b096a3b9e573df7fb15f
+
+< data.json
+
+###
+
+POST localhost:9000/wh/weather
+Accept: text/plain
+Content-Type: application/xml
+wh-topic: Product
+wh-trace-id: 32452345dh344553
+wh-authorized-subscriber: 5fc8de26be1b366fc295b6c1
+wh-authorized-subscriber: 5fc9b096a3b9e573df7fb15f
+
+< data.xml

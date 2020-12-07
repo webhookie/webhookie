@@ -1,0 +1,25 @@
+{
+    "name": "Redpoll Solutions",
+    "subscriptions": [
+        {
+            "name": "Product Subscription",
+            "topic": "Product",
+            "callbackUrl": "http://localhost:9002/wh/product",
+            "httpMethod": "POST",
+            "callbackSecurity": {
+                "method": "HMAC",
+                "secret": "SECRET-2"
+            }
+        },
+        {
+            "name": "Weather Subscription",
+            "topic": "Weather",
+            "callbackUrl": "http://localhost:9002/wh/weather",
+            "httpMethod": "POST",
+            "callbackSecurity": {
+                "method": "HMAC",
+                "secret": "SECRET-3"
+            }
+        }
+    ]
+}
