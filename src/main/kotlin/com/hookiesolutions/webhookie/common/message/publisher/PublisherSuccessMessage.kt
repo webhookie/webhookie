@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus
  * @author Arthur Kazemi<bidadh@gmail.com>
  * @since 8/12/20 23:48
  */
-data class ServerSuccessMessage(
+data class PublisherSuccessMessage(
   override val subscriptionMessage: SubscriptionMessage,
   override val status: HttpStatus,
   override val response: ByteArray,
@@ -17,7 +17,7 @@ data class ServerSuccessMessage(
 ): PublisherServerMessage {
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
-    if (other !is ServerSuccessMessage) return false
+    if (other !is PublisherSuccessMessage) return false
 
     if (status != other.status) return false
     if (!response.contentEquals(other.response)) return false

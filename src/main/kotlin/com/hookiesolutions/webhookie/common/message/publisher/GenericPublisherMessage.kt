@@ -14,19 +14,19 @@ interface GenericPublisherMessage {
   val subscriptionMessage: SubscriptionMessage
   companion object {
     fun success(subscriptionMessage: SubscriptionMessage, response: ResponseEntity<ByteArray>): GenericPublisherMessage {
-      return ServerSuccessMessage(subscriptionMessage, response.statusCode, response.body ?: ByteArray(0), response.headers)
+      return PublisherSuccessMessage(subscriptionMessage, response.statusCode, response.body ?: ByteArray(0), response.headers)
     }
 
     fun responseError(subscriptionMessage: SubscriptionMessage, throwable: WebClientResponseException): GenericPublisherMessage {
-      return ServerErrorMessage(subscriptionMessage, throwable.statusCode, throwable.responseBodyAsByteArray, throwable.headers, throwable.localizedMessage)
+      return PublisherResponseErrorMessage(subscriptionMessage, throwable.statusCode, throwable.responseBodyAsByteArray, throwable.headers, throwable.localizedMessage)
     }
 
     fun requestError(subscriptionMessage: SubscriptionMessage, throwable: WebClientRequestException): GenericPublisherMessage {
-      return ClientErrorMessage(subscriptionMessage, throwable.localizedMessage, throwable.headers)
+      return PublisherRequestErrorMessage(subscriptionMessage, throwable.localizedMessage, throwable.headers)
     }
 
     fun unknownError(subscriptionMessage: SubscriptionMessage, throwable: Throwable): GenericPublisherMessage {
-      return PublisherErrorMessage(subscriptionMessage, throwable.localizedMessage)
+      return PublisherOtherErrorMessage(subscriptionMessage, throwable.localizedMessage)
     }
   }
 }

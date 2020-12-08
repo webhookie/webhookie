@@ -2,14 +2,18 @@ package com.hookiesolutions.webhookie.publisher
 
 import com.hookiesolutions.webhookie.common.Constants.Channels.Companion.SUBSCRIPTION_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_SPAN_ID
+import com.hookiesolutions.webhookie.common.message.publisher.PublisherRequestErrorMessage
 import com.hookiesolutions.webhookie.common.message.publisher.GenericPublisherMessage
+import com.hookiesolutions.webhookie.common.message.publisher.PublisherOtherErrorMessage
+import com.hookiesolutions.webhookie.common.message.publisher.PublisherResponseErrorMessage
+import com.hookiesolutions.webhookie.common.message.publisher.PublisherSuccessMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionMessage
 import org.slf4j.Logger
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.integration.dsl.IntegrationFlow
 import org.springframework.integration.dsl.integrationFlow
-import org.springframework.messaging.MessageHeaders
+import org.springframework.messaging.SubscribableChannel
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClientRequestException
 import org.springframework.web.reactive.function.client.WebClientResponseException
@@ -22,7 +26,11 @@ import reactor.kotlin.core.publisher.toMono
  */
 @Configuration
 class PublisherFlows(
-  private val log: Logger
+  private val log: Logger,
+  private val publisherSuccessChannel: SubscribableChannel,
+  private val publisherResponseErrorChannel: SubscribableChannel,
+  private val publisherRequestErrorChannel: SubscribableChannel,
+  private val publisherOtherErrorChannel: SubscribableChannel,
 ) {
   @Bean
   fun publishSubscriptionMessage(clientFactory: HttpClientFactory): IntegrationFlow {
@@ -57,8 +65,12 @@ class PublisherFlows(
           }
       }
       split()
-      handle { payload: GenericPublisherMessage, _: MessageHeaders ->
-        log.info("{}", payload)
+      routeToRecipients {
+        this.recipient<Any>(publisherSuccessChannel) { p -> p is PublisherSuccessMessage }
+        this.recipient<Any>(publisherResponseErrorChannel) { p -> p is PublisherResponseErrorMessage }
+        this.recipient<Any>(publisherRequestErrorChannel) { p -> p is PublisherRequestErrorMessage }
+        this.recipient<Any>(publisherOtherErrorChannel) { p -> p is PublisherOtherErrorMessage }
+        this.defaultOutputChannel(publisherSuccessChannel)
       }
     }
   }
