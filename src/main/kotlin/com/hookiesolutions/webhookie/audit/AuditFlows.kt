@@ -1,8 +1,8 @@
 package com.hookiesolutions.webhookie.audit
 
-import com.hookiesolutions.webhookie.common.Constants.Channels.Companion.CONSUMER_CHANNEL_NAME
-import com.hookiesolutions.webhookie.common.Constants.Channels.Companion.NO_SUBSCRIPTION_CHANNEL_NAME
-import com.hookiesolutions.webhookie.common.Constants.Channels.Companion.SUBSCRIPTION_CHANNEL_NAME
+import com.hookiesolutions.webhookie.common.Constants.Channels.Consumer.Companion.CONSUMER_CHANNEL_NAME
+import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.NO_SUBSCRIPTION_CHANNEL_NAME
+import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.SUBSCRIPTION_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.message.subscription.NoSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionMessage
