@@ -28,7 +28,14 @@ class SubscriberClient(
       msg.originalMessage.mediaType
     )
 
-    log.info("Publishing message to '{}'", msg.subscription.callbackUrl)
+    log.info(
+      "'{}'ing '{}' message to '{}' ({}-{})",
+      msg.subscription.httpMethod.name,
+      msg.originalMessage.contentType,
+      msg.subscription.callbackUrl,
+      msg.originalMessage.traceId,
+      msg.spanId
+    )
 
     return webClient
       .body(BodyInserters.fromValue(msg.originalMessage.payload))
