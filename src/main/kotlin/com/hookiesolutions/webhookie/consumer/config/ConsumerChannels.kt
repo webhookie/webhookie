@@ -10,8 +10,8 @@ import org.springframework.messaging.SubscribableChannel
  * @author Arthur Kazemi<bidadh@gmail.com>
  * @since 2/12/20 13:45
  */
-@Configuration("consumer-channels")
-class Channels {
+@Configuration
+class ConsumerChannels {
   @Bean
   fun consumerChannel(): SubscribableChannel {
     return MessageChannels.publishSubscribe().get()

@@ -10,8 +10,8 @@ import org.springframework.integration.dsl.MessageChannels
  * @author Arthur Kazemi<bidadh@gmail.com>
  * @since 2/12/20 13:45
  */
-@Configuration("subscription-channels")
-class Channels {
+@Configuration
+class SubscriptionChannels {
   @Bean
   fun subscriptionChannel(): PublishSubscribeChannel = MessageChannels.publishSubscribe().get()
 
