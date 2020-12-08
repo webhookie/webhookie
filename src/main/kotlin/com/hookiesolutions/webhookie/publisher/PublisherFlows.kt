@@ -8,7 +8,6 @@ import com.hookiesolutions.webhookie.common.message.publisher.PublisherOtherErro
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherResponseErrorMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherSuccessMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionMessage
-import org.slf4j.Logger
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.integration.dsl.IntegrationFlow
@@ -26,7 +25,6 @@ import reactor.kotlin.core.publisher.toMono
  */
 @Configuration
 class PublisherFlows(
-  private val log: Logger,
   private val publisherSuccessChannel: SubscribableChannel,
   private val publisherResponseErrorChannel: SubscribableChannel,
   private val publisherRequestErrorChannel: SubscribableChannel,
@@ -52,15 +50,12 @@ class PublisherFlows(
           .toEntity(ByteArray::class.java)
           .map { GenericPublisherMessage.success(msg, it) }
           .onErrorResume(WebClientRequestException::class.java) {
-            log.error("was unable to :'{}'", it.localizedMessage)
             GenericPublisherMessage.requestError(msg, it).toMono()
           }
           .onErrorResume(WebClientResponseException::class.java) {
-            log.error("was unable to :'{}'", it.localizedMessage)
             GenericPublisherMessage.responseError(msg, it).toMono()
           }
           .onErrorResume {
-            log.error("was unable to :'{}'", it.localizedMessage)
             GenericPublisherMessage.unknownError(msg, it).toMono()
           }
       }
