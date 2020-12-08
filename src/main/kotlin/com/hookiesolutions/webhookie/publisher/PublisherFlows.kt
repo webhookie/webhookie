@@ -1,6 +1,7 @@
 package com.hookiesolutions.webhookie.publisher
 
 import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.SUBSCRIPTION_CHANNEL_NAME
+import com.hookiesolutions.webhookie.common.message.publisher.GenericPublisherMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherOtherErrorMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherRequestErrorMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherResponseErrorMessage
@@ -32,10 +33,10 @@ class PublisherFlows(
       transform<SubscriptionMessage> { subscriberClient.publish(it) }
       split()
       routeToRecipients {
-        this.recipient<Any>(publisherSuccessChannel) { p -> p is PublisherSuccessMessage }
-        this.recipient<Any>(publisherResponseErrorChannel) { p -> p is PublisherResponseErrorMessage }
-        this.recipient<Any>(publisherRequestErrorChannel) { p -> p is PublisherRequestErrorMessage }
-        this.recipient<Any>(publisherOtherErrorChannel) { p -> p is PublisherOtherErrorMessage }
+        this.recipient<GenericPublisherMessage>(publisherSuccessChannel) { p -> p is PublisherSuccessMessage }
+        this.recipient<GenericPublisherMessage>(publisherResponseErrorChannel) { p -> p is PublisherResponseErrorMessage }
+        this.recipient<GenericPublisherMessage>(publisherRequestErrorChannel) { p -> p is PublisherRequestErrorMessage }
+        this.recipient<GenericPublisherMessage>(publisherOtherErrorChannel) { p -> p is PublisherOtherErrorMessage }
         this.defaultOutputChannel(publisherSuccessChannel)
       }
     }

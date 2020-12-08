@@ -1,8 +1,8 @@
 package com.hookiesolutions.webhookie.subscription
 
 import com.hookiesolutions.webhookie.common.Constants.Channels.Consumer.Companion.CONSUMER_CHANNEL_NAME
-import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.NO_SUBSCRIPTION_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
+import com.hookiesolutions.webhookie.common.message.subscription.GenericSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.NoSubscriptionMessage
 import com.hookiesolutions.webhookie.common.service.IdGenerator
 import com.hookiesolutions.webhookie.subscription.service.SubscriptionService
@@ -22,7 +22,8 @@ import reactor.kotlin.core.publisher.toMono
 class SubscriptionFlows(
   private val idGenerator: IdGenerator,
   private val subscriptionService: SubscriptionService,
-  private val subscriptionChannel: MessageChannel
+  private val subscriptionChannel: MessageChannel,
+  private val noSubscriptionChannel: MessageChannel
 ) {
   @Bean
   fun subscriptionFlow(): IntegrationFlow {
@@ -35,7 +36,7 @@ class SubscriptionFlows(
       }
       split()
       routeToRecipients {
-        this.recipient<Any>(NO_SUBSCRIPTION_CHANNEL_NAME) { p -> p is NoSubscriptionMessage }
+        this.recipient<GenericSubscriptionMessage>(noSubscriptionChannel) { p -> p is NoSubscriptionMessage }
         this.defaultOutputChannel(subscriptionChannel)
       }
     }
