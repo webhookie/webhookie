@@ -12,6 +12,7 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
  */
 interface GenericPublisherMessage {
   val subscriptionMessage: SubscriptionMessage
+
   companion object {
     fun success(subscriptionMessage: SubscriptionMessage, response: ResponseEntity<ByteArray>): GenericPublisherMessage {
       return PublisherSuccessMessage(subscriptionMessage, response.statusCode, response.body ?: ByteArray(0), response.headers)
