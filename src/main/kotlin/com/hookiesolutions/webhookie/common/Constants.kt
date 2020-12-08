@@ -30,5 +30,14 @@ class Constants {
       const val SUBSCRIPTION_CHANNEL_NAME = "subscriptionChannel"
       const val NO_SUBSCRIPTION_CHANNEL_NAME = "noSubscriptionChannel"
     }
+
+    class Publisher {
+      companion object {
+        const val PUBLISHER_SUCCESS_CHANNEL = "publisherSuccessChannel"
+        const val PUBLISHER_RESPONSE_ERROR_CHANNEL = "publisherResponseErrorChannel"
+        const val PUBLISHER_REQUEST_ERROR_CHANNEL = "publisherRequestErrorChannel"
+        const val PUBLISHER_OTHER_ERROR_CHANNEL = "publisherOtherErrorChannel"
+      }
+    }
   }
 }
