@@ -4,6 +4,8 @@ import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.HE
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_AUTHORIZED_SUBSCRIBER
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_TOPIC
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_TRACE_ID
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
 import org.springframework.messaging.Message
 import org.springframework.messaging.MessageHeaders
 
@@ -25,6 +27,22 @@ data class ConsumerMessage(
   @Suppress("unused")
   val headers: MessageHeaders
     get() = message.headers
+
+  fun addMessageHeaders(headers: HttpHeaders) {
+    message.headers
+      .forEach {
+        val stringValue = it.value as? String
+        @Suppress("UNCHECKED_CAST") val listValue = it.value as? List<String>
+        if (stringValue != null) {
+          headers.addIfAbsent(it.key, stringValue)
+        } else if(listValue != null) {
+          headers.addAll(it.key, listValue)
+        }
+      }
+  }
+
+  val mediaType: MediaType
+    get() = MediaType.parseMediaType(contentType)
 
   companion object {
     fun from(message: Message<ByteArray>): ConsumerMessage {
