@@ -1,9 +1,17 @@
 package com.hookiesolutions.webhookie.audit
 
 import com.hookiesolutions.webhookie.common.Constants.Channels.Consumer.Companion.CONSUMER_CHANNEL_NAME
+import com.hookiesolutions.webhookie.common.Constants.Channels.Publisher.Companion.PUBLISHER_OTHER_ERROR_CHANNEL
+import com.hookiesolutions.webhookie.common.Constants.Channels.Publisher.Companion.PUBLISHER_REQUEST_ERROR_CHANNEL
+import com.hookiesolutions.webhookie.common.Constants.Channels.Publisher.Companion.PUBLISHER_RESPONSE_ERROR_CHANNEL
+import com.hookiesolutions.webhookie.common.Constants.Channels.Publisher.Companion.PUBLISHER_SUCCESS_CHANNEL
 import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.NO_SUBSCRIPTION_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.SUBSCRIPTION_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
+import com.hookiesolutions.webhookie.common.message.publisher.PublisherOtherErrorMessage
+import com.hookiesolutions.webhookie.common.message.publisher.PublisherRequestErrorMessage
+import com.hookiesolutions.webhookie.common.message.publisher.PublisherResponseErrorMessage
+import com.hookiesolutions.webhookie.common.message.publisher.PublisherSuccessMessage
 import com.hookiesolutions.webhookie.common.message.subscription.NoSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionMessage
 import org.slf4j.Logger
@@ -43,10 +51,50 @@ class AuditFlows(
   }
 
   @Bean
-  fun lognoSubscriptionMessage(): IntegrationFlow {
+  fun logNoSubscriptionMessage(): IntegrationFlow {
     return integrationFlow {
       channel(NO_SUBSCRIPTION_CHANNEL_NAME)
       handle { payload: NoSubscriptionMessage, _: MessageHeaders ->
+        log.warn("{}", payload)
+      }
+    }
+  }
+
+  @Bean
+  fun logPublisherSuccessMessage(): IntegrationFlow {
+    return integrationFlow {
+      channel(PUBLISHER_SUCCESS_CHANNEL)
+      handle { payload: PublisherSuccessMessage, _: MessageHeaders ->
+        log.warn("{}", payload)
+      }
+    }
+  }
+
+  @Bean
+  fun logPublisherRequestErrorMessage(): IntegrationFlow {
+    return integrationFlow {
+      channel(PUBLISHER_REQUEST_ERROR_CHANNEL)
+      handle { payload: PublisherRequestErrorMessage, _: MessageHeaders ->
+        log.warn("{}", payload)
+      }
+    }
+  }
+
+  @Bean
+  fun logPublisherResponseErrorMessage(): IntegrationFlow {
+    return integrationFlow {
+      channel(PUBLISHER_RESPONSE_ERROR_CHANNEL)
+      handle { payload: PublisherResponseErrorMessage, _: MessageHeaders ->
+        log.warn("{}", payload)
+      }
+    }
+  }
+
+  @Bean
+  fun logPublisherOtherErrorMessage(): IntegrationFlow {
+    return integrationFlow {
+      channel(PUBLISHER_OTHER_ERROR_CHANNEL)
+      handle { payload: PublisherOtherErrorMessage, _: MessageHeaders ->
         log.warn("{}", payload)
       }
     }
