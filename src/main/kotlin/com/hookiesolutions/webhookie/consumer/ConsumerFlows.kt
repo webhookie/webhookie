@@ -36,7 +36,8 @@ class ConsumerFlows(
     consumerRetryTemplate: RetryTemplate,
     missingHeadersSelector: GenericSelector<Message<*>>
   ): IntegrationFlow {
-    val inboundGateway = Amqp.inboundGateway(connectionFactory, amqpTemplate, consumerProperties.queue)
+    val inboundGateway = Amqp
+      .inboundGateway(connectionFactory, amqpTemplate, consumerProperties.queue)
       .retryTemplate(consumerRetryTemplate)
     return IntegrationFlows
       .from(inboundGateway)
