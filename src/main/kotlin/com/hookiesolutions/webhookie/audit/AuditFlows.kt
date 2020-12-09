@@ -65,7 +65,7 @@ class AuditFlows(
     return integrationFlow {
       channel(PUBLISHER_SUCCESS_CHANNEL)
       handle { payload: PublisherSuccessMessage, _: MessageHeaders ->
-        log.warn("{}", payload)
+        log.warn("'{}', {}", payload.status, payload.subscriptionMessage)
       }
     }
   }
@@ -75,7 +75,7 @@ class AuditFlows(
     return integrationFlow {
       channel(PUBLISHER_REQUEST_ERROR_CHANNEL)
       handle { payload: PublisherRequestErrorMessage, _: MessageHeaders ->
-        log.warn("{}", payload)
+        log.warn("{}", payload.reason)
       }
     }
   }
@@ -85,7 +85,7 @@ class AuditFlows(
     return integrationFlow {
       channel(PUBLISHER_RESPONSE_ERROR_CHANNEL)
       handle { payload: PublisherResponseErrorMessage, _: MessageHeaders ->
-        log.warn("{}", payload)
+        log.warn("{}", payload.reason)
       }
     }
   }
@@ -95,7 +95,7 @@ class AuditFlows(
     return integrationFlow {
       channel(PUBLISHER_OTHER_ERROR_CHANNEL)
       handle { payload: PublisherOtherErrorMessage, _: MessageHeaders ->
-        log.warn("{}", payload)
+        log.warn("{}", payload.reason)
       }
     }
   }
