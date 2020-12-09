@@ -4,6 +4,8 @@ webhookie:
     missing-header:
       exchange: ${WH_CONSUMER_MISSING_HEADER_EXCHANGE:wh-customer}
       routing-key: ${WH_CONSUMER_MISSING_HEADER_ROUTING_KEY:wh-missing-header}
+  publisher:
+    max-retry: 3
 spring:
   data:
     mongodb:
