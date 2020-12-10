@@ -28,8 +28,6 @@ class Constants {
     class Consumer {
       companion object {
         const val CONSUMER_CHANNEL_NAME = "consumerChannel"
-        const val SUBSCRIPTION_CHANNEL_NAME = "subscriptionChannel"
-        const val NO_SUBSCRIPTION_CHANNEL_NAME = "noSubscriptionChannel"
       }
     }
 
