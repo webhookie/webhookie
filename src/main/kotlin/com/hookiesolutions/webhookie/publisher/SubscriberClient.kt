@@ -9,7 +9,10 @@ import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClientRequestException
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import reactor.core.publisher.Mono
+import reactor.core.scheduler.Schedulers
 import reactor.kotlin.core.publisher.toMono
+import java.time.Duration
+import java.util.concurrent.Executors
 
 /**
  *
@@ -37,7 +40,7 @@ class SubscriberClient(
       msg.spanId
     )
 
-    return webClient
+    val serverResponse = webClient
       .body(BodyInserters.fromValue(msg.originalMessage.payload))
       .header(Constants.Queue.Headers.WH_HEADER_SPAN_ID, msg.spanId)
       .headers { msg.originalMessage.addMessageHeaders(it) }
@@ -53,5 +56,24 @@ class SubscriberClient(
       .onErrorResume {
         GenericPublisherMessage.unknownError(msg, it).toMono()
       }
+
+    val responseMono =  if (!msg.delay.isZero) {
+      log.info("Delaying publisher for '{}' seconds", msg.delay.seconds)
+      Mono
+        .delay(msg.delay)
+        .flatMap {
+          serverResponse
+        }
+    } else {
+      serverResponse
+    }
+
+    return Mono
+      .defer { responseMono }
+  }
+
+  fun calculateDelayForSubscription(message: SubscriptionMessage): Duration {
+    val currentDelay = message.delay.seconds
+    return Duration.ofSeconds(currentDelay * 2 + 10)
   }
 }

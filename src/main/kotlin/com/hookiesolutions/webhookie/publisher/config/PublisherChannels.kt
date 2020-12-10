@@ -4,6 +4,8 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.integration.channel.PublishSubscribeChannel
 import org.springframework.integration.dsl.MessageChannels
+import org.springframework.messaging.MessageChannel
+import java.util.concurrent.Executors
 
 /**
  *
@@ -23,4 +25,7 @@ class PublisherChannels {
 
   @Bean
   fun publisherOtherErrorChannel(): PublishSubscribeChannel = MessageChannels.publishSubscribe().get()
+
+  @Bean
+  fun retryResponseErrorChannel(): MessageChannel = MessageChannels.executor(Executors.newCachedThreadPool()).get()
 }
