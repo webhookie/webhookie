@@ -5,7 +5,10 @@ webhookie:
       exchange: ${WH_CONSUMER_MISSING_HEADER_EXCHANGE:wh-customer}
       routing-key: ${WH_CONSUMER_MISSING_HEADER_ROUTING_KEY:wh-missing-header}
   publisher:
-    max-retry: 3
+    retry:
+      max-retry: 15
+      initial-interval: 15
+      multiplier: 2
 spring:
   data:
     mongodb:

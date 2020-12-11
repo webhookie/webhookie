@@ -11,5 +11,11 @@ import org.springframework.boot.context.properties.ConstructorBinding
 @ConstructorBinding
 @ConfigurationProperties(prefix = "webhookie.publisher")
 data class PublisherProperties(
-  val maxRetry: Int = 10
+  val retry: RetryProfile = RetryProfile()
+)
+
+data class RetryProfile(
+  val maxRetry: Int = 10,
+  val initialInterval: Int = 10,
+  val multiplier: Int = 2
 )
