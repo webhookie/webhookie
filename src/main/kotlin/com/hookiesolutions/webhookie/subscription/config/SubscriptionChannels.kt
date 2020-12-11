@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.integration.channel.PublishSubscribeChannel
 import org.springframework.integration.dsl.MessageChannels
+import java.util.concurrent.Executors
 
 /**
  *
@@ -13,8 +14,12 @@ import org.springframework.integration.dsl.MessageChannels
 @Configuration
 class SubscriptionChannels {
   @Bean
-  fun subscriptionChannel(): PublishSubscribeChannel = MessageChannels.publishSubscribe().get()
+  fun subscriptionChannel(): PublishSubscribeChannel = MessageChannels
+    .publishSubscribe(Executors.newCachedThreadPool())
+    .get()
 
   @Bean
-  fun noSubscriptionChannel(): PublishSubscribeChannel = MessageChannels.publishSubscribe().get()
+  fun noSubscriptionChannel(): PublishSubscribeChannel = MessageChannels
+    .publishSubscribe()
+    .get()
 }
