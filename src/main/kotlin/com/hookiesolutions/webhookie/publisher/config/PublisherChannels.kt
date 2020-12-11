@@ -15,17 +15,27 @@ import java.util.concurrent.Executors
 @Configuration
 class PublisherChannels {
   @Bean
-  fun publisherSuccessChannel(): PublishSubscribeChannel = MessageChannels.publishSubscribe().get()
+  fun publisherSuccessChannel(): PublishSubscribeChannel = MessageChannels
+    .publishSubscribe()
+    .get()
 
   @Bean
-  fun publisherResponseErrorChannel(): PublishSubscribeChannel = MessageChannels.publishSubscribe().get()
+  fun publisherResponseErrorChannel(): PublishSubscribeChannel = MessageChannels
+    .publishSubscribe()
+    .get()
 
   @Bean
-  fun publisherRequestErrorChannel(): PublishSubscribeChannel = MessageChannels.publishSubscribe().get()
+  fun publisherRequestErrorChannel(): PublishSubscribeChannel = MessageChannels
+    .publishSubscribe()
+    .get()
 
   @Bean
-  fun publisherOtherErrorChannel(): PublishSubscribeChannel = MessageChannels.publishSubscribe().get()
+  fun publisherOtherErrorChannel(): PublishSubscribeChannel = MessageChannels
+    .publishSubscribe()
+    .get()
 
   @Bean
-  fun retryResponseErrorChannel(): MessageChannel = MessageChannels.executor(Executors.newCachedThreadPool()).get()
+  fun retrySubscriptionMessageChannel(): MessageChannel = MessageChannels
+    .executor(Executors.newCachedThreadPool())
+    .get()
 }
