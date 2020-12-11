@@ -45,7 +45,7 @@ class AuditFlows(
     return integrationFlow {
       channel(SUBSCRIPTION_CHANNEL_NAME)
       handle { payload: SubscriptionMessage, _: MessageHeaders ->
-        log.info("{}", payload)
+        log.info("{}, {}, {}, {}", payload.subscription.callbackUrl, payload.delay, payload.numberOfRetries, payload.spanId)
       }
     }
   }
@@ -55,7 +55,7 @@ class AuditFlows(
     return integrationFlow {
       channel(NO_SUBSCRIPTION_CHANNEL_NAME)
       handle { payload: NoSubscriptionMessage, _: MessageHeaders ->
-        log.warn("{}", payload)
+        log.warn("No Subscription for: '{}'", payload.originalMessage.topic)
       }
     }
   }
@@ -65,7 +65,7 @@ class AuditFlows(
     return integrationFlow {
       channel(PUBLISHER_SUCCESS_CHANNEL)
       handle { payload: PublisherSuccessMessage, _: MessageHeaders ->
-        log.warn("'{}', {}", payload.status, payload.subscriptionMessage)
+        log.warn("'{}', {}", payload.status, payload.subscriptionMessage.subscription.callbackUrl)
       }
     }
   }
@@ -75,7 +75,7 @@ class AuditFlows(
     return integrationFlow {
       channel(PUBLISHER_REQUEST_ERROR_CHANNEL)
       handle { payload: PublisherRequestErrorMessage, _: MessageHeaders ->
-        log.warn("{}", payload.reason)
+        log.warn("{}, {}", payload.subscriptionMessage.subscription.callbackUrl, payload.reason)
       }
     }
   }
@@ -85,7 +85,7 @@ class AuditFlows(
     return integrationFlow {
       channel(PUBLISHER_RESPONSE_ERROR_CHANNEL)
       handle { payload: PublisherResponseErrorMessage, _: MessageHeaders ->
-        log.warn("{}", payload.reason)
+        log.warn("'{}', {}, {}", payload.status, payload.subscriptionMessage.subscription.callbackUrl, payload.reason)
       }
     }
   }
@@ -95,7 +95,7 @@ class AuditFlows(
     return integrationFlow {
       channel(PUBLISHER_OTHER_ERROR_CHANNEL)
       handle { payload: PublisherOtherErrorMessage, _: MessageHeaders ->
-        log.warn("{}", payload.reason)
+        log.warn("{}, {}", payload.subscriptionMessage.subscription.callbackUrl, payload.reason)
       }
     }
   }
