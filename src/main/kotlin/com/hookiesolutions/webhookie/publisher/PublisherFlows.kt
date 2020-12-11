@@ -11,12 +11,12 @@ import com.hookiesolutions.webhookie.publisher.config.PublisherProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.http.HttpStatus
+import org.springframework.integration.core.GenericSelector
 import org.springframework.integration.dsl.IntegrationFlow
 import org.springframework.integration.dsl.integrationFlow
+import org.springframework.integration.transformer.GenericTransformer
 import org.springframework.messaging.MessageChannel
 import org.springframework.messaging.SubscribableChannel
-import java.time.Duration
 
 /**
  *
@@ -26,51 +26,36 @@ import java.time.Duration
 @Configuration
 @EnableConfigurationProperties(PublisherProperties::class)
 class PublisherFlows(
-  private val subscriberClient: SubscriberClient,
-  private val properties: PublisherProperties,
+  private val publisher: SubscriptionPublisher,
   private val publisherSuccessChannel: SubscribableChannel,
   private val publisherResponseErrorChannel: SubscribableChannel,
   private val publisherRequestErrorChannel: SubscribableChannel,
   private val publisherOtherErrorChannel: SubscribableChannel,
-  private val retryResponseErrorChannel: MessageChannel
+  private val retrySubscriptionMessageChannel: MessageChannel,
+  private val requiresRetrySelector: GenericSelector<GenericPublisherMessage>,
+  private val toRetryableSubscriptionMessage: GenericTransformer<GenericPublisherMessage, SubscriptionMessage>
 ) {
   @Bean
-  fun publishSubscriptionMessage(clientFactory: HttpClientFactory): IntegrationFlow {
+  fun publishSubscriptionFlow(): IntegrationFlow {
     return integrationFlow {
       channel(SUBSCRIPTION_CHANNEL_NAME)
-      transform<SubscriptionMessage> { subscriberClient.publish(it) }
+      transform<SubscriptionMessage> { publisher.publish(it) }
       split()
       routeToRecipients {
-        this.recipient<GenericPublisherMessage>(publisherSuccessChannel) { p -> p is PublisherSuccessMessage }
-        this.recipient<GenericPublisherMessage>(publisherResponseErrorChannel) { p -> p is PublisherResponseErrorMessage }
-        this.recipient<GenericPublisherMessage>(publisherRequestErrorChannel) { p -> p is PublisherRequestErrorMessage }
-        this.recipient<GenericPublisherMessage>(publisherOtherErrorChannel) { p -> p is PublisherOtherErrorMessage }
-        this.recipient<GenericPublisherMessage>(retryResponseErrorChannel) {
-          if(it.subscriptionMessage.numberOfRetries >= properties.maxRetry) {
-            return@recipient false
-          }
-
-          (it is PublisherRequestErrorMessage) || (
-              it is PublisherResponseErrorMessage && (
-                  it.status.is5xxServerError || (it.status == HttpStatus.NOT_FOUND)
-                  )
-              )
-        }
-        this.defaultOutputChannel(publisherSuccessChannel)
+        recipient<GenericPublisherMessage>(publisherSuccessChannel) { p -> p is PublisherSuccessMessage }
+        recipient<GenericPublisherMessage>(publisherResponseErrorChannel) { p -> p is PublisherResponseErrorMessage }
+        recipient<GenericPublisherMessage>(publisherRequestErrorChannel) { p -> p is PublisherRequestErrorMessage }
+        recipient<GenericPublisherMessage>(publisherOtherErrorChannel) { p -> p is PublisherOtherErrorMessage }
+        delegate.recipient(retrySubscriptionMessageChannel, requiresRetrySelector)
       }
     }
   }
 
   @Bean
-  fun handleRetryFlow(): IntegrationFlow {
+  fun retrySubscriptionFlow(): IntegrationFlow {
     return integrationFlow {
-      channel(retryResponseErrorChannel)
-      transform<GenericPublisherMessage> {
-        it.subscriptionMessage.copy(
-          delay = subscriberClient.calculateDelayForSubscription(it.subscriptionMessage),
-          numberOfRetries = it.subscriptionMessage.numberOfRetries + 1
-        )
-      }
+      channel(retrySubscriptionMessageChannel)
+      transform(toRetryableSubscriptionMessage)
       channel(SUBSCRIPTION_CHANNEL_NAME)
     }
   }
