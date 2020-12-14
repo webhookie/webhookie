@@ -5,9 +5,12 @@ import com.hookiesolutions.webhookie.common.Constants.Channels.Publisher.Compani
 import com.hookiesolutions.webhookie.common.Constants.Channels.Publisher.Companion.PUBLISHER_REQUEST_ERROR_CHANNEL
 import com.hookiesolutions.webhookie.common.Constants.Channels.Publisher.Companion.PUBLISHER_RESPONSE_ERROR_CHANNEL
 import com.hookiesolutions.webhookie.common.Constants.Channels.Publisher.Companion.PUBLISHER_SUCCESS_CHANNEL
+import com.hookiesolutions.webhookie.common.Constants.Channels.Publisher.Companion.RETRY_SUBSCRIPTION_MESSAGE_CHANNEL
+import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.BLOCK_SUBSCRIPTION_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.NO_SUBSCRIPTION_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.SUBSCRIPTION_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
+import com.hookiesolutions.webhookie.common.message.publisher.GenericPublisherMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherOtherErrorMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherRequestErrorMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherResponseErrorMessage
@@ -96,6 +99,26 @@ class AuditFlows(
       channel(PUBLISHER_OTHER_ERROR_CHANNEL)
       handle { payload: PublisherOtherErrorMessage, _: MessageHeaders ->
         log.warn("{}, {}", payload.subscriptionMessage.subscription.callbackUrl, payload.reason)
+      }
+    }
+  }
+
+  @Bean
+  fun logRetrySubscriptionMessageMessage(): IntegrationFlow {
+    return integrationFlow {
+      channel(RETRY_SUBSCRIPTION_MESSAGE_CHANNEL)
+      handle { payload: GenericPublisherMessage, _: MessageHeaders ->
+        log.warn("{}, {}", payload.subscriptionMessage.subscription.callbackUrl, payload.subscriptionMessage.delay.seconds)
+      }
+    }
+  }
+
+  @Bean
+  fun logBlockSubscriptionMessageMessage(): IntegrationFlow {
+    return integrationFlow {
+      channel(BLOCK_SUBSCRIPTION_CHANNEL_NAME)
+      handle { payload: SubscriptionMessage, _: MessageHeaders ->
+        log.warn("{}, {}", payload.subscription.callbackUrl, payload.delay.seconds)
       }
     }
   }
