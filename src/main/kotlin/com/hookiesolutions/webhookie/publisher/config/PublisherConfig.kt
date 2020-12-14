@@ -38,18 +38,30 @@ class PublisherConfig(
   }
 
   @Bean
-  fun requiresRetrySelector(): GenericSelector<GenericPublisherMessage> {
+  fun retryableErrorSelector(): GenericSelector<GenericPublisherMessage> {
     return GenericSelector {
-      val message = it
-      if(message.subscriptionMessage.numberOfRetries >= properties.retry.maxRetry) {
-        return@GenericSelector false
-      }
-
-      (message is PublisherRequestErrorMessage) || (
-          message is PublisherResponseErrorMessage && (
-              message.status.is5xxServerError || (message.status == HttpStatus.NOT_FOUND)
+      (it is PublisherRequestErrorMessage) || (
+          it is PublisherResponseErrorMessage && (
+              it.status.is5xxServerError || (it.status == HttpStatus.NOT_FOUND)
               )
           )
+    }
+  }
+
+  @Bean
+  fun subscriptionHasReachedMaximumRetrySelector(): GenericSelector<GenericPublisherMessage> {
+    return GenericSelector {
+      it.subscriptionMessage.numberOfRetries >= properties.retry.maxRetry
+    }
+  }
+
+  @Bean
+  fun requiresRetrySelector(
+    subscriptionHasReachedMaximumRetrySelector: GenericSelector<GenericPublisherMessage>,
+    retryableErrorSelector: GenericSelector<GenericPublisherMessage>
+  ): GenericSelector<GenericPublisherMessage> {
+    return GenericSelector {
+      retryableErrorSelector.accept(it) && !subscriptionHasReachedMaximumRetrySelector.accept(it)
     }
   }
 }
