@@ -1,6 +1,6 @@
 package com.hookiesolutions.webhookie.publisher
 
-import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.BLOCK_SUBSCRIPTION_CHANNEL_NAME
+import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.UNSUCCESSFUL_SUBSCRIPTION_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.SUBSCRIPTION_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.message.publisher.GenericPublisherMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherOtherErrorMessage
@@ -69,7 +69,7 @@ class PublisherFlows(
     return integrationFlow {
       channel(blockSubscriptionMessageChannel)
       transform<GenericPublisherMessage> { it.subscriptionMessage }
-      channel(BLOCK_SUBSCRIPTION_CHANNEL_NAME)
+      channel(UNSUCCESSFUL_SUBSCRIPTION_CHANNEL_NAME)
     }
   }
 }

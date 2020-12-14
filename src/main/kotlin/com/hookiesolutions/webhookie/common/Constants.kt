@@ -34,7 +34,7 @@ class Constants {
     class Subscription {
       companion object {
         const val SUBSCRIPTION_CHANNEL_NAME = "subscriptionChannel"
-        const val BLOCK_SUBSCRIPTION_CHANNEL_NAME = "blockSubscriptionChannel"
+        const val UNSUCCESSFUL_SUBSCRIPTION_CHANNEL_NAME = "unsuccessfulSubscriptionChannel"
         const val NO_SUBSCRIPTION_CHANNEL_NAME = "noSubscriptionChannel"
       }
     }

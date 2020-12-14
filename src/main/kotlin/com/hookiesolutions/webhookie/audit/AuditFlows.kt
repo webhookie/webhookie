@@ -6,7 +6,7 @@ import com.hookiesolutions.webhookie.common.Constants.Channels.Publisher.Compani
 import com.hookiesolutions.webhookie.common.Constants.Channels.Publisher.Companion.PUBLISHER_RESPONSE_ERROR_CHANNEL
 import com.hookiesolutions.webhookie.common.Constants.Channels.Publisher.Companion.PUBLISHER_SUCCESS_CHANNEL
 import com.hookiesolutions.webhookie.common.Constants.Channels.Publisher.Companion.RETRY_SUBSCRIPTION_MESSAGE_CHANNEL
-import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.BLOCK_SUBSCRIPTION_CHANNEL_NAME
+import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.UNSUCCESSFUL_SUBSCRIPTION_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.NO_SUBSCRIPTION_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.SUBSCRIPTION_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
@@ -116,7 +116,7 @@ class AuditFlows(
   @Bean
   fun logBlockSubscriptionMessageMessage(): IntegrationFlow {
     return integrationFlow {
-      channel(BLOCK_SUBSCRIPTION_CHANNEL_NAME)
+      channel(UNSUCCESSFUL_SUBSCRIPTION_CHANNEL_NAME)
       handle { payload: SubscriptionMessage, _: MessageHeaders ->
         log.warn("{}, {}", payload.subscription.callbackUrl, payload.delay.seconds)
       }
