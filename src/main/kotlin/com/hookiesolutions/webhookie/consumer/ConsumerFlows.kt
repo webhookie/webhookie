@@ -29,13 +29,12 @@ class ConsumerFlows(
   private val missingHeadersChannel: SubscribableChannel,
   private val consumerProperties: ConsumerProperties,
   private val connectionFactory: ConnectionFactory,
-  private val amqpTemplate: AmqpTemplate
+  private val amqpTemplate: AmqpTemplate,
+  private val consumerRetryTemplate: RetryTemplate,
+  private val missingHeadersSelector: GenericSelector<Message<*>>,
 ) {
   @Bean
-  fun consumerFlow(
-    consumerRetryTemplate: RetryTemplate,
-    missingHeadersSelector: GenericSelector<Message<*>>
-  ): IntegrationFlow {
+  fun consumerFlow(): IntegrationFlow {
     val inboundGateway = Amqp
       .inboundGateway(connectionFactory, amqpTemplate, consumerProperties.queue)
       .retryTemplate(consumerRetryTemplate)
