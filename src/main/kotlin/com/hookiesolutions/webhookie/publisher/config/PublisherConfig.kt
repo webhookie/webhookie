@@ -64,4 +64,14 @@ class PublisherConfig(
       retryableErrorSelector.accept(it) && !subscriptionHasReachedMaximumRetrySelector.accept(it)
     }
   }
+
+  @Bean
+  fun requiresBlockSelector(
+    subscriptionHasReachedMaximumRetrySelector: GenericSelector<GenericPublisherMessage>,
+    retryableErrorSelector: GenericSelector<GenericPublisherMessage>
+  ): GenericSelector<GenericPublisherMessage> {
+    return GenericSelector {
+      retryableErrorSelector.accept(it) && subscriptionHasReachedMaximumRetrySelector.accept(it)
+    }
+  }
 }
