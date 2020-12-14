@@ -3,6 +3,7 @@ package com.hookiesolutions.webhookie.publisher
 import com.hookiesolutions.webhookie.common.Constants
 import com.hookiesolutions.webhookie.common.message.publisher.GenericPublisherMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionMessage
+import com.hookiesolutions.webhookie.publisher.config.PublisherProperties
 import org.slf4j.Logger
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.BodyInserters
@@ -19,7 +20,8 @@ import reactor.kotlin.core.publisher.toMono
  */
 @Service
 class SubscriptionPublisher(
-  private val log: Logger
+  private val log: Logger,
+  private val properties: PublisherProperties
 ) {
   fun publish(msg: SubscriptionMessage): Mono<GenericPublisherMessage> {
     log.info( "'{}'ing '{}' message to '{}' ({}-{})",
@@ -31,7 +33,11 @@ class SubscriptionPublisher(
     )
 
     if (!msg.delay.isZero) {
-      log.info("Delaying publisher for '{}' seconds", msg.delay.seconds)
+      if(msg.numberOfRetries < properties.retry.maxRetry) {
+        log.info("Delaying '{}' publisher for '{}' seconds", msg.subscription.callbackUrl, msg.delay.seconds)
+      } else {
+        log.info("Last try for '{}' in '{}' seconds", msg.subscription.callbackUrl, msg.delay.seconds)
+      }
     }
 
     return Mono

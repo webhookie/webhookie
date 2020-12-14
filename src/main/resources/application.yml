@@ -6,8 +6,8 @@ webhookie:
       routing-key: ${WH_CONSUMER_MISSING_HEADER_ROUTING_KEY:wh-missing-header}
   publisher:
     retry:
-      max-retry: 15
-      initial-interval: 15
+      max-retry: 3
+      initial-interval: 5
       multiplier: 2
 spring:
   data:
