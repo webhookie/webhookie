@@ -1,5 +1,6 @@
 package com.hookiesolutions.webhookie.publisher
 
+import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.BLOCK_SUBSCRIPTION_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.SUBSCRIPTION_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.message.publisher.GenericPublisherMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherOtherErrorMessage
@@ -32,7 +33,9 @@ class PublisherFlows(
   private val publisherRequestErrorChannel: SubscribableChannel,
   private val publisherOtherErrorChannel: SubscribableChannel,
   private val retrySubscriptionMessageChannel: MessageChannel,
+  private val blockSubscriptionMessageChannel: MessageChannel,
   private val requiresRetrySelector: GenericSelector<GenericPublisherMessage>,
+  private val requiresBlockSelector: GenericSelector<GenericPublisherMessage>,
   private val toRetryableSubscriptionMessage: GenericTransformer<GenericPublisherMessage, SubscriptionMessage>
 ) {
   @Bean
@@ -47,16 +50,26 @@ class PublisherFlows(
         recipient<GenericPublisherMessage>(publisherRequestErrorChannel) { p -> p is PublisherRequestErrorMessage }
         recipient<GenericPublisherMessage>(publisherOtherErrorChannel) { p -> p is PublisherOtherErrorMessage }
         delegate.recipient(retrySubscriptionMessageChannel, requiresRetrySelector)
+        delegate.recipient(blockSubscriptionMessageChannel, requiresBlockSelector)
       }
     }
   }
 
   @Bean
-  fun retrySubscriptionFlow(): IntegrationFlow {
+  fun retrySubscriptionMessageFlow(): IntegrationFlow {
     return integrationFlow {
       channel(retrySubscriptionMessageChannel)
       transform(toRetryableSubscriptionMessage)
       channel(SUBSCRIPTION_CHANNEL_NAME)
+    }
+  }
+
+  @Bean
+  fun blockSubscriptionMessageFlow(): IntegrationFlow {
+    return integrationFlow {
+      channel(blockSubscriptionMessageChannel)
+      transform<GenericPublisherMessage> { it.subscriptionMessage }
+      channel(BLOCK_SUBSCRIPTION_CHANNEL_NAME)
     }
   }
 }
