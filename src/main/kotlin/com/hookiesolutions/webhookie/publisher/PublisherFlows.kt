@@ -8,6 +8,7 @@ import com.hookiesolutions.webhookie.common.message.publisher.PublisherRequestEr
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherResponseErrorMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherSuccessMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionMessage
+import com.hookiesolutions.webhookie.common.message.subscription.UnsuccessfulSubscriptionMessage
 import com.hookiesolutions.webhookie.publisher.config.PublisherProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
@@ -36,7 +37,8 @@ class PublisherFlows(
   private val blockSubscriptionMessageChannel: MessageChannel,
   private val requiresRetrySelector: GenericSelector<GenericPublisherMessage>,
   private val requiresBlockSelector: GenericSelector<GenericPublisherMessage>,
-  private val toRetryableSubscriptionMessage: GenericTransformer<GenericPublisherMessage, SubscriptionMessage>
+  private val toRetryableSubscriptionMessage: GenericTransformer<GenericPublisherMessage, SubscriptionMessage>,
+  private val unsuccessfulMessageTransformer: GenericTransformer<GenericPublisherMessage, UnsuccessfulSubscriptionMessage>
 ) {
   @Bean
   fun publishSubscriptionFlow(): IntegrationFlow {
@@ -68,7 +70,7 @@ class PublisherFlows(
   fun blockSubscriptionMessageFlow(): IntegrationFlow {
     return integrationFlow {
       channel(blockSubscriptionMessageChannel)
-      transform<GenericPublisherMessage> { it.subscriptionMessage }
+      transform(unsuccessfulMessageTransformer)
       channel(UNSUCCESSFUL_SUBSCRIPTION_CHANNEL_NAME)
     }
   }

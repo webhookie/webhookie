@@ -4,6 +4,8 @@ import com.hookiesolutions.webhookie.common.message.publisher.GenericPublisherMe
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherRequestErrorMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherResponseErrorMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionMessage
+import com.hookiesolutions.webhookie.common.message.subscription.UnsuccessfulSubscriptionMessage
+import com.hookiesolutions.webhookie.common.service.TimeMachine
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
@@ -18,7 +20,8 @@ import java.time.Duration
  */
 @Configuration
 class PublisherConfig(
-  private val properties: PublisherProperties
+  private val properties: PublisherProperties,
+  private val timeMachine: TimeMachine
 ) {
   @Bean
   fun toRetryableSubscriptionMessage(delayCalculator: GenericTransformer<SubscriptionMessage, Duration>): GenericTransformer<GenericPublisherMessage, SubscriptionMessage> {
@@ -72,6 +75,25 @@ class PublisherConfig(
   ): GenericSelector<GenericPublisherMessage> {
     return GenericSelector {
       retryableErrorSelector.accept(it) && subscriptionHasReachedMaximumRetrySelector.accept(it)
+    }
+  }
+
+  @Bean
+  fun unsuccessfulMessageTransformer(): GenericTransformer<GenericPublisherMessage, UnsuccessfulSubscriptionMessage> {
+    return GenericTransformer {
+      val reason: String = when (it) {
+        is PublisherRequestErrorMessage -> {
+          it.reason
+        }
+        is PublisherResponseErrorMessage -> {
+          it.reason
+        }
+        else -> {
+          "Unknown Error!"
+        }
+      }
+
+      UnsuccessfulSubscriptionMessage(it.subscriptionMessage, reason, timeMachine.now())
     }
   }
 }
