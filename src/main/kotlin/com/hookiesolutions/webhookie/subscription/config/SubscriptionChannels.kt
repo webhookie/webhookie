@@ -22,4 +22,9 @@ class SubscriptionChannels {
   fun noSubscriptionChannel(): PublishSubscribeChannel = MessageChannels
     .publishSubscribe()
     .get()
+
+  @Bean
+  fun unsuccessfulSubscriptionChannel(): PublishSubscribeChannel = MessageChannels
+    .publishSubscribe()
+    .get()
 }
