@@ -4,8 +4,10 @@ import com.hookiesolutions.webhookie.common.Constants.Channels.Consumer.Companio
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.message.subscription.GenericSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.NoSubscriptionMessage
+import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.UnsuccessfulSubscriptionMessage
 import com.hookiesolutions.webhookie.common.service.IdGenerator
+import com.hookiesolutions.webhookie.common.service.TimeMachine
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscription
 import com.hookiesolutions.webhookie.subscription.service.SubscriptionService
 import org.slf4j.Logger
@@ -25,10 +27,12 @@ import reactor.kotlin.core.publisher.toMono
 @Configuration
 class SubscriptionFlows(
   private val log: Logger,
+  private val timeMachine: TimeMachine,
   private val idGenerator: IdGenerator,
   private val subscriptionService: SubscriptionService,
   private val subscriptionChannel: MessageChannel,
   private val unsuccessfulSubscriptionChannel: MessageChannel,
+  private val blockedSubscriptionChannel: MessageChannel,
   private val noSubscriptionChannel: MessageChannel
 ) {
   @Bean
@@ -42,14 +46,15 @@ class SubscriptionFlows(
       }
       split()
       routeToRecipients {
-        this.recipient<GenericSubscriptionMessage>(noSubscriptionChannel) { p -> p is NoSubscriptionMessage }
-        this.defaultOutputChannel(subscriptionChannel)
+        recipient<GenericSubscriptionMessage>(noSubscriptionChannel) { p -> p is NoSubscriptionMessage }
+        recipient<GenericSubscriptionMessage>(blockedSubscriptionChannel) { it is SubscriptionMessage && it.subscription.blockedDetails != null}
+        recipient<GenericSubscriptionMessage>(subscriptionChannel) { it is SubscriptionMessage && it.subscription.blockedDetails == null}
       }
     }
   }
 
   @Bean
-  fun unsuccessfulSubscriptionFlow(): IntegrationFlow {
+  fun unsuccessfulSubscriptionFlow(logBlockedSubscriptionHandler: (BlockedSubscription, MessageHeaders) -> Unit): IntegrationFlow {
     return integrationFlow {
       channel(unsuccessfulSubscriptionChannel)
       transform<UnsuccessfulSubscriptionMessage> { payload ->
@@ -59,9 +64,25 @@ class SubscriptionFlows(
           }
       }
       split()
-      handle { payload: BlockedSubscription, _: MessageHeaders ->
-        log.debug("BlockedSubscriptionMessage was saved successfully: '{}'", payload.id)
-      }
+      handle(logBlockedSubscriptionHandler)
+    }
+  }
+
+  @Bean
+  fun blockedSubscriptionMessageFlow(logBlockedSubscriptionHandler: (BlockedSubscription, MessageHeaders) -> Unit): IntegrationFlow {
+    return integrationFlow {
+      channel(blockedSubscriptionChannel)
+      transform<SubscriptionMessage> { BlockedSubscription.from(it, timeMachine.now()) }
+      transform<BlockedSubscription> { subscriptionService.saveBlockedSubscription(it) }
+      split()
+      handle(logBlockedSubscriptionHandler)
+    }
+  }
+
+  @Bean
+  fun logBlockedSubscriptionHandler(): (BlockedSubscription, MessageHeaders) -> Unit {
+    return { payload: BlockedSubscription, _: MessageHeaders ->
+      log.warn("BlockedSubscriptionMessage was saved successfully: '{}'", payload.id)
     }
   }
 }

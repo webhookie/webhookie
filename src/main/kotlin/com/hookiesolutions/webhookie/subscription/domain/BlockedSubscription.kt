@@ -1,6 +1,7 @@
 package com.hookiesolutions.webhookie.subscription.domain
 
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
+import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.UnsuccessfulSubscriptionMessage
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
 import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
@@ -10,6 +11,7 @@ import org.springframework.data.annotation.TypeAlias
 import org.springframework.data.mongodb.core.index.CompoundIndex
 import org.springframework.data.mongodb.core.index.CompoundIndexes
 import org.springframework.data.mongodb.core.mapping.Document
+import java.time.Instant
 
 /**
  *
@@ -38,6 +40,15 @@ data class BlockedSubscription(
         message.subscriptionMessage.spanId,
         message.subscriptionMessage.subscription,
         BlockedDetailsDTO(message.reason, message.time)
+      )
+    }
+
+    fun from(message: SubscriptionMessage, at: Instant): BlockedSubscription {
+      return BlockedSubscription(
+        message.originalMessage,
+        message.spanId,
+        message.subscription,
+        BlockedDetailsDTO("New Message", at)
       )
     }
   }

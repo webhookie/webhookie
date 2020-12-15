@@ -24,6 +24,11 @@ class SubscriptionChannels {
     .get()
 
   @Bean
+  fun blockedSubscriptionChannel(): PublishSubscribeChannel = MessageChannels
+    .publishSubscribe()
+    .get()
+
+  @Bean
   fun unsuccessfulSubscriptionChannel(): PublishSubscribeChannel = MessageChannels
     .publishSubscribe()
     .get()
