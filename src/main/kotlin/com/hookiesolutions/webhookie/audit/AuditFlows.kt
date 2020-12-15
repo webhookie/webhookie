@@ -17,6 +17,7 @@ import com.hookiesolutions.webhookie.common.message.publisher.PublisherResponseE
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherSuccessMessage
 import com.hookiesolutions.webhookie.common.message.subscription.NoSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionMessage
+import com.hookiesolutions.webhookie.common.message.subscription.UnsuccessfulSubscriptionMessage
 import org.slf4j.Logger
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -114,11 +115,11 @@ class AuditFlows(
   }
 
   @Bean
-  fun logBlockSubscriptionMessageMessage(): IntegrationFlow {
+  fun logUnsuccessfulSubscriptionMessageMessage(): IntegrationFlow {
     return integrationFlow {
       channel(UNSUCCESSFUL_SUBSCRIPTION_CHANNEL_NAME)
-      handle { payload: SubscriptionMessage, _: MessageHeaders ->
-        log.warn("{}, {}", payload.subscription.callbackUrl, payload.delay.seconds)
+      handle { payload: UnsuccessfulSubscriptionMessage, _: MessageHeaders ->
+        log.warn("{}, {}", payload.subscriptionMessage.subscription.callbackUrl, payload.subscriptionMessage.delay.seconds)
       }
     }
   }
