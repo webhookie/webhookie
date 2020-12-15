@@ -8,9 +8,11 @@ import org.springframework.http.HttpMethod
  * @since 7/12/20 01:25
  */
 data class SubscriptionDTO(
+  val id: String,
   val name: String,
   val topic: String,
   val callbackUrl: String,
   val httpMethod: HttpMethod,
-  val callbackSecurity: CallbackSecurityDTO
+  val callbackSecurity: CallbackSecurityDTO,
+  val blockedDetails: BlockedDetailsDTO? = null
 )

@@ -1,11 +1,12 @@
 package com.hookiesolutions.webhookie.subscription.domain
 
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
-import com.hookiesolutions.webhookie.common.model.dto.CallbackSecurityDTO
 import com.hookiesolutions.webhookie.common.message.subscription.GenericSubscriptionMessage
-import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
 import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionMessage
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
+import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
+import com.hookiesolutions.webhookie.common.model.dto.CallbackSecurityDTO
+import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Criteria.where
@@ -22,7 +23,8 @@ data class Subscription(
   val topic: String,
   val callbackUrl: String,
   val httpMethod: HttpMethod,
-  val callbackSecurity: CallbackSecurityDTO
+  val callbackSecurity: CallbackSecurityDTO,
+  val blockedDetails: BlockedDetailsDTO? = null
 ) : AbstractEntity() {
   fun subscriptionMessage(consumerMessage: ConsumerMessage, spanId: String): GenericSubscriptionMessage {
     return SubscriptionMessage(
@@ -34,11 +36,13 @@ data class Subscription(
 
   private fun dto(): SubscriptionDTO {
     return SubscriptionDTO(
+      id!!,
       name,
       topic,
       callbackUrl,
       httpMethod,
-      callbackSecurity
+      callbackSecurity,
+      blockedDetails
     )
   }
 
@@ -53,6 +57,7 @@ data class Subscription(
   class Keys {
     companion object {
       const val KEY_TOPIC = "topic"
+      const val KEY_BLOCK_DETAILS = "blockedDetails"
     }
   }
 }

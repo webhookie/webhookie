@@ -31,4 +31,10 @@ abstract class AbstractDocument {
   @Version
   @JsonIgnore
   var version: Long? = null
+
+  class Keys {
+    companion object {
+      const val KEY_VERSION = "version"
+    }
+  }
 }
