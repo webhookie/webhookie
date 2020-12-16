@@ -39,7 +39,7 @@ class AuditFlows(
     return integrationFlow {
       channel(CONSUMER_CHANNEL_NAME)
       handle { payload: ConsumerMessage, _: MessageHeaders ->
-        log.warn("TOPIC: {}", payload.topic)
+        log.warn("TOPIC: {}", payload.headers.topic)
       }
     }
   }
@@ -59,7 +59,7 @@ class AuditFlows(
     return integrationFlow {
       channel(NO_SUBSCRIPTION_CHANNEL_NAME)
       handle { payload: NoSubscriptionMessage, _: MessageHeaders ->
-        log.warn("No Subscription for: '{}'", payload.originalMessage.topic)
+        log.warn("No Subscription for: '{}'", payload.originalMessage.headers.topic)
       }
     }
   }

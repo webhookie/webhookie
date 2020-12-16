@@ -1,6 +1,7 @@
 package com.hookiesolutions.webhookie.subscription.domain
 
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
+import com.hookiesolutions.webhookie.common.message.WebhookieHeaders
 import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.UnsuccessfulSubscriptionMessage
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
@@ -28,23 +29,17 @@ import java.time.Instant
 @TypeAlias(KEY_BLOCKED_MESSAGE_COLLECTION_NAME)
 @CompoundIndexes(CompoundIndex(name = "message_time", def = "{'blockedDetails.time' : 1}"))
 data class BlockedSubscriptionMessage(
-  val topic: String,
-  val traceId: String,
-  val contentType: String,
-  val authorizedSubscribers: Set<String> = emptySet(),
+  val headers: WebhookieHeaders,
   val originalSpanId: String,
   val payload: ByteArray,
-  val headers: Map<String, Any>,
+  val messageHeaders: Map<String, Any>,
   val subscription: SubscriptionDTO,
   val blockedDetails: BlockedDetailsDTO
 ): AbstractEntity() {
   fun subscriptionMessage(spanId: String): SubscriptionMessage {
-    val msg = GenericMessage<ByteArray>(payload, headers)
+    val msg = GenericMessage<ByteArray>(payload, messageHeaders)
     val originalMessage = ConsumerMessage(
-      topic,
-      traceId,
-      contentType,
-      authorizedSubscribers,
+      headers,
       msg
     )
     return SubscriptionMessage(originalMessage, spanId, subscription)
@@ -69,10 +64,7 @@ data class BlockedSubscriptionMessage(
     fun from(message: UnsuccessfulSubscriptionMessage): BlockedSubscriptionMessage {
       val originalMessage = message.subscriptionMessage.originalMessage
       return BlockedSubscriptionMessage(
-        originalMessage.topic,
-        originalMessage.traceId,
-        originalMessage.contentType,
-        originalMessage.authorizedSubscribers,
+        originalMessage.headers,
         message.subscriptionMessage.spanId,
         originalMessage.payload,
         originalMessage.messageHeaders,
@@ -84,10 +76,7 @@ data class BlockedSubscriptionMessage(
     fun from(message: SubscriptionMessage, at: Instant): BlockedSubscriptionMessage {
       val originalMessage = message.originalMessage
       return BlockedSubscriptionMessage(
-        originalMessage.topic,
-        originalMessage.traceId,
-        originalMessage.contentType,
-        originalMessage.authorizedSubscribers,
+        originalMessage.headers,
         message.spanId,
         originalMessage.payload,
         originalMessage.messageHeaders,
@@ -95,35 +84,5 @@ data class BlockedSubscriptionMessage(
         BlockedDetailsDTO("New Message", at)
       )
     }
-  }
-
-  override fun equals(other: Any?): Boolean {
-    if (this === other) return true
-    if (other !is BlockedSubscriptionMessage) return false
-
-    if (topic != other.topic) return false
-    if (traceId != other.traceId) return false
-    if (contentType != other.contentType) return false
-    if (authorizedSubscribers != other.authorizedSubscribers) return false
-    if (originalSpanId != other.originalSpanId) return false
-    if (!payload.contentEquals(other.payload)) return false
-    if (headers != other.headers) return false
-    if (subscription != other.subscription) return false
-    if (blockedDetails != other.blockedDetails) return false
-
-    return true
-  }
-
-  override fun hashCode(): Int {
-    var result = topic.hashCode()
-    result = 31 * result + traceId.hashCode()
-    result = 31 * result + contentType.hashCode()
-    result = 31 * result + authorizedSubscribers.hashCode()
-    result = 31 * result + originalSpanId.hashCode()
-    result = 31 * result + payload.contentHashCode()
-    result = 31 * result + headers.hashCode()
-    result = 31 * result + subscription.hashCode()
-    result = 31 * result + blockedDetails.hashCode()
-    return result
   }
 }

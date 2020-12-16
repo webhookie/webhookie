@@ -26,9 +26,9 @@ class SubscriptionPublisher(
   fun publish(msg: SubscriptionMessage): Mono<GenericPublisherMessage> {
     log.info( "'{}'ing '{}' message to '{}' ({}-{})",
       msg.subscription.httpMethod.name,
-      msg.originalMessage.contentType,
+      msg.originalMessage.headers.contentType,
       msg.subscription.callbackUrl,
-      msg.originalMessage.traceId,
+      msg.originalMessage.headers.traceId,
       msg.spanId
     )
 

@@ -47,7 +47,7 @@ class SubscriptionService(
   private val mongoTemplate: ReactiveMongoTemplate
 ) {
   fun findSubscriptionsFor(consumerMessage: ConsumerMessage): Flux<Subscription> {
-    log.info("Reading '{}' subscribers", consumerMessage.topic)
+    log.info("Reading '{}' subscribers", consumerMessage.headers.topic)
 
     val match = match(matchCriteria(consumerMessage))
     val project = project()
@@ -102,9 +102,9 @@ class SubscriptionService(
   }
 
   private fun matchCriteria(consumerMessage: ConsumerMessage): Criteria {
-    var criteria = elemMatch(KEY_SUBSCRIPTIONS, topicIs(consumerMessage.topic))
-    if (consumerMessage.authorizedSubscribers.isNotEmpty()) {
-      val objectIds = consumerMessage.authorizedSubscribers
+    var criteria = elemMatch(KEY_SUBSCRIPTIONS, topicIs(consumerMessage.headers.topic))
+    if (consumerMessage.headers.authorizedSubscribers.isNotEmpty()) {
+      val objectIds = consumerMessage.headers.authorizedSubscribers
         .filter { ObjectId.isValid(it) }
         .map { ObjectId(it) }
       criteria = criteria.and(UNDERSCORE_ID).`in`(objectIds)
@@ -120,7 +120,7 @@ class SubscriptionService(
     filterExpression.put(
       "cond",
       BasicDBObject(
-        "\$eq", listOf("\$\$$KEY_SUBSCRIPTIONS.$KEY_TOPIC", consumerMessage.topic)
+        "\$eq", listOf("\$\$$KEY_SUBSCRIPTIONS.$KEY_TOPIC", consumerMessage.headers.topic)
       )
     )
     return Document("\$filter", filterExpression)

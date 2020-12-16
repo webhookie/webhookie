@@ -15,10 +15,7 @@ import org.springframework.messaging.MessageHeaders
  * @since 3/12/20 12:31
  */
 data class ConsumerMessage(
-  val topic: String,
-  val traceId: String,
-  val contentType: String,
-  val authorizedSubscribers: Set<String> = emptySet(),
+  val headers: WebhookieHeaders,
   val message: Message<ByteArray>
 ) {
   val payload: ByteArray
@@ -42,7 +39,7 @@ data class ConsumerMessage(
   }
 
   val mediaType: MediaType
-    get() = MediaType.parseMediaType(contentType)
+    get() = headers.mediaType
 
   companion object {
     fun from(message: Message<ByteArray>): ConsumerMessage {
@@ -51,7 +48,10 @@ data class ConsumerMessage(
       val contentType = message.headers[HEADER_CONTENT_TYPE] as String
       @Suppress("UNCHECKED_CAST")
       val authorizedSubscribers: Collection<String> = message.headers[WH_HEADER_AUTHORIZED_SUBSCRIBER] as? Collection<String> ?: emptySet()
-      return ConsumerMessage(topic, traceId, contentType, authorizedSubscribers.toSet(), message)
+      return ConsumerMessage(
+        WebhookieHeaders(topic, traceId, contentType, authorizedSubscribers.toSet()),
+        message
+      )
     }
   }
 }
