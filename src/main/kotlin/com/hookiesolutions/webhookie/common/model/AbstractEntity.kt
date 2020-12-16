@@ -17,6 +17,10 @@ abstract class AbstractEntity : AbstractDocument() {
         return where(UNDERSCORE_ID).`is`(id)
       }
 
+      fun byObjectId(id: String): Criteria {
+        return where(UNDERSCORE_ID).`is`(ObjectId(id))
+      }
+
       fun idIsIn(ids: Collection<String>): Criteria {
         val objectIds = ids
           .filter { ObjectId.isValid(it) }

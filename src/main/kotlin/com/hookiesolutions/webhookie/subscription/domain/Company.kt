@@ -61,6 +61,12 @@ data class Company(
           .set("$KEY_SUBSCRIPTIONS.$.$KEY_BLOCK_DETAILS", details)
           .inc(KEY_VERSION, 1)
       }
+
+      fun unblockSubscription(): Update {
+        return Update()
+          .unset("$KEY_SUBSCRIPTIONS.$.$KEY_BLOCK_DETAILS")
+          .inc(KEY_VERSION, 1)
+      }
     }
   }
 

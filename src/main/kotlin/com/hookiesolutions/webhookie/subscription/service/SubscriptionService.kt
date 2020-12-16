@@ -2,6 +2,7 @@ package com.hookiesolutions.webhookie.subscription.service
 
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.message.subscription.UnsuccessfulSubscriptionMessage
+import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.byObjectId
 import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.elemMatch
 import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscription
@@ -11,6 +12,7 @@ import com.hookiesolutions.webhookie.subscription.domain.Company.Keys.Companion.
 import com.hookiesolutions.webhookie.subscription.domain.Company.Keys.Companion.KEY_SUBSCRIPTIONS
 import com.hookiesolutions.webhookie.subscription.domain.Company.Queries.Companion.bySubscriptionId
 import com.hookiesolutions.webhookie.subscription.domain.Company.Updates.Companion.blockSubscription
+import com.hookiesolutions.webhookie.subscription.domain.Company.Updates.Companion.unblockSubscription
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_TOPIC
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Companion.topicIs
@@ -19,6 +21,7 @@ import com.mongodb.DBObject
 import org.bson.Document
 import org.bson.types.ObjectId
 import org.slf4j.Logger
+import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.aggregation.Aggregation
 import org.springframework.data.mongodb.core.aggregation.Aggregation.match
@@ -121,5 +124,18 @@ class SubscriptionService(
       )
     )
     return Document("\$filter", filterExpression)
+  }
+
+  fun unblockSubscriptionBy(id: String): Mono<Company> {
+    val criteria = elemMatch(KEY_SUBSCRIPTIONS, byObjectId(id))
+    val update = unblockSubscription()
+
+    return mongoTemplate.findAndModify(
+      query(criteria),
+      update,
+      FindAndModifyOptions.options().returnNew(true),
+      Company::class.java,
+      KEY_COMPANY_COLLECTION_NAME
+    )
   }
 }
