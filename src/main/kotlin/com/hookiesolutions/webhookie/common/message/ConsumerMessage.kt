@@ -25,7 +25,7 @@ data class ConsumerMessage(
     get() = message.payload
 
   @Suppress("unused")
-  val headers: MessageHeaders
+  val messageHeaders: MessageHeaders
     get() = message.headers
 
   fun addMessageHeaders(headers: HttpHeaders) {

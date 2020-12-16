@@ -75,7 +75,7 @@ data class BlockedSubscriptionMessage(
         originalMessage.authorizedSubscribers,
         message.subscriptionMessage.spanId,
         originalMessage.payload,
-        originalMessage.headers,
+        originalMessage.messageHeaders,
         message.subscriptionMessage.subscription,
         BlockedDetailsDTO(message.reason, message.time)
       )
@@ -90,7 +90,7 @@ data class BlockedSubscriptionMessage(
         originalMessage.authorizedSubscribers,
         message.spanId,
         originalMessage.payload,
-        originalMessage.headers,
+        originalMessage.messageHeaders,
         message.subscription,
         BlockedDetailsDTO("New Message", at)
       )
