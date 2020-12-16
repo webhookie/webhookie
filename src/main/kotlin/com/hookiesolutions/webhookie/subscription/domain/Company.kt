@@ -13,7 +13,6 @@ import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Update
-import java.time.Instant
 
 /**
  *
@@ -26,7 +25,24 @@ data class Company(
   @Indexed(unique = true)
   val name: String,
   val subscriptions: Set<Subscription>
-): AbstractEntity() {
+) : AbstractEntity() {
+  fun findSubscriptionByUpdateRegex(regexList: List<String>?): Subscription? {
+    val idx = regexList
+      .orEmpty()
+      .filter { key -> key.startsWith(KEY_SUBSCRIPTIONS) }
+      .map { key -> Regex("$KEY_SUBSCRIPTIONS\\.(\\d+)\\.$KEY_BLOCK_DETAILS").find(key) }
+      .asSequence()
+      .map { it!!.groupValues[1] }
+      .map { it.toInt() }
+      .firstOrNull()
+
+    return if((idx != null) && idx < subscriptions.size) {
+      subscriptions.toList()[idx]
+    } else {
+      null
+    }
+  }
+
   class Queries {
     companion object {
       fun bySubscriptionId(id: String): Criteria {
