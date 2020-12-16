@@ -5,8 +5,8 @@ import com.hookiesolutions.webhookie.common.message.subscription.UnsuccessfulSub
 import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.byObjectId
 import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.elemMatch
 import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
-import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscription
-import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscription.Keys.Companion.KEY_BLOCKED_MESSAGE_COLLECTION_NAME
+import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
+import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage.Keys.Companion.KEY_BLOCKED_MESSAGE_COLLECTION_NAME
 import com.hookiesolutions.webhookie.subscription.domain.Company
 import com.hookiesolutions.webhookie.subscription.domain.Company.Keys.Companion.KEY_COMPANY_COLLECTION_NAME
 import com.hookiesolutions.webhookie.subscription.domain.Company.Keys.Companion.KEY_SUBSCRIPTIONS
@@ -68,12 +68,12 @@ class SubscriptionService(
       .aggregate(aggregation, KEY_COMPANY_COLLECTION_NAME, Subscription::class.java)
   }
 
-  fun saveBlockedSubscription(message: BlockedSubscription): Mono<BlockedSubscription> {
+  fun saveBlockedSubscription(message: BlockedSubscriptionMessage): Mono<BlockedSubscriptionMessage> {
     log.info("Saving BlockedSubscriptionMessage: '{}'", message.subscription.callbackUrl)
     return mongoTemplate.save(message, KEY_BLOCKED_MESSAGE_COLLECTION_NAME)
   }
 
-  fun blockSubscriptionFor(message: UnsuccessfulSubscriptionMessage): Mono<BlockedSubscription> {
+  fun blockSubscriptionFor(message: UnsuccessfulSubscriptionMessage): Mono<BlockedSubscriptionMessage> {
     val subscription = message.subscriptionMessage.subscription
     val details = BlockedDetailsDTO(message.reason, message.time)
 
@@ -92,13 +92,13 @@ class SubscriptionService(
       .doOnNext {
         log.info("Subscription({}) was blocked because '{}'", subscription.id, details.reason)
       }
-      .map { BlockedSubscription.from(message) }
+      .map { BlockedSubscriptionMessage.from(message) }
   }
 
-  fun findAllAndRemoveBlockedMessagesForSubscription(id: String): Flux<BlockedSubscription> {
+  fun findAllAndRemoveBlockedMessagesForSubscription(id: String): Flux<BlockedSubscriptionMessage> {
     log.info("Fetching all blocked messages for subscription: '{}'", id)
-    val query = query(BlockedSubscription.Queries.bySubscriptionId(id))
-    return mongoTemplate.findAllAndRemove(query, BlockedSubscription::class.java, KEY_BLOCKED_MESSAGE_COLLECTION_NAME)
+    val query = query(BlockedSubscriptionMessage.Queries.bySubscriptionId(id))
+    return mongoTemplate.findAllAndRemove(query, BlockedSubscriptionMessage::class.java, KEY_BLOCKED_MESSAGE_COLLECTION_NAME)
   }
 
   private fun matchCriteria(consumerMessage: ConsumerMessage): Criteria {

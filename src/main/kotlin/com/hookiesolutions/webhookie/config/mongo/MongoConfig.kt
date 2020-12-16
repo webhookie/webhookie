@@ -1,6 +1,6 @@
 package com.hookiesolutions.webhookie.config.mongo
 
-import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscription
+import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
 import com.hookiesolutions.webhookie.subscription.domain.Company
 import org.slf4j.Logger
 import org.springframework.boot.context.event.ApplicationReadyEvent
@@ -30,7 +30,7 @@ class MongoConfig(
   fun initIndicesAfterStartup() {
     val resolver = MongoPersistentEntityIndexResolver(mongoMappingContext)
 
-    Flux.just(Company::class.java, BlockedSubscription::class.java)
+    Flux.just(Company::class.java, BlockedSubscriptionMessage::class.java)
       .flatMap { clazz ->
         resolver
           .resolveIndexFor(clazz)

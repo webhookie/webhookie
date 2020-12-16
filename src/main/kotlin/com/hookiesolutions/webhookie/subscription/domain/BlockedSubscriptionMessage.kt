@@ -6,8 +6,8 @@ import com.hookiesolutions.webhookie.common.message.subscription.UnsuccessfulSub
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
 import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
-import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscription.Keys.Companion.KEY_BLOCKED_MESSAGE_COLLECTION_NAME
-import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscription.Keys.Companion.KEY_SUBSCRIPTION
+import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage.Keys.Companion.KEY_BLOCKED_MESSAGE_COLLECTION_NAME
+import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage.Keys.Companion.KEY_SUBSCRIPTION
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.TypeAlias
 import org.springframework.data.mongodb.core.aggregation.Fields.UNDERSCORE_ID
@@ -27,7 +27,7 @@ import java.time.Instant
 @Document
 @TypeAlias(KEY_BLOCKED_MESSAGE_COLLECTION_NAME)
 @CompoundIndexes(CompoundIndex(name = "message_time", def = "{'blockedDetails.time' : 1}"))
-data class BlockedSubscription(
+data class BlockedSubscriptionMessage(
   val topic: String,
   val traceId: String,
   val contentType: String,
@@ -52,7 +52,7 @@ data class BlockedSubscription(
 
   class Keys {
     companion object {
-      const val KEY_BLOCKED_MESSAGE_COLLECTION_NAME = "blocked_subscription"
+      const val KEY_BLOCKED_MESSAGE_COLLECTION_NAME = "blocked_subscription_message"
       const val KEY_SUBSCRIPTION = "subscription"
     }
   }
@@ -66,9 +66,9 @@ data class BlockedSubscription(
   }
 
   companion object {
-    fun from(message: UnsuccessfulSubscriptionMessage): BlockedSubscription {
+    fun from(message: UnsuccessfulSubscriptionMessage): BlockedSubscriptionMessage {
       val originalMessage = message.subscriptionMessage.originalMessage
-      return BlockedSubscription(
+      return BlockedSubscriptionMessage(
         originalMessage.topic,
         originalMessage.traceId,
         originalMessage.contentType,
@@ -81,9 +81,9 @@ data class BlockedSubscription(
       )
     }
 
-    fun from(message: SubscriptionMessage, at: Instant): BlockedSubscription {
+    fun from(message: SubscriptionMessage, at: Instant): BlockedSubscriptionMessage {
       val originalMessage = message.originalMessage
-      return BlockedSubscription(
+      return BlockedSubscriptionMessage(
         originalMessage.topic,
         originalMessage.traceId,
         originalMessage.contentType,
@@ -99,7 +99,7 @@ data class BlockedSubscription(
 
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
-    if (other !is BlockedSubscription) return false
+    if (other !is BlockedSubscriptionMessage) return false
 
     if (topic != other.topic) return false
     if (traceId != other.traceId) return false

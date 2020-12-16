@@ -8,7 +8,7 @@ import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionMes
 import com.hookiesolutions.webhookie.common.message.subscription.UnsuccessfulSubscriptionMessage
 import com.hookiesolutions.webhookie.common.service.IdGenerator
 import com.hookiesolutions.webhookie.common.service.TimeMachine
-import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscription
+import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
 import com.hookiesolutions.webhookie.subscription.domain.Company
 import com.hookiesolutions.webhookie.subscription.domain.Company.Keys.Companion.KEY_COMPANY_COLLECTION_NAME
 import com.hookiesolutions.webhookie.subscription.domain.Company.Keys.Companion.KEY_SUBSCRIPTIONS
@@ -69,7 +69,7 @@ class SubscriptionFlows(
   }
 
   @Bean
-  fun unsuccessfulSubscriptionFlow(logBlockedSubscriptionHandler: (BlockedSubscription, MessageHeaders) -> Unit): IntegrationFlow {
+  fun unsuccessfulSubscriptionFlow(logBlockedSubscriptionHandler: (BlockedSubscriptionMessage, MessageHeaders) -> Unit): IntegrationFlow {
     return integrationFlow {
       channel(unsuccessfulSubscriptionChannel)
       transform<UnsuccessfulSubscriptionMessage> { payload ->
@@ -84,11 +84,11 @@ class SubscriptionFlows(
   }
 
   @Bean
-  fun blockedSubscriptionMessageFlow(logBlockedSubscriptionHandler: (BlockedSubscription, MessageHeaders) -> Unit): IntegrationFlow {
+  fun blockedSubscriptionMessageFlow(logBlockedSubscriptionHandler: (BlockedSubscriptionMessage, MessageHeaders) -> Unit): IntegrationFlow {
     return integrationFlow {
       channel(blockedSubscriptionChannel)
-      transform<SubscriptionMessage> { BlockedSubscription.from(it, timeMachine.now()) }
-      transform<BlockedSubscription> { subscriptionService.saveBlockedSubscription(it) }
+      transform<SubscriptionMessage> { BlockedSubscriptionMessage.from(it, timeMachine.now()) }
+      transform<BlockedSubscriptionMessage> { subscriptionService.saveBlockedSubscription(it) }
       split()
       handle(logBlockedSubscriptionHandler)
     }
@@ -141,8 +141,8 @@ class SubscriptionFlows(
   }
 
   @Bean
-  fun logBlockedSubscriptionHandler(): (BlockedSubscription, MessageHeaders) -> Unit {
-    return { payload: BlockedSubscription, _: MessageHeaders ->
+  fun logBlockedSubscriptionHandler(): (BlockedSubscriptionMessage, MessageHeaders) -> Unit {
+    return { payload: BlockedSubscriptionMessage, _: MessageHeaders ->
       log.warn("BlockedSubscriptionMessage was saved successfully: '{}'", payload.id)
     }
   }
