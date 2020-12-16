@@ -92,6 +92,12 @@ class SubscriptionService(
       .map { BlockedSubscription.from(message) }
   }
 
+  fun findAllAndRemoveBlockedMessagesForSubscription(id: String): Flux<BlockedSubscription> {
+    log.info("Fetching all blocked messages for subscription: '{}'", id)
+    val query = query(BlockedSubscription.Queries.bySubscriptionId(id))
+    return mongoTemplate.findAllAndRemove(query, BlockedSubscription::class.java, KEY_BLOCKED_MESSAGE_COLLECTION_NAME)
+  }
+
   private fun matchCriteria(consumerMessage: ConsumerMessage): Criteria {
     var criteria = elemMatch(KEY_SUBSCRIPTIONS, topicIs(consumerMessage.topic))
     if (consumerMessage.authorizedSubscribers.isNotEmpty()) {
