@@ -10,6 +10,7 @@ import com.hookiesolutions.webhookie.common.model.dto.CallbackSecurityDTO
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_BLOCK_DETAILS
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_TOPIC
+import org.springframework.data.annotation.TypeAlias
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.query.Criteria
@@ -23,6 +24,7 @@ import org.springframework.http.HttpMethod
  * @since 3/12/20 17:27
  */
 @Document(collection = "subscription")
+@TypeAlias("subscription")
 data class Subscription(
   val name: String,
   val companyId: String,

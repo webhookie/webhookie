@@ -9,6 +9,7 @@ import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage.Keys.Companion.KEY_SUBSCRIPTION
 import org.bson.types.ObjectId
+import org.springframework.data.annotation.TypeAlias
 import org.springframework.data.mongodb.core.aggregation.Fields.UNDERSCORE_ID
 import org.springframework.data.mongodb.core.index.CompoundIndex
 import org.springframework.data.mongodb.core.index.CompoundIndexes
@@ -24,6 +25,7 @@ import java.time.Instant
  * @since 14/12/20 17:45
  */
 @Document(collection = "blocked_subscription_message")
+@TypeAlias("blocked_subscription_message")
 @CompoundIndexes(CompoundIndex(name = "message_time", def = "{'blockedDetails.time' : 1}"))
 data class BlockedSubscriptionMessage(
   val headers: WebhookieHeaders,
