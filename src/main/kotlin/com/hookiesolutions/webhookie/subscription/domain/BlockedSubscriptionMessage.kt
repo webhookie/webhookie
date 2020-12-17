@@ -2,8 +2,8 @@ package com.hookiesolutions.webhookie.subscription.domain
 
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.message.WebhookieHeaders
+import com.hookiesolutions.webhookie.common.message.publisher.PublisherErrorMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionMessage
-import com.hookiesolutions.webhookie.common.message.subscription.UnsuccessfulSubscriptionMessage
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
 import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
@@ -59,7 +59,7 @@ data class BlockedSubscriptionMessage(
   }
 
   companion object {
-    fun from(message: UnsuccessfulSubscriptionMessage): BlockedSubscriptionMessage {
+    fun from(message: PublisherErrorMessage, at: Instant): BlockedSubscriptionMessage {
       val originalMessage = message.subscriptionMessage.originalMessage
       return BlockedSubscriptionMessage(
         originalMessage.headers,
@@ -67,11 +67,11 @@ data class BlockedSubscriptionMessage(
         originalMessage.payload,
         originalMessage.messageHeaders,
         message.subscriptionMessage.subscription,
-        BlockedDetailsDTO(message.reason, message.time)
+        BlockedDetailsDTO(message.reason, at)
       )
     }
 
-    fun from(message: SubscriptionMessage, at: Instant): BlockedSubscriptionMessage {
+    fun from(message: SubscriptionMessage, at: Instant, reason: String): BlockedSubscriptionMessage {
       val originalMessage = message.originalMessage
       return BlockedSubscriptionMessage(
         originalMessage.headers,
@@ -79,7 +79,7 @@ data class BlockedSubscriptionMessage(
         originalMessage.payload,
         originalMessage.messageHeaders,
         message.subscription,
-        BlockedDetailsDTO("New Message", at)
+        BlockedDetailsDTO(reason, at)
       )
     }
   }

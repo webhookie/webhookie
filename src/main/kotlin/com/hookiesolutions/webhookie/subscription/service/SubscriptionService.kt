@@ -2,9 +2,10 @@ package com.hookiesolutions.webhookie.subscription.service
 
 import com.hookiesolutions.webhookie.common.exception.EntityNotFoundException
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
-import com.hookiesolutions.webhookie.common.message.subscription.UnsuccessfulSubscriptionMessage
+import com.hookiesolutions.webhookie.common.message.publisher.PublisherErrorMessage
 import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.byId
 import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
+import com.hookiesolutions.webhookie.common.service.TimeMachine
 import com.hookiesolutions.webhookie.subscription.domain.Application
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
@@ -31,6 +32,7 @@ import reactor.kotlin.core.publisher.toMono
 @Service
 class SubscriptionService(
   private val log: Logger,
+  private val timeMachine: TimeMachine,
   private val mongoTemplate: ReactiveMongoTemplate
 ) {
   fun findSubscriptionsFor(consumerMessage: ConsumerMessage): Flux<Subscription> {
@@ -54,9 +56,10 @@ class SubscriptionService(
     return mongoTemplate.save(message)
   }
 
-  fun blockSubscriptionFor(message: UnsuccessfulSubscriptionMessage): Mono<BlockedSubscriptionMessage> {
+  fun blockSubscriptionFor(message: PublisherErrorMessage): Mono<BlockedSubscriptionMessage> {
     val subscription = message.subscriptionMessage.subscription
-    val details = BlockedDetailsDTO(message.reason, message.time)
+    val time = timeMachine.now()
+    val details = BlockedDetailsDTO(message.reason, time)
 
     log.info(
       "updating subscription: '{}' as and the reason is: '{}'",
@@ -73,7 +76,7 @@ class SubscriptionService(
       .doOnNext {
         log.info("Subscription({}) was blocked because '{}'", subscription.id, details.reason)
       }
-      .map { BlockedSubscriptionMessage.from(message) }
+      .map { BlockedSubscriptionMessage.from(message, time) }
   }
 
   fun findAllAndRemoveBlockedMessagesForSubscription(id: String): Flux<BlockedSubscriptionMessage> {

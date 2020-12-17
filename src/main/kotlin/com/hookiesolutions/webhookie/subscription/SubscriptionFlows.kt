@@ -6,7 +6,6 @@ import com.hookiesolutions.webhookie.common.message.publisher.PublisherErrorMess
 import com.hookiesolutions.webhookie.common.message.subscription.GenericSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.NoSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionMessage
-import com.hookiesolutions.webhookie.common.message.subscription.UnsuccessfulSubscriptionMessage
 import com.hookiesolutions.webhookie.common.service.IdGenerator
 import com.hookiesolutions.webhookie.common.service.TimeMachine
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
@@ -70,8 +69,7 @@ class SubscriptionFlows(
   fun unsuccessfulSubscriptionFlow(logBlockedSubscriptionHandler: (BlockedSubscriptionMessage, MessageHeaders) -> Unit): IntegrationFlow {
     return integrationFlow {
       channel(unsuccessfulSubscriptionChannel)
-      transform<PublisherErrorMessage> { UnsuccessfulSubscriptionMessage(it.subscriptionMessage, it.reason, timeMachine.now()) }
-      transform<UnsuccessfulSubscriptionMessage> { payload ->
+      transform<PublisherErrorMessage> { payload ->
         subscriptionService.blockSubscriptionFor(payload)
           .flatMap {
             subscriptionService.saveBlockedSubscription(it)
@@ -86,7 +84,7 @@ class SubscriptionFlows(
   fun blockedSubscriptionMessageFlow(logBlockedSubscriptionHandler: (BlockedSubscriptionMessage, MessageHeaders) -> Unit): IntegrationFlow {
     return integrationFlow {
       channel(blockedSubscriptionChannel)
-      transform<SubscriptionMessage> { BlockedSubscriptionMessage.from(it, timeMachine.now()) }
+      transform<SubscriptionMessage> { BlockedSubscriptionMessage.from(it, timeMachine.now(), "New Message") }
       transform<BlockedSubscriptionMessage> { subscriptionService.saveBlockedSubscription(it) }
       split()
       handle(logBlockedSubscriptionHandler)
