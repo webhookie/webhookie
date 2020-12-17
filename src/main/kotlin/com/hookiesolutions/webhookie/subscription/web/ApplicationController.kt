@@ -8,7 +8,6 @@ import com.hookiesolutions.webhookie.subscription.web.CompanyController.Companio
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.slf4j.Logger
 import org.springframework.http.MediaType
-import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -23,7 +22,6 @@ import javax.validation.Valid
  */
 @RestController
 @SecurityRequirement(name = OpenAPIConfig.BASIC_SCHEME)
-@Validated
 class ApplicationController(
   private val log: Logger,
   private val companyService: CompanyService

@@ -1,14 +1,17 @@
 package com.hookiesolutions.webhookie.subscription.service
 
+import com.hookiesolutions.webhookie.common.exception.EntityNotFoundException
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.message.subscription.UnsuccessfulSubscriptionMessage
 import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.byId
 import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
+import com.hookiesolutions.webhookie.subscription.domain.Application
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Companion.topicIs
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Updates.Companion.blockSubscription
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Updates.Companion.unblockSubscription
+import com.hookiesolutions.webhookie.subscription.service.model.CreateSubscriptionRequest
 import org.slf4j.Logger
 import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
@@ -16,6 +19,7 @@ import org.springframework.data.mongodb.core.query.Query.query
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.toMono
 
 
 /**
@@ -77,5 +81,13 @@ class SubscriptionService(
       FindAndModifyOptions.options().returnNew(true),
       Subscription::class.java
     )
+  }
+
+  fun createSubscriptionFor(applicationId: String, body: CreateSubscriptionRequest): Mono<Subscription> {
+    return mongoTemplate.findById(applicationId, Application::class.java)
+      .switchIfEmpty(EntityNotFoundException("Application not found by id: '$applicationId'").toMono())
+      .map { body.subscriptionFor(it.companyId, applicationId) }
+      .flatMap { mongoTemplate.save(it) }
+      .doOnNext { log.info("Subscription '{}' was created successfully", it.name) }
   }
 }

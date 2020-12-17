@@ -33,7 +33,7 @@ data class Subscription(
   val topic: String,
   val callbackUrl: String,
   val httpMethod: HttpMethod,
-  val callbackSecurity: CallbackSecurityDTO,
+  val callbackSecurity: CallbackSecurityDTO? = null,
   val blockedDetails: BlockedDetailsDTO? = null
 ) : AbstractEntity() {
   fun subscriptionMessage(consumerMessage: ConsumerMessage, spanId: String): GenericSubscriptionMessage {
