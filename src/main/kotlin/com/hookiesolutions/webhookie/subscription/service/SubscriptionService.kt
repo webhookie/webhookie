@@ -8,6 +8,7 @@ import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
 import com.hookiesolutions.webhookie.subscription.domain.Application
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
+import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_COMPANY_ID
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Companion.topicIs
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Updates.Companion.blockSubscription
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Updates.Companion.unblockSubscription
@@ -35,8 +36,15 @@ class SubscriptionService(
   fun findSubscriptionsFor(consumerMessage: ConsumerMessage): Flux<Subscription> {
     log.info("Reading '{}' subscribers", consumerMessage.headers.topic)
 
+    var criteria = topicIs(consumerMessage.headers.topic)
+    if(consumerMessage.headers.authorizedSubscribers.isNotEmpty()) {
+      criteria = criteria
+        .and(KEY_COMPANY_ID).
+        `in`(consumerMessage.headers.authorizedSubscribers)
+    }
+
     return mongoTemplate.find(
-      query(topicIs(consumerMessage.headers.topic)),
+      query(criteria),
       Subscription::class.java
     )
   }

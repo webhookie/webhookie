@@ -83,6 +83,7 @@ data class Subscription(
   class Keys {
     companion object {
       const val KEY_TOPIC = "topic"
+      const val KEY_COMPANY_ID = "companyId"
       const val KEY_BLOCK_DETAILS = "blockedDetails"
     }
   }
