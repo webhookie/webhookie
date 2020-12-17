@@ -1,4 +1,4 @@
-package com.hookiesolutions.webhookie.subscription.web.model
+package com.hookiesolutions.webhookie.subscription.service.model
 
 import com.hookiesolutions.webhookie.subscription.domain.Company
 import javax.validation.constraints.NotEmpty

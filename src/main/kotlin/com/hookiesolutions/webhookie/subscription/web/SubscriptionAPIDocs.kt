@@ -1,6 +1,6 @@
 package com.hookiesolutions.webhookie.subscription.web
 
-import com.hookiesolutions.webhookie.subscription.web.CompanyController.Companion.COMPANY_REQUEST_MAPPING
+import com.hookiesolutions.webhookie.subscription.web.CompanyController.Companion.REQUEST_MAPPING_COMPANY
 import org.springdoc.core.GroupedOpenApi
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Configuration
 class SubscriptionAPIDocs {
   @Bean
   fun subscriptionOpenApi(): GroupedOpenApi {
-    val paths = arrayOf("${COMPANY_REQUEST_MAPPING}/**")
+    val paths = arrayOf("${REQUEST_MAPPING_COMPANY}/**")
     return GroupedOpenApi
       .builder()
       .group("subscription")

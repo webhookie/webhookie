@@ -2,12 +2,12 @@ package com.hookiesolutions.webhookie.subscription.web
 
 import com.hookiesolutions.webhookie.config.web.OpenAPIConfig
 import com.hookiesolutions.webhookie.subscription.domain.Company
+import com.hookiesolutions.webhookie.subscription.service.CompanyService
 import com.hookiesolutions.webhookie.subscription.service.SubscriptionService
-import com.hookiesolutions.webhookie.subscription.web.CompanyController.Companion.COMPANY_REQUEST_MAPPING
-import com.hookiesolutions.webhookie.subscription.web.model.CreateCompanyRequest
+import com.hookiesolutions.webhookie.subscription.web.CompanyController.Companion.REQUEST_MAPPING_COMPANY
+import com.hookiesolutions.webhookie.subscription.service.model.CreateCompanyRequest
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.slf4j.Logger
-import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.PatchMapping
@@ -26,12 +26,12 @@ import javax.validation.Valid
  */
 @RestController
 @SecurityRequirement(name = OpenAPIConfig.BASIC_SCHEME)
-@RequestMapping(COMPANY_REQUEST_MAPPING)
+@RequestMapping(REQUEST_MAPPING_COMPANY)
 @Validated
 class CompanyController(
   private val log: Logger,
   private val subscriptionService: SubscriptionService,
-  private val mongoTemplate: ReactiveMongoTemplate
+  private val companyService: CompanyService
 ) {
   @PostMapping("",
     consumes = [MediaType.APPLICATION_JSON_VALUE],
@@ -39,7 +39,7 @@ class CompanyController(
   )
   fun createCompany(@Valid @RequestBody companyRequest: CreateCompanyRequest): Mono<Company> {
     log.info("Saving Company: '{}'", companyRequest.name)
-    return mongoTemplate.save(companyRequest.company())
+    return companyService.createCompany(companyRequest)
   }
 
   @PatchMapping("/subscription/{id}/unblock", produces = [MediaType.TEXT_PLAIN_VALUE])
@@ -50,6 +50,6 @@ class CompanyController(
   }
 
   companion object {
-    const val COMPANY_REQUEST_MAPPING = "/company"
+    const val REQUEST_MAPPING_COMPANY = "/company"
   }
 }
