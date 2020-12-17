@@ -39,7 +39,7 @@ class PublisherChannels {
     .get()
 
   @Bean
-  fun blockSubscriptionMessageChannel(): PublishSubscribeChannel = MessageChannels
+  fun unsuccessfulMessageChannel(): PublishSubscribeChannel = MessageChannels
     .publishSubscribe()
     .get()
 }

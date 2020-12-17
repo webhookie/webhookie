@@ -1,7 +1,7 @@
 package com.hookiesolutions.webhookie.publisher
 
-import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.UNSUCCESSFUL_SUBSCRIPTION_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.SUBSCRIPTION_CHANNEL_NAME
+import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.UNSUCCESSFUL_SUBSCRIPTION_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.message.publisher.GenericPublisherMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherOtherErrorMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherRequestErrorMessage
@@ -34,7 +34,7 @@ class PublisherFlows(
   private val publisherRequestErrorChannel: SubscribableChannel,
   private val publisherOtherErrorChannel: SubscribableChannel,
   private val retrySubscriptionMessageChannel: MessageChannel,
-  private val blockSubscriptionMessageChannel: MessageChannel,
+  private val unsuccessfulMessageChannel: MessageChannel,
   private val requiresRetrySelector: GenericSelector<GenericPublisherMessage>,
   private val requiresBlockSelector: GenericSelector<GenericPublisherMessage>,
   private val toRetryableSubscriptionMessage: GenericTransformer<GenericPublisherMessage, SubscriptionMessage>,
@@ -52,7 +52,7 @@ class PublisherFlows(
         recipient<GenericPublisherMessage>(publisherRequestErrorChannel) { p -> p is PublisherRequestErrorMessage }
         recipient<GenericPublisherMessage>(publisherOtherErrorChannel) { p -> p is PublisherOtherErrorMessage }
         delegate.recipient(retrySubscriptionMessageChannel, requiresRetrySelector)
-        delegate.recipient(blockSubscriptionMessageChannel, requiresBlockSelector)
+        delegate.recipient(unsuccessfulMessageChannel, requiresBlockSelector)
       }
     }
   }
@@ -67,9 +67,9 @@ class PublisherFlows(
   }
 
   @Bean
-  fun blockSubscriptionMessageFlow(): IntegrationFlow {
+  fun unsuccessfulMessageFlow(): IntegrationFlow {
     return integrationFlow {
-      channel(blockSubscriptionMessageChannel)
+      channel(unsuccessfulMessageChannel)
       transform(unsuccessfulMessageTransformer)
       channel(UNSUCCESSFUL_SUBSCRIPTION_CHANNEL_NAME)
     }
