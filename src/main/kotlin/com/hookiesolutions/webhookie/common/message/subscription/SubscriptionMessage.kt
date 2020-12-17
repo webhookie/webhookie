@@ -14,5 +14,7 @@ data class SubscriptionMessage(
   val spanId: String,
   val subscription: SubscriptionDTO,
   val delay: Duration = Duration.ZERO,
-  val numberOfRetries: Int = 0
+  val numberOfRetries: Int = 0,
+  val subscriptionIsBlocked: Boolean = subscription.isBlocked,
+  val subscriptionIsWorking: Boolean = !subscription.isBlocked
 ): GenericSubscriptionMessage

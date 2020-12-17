@@ -15,4 +15,7 @@ data class SubscriptionDTO(
   val httpMethod: HttpMethod,
   val callbackSecurity: CallbackSecurityDTO? = null,
   val blockedDetails: BlockedDetailsDTO? = null
-)
+) {
+  val isBlocked: Boolean
+    get() = blockedDetails != null
+}

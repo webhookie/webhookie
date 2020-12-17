@@ -59,8 +59,8 @@ class SubscriptionFlows(
       split()
       routeToRecipients {
         recipient<GenericSubscriptionMessage>(noSubscriptionChannel) { p -> p is NoSubscriptionMessage }
-        recipient<GenericSubscriptionMessage>(blockedSubscriptionChannel) { it is SubscriptionMessage && it.subscription.blockedDetails != null }
-        recipient<GenericSubscriptionMessage>(subscriptionChannel) { it is SubscriptionMessage && it.subscription.blockedDetails == null }
+        recipient<GenericSubscriptionMessage>(blockedSubscriptionChannel) { it is SubscriptionMessage && it.subscriptionIsBlocked}
+        recipient<GenericSubscriptionMessage>(subscriptionChannel) { it is SubscriptionMessage && it.subscriptionIsWorking}
       }
     }
   }
