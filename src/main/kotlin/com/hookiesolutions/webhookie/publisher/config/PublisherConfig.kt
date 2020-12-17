@@ -42,7 +42,7 @@ class PublisherConfig(
     return GenericSelector {
       (it is PublisherRequestErrorMessage) || (
           it is PublisherResponseErrorMessage && (
-              it.status.is5xxServerError || (it.status == HttpStatus.NOT_FOUND)
+              it.response.status.is5xxServerError || (it.response.status == HttpStatus.NOT_FOUND)
               )
           )
     }

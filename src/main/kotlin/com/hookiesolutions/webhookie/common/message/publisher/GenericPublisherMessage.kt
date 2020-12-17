@@ -15,11 +15,11 @@ interface GenericPublisherMessage {
 
   companion object {
     fun success(subscriptionMessage: SubscriptionMessage, response: ResponseEntity<ByteArray>): GenericPublisherMessage {
-      return PublisherSuccessMessage(subscriptionMessage, response.statusCode, response.body ?: ByteArray(0), response.headers)
+      return PublisherSuccessMessage(subscriptionMessage, ServerResponse(response.statusCode, response.body ?: ByteArray(0), response.headers))
     }
 
     fun responseError(subscriptionMessage: SubscriptionMessage, throwable: WebClientResponseException): GenericPublisherMessage {
-      return PublisherResponseErrorMessage(subscriptionMessage, throwable.statusCode, throwable.responseBodyAsByteArray, throwable.headers, throwable.localizedMessage)
+      return PublisherResponseErrorMessage(subscriptionMessage, ServerResponse(throwable.statusCode, throwable.responseBodyAsByteArray, throwable.headers), throwable.localizedMessage)
     }
 
     fun requestError(subscriptionMessage: SubscriptionMessage, throwable: WebClientRequestException): GenericPublisherMessage {

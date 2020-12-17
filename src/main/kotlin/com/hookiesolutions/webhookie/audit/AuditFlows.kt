@@ -69,7 +69,7 @@ class AuditFlows(
     return integrationFlow {
       channel(PUBLISHER_SUCCESS_CHANNEL)
       handle { payload: PublisherSuccessMessage, _: MessageHeaders ->
-        log.warn("'{}', {}", payload.status, payload.subscriptionMessage.subscription.callbackUrl)
+        log.warn("'{}', {}", payload.response.status, payload.subscriptionMessage.subscription.callbackUrl)
       }
     }
   }
@@ -89,7 +89,7 @@ class AuditFlows(
     return integrationFlow {
       channel(PUBLISHER_RESPONSE_ERROR_CHANNEL)
       handle { payload: PublisherResponseErrorMessage, _: MessageHeaders ->
-        log.warn("'{}', {}, {}", payload.status, payload.subscriptionMessage.subscription.callbackUrl, payload.reason)
+        log.warn("'{}', {}, {}", payload.response.status, payload.subscriptionMessage.subscription.callbackUrl, payload.reason)
       }
     }
   }
