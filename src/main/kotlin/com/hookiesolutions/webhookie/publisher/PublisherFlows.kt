@@ -35,6 +35,7 @@ class PublisherFlows(
   private val publisherOtherErrorChannel: SubscribableChannel,
   private val retrySubscriptionMessageChannel: MessageChannel,
   private val unsuccessfulMessageChannel: MessageChannel,
+  private val internalSubscriptionChannel: MessageChannel,
   private val requiresRetrySelector: GenericSelector<GenericPublisherMessage>,
   private val requiresBlockSelector: GenericSelector<GenericPublisherMessage>,
   private val toRetryableSubscriptionMessage: GenericTransformer<GenericPublisherMessage, SubscriptionMessage>,
@@ -44,6 +45,14 @@ class PublisherFlows(
   fun publishSubscriptionFlow(): IntegrationFlow {
     return integrationFlow {
       channel(SUBSCRIPTION_CHANNEL_NAME)
+      channel(internalSubscriptionChannel)
+    }
+  }
+
+  @Bean
+  fun internalSubscriptionFlow(): IntegrationFlow {
+    return integrationFlow {
+      channel(internalSubscriptionChannel)
       transform<SubscriptionMessage> { publisher.publish(it) }
       split()
       routeToRecipients {
