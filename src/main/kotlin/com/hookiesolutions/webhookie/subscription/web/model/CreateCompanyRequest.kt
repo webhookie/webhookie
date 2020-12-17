@@ -1,8 +1,6 @@
 package com.hookiesolutions.webhookie.subscription.web.model
 
 import com.hookiesolutions.webhookie.subscription.domain.Company
-import com.hookiesolutions.webhookie.subscription.domain.Subscription
-import org.bson.types.ObjectId
 import javax.validation.constraints.NotEmpty
 
 /**
