@@ -10,6 +10,6 @@ import org.springframework.http.HttpHeaders
  */
 data class PublisherRequestErrorMessage(
   override val subscriptionMessage: SubscriptionMessage,
-  val reason: String,
+  override val reason: String,
   val headers: HttpHeaders
-): GenericPublisherMessage
+): PublisherErrorMessage

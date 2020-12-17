@@ -40,11 +40,6 @@ class PublisherChannels {
     .get()
 
   @Bean
-  fun unsuccessfulMessageChannel(): PublishSubscribeChannel = MessageChannels
-    .publishSubscribe()
-    .get()
-
-  @Bean
   fun internalSubscriptionChannel(): MessageChannel = MessageChannels
     .direct()
     .get()

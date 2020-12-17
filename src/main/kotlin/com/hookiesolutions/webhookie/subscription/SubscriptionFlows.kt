@@ -2,6 +2,7 @@ package com.hookiesolutions.webhookie.subscription
 
 import com.hookiesolutions.webhookie.common.Constants.Channels.Consumer.Companion.CONSUMER_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
+import com.hookiesolutions.webhookie.common.message.publisher.PublisherErrorMessage
 import com.hookiesolutions.webhookie.common.message.subscription.GenericSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.NoSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionMessage
@@ -69,6 +70,7 @@ class SubscriptionFlows(
   fun unsuccessfulSubscriptionFlow(logBlockedSubscriptionHandler: (BlockedSubscriptionMessage, MessageHeaders) -> Unit): IntegrationFlow {
     return integrationFlow {
       channel(unsuccessfulSubscriptionChannel)
+      transform<PublisherErrorMessage> { UnsuccessfulSubscriptionMessage(it.subscriptionMessage, it.reason, timeMachine.now()) }
       transform<UnsuccessfulSubscriptionMessage> { payload ->
         subscriptionService.blockSubscriptionFor(payload)
           .flatMap {

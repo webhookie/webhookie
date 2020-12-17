@@ -14,8 +14,8 @@ data class PublisherResponseErrorMessage(
   override val status: HttpStatus,
   override val response: ByteArray,
   override val headers: HttpHeaders,
-  val reason: String
-): PublisherServerMessage {
+  override val reason: String
+): PublisherServerMessage, PublisherErrorMessage {
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other !is PublisherResponseErrorMessage) return false

@@ -8,7 +8,6 @@ import com.hookiesolutions.webhookie.common.message.publisher.PublisherRequestEr
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherResponseErrorMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherSuccessMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionMessage
-import com.hookiesolutions.webhookie.common.message.subscription.UnsuccessfulSubscriptionMessage
 import com.hookiesolutions.webhookie.publisher.config.PublisherProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
@@ -34,12 +33,10 @@ class PublisherFlows(
   private val publisherRequestErrorChannel: SubscribableChannel,
   private val publisherOtherErrorChannel: SubscribableChannel,
   private val retrySubscriptionMessageChannel: MessageChannel,
-  private val unsuccessfulMessageChannel: MessageChannel,
   private val internalSubscriptionChannel: MessageChannel,
   private val requiresRetrySelector: GenericSelector<GenericPublisherMessage>,
   private val requiresBlockSelector: GenericSelector<GenericPublisherMessage>,
-  private val toRetryableSubscriptionMessage: GenericTransformer<GenericPublisherMessage, SubscriptionMessage>,
-  private val unsuccessfulMessageTransformer: GenericTransformer<GenericPublisherMessage, UnsuccessfulSubscriptionMessage>
+  private val toRetryableSubscriptionMessage: GenericTransformer<GenericPublisherMessage, SubscriptionMessage>
 ) {
   @Bean
   fun publishSubscriptionFlow(): IntegrationFlow {
@@ -61,7 +58,7 @@ class PublisherFlows(
         recipient<GenericPublisherMessage>(publisherRequestErrorChannel) { p -> p is PublisherRequestErrorMessage }
         recipient<GenericPublisherMessage>(publisherOtherErrorChannel) { p -> p is PublisherOtherErrorMessage }
         delegate.recipient(retrySubscriptionMessageChannel, requiresRetrySelector)
-        delegate.recipient(unsuccessfulMessageChannel, requiresBlockSelector)
+        delegate.recipient(UNSUCCESSFUL_SUBSCRIPTION_CHANNEL_NAME, requiresBlockSelector)
       }
     }
   }
@@ -72,15 +69,6 @@ class PublisherFlows(
       channel(retrySubscriptionMessageChannel)
       transform(toRetryableSubscriptionMessage)
       channel(SUBSCRIPTION_CHANNEL_NAME)
-    }
-  }
-
-  @Bean
-  fun unsuccessfulMessageFlow(): IntegrationFlow {
-    return integrationFlow {
-      channel(unsuccessfulMessageChannel)
-      transform(unsuccessfulMessageTransformer)
-      channel(UNSUCCESSFUL_SUBSCRIPTION_CHANNEL_NAME)
     }
   }
 }
