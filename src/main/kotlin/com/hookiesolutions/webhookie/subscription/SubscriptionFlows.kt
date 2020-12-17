@@ -10,7 +10,6 @@ import com.hookiesolutions.webhookie.common.service.IdGenerator
 import com.hookiesolutions.webhookie.common.service.TimeMachine
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
 import com.hookiesolutions.webhookie.subscription.domain.Company
-import com.hookiesolutions.webhookie.subscription.domain.Company.Keys.Companion.KEY_COMPANY_COLLECTION_NAME
 import com.hookiesolutions.webhookie.subscription.domain.Company.Keys.Companion.KEY_SUBSCRIPTIONS
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_BLOCK_DETAILS
 import com.hookiesolutions.webhookie.subscription.service.SubscriptionService
@@ -109,7 +108,6 @@ class SubscriptionFlows(
     val producerSpec = MongoDb
       .changeStreamInboundChannelAdapter(mongoTemplate)
       .domainType(Company::class.java)
-      .collection(KEY_COMPANY_COLLECTION_NAME)
       .options(changeStreamOptions)
       .extractBody(false)
 

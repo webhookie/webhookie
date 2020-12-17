@@ -7,10 +7,8 @@ import com.hookiesolutions.webhookie.common.message.subscription.UnsuccessfulSub
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
 import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
-import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage.Keys.Companion.KEY_BLOCKED_MESSAGE_COLLECTION_NAME
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage.Keys.Companion.KEY_SUBSCRIPTION
 import org.bson.types.ObjectId
-import org.springframework.data.annotation.TypeAlias
 import org.springframework.data.mongodb.core.aggregation.Fields.UNDERSCORE_ID
 import org.springframework.data.mongodb.core.index.CompoundIndex
 import org.springframework.data.mongodb.core.index.CompoundIndexes
@@ -25,8 +23,7 @@ import java.time.Instant
  * @author Arthur Kazemi<bidadh@gmail.com>
  * @since 14/12/20 17:45
  */
-@Document
-@TypeAlias(KEY_BLOCKED_MESSAGE_COLLECTION_NAME)
+@Document(collection = "blocked_subscription_message")
 @CompoundIndexes(CompoundIndex(name = "message_time", def = "{'blockedDetails.time' : 1}"))
 data class BlockedSubscriptionMessage(
   val headers: WebhookieHeaders,
@@ -45,18 +42,17 @@ data class BlockedSubscriptionMessage(
     return SubscriptionMessage(originalMessage, spanId, subscription)
   }
 
-  class Keys {
-    companion object {
-      const val KEY_BLOCKED_MESSAGE_COLLECTION_NAME = "blocked_subscription_message"
-      const val KEY_SUBSCRIPTION = "subscription"
-    }
-  }
-
   class Queries {
     companion object {
       fun bySubscriptionId(id: String): Criteria {
         return where("$KEY_SUBSCRIPTION.$UNDERSCORE_ID").`is`(ObjectId(id))
       }
+    }
+  }
+
+  class Keys {
+    companion object {
+      const val KEY_SUBSCRIPTION = "subscription"
     }
   }
 

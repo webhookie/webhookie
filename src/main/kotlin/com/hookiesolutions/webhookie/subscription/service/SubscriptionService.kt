@@ -6,9 +6,7 @@ import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Compani
 import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.elemMatch
 import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
-import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage.Keys.Companion.KEY_BLOCKED_MESSAGE_COLLECTION_NAME
 import com.hookiesolutions.webhookie.subscription.domain.Company
-import com.hookiesolutions.webhookie.subscription.domain.Company.Keys.Companion.KEY_COMPANY_COLLECTION_NAME
 import com.hookiesolutions.webhookie.subscription.domain.Company.Keys.Companion.KEY_SUBSCRIPTIONS
 import com.hookiesolutions.webhookie.subscription.domain.Company.Queries.Companion.bySubscriptionId
 import com.hookiesolutions.webhookie.subscription.domain.Company.Updates.Companion.blockSubscription
@@ -65,12 +63,12 @@ class SubscriptionService(
     )
 
     return mongoTemplate
-      .aggregate(aggregation, KEY_COMPANY_COLLECTION_NAME, Subscription::class.java)
+      .aggregate(aggregation, Company::class.java, Subscription::class.java)
   }
 
   fun saveBlockedSubscription(message: BlockedSubscriptionMessage): Mono<BlockedSubscriptionMessage> {
     log.info("Saving BlockedSubscriptionMessage: '{}'", message.subscription.callbackUrl)
-    return mongoTemplate.save(message, KEY_BLOCKED_MESSAGE_COLLECTION_NAME)
+    return mongoTemplate.save(message)
   }
 
   fun blockSubscriptionFor(message: UnsuccessfulSubscriptionMessage): Mono<BlockedSubscriptionMessage> {
@@ -98,7 +96,7 @@ class SubscriptionService(
   fun findAllAndRemoveBlockedMessagesForSubscription(id: String): Flux<BlockedSubscriptionMessage> {
     log.info("Fetching all blocked messages for subscription: '{}'", id)
     val query = query(BlockedSubscriptionMessage.Queries.bySubscriptionId(id))
-    return mongoTemplate.findAllAndRemove(query, BlockedSubscriptionMessage::class.java, KEY_BLOCKED_MESSAGE_COLLECTION_NAME)
+    return mongoTemplate.findAllAndRemove(query, BlockedSubscriptionMessage::class.java)
   }
 
   private fun matchCriteria(consumerMessage: ConsumerMessage): Criteria {
@@ -134,8 +132,7 @@ class SubscriptionService(
       query(criteria),
       update,
       FindAndModifyOptions.options().returnNew(true),
-      Company::class.java,
-      KEY_COMPANY_COLLECTION_NAME
+      Company::class.java
     )
   }
 }
