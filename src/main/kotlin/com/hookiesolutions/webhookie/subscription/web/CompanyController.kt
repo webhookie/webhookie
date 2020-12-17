@@ -38,7 +38,7 @@ class CompanyController(
     produces = [MediaType.APPLICATION_JSON_VALUE]
   )
   fun createCompany(@Valid @RequestBody companyRequest: CreateCompanyRequest): Mono<Company> {
-    log.info("Saving Company: '{}', '{}' subscriptions", companyRequest.name, companyRequest.subscriptions.size)
+    log.info("Saving Company: '{}'", companyRequest.name)
     return mongoTemplate.save(companyRequest.company())
   }
 

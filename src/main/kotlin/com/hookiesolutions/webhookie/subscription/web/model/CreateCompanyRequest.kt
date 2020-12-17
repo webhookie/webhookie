@@ -12,16 +12,11 @@ import javax.validation.constraints.NotEmpty
  */
 data class CreateCompanyRequest(
   @field:NotEmpty
-  val name: String,
-  val subscriptions: Set<Subscription>
+  val name: String
 ) {
   fun company(): Company {
-
-    subscriptions.forEach {
-      it.id = ObjectId.get().toHexString()
-    }
     return Company(
-      name, subscriptions
+      name
     )
   }
 }

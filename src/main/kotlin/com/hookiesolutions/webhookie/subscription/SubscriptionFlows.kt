@@ -9,8 +9,7 @@ import com.hookiesolutions.webhookie.common.message.subscription.UnsuccessfulSub
 import com.hookiesolutions.webhookie.common.service.IdGenerator
 import com.hookiesolutions.webhookie.common.service.TimeMachine
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
-import com.hookiesolutions.webhookie.subscription.domain.Company
-import com.hookiesolutions.webhookie.subscription.domain.Company.Keys.Companion.KEY_SUBSCRIPTIONS
+import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_BLOCK_DETAILS
 import com.hookiesolutions.webhookie.subscription.service.SubscriptionService
 import com.mongodb.client.model.changestream.FullDocument
@@ -18,7 +17,6 @@ import com.mongodb.client.model.changestream.OperationType
 import org.slf4j.Logger
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.data.mongodb.core.ChangeStreamEvent
 import org.springframework.data.mongodb.core.ChangeStreamOptions
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.aggregation.Aggregation
@@ -99,7 +97,7 @@ class SubscriptionFlows(
       where("operationType")
         .`is`(OperationType.UPDATE.value)
         .and("updateDescription.removedFields")
-        .regex("$KEY_SUBSCRIPTIONS.[0-9]+.$KEY_BLOCK_DETAILS")
+        .regex(KEY_BLOCK_DETAILS)
     )
     val changeStreamOptions = ChangeStreamOptions.builder()
       .fullDocumentLookup(FullDocument.UPDATE_LOOKUP)
@@ -107,18 +105,11 @@ class SubscriptionFlows(
       .build()
     val producerSpec = MongoDb
       .changeStreamInboundChannelAdapter(mongoTemplate)
-      .domainType(Company::class.java)
+      .domainType(Subscription::class.java)
       .options(changeStreamOptions)
-      .extractBody(false)
+      .extractBody(true)
 
     return IntegrationFlows.from(producerSpec)
-      .transform<ChangeStreamEvent<Company>, String> {
-        it.body
-          ?.findSubscriptionByUpdateRegex(it.raw?.updateDescription?.removedFields)
-          ?.id
-          ?: ""
-      }
-      .filter<String> { it.isNotBlank()}
       .channel(resendBlockedMessageChannel)
       .get()
   }
@@ -127,8 +118,8 @@ class SubscriptionFlows(
   fun resendBlockedMessageFlow(): IntegrationFlow {
     return integrationFlow {
       channel(resendBlockedMessageChannel)
-      transform<String> { id ->
-        subscriptionService.findAllAndRemoveBlockedMessagesForSubscription(id)
+      transform<Subscription> { subscription ->
+        subscriptionService.findAllAndRemoveBlockedMessagesForSubscription(subscription.id!!)
           .map {
             it.subscriptionMessage(idGenerator.generate())
           }

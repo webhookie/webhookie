@@ -7,10 +7,11 @@ import org.springframework.data.mongodb.core.mapping.Document
 /**
  *
  * @author Arthur Kazemi<bidadh@gmail.com>
- * @since 3/12/20 17:26
+ * @since 17/12/20 16:26
  */
-@Document(collection = "company")
-data class Company(
-  @Indexed(unique = true)
-  val name: String
-) : AbstractEntity()
+@Document(collection = "application")
+data class Application(
+  val name: String,
+  @Indexed
+  val companyId: String
+): AbstractEntity()
