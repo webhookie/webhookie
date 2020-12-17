@@ -2,12 +2,12 @@ package com.hookiesolutions.webhookie.subscription.web
 
 import com.hookiesolutions.webhookie.config.web.OpenAPIConfig
 import com.hookiesolutions.webhookie.subscription.domain.Company
-import com.hookiesolutions.webhookie.subscription.domain.CompanyRepository
 import com.hookiesolutions.webhookie.subscription.service.SubscriptionService
 import com.hookiesolutions.webhookie.subscription.web.CompanyController.Companion.COMPANY_REQUEST_MAPPING
 import com.hookiesolutions.webhookie.subscription.web.model.CreateCompanyRequest
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.slf4j.Logger
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.PatchMapping
@@ -31,7 +31,7 @@ import javax.validation.Valid
 class CompanyController(
   private val log: Logger,
   private val subscriptionService: SubscriptionService,
-  private val companyRepository: CompanyRepository
+  private val mongoTemplate: ReactiveMongoTemplate
 ) {
   @PostMapping("",
     consumes = [MediaType.APPLICATION_JSON_VALUE],
@@ -39,7 +39,7 @@ class CompanyController(
   )
   fun createCompany(@Valid @RequestBody companyRequest: CreateCompanyRequest): Mono<Company> {
     log.info("Saving Company: '{}', '{}' subscriptions", companyRequest.name, companyRequest.subscriptions.size)
-    return companyRepository.save(companyRequest.company())
+    return mongoTemplate.save(companyRequest.company())
   }
 
   @PatchMapping("/subscription/{id}/unblock", produces = [MediaType.TEXT_PLAIN_VALUE])
