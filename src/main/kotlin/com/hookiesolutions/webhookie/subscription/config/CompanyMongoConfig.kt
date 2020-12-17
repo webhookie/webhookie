@@ -1,7 +1,9 @@
-package com.hookiesolutions.webhookie.config.mongo
+package com.hookiesolutions.webhookie.subscription.config
 
+import com.hookiesolutions.webhookie.subscription.domain.Application
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
 import com.hookiesolutions.webhookie.subscription.domain.Company
+import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import org.slf4j.Logger
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.annotation.Configuration
@@ -21,7 +23,7 @@ import reactor.kotlin.core.publisher.toMono
  * @since 3/12/20 17:33
  */
 @Configuration
-class MongoConfig(
+class CompanyMongoConfig(
   private val mongoTemplate: ReactiveMongoTemplate,
   private val mongoMappingContext: MongoMappingContext,
   private val logger: Logger
@@ -30,7 +32,12 @@ class MongoConfig(
   fun initIndicesAfterStartup() {
     val resolver = MongoPersistentEntityIndexResolver(mongoMappingContext)
 
-    Flux.just(Company::class.java, BlockedSubscriptionMessage::class.java)
+    Flux.just(
+      Company::class.java,
+      BlockedSubscriptionMessage::class.java,
+      Application::class.java,
+      Subscription::class.java
+    )
       .flatMap { clazz ->
         resolver
           .resolveIndexFor(clazz)
