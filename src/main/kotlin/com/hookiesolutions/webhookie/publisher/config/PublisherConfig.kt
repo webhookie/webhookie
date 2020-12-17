@@ -1,12 +1,10 @@
 package com.hookiesolutions.webhookie.publisher.config
 
 import com.hookiesolutions.webhookie.common.message.publisher.GenericPublisherMessage
-import com.hookiesolutions.webhookie.common.message.publisher.PublisherRequestErrorMessage
-import com.hookiesolutions.webhookie.common.message.publisher.PublisherResponseErrorMessage
+import com.hookiesolutions.webhookie.common.message.publisher.PublisherErrorMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionMessage
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.http.HttpStatus
 import org.springframework.integration.core.GenericSelector
 import org.springframework.integration.transformer.GenericTransformer
 import java.time.Duration
@@ -21,16 +19,6 @@ class PublisherConfig(
   private val properties: PublisherProperties
 ) {
   @Bean
-  fun toRetryableSubscriptionMessage(delayCalculator: GenericTransformer<SubscriptionMessage, Duration>): GenericTransformer<GenericPublisherMessage, SubscriptionMessage> {
-    return GenericTransformer {
-      it.subscriptionMessage.copy(
-        delay = delayCalculator.transform(it.subscriptionMessage),
-        numberOfRetries = it.subscriptionMessage.numberOfRetries + 1
-      )
-    }
-  }
-
-  @Bean
   fun delayCalculator(): GenericTransformer<SubscriptionMessage, Duration> {
     return GenericTransformer {
       Duration.ofSeconds(it.delay.seconds * properties.retry.multiplier + properties.retry.initialInterval)
@@ -39,13 +27,7 @@ class PublisherConfig(
 
   @Bean
   fun retryableErrorSelector(): GenericSelector<GenericPublisherMessage> {
-    return GenericSelector {
-      (it is PublisherRequestErrorMessage) || (
-          it is PublisherResponseErrorMessage && (
-              it.response.status.is5xxServerError || (it.response.status == HttpStatus.NOT_FOUND)
-              )
-          )
-    }
+    return GenericSelector { it is PublisherErrorMessage && it.isRetryable }
   }
 
   @Bean

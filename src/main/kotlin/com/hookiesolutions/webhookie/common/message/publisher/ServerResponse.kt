@@ -13,6 +13,12 @@ data class ServerResponse(
   val data: ByteArray,
   val headers: HttpHeaders
 ) {
+  val is5xxServerError: Boolean
+    get() = status.is5xxServerError
+
+  val isNotFound: Boolean
+    get() = status == HttpStatus.NOT_FOUND
+
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other !is ServerResponse) return false

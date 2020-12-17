@@ -3,6 +3,7 @@ package com.hookiesolutions.webhookie.publisher
 import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.SUBSCRIPTION_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.UNSUCCESSFUL_SUBSCRIPTION_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.message.publisher.GenericPublisherMessage
+import com.hookiesolutions.webhookie.common.message.publisher.PublisherErrorMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherOtherErrorMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherRequestErrorMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherResponseErrorMessage
@@ -18,6 +19,7 @@ import org.springframework.integration.dsl.integrationFlow
 import org.springframework.integration.transformer.GenericTransformer
 import org.springframework.messaging.MessageChannel
 import org.springframework.messaging.SubscribableChannel
+import java.time.Duration
 
 /**
  *
@@ -36,7 +38,7 @@ class PublisherFlows(
   private val internalSubscriptionChannel: MessageChannel,
   private val requiresRetrySelector: GenericSelector<GenericPublisherMessage>,
   private val requiresBlockSelector: GenericSelector<GenericPublisherMessage>,
-  private val toRetryableSubscriptionMessage: GenericTransformer<GenericPublisherMessage, SubscriptionMessage>
+  private val delayCalculator: GenericTransformer<SubscriptionMessage, Duration>
 ) {
   @Bean
   fun publishSubscriptionFlow(): IntegrationFlow {
@@ -53,12 +55,12 @@ class PublisherFlows(
       transform<SubscriptionMessage> { publisher.publish(it) }
       split()
       routeToRecipients {
-        recipient<GenericPublisherMessage>(publisherSuccessChannel) { p -> p is PublisherSuccessMessage }
-        recipient<GenericPublisherMessage>(publisherResponseErrorChannel) { p -> p is PublisherResponseErrorMessage }
-        recipient<GenericPublisherMessage>(publisherRequestErrorChannel) { p -> p is PublisherRequestErrorMessage }
-        recipient<GenericPublisherMessage>(publisherOtherErrorChannel) { p -> p is PublisherOtherErrorMessage }
-        delegate.recipient(retrySubscriptionMessageChannel, requiresRetrySelector)
-        delegate.recipient(UNSUCCESSFUL_SUBSCRIPTION_CHANNEL_NAME, requiresBlockSelector)
+        recipient<GenericPublisherMessage>(publisherSuccessChannel) { it is PublisherSuccessMessage }
+        recipient<GenericPublisherMessage>(publisherResponseErrorChannel) { it is PublisherResponseErrorMessage }
+        recipient<GenericPublisherMessage>(publisherRequestErrorChannel) { it is PublisherRequestErrorMessage }
+        recipient<GenericPublisherMessage>(publisherOtherErrorChannel) { it is PublisherOtherErrorMessage }
+        recipient<GenericPublisherMessage>(retrySubscriptionMessageChannel) { requiresRetrySelector.accept(it) }
+        recipient<GenericPublisherMessage>(UNSUCCESSFUL_SUBSCRIPTION_CHANNEL_NAME) { requiresBlockSelector.accept(it) }
       }
     }
   }
@@ -67,7 +69,12 @@ class PublisherFlows(
   fun retrySubscriptionMessageFlow(): IntegrationFlow {
     return integrationFlow {
       channel(retrySubscriptionMessageChannel)
-      transform(toRetryableSubscriptionMessage)
+      transform<PublisherErrorMessage> {
+        it.subscriptionMessage.copy(
+          delay = delayCalculator.transform(it.subscriptionMessage),
+          numberOfRetries = it.subscriptionMessage.numberOfRetries + 1
+        )
+      }
       channel(SUBSCRIPTION_CHANNEL_NAME)
     }
   }
