@@ -6,8 +6,8 @@ import org.springframework.http.HttpMethod
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
 import org.springframework.security.config.web.server.ServerHttpSecurity
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter
 import org.springframework.security.web.server.SecurityWebFilterChain
-import java.security.interfaces.RSAPublicKey
 
 /**
  *
@@ -19,11 +19,11 @@ import java.security.interfaces.RSAPublicKey
 @EnableReactiveMethodSecurity
 class DefaultWebfluxResourceServerSecurityConfig(
   private val securityProperties: WebHookieSecurityProperties,
-  private val jwtAuthoritiesAwareAuthConverter: JwtAuthoritiesAuthenticationConverter,
-  private val publicKey: RSAPublicKey
 ) {
   @Bean
-  @Throws(Exception::class)
+  fun jwtAuthoritiesAwareAuthConverter() = JwtAuthoritiesAuthenticationConverter(JwtAuthenticationConverter())
+
+  @Bean
   internal fun springWebFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain {
     http
       .csrf().disable()
@@ -40,8 +40,7 @@ class DefaultWebfluxResourceServerSecurityConfig(
       }
       .oauth2ResourceServer()
       .jwt()
-      .jwtAuthenticationConverter(jwtAuthoritiesAwareAuthConverter)
-      .publicKey(publicKey)
+      .jwtAuthenticationConverter(jwtAuthoritiesAwareAuthConverter())
     return http.build()
   }
 }

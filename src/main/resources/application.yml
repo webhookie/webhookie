@@ -23,6 +23,13 @@ spring:
     virtual-host: ${WH_AMQP_V_HOST}
     username: ${WH_AMQP_USERNAME}
     password: ${WH_AMQP_PASSWORD}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://webhookie.au.auth0.com/
+          jwk-set-uri: https://webhookie.au.auth0.com/.well-known/jwks.json
+          jws-algorithm: RS256
 management:
   endpoints:
     web:
