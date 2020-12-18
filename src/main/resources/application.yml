@@ -9,6 +9,11 @@ webhookie:
       max-retry: 3
       initial-interval: 5
       multiplier: 2
+  security:
+    no-auth:
+      pathMatchers:
+        OPTIONS: /**
+        GET: /actuator/**, /swagger-ui.html**, /v3/api-docs**, /v3/api-docs/**, /webjars/swagger-ui/**
 spring:
   data:
     mongodb:

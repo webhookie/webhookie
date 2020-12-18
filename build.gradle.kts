@@ -33,6 +33,9 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-security")
 	implementation("org.springframework.boot:spring-boot-starter-webflux")
 
+	implementation("org.springframework.security:spring-security-oauth2-resource-server")
+	implementation("org.springframework.security:spring-security-oauth2-jose")
+
 	implementation("org.springdoc:springdoc-openapi-webflux-ui:${property("springdocVersion")}")
 	implementation("org.springdoc:springdoc-openapi-kotlin:${property("springdocVersion")}")
 	implementation("org.springdoc:springdoc-openapi-security:${property("springdocVersion")}")

@@ -1,0 +1,21 @@
+POST https://ideabaker-dev.au.auth0.com/oauth/token HTTP/1.1
+Accept: application/json
+Authorization: Basic d8BlBn60hsa0MO6clZVJaZ58x1zDVBzB FBLyYgFBC6EETjFtO-AN-cJyIdLyytZc7-Ep8QAtmjgQOu9KFXcCZAjB2IUSaUgV
+cache-control: no-cache
+Content-Type: application/x-www-form-urlencoded
+
+password=weqzox-teGkec-zithu8&username=bidadh@gmail.com&grant_type=password
+
+> response-handlers/token.js
+
+###
+
+POST {{host}}/oauth/token HTTP/1.1
+Accept: application/json
+Authorization: Basic oAuthClientAppID secret
+cache-control: no-cache
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=refresh_token&refresh_token={{refresh_token}}
+
+> ../myson-auth-service/http-requests/response-handlers/token.js
