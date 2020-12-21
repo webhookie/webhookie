@@ -1,0 +1,10 @@
+version: '3.9'
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:12.0.1
+    environment:
+      - KEYCLOAK_USER=admin
+      - KEYCLOAK_PASSWORD=admin
+    ports:
+    - 9900:9990
+    - 8000:8080
