@@ -17,7 +17,7 @@ webhookie:
 spring:
   data:
     mongodb:
-      uri: mongodb+srv://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}/${DB_NAME}?retryWrites=true&w=majority
+      uri: mongodb+srv://${WH_DB_USERNAME}:${WH_DB_PASSWORD}@${WH_DB_HOST}/${WH_DB_NAME}?retryWrites=true&w=majority
   rabbitmq:
     host: ${WH_AMQP_HOST}
     virtual-host: ${WH_AMQP_V_HOST}
@@ -27,9 +27,9 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: https://webhookie.au.auth0.com/
-          jwk-set-uri: https://webhookie.au.auth0.com/.well-known/jwks.json
-          jws-algorithm: RS256
+          issuer-uri: ${WH_IAM_ISSUER_URI}
+          jwk-set-uri: ${WH_IAM_JWK_SET_URI}
+          jws-algorithm: ${WH_IAM_JWS_ALG}
 management:
   endpoints:
     web:
