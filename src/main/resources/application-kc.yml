@@ -1,0 +1,8 @@
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://127.0.0.1:8000/auth/realms/webhookie
+          jwk-set-uri: http://127.0.0.1:8000/auth/realms/webhookie/protocol/openid-connect/certs
+          jws-algorithm: RS256
