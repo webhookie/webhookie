@@ -12,7 +12,7 @@ webhookie:
 spring:
   data:
     mongodb:
-      uri: mongodb+srv://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}/${DB_NAME}?retryWrites=true&w=majority
+      uri: mongodb+srv://${WH_DB_USERNAME}:${WH_DB_PASSWORD}@${WH_DB_HOST}/${WH_DB_NAME}?retryWrites=true&w=majority
   rabbitmq:
     host: ${WH_AMQP_HOST}
     virtual-host: ${WH_AMQP_V_HOST}
