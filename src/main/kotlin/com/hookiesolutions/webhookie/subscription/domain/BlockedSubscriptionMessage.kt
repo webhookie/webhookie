@@ -2,7 +2,7 @@ package com.hookiesolutions.webhookie.subscription.domain
 
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.message.WebhookieHeaders
-import com.hookiesolutions.webhookie.common.message.publisher.PublisherErrorMessage
+import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscriptionMessageDTO
 import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionMessage
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
 import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
@@ -17,7 +17,6 @@ import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Criteria.where
 import org.springframework.messaging.support.GenericMessage
-import java.time.Instant
 
 /**
  *
@@ -59,31 +58,14 @@ data class BlockedSubscriptionMessage(
   }
 
   companion object {
-    fun from(message: PublisherErrorMessage, at: Instant): BlockedSubscriptionMessage {
-      val originalMessage = message.subscriptionMessage.originalMessage
+    fun from(dto: BlockedSubscriptionMessageDTO): BlockedSubscriptionMessage {
       return BlockedSubscriptionMessage(
-        originalMessage.headers,
-        message.subscriptionMessage.spanId,
-        originalMessage.payload,
-        originalMessage.messageHeaders,
-        message.subscriptionMessage.subscription,
-        BlockedDetailsDTO(message.reason, at)
-      )
-    }
-
-    fun from(message: SubscriptionMessage, at: Instant, reason: String): BlockedSubscriptionMessage {
-      val originalMessage = message.originalMessage
-      return BlockedSubscriptionMessage(
-        originalMessage.headers,
-        message.spanId,
-        originalMessage.payload,
-        originalMessage.messageHeaders,
-        message.subscription,
-        BlockedDetailsDTO(reason, at)
+        dto.headers, dto.originalSpanId, dto.payload, dto.messageHeaders, dto.subscription, dto.blockedDetails
       )
     }
   }
 
+  @Suppress("DuplicatedCode")
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other !is BlockedSubscriptionMessage) return false

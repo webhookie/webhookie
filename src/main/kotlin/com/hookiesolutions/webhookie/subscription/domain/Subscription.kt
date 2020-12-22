@@ -48,6 +48,8 @@ data class Subscription(
     return SubscriptionDTO(
       id!!,
       name,
+      companyId,
+      applicationId,
       topic,
       callbackUrl,
       httpMethod,
