@@ -3,6 +3,7 @@ package com.hookiesolutions.webhookie.subscription
 import com.hookiesolutions.webhookie.common.Constants.Channels.Consumer.Companion.CONSUMER_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherErrorMessage
+import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscriptionMessageDTO
 import com.hookiesolutions.webhookie.common.message.subscription.GenericSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.NoSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionMessage
@@ -59,7 +60,10 @@ class SubscriptionFlows(
       split()
       routeToRecipients {
         recipient<GenericSubscriptionMessage>(noSubscriptionChannel) { p -> p is NoSubscriptionMessage }
-        recipient<GenericSubscriptionMessage>(blockedSubscriptionChannel) { it is SubscriptionMessage && it.subscriptionIsBlocked}
+        recipientFlow<GenericSubscriptionMessage>({ it is SubscriptionMessage && it.subscriptionIsBlocked}, {
+          transform<SubscriptionMessage> { BlockedSubscriptionMessageDTO.from(it, timeMachine.now(), "New Message") }
+          channel(blockedSubscriptionChannel)
+        })
         recipient<GenericSubscriptionMessage>(subscriptionChannel) { it is SubscriptionMessage && it.subscriptionIsWorking}
       }
     }
@@ -71,12 +75,12 @@ class SubscriptionFlows(
       channel(unsuccessfulSubscriptionChannel)
       transform<PublisherErrorMessage> { payload ->
         subscriptionService.blockSubscriptionFor(payload)
-          .flatMap {
-            subscriptionService.saveBlockedSubscription(it)
+          .map {
+            BlockedSubscriptionMessageDTO.from(payload, it)
           }
       }
       split()
-      handle(logBlockedSubscriptionHandler)
+      channel(blockedSubscriptionChannel)
     }
   }
 
@@ -84,8 +88,7 @@ class SubscriptionFlows(
   fun blockedSubscriptionMessageFlow(logBlockedSubscriptionHandler: (BlockedSubscriptionMessage, MessageHeaders) -> Unit): IntegrationFlow {
     return integrationFlow {
       channel(blockedSubscriptionChannel)
-      transform<SubscriptionMessage> { BlockedSubscriptionMessage.from(it, timeMachine.now(), "New Message") }
-      transform<BlockedSubscriptionMessage> { subscriptionService.saveBlockedSubscription(it) }
+      transform<BlockedSubscriptionMessageDTO> { subscriptionService.saveBlockedSubscription(BlockedSubscriptionMessage.from(it)) }
       split()
       handle(logBlockedSubscriptionHandler)
     }

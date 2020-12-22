@@ -56,7 +56,7 @@ class SubscriptionService(
     return mongoTemplate.save(message)
   }
 
-  fun blockSubscriptionFor(message: PublisherErrorMessage): Mono<BlockedSubscriptionMessage> {
+  fun blockSubscriptionFor(message: PublisherErrorMessage): Mono<BlockedDetailsDTO> {
     val subscription = message.subscriptionMessage.subscription
     val time = timeMachine.now()
     val details = BlockedDetailsDTO(message.reason, time)
@@ -76,7 +76,7 @@ class SubscriptionService(
       .doOnNext {
         log.info("Subscription({}) was blocked because '{}'", subscription.id, details.reason)
       }
-      .map { BlockedSubscriptionMessage.from(message, time) }
+      .map { details }
   }
 
   fun findAllAndRemoveBlockedMessagesForSubscription(id: String): Flux<BlockedSubscriptionMessage> {
