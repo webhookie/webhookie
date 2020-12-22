@@ -6,6 +6,7 @@ import com.hookiesolutions.webhookie.common.Constants.Channels.Publisher.Compani
 import com.hookiesolutions.webhookie.common.Constants.Channels.Publisher.Companion.PUBLISHER_RESPONSE_ERROR_CHANNEL
 import com.hookiesolutions.webhookie.common.Constants.Channels.Publisher.Companion.PUBLISHER_SUCCESS_CHANNEL
 import com.hookiesolutions.webhookie.common.Constants.Channels.Publisher.Companion.RETRY_SUBSCRIPTION_MESSAGE_CHANNEL
+import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.BLOCKED_SUBSCRIPTION_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.NO_SUBSCRIPTION_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.SUBSCRIPTION_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.UNSUCCESSFUL_SUBSCRIPTION_CHANNEL_NAME
@@ -16,6 +17,7 @@ import com.hookiesolutions.webhookie.common.message.publisher.PublisherOtherErro
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherRequestErrorMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherResponseErrorMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherSuccessMessage
+import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscriptionMessageDTO
 import com.hookiesolutions.webhookie.common.message.subscription.NoSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionMessage
 import org.slf4j.Logger
@@ -50,6 +52,16 @@ class AuditFlows(
       channel(SUBSCRIPTION_CHANNEL_NAME)
       handle { payload: SubscriptionMessage, _: MessageHeaders ->
         log.info("{}, {}, {}, {}", payload.subscription.callbackUrl, payload.delay, payload.numberOfRetries, payload.spanId)
+      }
+    }
+  }
+
+  @Bean
+  fun logBlockedSubscriptionFlow(): IntegrationFlow {
+    return integrationFlow {
+      channel(BLOCKED_SUBSCRIPTION_CHANNEL_NAME)
+      handle { payload: BlockedSubscriptionMessageDTO, _: MessageHeaders ->
+        log.info("BLOCKED SUBSCRIPTION {}, {}, {}, {}", payload.subscription.callbackUrl, payload.subscription.topic, payload.originalSpanId)
       }
     }
   }
