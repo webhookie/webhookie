@@ -22,6 +22,7 @@ import org.springframework.data.mongodb.core.ChangeStreamOptions
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.aggregation.Aggregation
 import org.springframework.data.mongodb.core.query.Criteria.where
+import org.springframework.integration.context.IntegrationContextUtils.NULL_CHANNEL_BEAN_NAME
 import org.springframework.integration.dsl.IntegrationFlow
 import org.springframework.integration.dsl.IntegrationFlows
 import org.springframework.integration.dsl.integrationFlow
@@ -70,7 +71,7 @@ class SubscriptionFlows(
   }
 
   @Bean
-  fun unsuccessfulSubscriptionFlow(logBlockedSubscriptionHandler: (BlockedSubscriptionMessage, MessageHeaders) -> Unit): IntegrationFlow {
+  fun unsuccessfulSubscriptionFlow(): IntegrationFlow {
     return integrationFlow {
       channel(unsuccessfulSubscriptionChannel)
       transform<PublisherErrorMessage> { payload ->
@@ -118,17 +119,17 @@ class SubscriptionFlows(
   }
 
   @Bean
-  fun resendBlockedMessageFlow(): IntegrationFlow {
+  fun resendBlockedMessageFlow(resendBlockedSubscriptionMessageHandler: (BlockedSubscriptionMessage, MessageHeaders) -> Unit): IntegrationFlow {
     return integrationFlow {
       channel(resendBlockedMessageChannel)
       transform<Subscription> { subscription ->
-        subscriptionService.findAllAndRemoveBlockedMessagesForSubscription(subscription.id!!)
-          .map {
-            it.subscriptionMessage(idGenerator.generate())
-          }
+        subscriptionService.findAllBlockedMessagesForSubscription(subscription.id!!)
       }
       split()
-      channel(subscriptionChannel)
+      handle { payload: BlockedSubscriptionMessage, _: MessageHeaders ->
+        subscriptionService.resendAndRemoveSingleBlockedMessage(payload)
+      }
+      channel(NULL_CHANNEL_BEAN_NAME)
     }
   }
 

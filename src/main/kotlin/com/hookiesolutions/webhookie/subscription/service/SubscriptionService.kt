@@ -5,9 +5,11 @@ import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherErrorMessage
 import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.byId
 import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
+import com.hookiesolutions.webhookie.common.service.IdGenerator
 import com.hookiesolutions.webhookie.common.service.TimeMachine
 import com.hookiesolutions.webhookie.subscription.domain.Application
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
+import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage.Queries.Companion.bySubscriptionId
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_COMPANY_ID
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Companion.topicIs
@@ -18,7 +20,10 @@ import org.slf4j.Logger
 import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.query.Query.query
+import org.springframework.messaging.MessageChannel
+import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
@@ -33,6 +38,8 @@ import reactor.kotlin.core.publisher.toMono
 class SubscriptionService(
   private val log: Logger,
   private val timeMachine: TimeMachine,
+  private val idGenerator: IdGenerator,
+  private val subscriptionChannel: MessageChannel,
   private val mongoTemplate: ReactiveMongoTemplate
 ) {
   fun findSubscriptionsFor(consumerMessage: ConsumerMessage): Flux<Subscription> {
@@ -79,10 +86,10 @@ class SubscriptionService(
       .map { details }
   }
 
-  fun findAllAndRemoveBlockedMessagesForSubscription(id: String): Flux<BlockedSubscriptionMessage> {
+  fun findAllBlockedMessagesForSubscription(id: String): Flux<BlockedSubscriptionMessage> {
     log.info("Fetching all blocked messages for subscription: '{}'", id)
-    val query = query(BlockedSubscriptionMessage.Queries.bySubscriptionId(id))
-    return mongoTemplate.findAllAndRemove(query, BlockedSubscriptionMessage::class.java)
+    val query = query(bySubscriptionId(id))
+    return mongoTemplate.find(query, BlockedSubscriptionMessage::class.java)
   }
 
   fun unblockSubscriptionBy(id: String): Mono<Subscription> {
@@ -100,5 +107,25 @@ class SubscriptionService(
       .map { body.subscriptionFor(it.companyId, applicationId) }
       .flatMap { mongoTemplate.save(it) }
       .doOnNext { log.info("Subscription '{}' was created successfully", it.name) }
+  }
+
+  @Transactional
+  fun resendAndRemoveSingleBlockedMessage(bsm: BlockedSubscriptionMessage) {
+    val subscriptionMessage = bsm.subscriptionMessage(idGenerator.generate())
+    val message = MessageBuilder
+      .withPayload(subscriptionMessage)
+      .copyHeadersIfAbsent(bsm.messageHeaders)
+      .build()
+    subscriptionChannel.send(message)
+      .toMono()
+      .filter { it }
+      .flatMap { mongoTemplate.remove(bsm) }
+      .subscribe {
+        if (it.deletedCount > 0) {
+          log.info("Blocked Message: '{}' was removed successfully!", bsm.id)
+        } else {
+          log.warn("Was unable to remove Blocked Message: '{}'!", bsm.id)
+        }
+      }
   }
 }
