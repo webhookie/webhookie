@@ -20,7 +20,7 @@ import org.springframework.security.web.server.util.matcher.ServerWebExchangeMat
 @EnableWebFluxSecurity
 @EnableReactiveMethodSecurity
 @EnableConfigurationProperties(WebHookieSecurityProperties::class, NoAuth::class, RolesConfig::class, AudProperties::class)
-class DefaultWebfluxResourceServerSecurityConfig(
+class SecurityConfig(
   private val securityProperties: WebHookieSecurityProperties,
   private val jwtAuthoritiesConverter: JwtAuthoritiesConverter
 ) {
