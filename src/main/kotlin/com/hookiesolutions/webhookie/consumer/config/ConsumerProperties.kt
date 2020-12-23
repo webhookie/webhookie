@@ -18,7 +18,9 @@ data class ConsumerProperties(
   )
 )
 
+@ConstructorBinding
+@ConfigurationProperties(prefix = "webhookie.consumer.missing-header")
 data class ConsumerErrorExchangeProperties(
-  var exchange: String,
-  var routingKey: String
+  val exchange: String,
+  val routingKey: String
 )

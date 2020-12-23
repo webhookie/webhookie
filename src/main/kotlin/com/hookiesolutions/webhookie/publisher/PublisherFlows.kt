@@ -10,6 +10,7 @@ import com.hookiesolutions.webhookie.common.message.publisher.PublisherResponseE
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherSuccessMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionMessage
 import com.hookiesolutions.webhookie.publisher.config.PublisherProperties
+import com.hookiesolutions.webhookie.publisher.config.RetryProfile
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -27,7 +28,7 @@ import java.time.Duration
  * @since 6/12/20 23:20
  */
 @Configuration
-@EnableConfigurationProperties(PublisherProperties::class)
+@EnableConfigurationProperties(PublisherProperties::class, RetryProfile::class)
 class PublisherFlows(
   private val publisher: SubscriptionPublisher,
   private val publisherSuccessChannel: SubscribableChannel,

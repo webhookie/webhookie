@@ -14,6 +14,8 @@ data class PublisherProperties(
   val retry: RetryProfile = RetryProfile()
 )
 
+@ConstructorBinding
+@ConfigurationProperties(prefix = "webhookie.publisher.retry")
 data class RetryProfile(
   val maxRetry: Int = 10,
   val initialInterval: Int = 10,
