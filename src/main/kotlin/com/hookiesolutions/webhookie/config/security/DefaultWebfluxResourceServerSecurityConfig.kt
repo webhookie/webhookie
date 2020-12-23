@@ -1,13 +1,15 @@
 package com.hookiesolutions.webhookie.config.security
 
+import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
 import org.springframework.security.config.web.server.ServerHttpSecurity
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter
+import org.springframework.security.config.web.server.invoke
 import org.springframework.security.web.server.SecurityWebFilterChain
+import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatchers.pathMatchers
 
 /**
  *
@@ -17,30 +19,32 @@ import org.springframework.security.web.server.SecurityWebFilterChain
 @Configuration
 @EnableWebFluxSecurity
 @EnableReactiveMethodSecurity
+@EnableConfigurationProperties(WebHookieSecurityProperties::class, NoAuth::class, RolesConfig::class, AudProperties::class)
 class DefaultWebfluxResourceServerSecurityConfig(
   private val securityProperties: WebHookieSecurityProperties,
+  private val jwtAuthoritiesConverter: JwtAuthoritiesConverter
 ) {
   @Bean
-  fun jwtAuthoritiesAwareAuthConverter() = JwtAuthoritiesAuthenticationConverter(JwtAuthenticationConverter())
+  internal fun springSecurityFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain {
+    return http {
+      csrf { disable() }
 
-  @Bean
-  internal fun springWebFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain {
-    http
-      .csrf().disable()
-      .authorizeExchange {
+      authorizeExchange {
         securityProperties.noAuth.pathMatchers
+          .plus(HttpMethod.OPTIONS.name to arrayOf("/**"))
           .entries
-          .forEach { entry ->
-            it.pathMatchers(HttpMethod.valueOf(entry.key), *entry.value).permitAll()
+          .forEach {
+            authorize(pathMatchers(HttpMethod.valueOf(it.key), *it.value), permitAll)
           }
 
-        it
-          .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-          .anyExchange().authenticated()
+        authorize()
       }
-      .oauth2ResourceServer()
-      .jwt()
-      .jwtAuthenticationConverter(jwtAuthoritiesAwareAuthConverter())
-    return http.build()
+
+      oauth2ResourceServer {
+        jwt {
+          jwtAuthenticationConverter = jwtAuthoritiesConverter
+        }
+      }
+    }
   }
 }
