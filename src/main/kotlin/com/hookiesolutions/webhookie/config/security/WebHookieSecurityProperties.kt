@@ -1,15 +1,34 @@
 package com.hookiesolutions.webhookie.config.security
 
 import org.springframework.boot.context.properties.ConfigurationProperties
-import org.springframework.stereotype.Component
+import org.springframework.boot.context.properties.ConstructorBinding
 
+@ConstructorBinding
 @ConfigurationProperties(prefix = "webhookie.security")
-@Component
 class WebHookieSecurityProperties(
-  var noAuth: NoAuth = NoAuth()
-) {
+  val iamAud: AudProperties,
+  val loginUrl: String,
+  val roles: RolesConfig,
+  val noAuth: NoAuth = NoAuth()
+)
 
-  class NoAuth {
-    var pathMatchers = mapOf<String,Array<String>>()
-  }
-}
+@ConstructorBinding
+@ConfigurationProperties(prefix = "webhookie.security.no-auth")
+data class NoAuth(
+  val pathMatchers: Map<String,Array<String>> = mapOf()
+)
+
+@ConstructorBinding
+@ConfigurationProperties(prefix = "webhookie.security.roles")
+data class RolesConfig(
+  val jwkJsonPath: String,
+  val autoAssignConsumer: Boolean = true,
+  val roleMapping: Map<String, String> = mapOf()
+)
+
+@ConstructorBinding
+@ConfigurationProperties(prefix = "webhookie.security.iam-aud")
+data class AudProperties(
+  val jsonPath: String,
+  val value: String
+)

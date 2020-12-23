@@ -6,3 +6,17 @@ spring:
           issuer-uri: https://webhookie.au.auth0.com/
           jwk-set-uri: https://webhookie.au.auth0.com/.well-known/jwks.json
           jws-algorithm: RS256
+webhookie:
+  security:
+    iam-aud:
+      json-path: $.aud[0]
+      value: KbsOSWkS6GWvmh20mg24UdnrKwgUMfvK
+    login-url: http://localhost:8080
+    roles:
+      jwk-json-path: $['https://webhookie.com/roles'] # if autoAssign is false and cannot find WH_CONSUMER then respond with 403
+      auto-assign-consumer: true
+      role-mapping:
+        USER: WH_CONSUMER
+        ADMIN: WH_ADMIN
+        PROVIDER: WH_PROVIDER
+        ROLE1: WH_CONSUMER
