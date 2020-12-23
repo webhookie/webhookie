@@ -50,4 +50,12 @@ class Constants {
       }
     }
   }
+
+  class Security {
+    class Roles {
+      companion object {
+        const val ROLE_CONSUMER: String = "WH_CONSUMER"
+      }
+    }
+  }
 }
