@@ -8,9 +8,7 @@ spring:
           jws-algorithm: RS256
 webhookie:
   security:
-    iam-aud:
-      json-path: $.aud[0]
-      value: KbsOSWkS6GWvmh20mg24UdnrKwgUMfvK
+    audience: ${WH_SECURITY_AUD:account}
     login-url: http://localhost:8080
     roles:
       jwk-json-path: $['https://webhookie.com/roles'] # if autoAssign is false and cannot find WH_CONSUMER then respond with 403

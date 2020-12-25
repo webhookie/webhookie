@@ -1,5 +1,6 @@
 package com.hookiesolutions.webhookie.config.security
 
+import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -8,8 +9,15 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
 import org.springframework.security.config.web.server.ServerHttpSecurity
 import org.springframework.security.config.web.server.invoke
+import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator
+import org.springframework.security.oauth2.core.OAuth2TokenValidator
+import org.springframework.security.oauth2.jwt.Jwt
+import org.springframework.security.oauth2.jwt.JwtValidators
+import org.springframework.security.oauth2.jwt.NimbusReactiveJwtDecoder
+import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder
 import org.springframework.security.web.server.SecurityWebFilterChain
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatchers.pathMatchers
+import javax.annotation.PostConstruct
 
 /**
  *
@@ -19,9 +27,12 @@ import org.springframework.security.web.server.util.matcher.ServerWebExchangeMat
 @Configuration
 @EnableWebFluxSecurity
 @EnableReactiveMethodSecurity
-@EnableConfigurationProperties(WebHookieSecurityProperties::class, NoAuth::class, RolesConfig::class, AudProperties::class)
+@EnableConfigurationProperties(WebHookieSecurityProperties::class, NoAuth::class, RolesConfig::class)
 class SecurityConfig(
   private val securityProperties: WebHookieSecurityProperties,
+  private val audienceValidator: AudienceValidator,
+  private val jwtDecoder: ReactiveJwtDecoder,
+  private val resourceServerProperties: OAuth2ResourceServerProperties,
   private val jwtAuthoritiesConverter: JwtAuthoritiesConverter
 ) {
   @Bean
@@ -46,5 +57,15 @@ class SecurityConfig(
         }
       }
     }
+  }
+
+  @PostConstruct
+  fun customizeDecoder() {
+    val validators = mutableListOf<OAuth2TokenValidator<Jwt>>(audienceValidator)
+    if(resourceServerProperties.jwt.issuerUri != null) {
+      val validator = JwtValidators.createDefaultWithIssuer(resourceServerProperties.jwt.issuerUri)
+      validators.add(validator)
+    }
+    (jwtDecoder as NimbusReactiveJwtDecoder).setJwtValidator(DelegatingOAuth2TokenValidator(validators))
   }
 }

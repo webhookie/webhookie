@@ -17,17 +17,11 @@ class JwtTokenAttributesExtractor(
   private val log: Logger,
   private val securityProperties: WebHookieSecurityProperties
 ) {
-  fun read(jwt: Jwt): Mono<JwtAttributes> {
+  fun read(jwt: Jwt): Mono<List<String>> {
     return Mono.create { sink ->
       try {
-        val aud: String = JsonPathUtils.evaluate(jwt.claims, securityProperties.iamAud.jsonPath)
-        if (aud != securityProperties.iamAud.value) {
-          log.error("Provided aud: '{}' in the token doesn't match with the instance aud: '{}'", aud, securityProperties.iamAud.value)
-          sink.error(BadJwtException("Invalid aud: $aud"))
-        } else {
-          val roles: List<String> = JsonPathUtils.evaluate(jwt.claims, securityProperties.roles.jwkJsonPath)
-          sink.success(JwtAttributes(aud, roles))
-        }
+        val roles: List<String> = JsonPathUtils.evaluate(jwt.claims, securityProperties.roles.jwkJsonPath)
+        sink.success(roles)
       } catch (ex: Exception) {
         log.error("Unable to extract jwt values! cause: '{}'", ex.localizedMessage)
         sink.error(BadJwtException(ex.localizedMessage, ex))

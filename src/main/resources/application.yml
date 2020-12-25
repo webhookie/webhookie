@@ -10,9 +10,7 @@ webhookie:
       initial-interval: 5
       multiplier: 2
   security:
-    iam-aud:
-      json-path: ${WH_SECURITY_AUD_JSON_PATH:$.aud[0]}
-      value: ${WH_SECURITY_AUD:account}
+    audience: ${WH_SECURITY_AUD:account}
     login-url: ${WH_SECURITY_LOGIN_URL:http://localhost:8080}
     roles:
       jwk-json-path: ${WH_SECURITY_ROLES_JSON_PATH:$.realm_access.roles} # if autoAssign is false and cannot find WH_CONSUMER then respond with 403

@@ -6,7 +6,7 @@ import org.springframework.boot.context.properties.ConstructorBinding
 @ConstructorBinding
 @ConfigurationProperties(prefix = "webhookie.security")
 class WebHookieSecurityProperties(
-  val iamAud: AudProperties,
+  val audience: String,
   val loginUrl: String,
   val roles: RolesConfig,
   val noAuth: NoAuth = NoAuth()
@@ -24,11 +24,4 @@ data class RolesConfig(
   val jwkJsonPath: String,
   val autoAssignConsumer: Boolean = true,
   val roleMapping: Map<String, String> = mapOf()
-)
-
-@ConstructorBinding
-@ConfigurationProperties(prefix = "webhookie.security.iam-aud")
-data class AudProperties(
-  val jsonPath: String,
-  val value: String
 )

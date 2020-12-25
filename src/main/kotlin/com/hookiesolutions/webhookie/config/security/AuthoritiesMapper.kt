@@ -14,8 +14,8 @@ import org.springframework.stereotype.Component
 class AuthoritiesMapper(
   private val securityProperties: WebHookieSecurityProperties
 ) {
-  fun map(jwtAttributes: JwtAttributes): Set<GrantedAuthority> {
-    return jwtAttributes.roles
+  fun map(roles: List<String>): Set<GrantedAuthority> {
+    return roles
       .asSequence()
       .map { securityProperties.roles.roleMapping.getOrDefault(it, it) }
       .plus(consumerAuthorityIfRequired())
