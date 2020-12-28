@@ -55,6 +55,8 @@ class SecurityConfig(
         jwt {
           jwtAuthenticationConverter = jwtAuthoritiesConverter
         }
+
+        authenticationEntryPoint = DelegateAuthenticationEntryPoint()
       }
     }
   }
