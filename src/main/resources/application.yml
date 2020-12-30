@@ -24,6 +24,11 @@ webhookie:
       pathMatchers:
         OPTIONS: /**
         GET: /actuator/**, /swagger-ui.html**, /v3/api-docs**, /v3/api-docs/**, /webjars/swagger-ui/**
+mongodb:
+  encrypt:
+    keys:
+      - version: 1
+        key: hqHKBLV83LpCqzKpf8OvutbCs+O5wX5BPu3btWpEvXA=
 spring:
   data:
     mongodb:

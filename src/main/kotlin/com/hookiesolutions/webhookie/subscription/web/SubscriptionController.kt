@@ -1,7 +1,7 @@
 package com.hookiesolutions.webhookie.subscription.web
 
+import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
 import com.hookiesolutions.webhookie.config.web.OpenAPIConfig
-import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.subscription.service.SubscriptionService
 import com.hookiesolutions.webhookie.subscription.service.model.CreateSubscriptionRequest
 import com.hookiesolutions.webhookie.subscription.web.ApplicationController.Companion.REQUEST_MAPPING_APPLICATION
@@ -43,9 +43,10 @@ class SubscriptionController(
     consumes = [MediaType.APPLICATION_JSON_VALUE],
     produces = [MediaType.APPLICATION_JSON_VALUE],
   )
-  fun createSubscription(@PathVariable applicationId: String, @RequestBody body: @Valid CreateSubscriptionRequest): Mono<Subscription> {
+  fun createSubscription(@PathVariable applicationId: String, @RequestBody body: @Valid CreateSubscriptionRequest): Mono<SubscriptionDTO> {
     log.info("Creating '{}' subscription for application: '{}'", body.topic, applicationId)
     return subscriptionService.createSubscriptionFor(applicationId, body)
+      .map { it.dto() }
   }
 
   companion object {

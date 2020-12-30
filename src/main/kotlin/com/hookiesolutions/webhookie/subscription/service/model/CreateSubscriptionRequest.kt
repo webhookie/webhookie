@@ -1,7 +1,7 @@
 package com.hookiesolutions.webhookie.subscription.service.model
 
-import com.hookiesolutions.webhookie.common.model.dto.CallbackSecurityDTO
 import com.hookiesolutions.webhookie.common.validation.IRI
+import com.hookiesolutions.webhookie.subscription.domain.CallbackSecurity
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import org.springframework.http.HttpMethod
 import javax.validation.constraints.NotBlank
@@ -19,7 +19,7 @@ data class CreateSubscriptionRequest(
   @field:IRI(message = "Invalid callbackUrl!")
   val callbackUrl: String,
   val httpMethod: HttpMethod,
-  val callbackSecurity: CallbackSecurityDTO?
+  val callbackSecurity: CallbackSecurity?
 ) {
   fun subscriptionFor(companyId: String, applicationId: String): Subscription {
     return Subscription(name, companyId, applicationId, topic, callbackUrl, httpMethod, callbackSecurity)

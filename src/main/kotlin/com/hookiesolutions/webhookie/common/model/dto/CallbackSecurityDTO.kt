@@ -7,5 +7,5 @@ package com.hookiesolutions.webhookie.common.model.dto
  */
 data class CallbackSecurityDTO(
   val method: String = "HMAC",
-  val secret: String
+  val keyId: String
 )

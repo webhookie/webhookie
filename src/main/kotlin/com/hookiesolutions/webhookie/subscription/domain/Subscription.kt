@@ -6,7 +6,6 @@ import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionMes
 import com.hookiesolutions.webhookie.common.model.AbstractDocument.Keys.Companion.KEY_VERSION
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
 import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
-import com.hookiesolutions.webhookie.common.model.dto.CallbackSecurityDTO
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_BLOCK_DETAILS
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_TOPIC
@@ -33,7 +32,7 @@ data class Subscription(
   val topic: String,
   val callbackUrl: String,
   val httpMethod: HttpMethod,
-  val callbackSecurity: CallbackSecurityDTO? = null,
+  val callbackSecurity: CallbackSecurity? = null,
   val blockedDetails: BlockedDetailsDTO? = null
 ) : AbstractEntity() {
   fun subscriptionMessage(consumerMessage: ConsumerMessage, spanId: String): GenericSubscriptionMessage {
@@ -44,7 +43,7 @@ data class Subscription(
     )
   }
 
-  private fun dto(): SubscriptionDTO {
+  fun dto(): SubscriptionDTO {
     return SubscriptionDTO(
       id!!,
       name,
@@ -53,7 +52,7 @@ data class Subscription(
       topic,
       callbackUrl,
       httpMethod,
-      callbackSecurity,
+      callbackSecurity?.dto(),
       blockedDetails
     )
   }
