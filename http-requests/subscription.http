@@ -1,0 +1,17 @@
+POST {{host}}/application/5fdafc56c3d8421164f9d867/subscription
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI1amh0Y0tEUHQwYWdMXzJUYTcxODJiN0ZxempaYURRVmw0VHdXQlFXVkx3In0.eyJleHAiOjE2MDkyNzA5NzEsImlhdCI6MTYwOTIzNDk3MSwianRpIjoiZThhNDdhOWQtMTQ0Yi00NDkxLWIyYTYtMjQwMjRlMWUwYjg3IiwiaXNzIjoiaHR0cDovLzEyNy4wLjAuMTo4MDAwL2F1dGgvcmVhbG1zL3dlYmhvb2tpZSIsImF1ZCI6ImFjY291bnQiLCJzdWIiOiIxMzFlMzU2ZC0yYjQ3LTRjODgtOGQyYy1kMzlkMDY3ZDc2MWYiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJ3ZWJob29raWUtY2xpZW50Iiwic2Vzc2lvbl9zdGF0ZSI6ImNjYjI0M2U0LTk2ZTItNDFmMi1iODM5LTE3NDY0Y2U1MzE3NyIsImFjciI6IjEiLCJyZWFsbV9hY2Nlc3MiOnsicm9sZXMiOlsiUFJPVklERVIiLCJDT05TVU1FUiIsIkFETUlOIiwiVVNFUiJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoiZW1haWwgcHJvZmlsZSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJuYW1lIjoiQXJ0aHVyIEthemVtaSIsInByZWZlcnJlZF91c2VybmFtZSI6ImJpZGFkaCIsImdpdmVuX25hbWUiOiJBcnRodXIiLCJmYW1pbHlfbmFtZSI6IkthemVtaSIsImVtYWlsIjoiYmlkYWRoQGdtYWlsLmNvbSJ9.eTrrxiYm8u4mWRI4fo0xU3uZJcfejvFLBglmmLPw9Ob3m59bFbq3NLEC5SK__rrB2QZfxEHZ5OYYGqQGgAhLZrEsM0Uvr5Rmz4H8YuTPomTyJUoFLTGIsUmrxjFU2h7noSPQK-Ukwg18t_xY_Wc2gPOgqmGq_jaP6HT4fxjeIuSx3MwBVWcYxr87jEGG5r8gCTLZkqMFbrbX06LoUFj18Sr2FyfxV7TP2o2Gt6tgSLqMCWu0qvRhBiNeaTD5UMaVWUc8AH5-nBg2CGBAhDWKnmNu1o81PBOWN2Ua0750XMEF5xM96SrvvIvTbu_SkBfuvzfJCJfZPiBZp86lm69cmQ
+
+{
+    "name": "HMAC Subscription",
+    "topic": "Weather",
+    "callbackUrl": "http://localhost:9004/wh/weather",
+    "httpMethod": "POST",
+    "callbackSecurity": {
+        "secret": {
+            "keyId": "1",
+            "secret": "MY SECRET"
+        }
+    }
+}
