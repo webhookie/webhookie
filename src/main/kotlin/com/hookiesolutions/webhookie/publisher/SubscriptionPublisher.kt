@@ -49,7 +49,7 @@ class SubscriptionPublisher(
           .contentType(msg.originalMessage.mediaType)
           .body(BodyInserters.fromValue(msg.originalMessage.payload))
           .header(Constants.Queue.Headers.WH_HEADER_SPAN_ID, msg.spanId)
-          .headers { msg.originalMessage.addMessageHeaders(it) }
+          .headers { msg.addMessageHeaders(it) }
           .retrieve()
           .toEntity(ByteArray::class.java)
           .map { GenericPublisherMessage.success(msg, it) }

@@ -13,6 +13,7 @@ import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMess
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_BLOCK_DETAILS
 import com.hookiesolutions.webhookie.subscription.service.SubscriptionService
+import com.hookiesolutions.webhookie.subscription.service.SubscriptionSignor
 import com.mongodb.client.model.changestream.FullDocument
 import com.mongodb.client.model.changestream.OperationType
 import org.slf4j.Logger
@@ -42,6 +43,7 @@ class SubscriptionFlows(
   private val mongoTemplate: ReactiveMongoTemplate,
   private val timeMachine: TimeMachine,
   private val idGenerator: IdGenerator,
+  private val signor: SubscriptionSignor,
   private val subscriptionService: SubscriptionService,
   private val subscriptionChannel: MessageChannel,
   private val unsuccessfulSubscriptionChannel: MessageChannel,
@@ -55,7 +57,11 @@ class SubscriptionFlows(
       channel(CONSUMER_CHANNEL_NAME)
       transform<ConsumerMessage> { cm ->
         subscriptionService.findSubscriptionsFor(cm)
-          .map { it.subscriptionMessage(cm, idGenerator.generate()) }
+          .map {
+            val spanId = idGenerator.generate()
+            val signature = signor.sign(it, cm, spanId)
+            it.subscriptionMessage(cm, spanId, signature)
+          }
           .switchIfEmpty(NoSubscriptionMessage(cm).toMono())
       }
       split()

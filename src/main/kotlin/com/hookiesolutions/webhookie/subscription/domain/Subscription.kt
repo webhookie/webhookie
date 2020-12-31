@@ -3,6 +3,7 @@ package com.hookiesolutions.webhookie.subscription.domain
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.message.subscription.GenericSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionMessage
+import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionSignature
 import com.hookiesolutions.webhookie.common.model.AbstractDocument.Keys.Companion.KEY_VERSION
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
 import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
@@ -35,11 +36,12 @@ data class Subscription(
   val callbackSecurity: CallbackSecurity? = null,
   val blockedDetails: BlockedDetailsDTO? = null
 ) : AbstractEntity() {
-  fun subscriptionMessage(consumerMessage: ConsumerMessage, spanId: String): GenericSubscriptionMessage {
+  fun subscriptionMessage(consumerMessage: ConsumerMessage, spanId: String, signature: SubscriptionSignature?): GenericSubscriptionMessage {
     return SubscriptionMessage(
-      consumerMessage,
-      spanId,
-      dto()
+      originalMessage = consumerMessage,
+      spanId = spanId,
+      subscription = dto(),
+      signature = signature
     )
   }
 
