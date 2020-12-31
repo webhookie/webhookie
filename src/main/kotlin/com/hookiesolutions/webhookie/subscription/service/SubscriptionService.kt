@@ -58,7 +58,7 @@ class SubscriptionService(
     )
   }
 
-  fun saveBlockedSubscription(message: BlockedSubscriptionMessage): Mono<BlockedSubscriptionMessage> {
+  fun saveBlockedSubscriptionMessage(message: BlockedSubscriptionMessage): Mono<BlockedSubscriptionMessage> {
     log.info("Saving BlockedSubscriptionMessage: '{}'", message.subscription.callbackUrl)
     return mongoTemplate.save(message)
   }

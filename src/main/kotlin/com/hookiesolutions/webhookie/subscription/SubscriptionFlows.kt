@@ -5,15 +5,10 @@ import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherErrorMessage
 import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscriptionMessageDTO
 import com.hookiesolutions.webhookie.common.message.subscription.GenericSubscriptionMessage
-import com.hookiesolutions.webhookie.common.message.subscription.NoSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionMessage
-import com.hookiesolutions.webhookie.common.service.IdGenerator
-import com.hookiesolutions.webhookie.common.service.TimeMachine
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_BLOCK_DETAILS
-import com.hookiesolutions.webhookie.subscription.service.SubscriptionService
-import com.hookiesolutions.webhookie.subscription.service.SubscriptionSignor
 import com.mongodb.client.model.changestream.FullDocument
 import com.mongodb.client.model.changestream.OperationType
 import org.slf4j.Logger
@@ -28,9 +23,12 @@ import org.springframework.integration.dsl.IntegrationFlow
 import org.springframework.integration.dsl.IntegrationFlows
 import org.springframework.integration.dsl.integrationFlow
 import org.springframework.integration.mongodb.dsl.MongoDb
+import org.springframework.integration.mongodb.dsl.MongoDbChangeStreamMessageProducerSpec
+import org.springframework.integration.transformer.GenericTransformer
 import org.springframework.messaging.MessageChannel
 import org.springframework.messaging.MessageHeaders
-import reactor.kotlin.core.publisher.toMono
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
 
 /**
  *
@@ -41,68 +39,94 @@ import reactor.kotlin.core.publisher.toMono
 class SubscriptionFlows(
   private val log: Logger,
   private val mongoTemplate: ReactiveMongoTemplate,
-  private val timeMachine: TimeMachine,
-  private val idGenerator: IdGenerator,
-  private val signor: SubscriptionSignor,
-  private val subscriptionService: SubscriptionService,
-  private val subscriptionChannel: MessageChannel,
-  private val unsuccessfulSubscriptionChannel: MessageChannel,
-  private val blockedSubscriptionChannel: MessageChannel,
-  private val resendBlockedMessageChannel: MessageChannel,
-  private val noSubscriptionChannel: MessageChannel
 ) {
   @Bean
-  fun subscriptionFlow(): IntegrationFlow {
+  fun subscriptionFlow(
+    toSubscriptionMessageFlux: GenericTransformer<ConsumerMessage, Flux<GenericSubscriptionMessage>>,
+    messageHasNoSubscription: (GenericSubscriptionMessage) -> Boolean,
+    subscriptionIsBlocked: (GenericSubscriptionMessage) -> Boolean,
+    subscriptionIsWorking: (GenericSubscriptionMessage) -> Boolean,
+    toBlockedSubscriptionMessageDTO: GenericTransformer<SubscriptionMessage, BlockedSubscriptionMessageDTO>,
+    subscriptionChannel: MessageChannel,
+    noSubscriptionChannel: MessageChannel,
+    blockedSubscriptionChannel: MessageChannel
+  ): IntegrationFlow {
     return integrationFlow {
       channel(CONSUMER_CHANNEL_NAME)
-      transform<ConsumerMessage> { cm ->
-        subscriptionService.findSubscriptionsFor(cm)
-          .map {
-            val spanId = idGenerator.generate()
-            val signature = signor.sign(it, cm, spanId)
-            it.subscriptionMessage(cm, spanId, signature)
-          }
-          .switchIfEmpty(NoSubscriptionMessage(cm).toMono())
-      }
+      transform(toSubscriptionMessageFlux)
       split()
       routeToRecipients {
-        recipient<GenericSubscriptionMessage>(noSubscriptionChannel) { p -> p is NoSubscriptionMessage }
-        recipientFlow<GenericSubscriptionMessage>({ it is SubscriptionMessage && it.subscriptionIsBlocked}, {
-          transform<SubscriptionMessage> { BlockedSubscriptionMessageDTO.from(it, timeMachine.now(), "New Message") }
+        recipient(subscriptionChannel, subscriptionIsWorking)
+        recipient(noSubscriptionChannel,messageHasNoSubscription)
+        recipientFlow(subscriptionIsBlocked, {
+          transform(toBlockedSubscriptionMessageDTO)
           channel(blockedSubscriptionChannel)
         })
-        recipient<GenericSubscriptionMessage>(subscriptionChannel) { it is SubscriptionMessage && it.subscriptionIsWorking}
       }
     }
   }
 
   @Bean
-  fun unsuccessfulSubscriptionFlow(): IntegrationFlow {
+  fun unsuccessfulSubscriptionFlow(
+    blockSubscription: GenericTransformer<PublisherErrorMessage, Mono<BlockedSubscriptionMessageDTO>>,
+    unsuccessfulSubscriptionChannel: MessageChannel,
+    blockedSubscriptionChannel: MessageChannel
+  ): IntegrationFlow {
     return integrationFlow {
       channel(unsuccessfulSubscriptionChannel)
-      transform<PublisherErrorMessage> { payload ->
-        subscriptionService.blockSubscriptionFor(payload)
-          .map {
-            BlockedSubscriptionMessageDTO.from(payload, it)
-          }
-      }
+      transform(blockSubscription)
       split()
       channel(blockedSubscriptionChannel)
     }
   }
 
   @Bean
-  fun blockedSubscriptionMessageFlow(logBlockedSubscriptionHandler: (BlockedSubscriptionMessage, MessageHeaders) -> Unit): IntegrationFlow {
+  fun blockedSubscriptionMessageFlow(
+    blockedSubscriptionChannel: MessageChannel,
+    saveBlockedMessageMono: GenericTransformer<BlockedSubscriptionMessageDTO, Mono<BlockedSubscriptionMessage>>,
+    logBlockedSubscriptionHandler: (BlockedSubscriptionMessage, MessageHeaders) -> Unit
+  ): IntegrationFlow {
     return integrationFlow {
       channel(blockedSubscriptionChannel)
-      transform<BlockedSubscriptionMessageDTO> { subscriptionService.saveBlockedSubscription(BlockedSubscriptionMessage.from(it)) }
+      transform(saveBlockedMessageMono)
       split()
       handle(logBlockedSubscriptionHandler)
     }
   }
 
   @Bean
-  fun unblockSubscriptionFlow(): IntegrationFlow {
+  fun unblockSubscriptionFlow(
+    resendBlockedMessageChannel: MessageChannel
+  ): IntegrationFlow {
+    return IntegrationFlows
+      .from(unblockSubscriptionMongoEvent())
+      .channel(resendBlockedMessageChannel)
+      .get()
+  }
+
+  @Bean
+  fun resendBlockedMessageFlow(
+    resendBlockedMessageChannel: MessageChannel,
+    toBlockedSubscriptionMessageFlux: GenericTransformer<Subscription, Flux<BlockedSubscriptionMessage>>,
+    resendAndRemoveSingleBlockedMessage: (BlockedSubscriptionMessage, MessageHeaders) -> Unit
+  ): IntegrationFlow {
+    return integrationFlow {
+      channel(resendBlockedMessageChannel)
+      transform(toBlockedSubscriptionMessageFlux)
+      split()
+      handle(resendAndRemoveSingleBlockedMessage)
+      channel(NULL_CHANNEL_BEAN_NAME)
+    }
+  }
+
+  @Bean
+  fun logBlockedSubscriptionHandler(): (BlockedSubscriptionMessage, MessageHeaders) -> Unit {
+    return { payload: BlockedSubscriptionMessage, _: MessageHeaders ->
+      log.warn("BlockedSubscriptionMessage was saved successfully: '{}'", payload.id)
+    }
+  }
+
+  private fun unblockSubscriptionMongoEvent(): MongoDbChangeStreamMessageProducerSpec {
     val match = Aggregation.match(
       where("operationType")
         .`is`(OperationType.UPDATE.value)
@@ -113,36 +137,10 @@ class SubscriptionFlows(
       .fullDocumentLookup(FullDocument.UPDATE_LOOKUP)
       .filter(Aggregation.newAggregation(match))
       .build()
-    val producerSpec = MongoDb
+    return MongoDb
       .changeStreamInboundChannelAdapter(mongoTemplate)
       .domainType(Subscription::class.java)
       .options(changeStreamOptions)
       .extractBody(true)
-
-    return IntegrationFlows.from(producerSpec)
-      .channel(resendBlockedMessageChannel)
-      .get()
-  }
-
-  @Bean
-  fun resendBlockedMessageFlow(resendBlockedSubscriptionMessageHandler: (BlockedSubscriptionMessage, MessageHeaders) -> Unit): IntegrationFlow {
-    return integrationFlow {
-      channel(resendBlockedMessageChannel)
-      transform<Subscription> { subscription ->
-        subscriptionService.findAllBlockedMessagesForSubscription(subscription.id!!)
-      }
-      split()
-      handle { payload: BlockedSubscriptionMessage, _: MessageHeaders ->
-        subscriptionService.resendAndRemoveSingleBlockedMessage(payload)
-      }
-      channel(NULL_CHANNEL_BEAN_NAME)
-    }
-  }
-
-  @Bean
-  fun logBlockedSubscriptionHandler(): (BlockedSubscriptionMessage, MessageHeaders) -> Unit {
-    return { payload: BlockedSubscriptionMessage, _: MessageHeaders ->
-      log.warn("BlockedSubscriptionMessage was saved successfully: '{}'", payload.id)
-    }
   }
 }
