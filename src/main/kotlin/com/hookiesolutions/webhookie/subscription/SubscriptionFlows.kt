@@ -47,7 +47,7 @@ class SubscriptionFlows(
     subscriptionIsBlocked: (GenericSubscriptionMessage) -> Boolean,
     subscriptionIsWorking: (GenericSubscriptionMessage) -> Boolean,
     toBlockedSubscriptionMessageDTO: GenericTransformer<SubscriptionMessage, BlockedSubscriptionMessageDTO>,
-    subscriptionChannel: MessageChannel,
+    signSubscriptionMessageChannel: MessageChannel,
     noSubscriptionChannel: MessageChannel,
     blockedSubscriptionChannel: MessageChannel
   ): IntegrationFlow {
@@ -56,7 +56,7 @@ class SubscriptionFlows(
       transform(toSubscriptionMessageFlux)
       split()
       routeToRecipients {
-        recipient(subscriptionChannel, subscriptionIsWorking)
+        recipient(signSubscriptionMessageChannel, subscriptionIsWorking)
         recipient(noSubscriptionChannel,messageHasNoSubscription)
         recipientFlow(subscriptionIsBlocked, {
           transform(toBlockedSubscriptionMessageDTO)
@@ -116,6 +116,20 @@ class SubscriptionFlows(
       split()
       handle(resendAndRemoveSingleBlockedMessage)
       channel(NULL_CHANNEL_BEAN_NAME)
+    }
+  }
+
+  @Bean
+  fun signSubscriptionFlow(
+    signSubscriptionMessageChannel: MessageChannel,
+    signSubscriptionMessage: GenericTransformer<SubscriptionMessage, Mono<SubscriptionMessage>>,
+    subscriptionChannel: MessageChannel
+  ): IntegrationFlow {
+    return integrationFlow {
+      channel(signSubscriptionMessageChannel)
+      transform(signSubscriptionMessage)
+      split()
+      channel(subscriptionChannel)
     }
   }
 

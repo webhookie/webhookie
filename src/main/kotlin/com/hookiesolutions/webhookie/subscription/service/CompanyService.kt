@@ -19,12 +19,13 @@ import reactor.kotlin.core.publisher.toMono
 @Service
 class CompanyService(
   private val log: Logger,
+  private val factory: ConversionsFactory,
   private val mongoTemplate: ReactiveMongoTemplate
 ) {
   fun addApplicationTo(companyId: String, body: CreateApplicationRequest): Mono<Application> {
     return mongoTemplate.findById(companyId, Company::class.java)
       .switchIfEmpty(EntityNotFoundException("Company not found by id: '$companyId'").toMono())
-      .map { body.createApplicationFor(it.id!!) }
+      .map { factory.createApplicationRequestToApplication(body, it) }
       .flatMap { mongoTemplate.save(it) }
       .doOnNext { log.info("Application '{}' was created successfully", it.name) }
   }

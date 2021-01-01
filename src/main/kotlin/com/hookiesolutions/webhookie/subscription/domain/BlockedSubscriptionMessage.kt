@@ -2,9 +2,6 @@ package com.hookiesolutions.webhookie.subscription.domain
 
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.message.WebhookieHeaders
-import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscriptionMessageDTO
-import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionMessage
-import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionSignature
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
 import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
@@ -41,15 +38,6 @@ data class BlockedSubscriptionMessage(
       GenericMessage(payload, messageHeaders)
     )
 
-  fun subscriptionMessage(spanId: String, signature: SubscriptionSignature?): SubscriptionMessage {
-    return SubscriptionMessage(
-      originalMessage = originalMessage,
-      spanId = spanId,
-      subscription = subscription,
-      signature = signature
-    )
-  }
-
   class Queries {
     companion object {
       fun bySubscriptionId(id: String): Criteria {
@@ -61,14 +49,6 @@ data class BlockedSubscriptionMessage(
   class Keys {
     companion object {
       const val KEY_SUBSCRIPTION = "subscription"
-    }
-  }
-
-  companion object {
-    fun from(dto: BlockedSubscriptionMessageDTO): BlockedSubscriptionMessage {
-      return BlockedSubscriptionMessage(
-        dto.headers, dto.originalSpanId, dto.payload, dto.messageHeaders, dto.subscription, dto.blockedDetails
-      )
     }
   }
 

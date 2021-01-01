@@ -3,6 +3,7 @@ package com.hookiesolutions.webhookie.subscription.service
 import com.hookiesolutions.webhookie.common.exception.EntityNotFoundException
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherErrorMessage
+import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionMessage
 import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.byId
 import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
 import com.hookiesolutions.webhookie.common.service.IdGenerator
@@ -40,7 +41,8 @@ class SubscriptionService(
   private val timeMachine: TimeMachine,
   private val signor: SubscriptionSignor,
   private val idGenerator: IdGenerator,
-  private val subscriptionChannel: MessageChannel,
+  private val factory: ConversionsFactory,
+  private val signSubscriptionMessageChannel: MessageChannel,
   private val mongoTemplate: ReactiveMongoTemplate
 ) {
   fun findSubscriptionsFor(consumerMessage: ConsumerMessage): Flux<Subscription> {
@@ -105,7 +107,7 @@ class SubscriptionService(
   fun createSubscriptionFor(applicationId: String, body: CreateSubscriptionRequest): Mono<Subscription> {
     return mongoTemplate.findById(applicationId, Application::class.java)
       .switchIfEmpty(EntityNotFoundException("Application not found by id: '$applicationId'").toMono())
-      .map { body.subscriptionFor(it.companyId, applicationId) }
+      .map { factory.createSubscriptionRequestToSubscription(body, it) }
       .flatMap { mongoTemplate.save(it) }
       .doOnNext { log.info("Subscription '{}' was created successfully", it.name) }
   }
@@ -113,18 +115,13 @@ class SubscriptionService(
   //TODO: refactor
   @Transactional
   fun resendAndRemoveSingleBlockedMessage(bsm: BlockedSubscriptionMessage) {
-    mongoTemplate.findById(bsm.subscription.id, Subscription::class.java)
-      .flatMap { subscription ->
-        val spanId = idGenerator.generate()
-        val signature = signor.sign(subscription, bsm.originalMessage, spanId)
-        val subscriptionMessage = bsm.subscriptionMessage(spanId, signature)
-        val message = MessageBuilder
-          .withPayload(subscriptionMessage)
-          .copyHeadersIfAbsent(bsm.messageHeaders)
-          .build()
-        subscriptionChannel.send(message)
-          .toMono()
-      }
+    val subscriptionMessage = factory.blockedSubscriptionMessageToSubscriptionMessage(bsm)
+    val message = MessageBuilder
+      .withPayload(subscriptionMessage)
+      .copyHeadersIfAbsent(bsm.messageHeaders)
+      .build()
+    signSubscriptionMessageChannel.send(message)
+      .toMono()
       .flatMap { mongoTemplate.remove(bsm) }
       .subscribe {
         if (it.deletedCount > 0) {
@@ -132,6 +129,19 @@ class SubscriptionService(
         } else {
           log.warn("Was unable to remove Blocked Message: '{}'!", bsm.id)
         }
+      }
+  }
+
+  fun signSubscriptionMessage(subscriptionMessage: SubscriptionMessage): Mono<SubscriptionMessage> {
+    return mongoTemplate.findById(subscriptionMessage.subscription.id, Subscription::class.java)
+      .map {
+        val spanId = idGenerator.generate()
+        val signature = signor.sign(it, subscriptionMessage.originalMessage, spanId)
+
+        subscriptionMessage.copy(
+          spanId = spanId,
+          signature = signature
+        )
       }
   }
 }

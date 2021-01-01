@@ -2,7 +2,6 @@ package com.hookiesolutions.webhookie.subscription.service.model
 
 import com.hookiesolutions.webhookie.common.validation.IRI
 import com.hookiesolutions.webhookie.subscription.domain.CallbackSecurity
-import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import org.springframework.http.HttpMethod
 import javax.validation.constraints.NotBlank
 
@@ -20,8 +19,4 @@ data class CreateSubscriptionRequest(
   val callbackUrl: String,
   val httpMethod: HttpMethod,
   val callbackSecurity: CallbackSecurity?
-) {
-  fun subscriptionFor(companyId: String, applicationId: String): Subscription {
-    return Subscription(name, companyId, applicationId, topic, callbackUrl, httpMethod, callbackSecurity)
-  }
-}
+)

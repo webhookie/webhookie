@@ -20,6 +20,11 @@ class SubscriptionChannels {
     .get()
 
   @Bean
+  fun signSubscriptionMessageChannel(): PublishSubscribeChannel = MessageChannels
+    .publishSubscribe(Executors.newCachedThreadPool())
+    .get()
+
+  @Bean
   fun noSubscriptionChannel(): PublishSubscribeChannel = MessageChannels
     .publishSubscribe()
     .get()
