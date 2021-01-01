@@ -4,6 +4,7 @@ import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.message.WebhookieHeaders
 import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscriptionMessageDTO
 import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionMessage
+import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionSignature
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
 import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
@@ -34,13 +35,19 @@ data class BlockedSubscriptionMessage(
   val subscription: SubscriptionDTO,
   val blockedDetails: BlockedDetailsDTO
 ): AbstractEntity() {
-  fun subscriptionMessage(spanId: String): SubscriptionMessage {
-    val msg = GenericMessage<ByteArray>(payload, messageHeaders)
-    val originalMessage = ConsumerMessage(
+  val originalMessage: ConsumerMessage
+    get() = ConsumerMessage(
       headers,
-      msg
+      GenericMessage(payload, messageHeaders)
     )
-    return SubscriptionMessage(originalMessage, spanId, subscription)
+
+  fun subscriptionMessage(spanId: String, signature: SubscriptionSignature?): SubscriptionMessage {
+    return SubscriptionMessage(
+      originalMessage = originalMessage,
+      spanId = spanId,
+      subscription = subscription,
+      signature = signature
+    )
   }
 
   class Queries {

@@ -38,6 +38,7 @@ import reactor.kotlin.core.publisher.toMono
 class SubscriptionService(
   private val log: Logger,
   private val timeMachine: TimeMachine,
+  private val signor: SubscriptionSignor,
   private val idGenerator: IdGenerator,
   private val subscriptionChannel: MessageChannel,
   private val mongoTemplate: ReactiveMongoTemplate
@@ -109,16 +110,21 @@ class SubscriptionService(
       .doOnNext { log.info("Subscription '{}' was created successfully", it.name) }
   }
 
+  //TODO: refactor
   @Transactional
   fun resendAndRemoveSingleBlockedMessage(bsm: BlockedSubscriptionMessage) {
-    val subscriptionMessage = bsm.subscriptionMessage(idGenerator.generate())
-    val message = MessageBuilder
-      .withPayload(subscriptionMessage)
-      .copyHeadersIfAbsent(bsm.messageHeaders)
-      .build()
-    subscriptionChannel.send(message)
-      .toMono()
-      .filter { it }
+    mongoTemplate.findById(bsm.subscription.id, Subscription::class.java)
+      .flatMap { subscription ->
+        val spanId = idGenerator.generate()
+        val signature = signor.sign(subscription, bsm.originalMessage, spanId)
+        val subscriptionMessage = bsm.subscriptionMessage(spanId, signature)
+        val message = MessageBuilder
+          .withPayload(subscriptionMessage)
+          .copyHeadersIfAbsent(bsm.messageHeaders)
+          .build()
+        subscriptionChannel.send(message)
+          .toMono()
+      }
       .flatMap { mongoTemplate.remove(bsm) }
       .subscribe {
         if (it.deletedCount > 0) {
