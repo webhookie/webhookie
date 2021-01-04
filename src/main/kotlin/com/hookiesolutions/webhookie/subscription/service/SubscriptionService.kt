@@ -124,7 +124,8 @@ class SubscriptionService(
       .copyHeadersIfAbsent(bsm.messageHeaders)
       .build()
 
-    outputChannelFor(bsm.subscription).send(message)
+    outputChannelFor(bsm.subscription)
+      .send(message)
       .toMono()
       .flatMap { mongoTemplate.remove(bsm) }
       .subscribe {
