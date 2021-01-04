@@ -46,9 +46,11 @@ class SubscriptionFlows(
     toSubscriptionMessageFlux: GenericTransformer<ConsumerMessage, Flux<GenericSubscriptionMessage>>,
     messageHasNoSubscription: (GenericSubscriptionMessage) -> Boolean,
     subscriptionIsBlocked: (GenericSubscriptionMessage) -> Boolean,
-    subscriptionIsWorking: (GenericSubscriptionMessage) -> Boolean,
     toBlockedSubscriptionMessageDTO: GenericTransformer<SubscriptionMessage, BlockedSubscriptionMessageDTO>,
+    toBeSignedWorkingSubscription: (GenericSubscriptionMessage) -> Boolean,
+    nonSignableWorkingSubscription: (GenericSubscriptionMessage) -> Boolean,
     signSubscriptionMessageChannel: MessageChannel,
+    subscriptionChannel: MessageChannel,
     noSubscriptionChannel: MessageChannel,
     blockedSubscriptionChannel: MessageChannel
   ): IntegrationFlow {
@@ -57,8 +59,9 @@ class SubscriptionFlows(
       transform(toSubscriptionMessageFlux)
       split()
       routeToRecipients {
-        recipient(signSubscriptionMessageChannel, subscriptionIsWorking)
-        recipient(noSubscriptionChannel,messageHasNoSubscription)
+        recipient(signSubscriptionMessageChannel, toBeSignedWorkingSubscription)
+        recipient(subscriptionChannel, nonSignableWorkingSubscription)
+        recipient(noSubscriptionChannel, messageHasNoSubscription)
         recipientFlow(subscriptionIsBlocked, {
           transform(toBlockedSubscriptionMessageDTO)
           channel(blockedSubscriptionChannel)

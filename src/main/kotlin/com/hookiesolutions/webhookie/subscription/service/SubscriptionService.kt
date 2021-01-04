@@ -8,6 +8,7 @@ import com.hookiesolutions.webhookie.common.message.subscription.SignedSubscript
 import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionMessage
 import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.byId
 import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
+import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
 import com.hookiesolutions.webhookie.common.service.IdGenerator
 import com.hookiesolutions.webhookie.common.service.TimeMachine
 import com.hookiesolutions.webhookie.subscription.domain.Application
@@ -45,6 +46,7 @@ class SubscriptionService(
   private val idGenerator: IdGenerator,
   private val factory: ConversionsFactory,
   private val signSubscriptionMessageChannel: MessageChannel,
+  private val subscriptionChannel: MessageChannel,
   private val mongoTemplate: ReactiveMongoTemplate
 ) {
   fun findSubscriptionsFor(consumerMessage: ConsumerMessage): Flux<Subscription> {
@@ -122,7 +124,8 @@ class SubscriptionService(
       .withPayload(subscriptionMessage)
       .copyHeadersIfAbsent(bsm.messageHeaders)
       .build()
-    signSubscriptionMessageChannel.send(message)
+
+    outputChannelFor(bsm.subscription).send(message)
       .toMono()
       .flatMap { mongoTemplate.remove(bsm) }
       .subscribe {
@@ -132,6 +135,14 @@ class SubscriptionService(
           log.warn("Was unable to remove Blocked Message: '{}'!", bsm.id)
         }
       }
+  }
+
+  private fun outputChannelFor(subscription: SubscriptionDTO): MessageChannel {
+    return if(subscription.callbackSecurity == null) {
+      subscriptionChannel
+    } else {
+      signSubscriptionMessageChannel
+    }
   }
 
   fun signSubscriptionMessage(subscriptionMessage: SubscriptionMessage): Mono<SignableSubscriptionMessage> {
