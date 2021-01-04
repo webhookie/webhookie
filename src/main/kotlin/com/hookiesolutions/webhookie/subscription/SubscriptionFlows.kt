@@ -8,7 +8,7 @@ import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscrip
 import com.hookiesolutions.webhookie.common.message.subscription.GenericSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SignedSubscriptionMessage
-import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionMessage
+import com.hookiesolutions.webhookie.common.message.subscription.UnsignedSubscriptionMessage
 import com.hookiesolutions.webhookie.subscription.config.SubscriptionProperties
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
@@ -49,7 +49,7 @@ class SubscriptionFlows {
     toSubscriptionMessageFlux: GenericTransformer<ConsumerMessage, Flux<GenericSubscriptionMessage>>,
     messageHasNoSubscription: (GenericSubscriptionMessage) -> Boolean,
     subscriptionIsBlocked: (GenericSubscriptionMessage) -> Boolean,
-    toBlockedSubscriptionMessageDTO: GenericTransformer<SubscriptionMessage, BlockedSubscriptionMessageDTO>,
+    toBlockedSubscriptionMessageDTO: GenericTransformer<UnsignedSubscriptionMessage, BlockedSubscriptionMessageDTO>,
     toBeSignedWorkingSubscription: (GenericSubscriptionMessage) -> Boolean,
     nonSignableWorkingSubscription: (GenericSubscriptionMessage) -> Boolean,
     signSubscriptionMessageChannel: MessageChannel,
@@ -101,7 +101,7 @@ class SubscriptionFlows {
       channel(retrySubscriptionChannel)
       transform(toDelayedSignableSubscriptionMessage)
       routeToRecipients {
-        recipient<SignableSubscriptionMessage>(subscriptionChannel) { it is SubscriptionMessage}
+        recipient<SignableSubscriptionMessage>(subscriptionChannel) { it is UnsignedSubscriptionMessage}
         recipient<SignableSubscriptionMessage>(signSubscriptionMessageChannel) {it is SignedSubscriptionMessage}
       }
     }

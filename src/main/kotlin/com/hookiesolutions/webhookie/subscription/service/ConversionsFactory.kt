@@ -1,9 +1,12 @@
 package com.hookiesolutions.webhookie.subscription.service
 
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
+import com.hookiesolutions.webhookie.common.message.publisher.PublisherErrorMessage
 import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscriptionMessageDTO
 import com.hookiesolutions.webhookie.common.message.subscription.GenericSubscriptionMessage
-import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionMessage
+import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
+import com.hookiesolutions.webhookie.common.message.subscription.UnsignedSubscriptionMessage
+import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
 import com.hookiesolutions.webhookie.common.service.IdGenerator
 import com.hookiesolutions.webhookie.subscription.domain.Application
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
@@ -12,6 +15,7 @@ import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.subscription.service.model.CreateApplicationRequest
 import com.hookiesolutions.webhookie.subscription.service.model.CreateSubscriptionRequest
 import org.springframework.stereotype.Service
+import java.time.Instant
 
 /**
  *
@@ -46,8 +50,8 @@ class ConversionsFactory(
 
   fun blockedSubscriptionMessageToSubscriptionMessage(
     bsm: BlockedSubscriptionMessage
-  ): SubscriptionMessage {
-    return SubscriptionMessage(
+  ): UnsignedSubscriptionMessage {
+    return UnsignedSubscriptionMessage(
       originalMessage = bsm.originalMessage,
       spanId = bsm.originalSpanId,
       subscription = bsm.subscription
@@ -59,7 +63,7 @@ class ConversionsFactory(
     consumerMessage: ConsumerMessage
   ): GenericSubscriptionMessage {
     val spanId = idGenerator.generate()
-    return SubscriptionMessage(
+    return UnsignedSubscriptionMessage(
       originalMessage = consumerMessage,
       spanId = spanId,
       subscription = subscription.dto()
@@ -76,6 +80,39 @@ class ConversionsFactory(
       dto.messageHeaders,
       dto.subscription,
       dto.blockedDetails
+    )
+  }
+
+  fun createBlockedSubscriptionMessageDTO(
+    errorMessage: PublisherErrorMessage,
+    blockedDetailsDTO: BlockedDetailsDTO
+  ): BlockedSubscriptionMessageDTO {
+    val originalMessage = errorMessage.subscriptionMessage.originalMessage
+    return BlockedSubscriptionMessageDTO(
+      null,
+      originalMessage.headers,
+      errorMessage.subscriptionMessage.spanId,
+      originalMessage.payload,
+      originalMessage.messageHeaders,
+      errorMessage.subscriptionMessage.subscription,
+      blockedDetailsDTO
+    )
+  }
+
+  fun createBlockedSubscriptionMessageDTO(
+    message: UnsignedSubscriptionMessage,
+    at: Instant,
+    reason: String
+  ): BlockedSubscriptionMessageDTO {
+    val originalMessage = message.originalMessage
+    return BlockedSubscriptionMessageDTO(
+      null,
+      originalMessage.headers,
+      message.spanId,
+      originalMessage.payload,
+      originalMessage.messageHeaders,
+      message.subscription,
+      BlockedDetailsDTO(reason, at)
     )
   }
 }

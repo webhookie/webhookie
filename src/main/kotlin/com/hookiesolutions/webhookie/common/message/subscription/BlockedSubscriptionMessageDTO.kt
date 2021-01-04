@@ -1,10 +1,8 @@
 package com.hookiesolutions.webhookie.common.message.subscription
 
 import com.hookiesolutions.webhookie.common.message.WebhookieHeaders
-import com.hookiesolutions.webhookie.common.message.publisher.PublisherErrorMessage
 import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
-import java.time.Instant
 
 /**
  *
@@ -20,34 +18,6 @@ data class BlockedSubscriptionMessageDTO(
   val subscription: SubscriptionDTO,
   val blockedDetails: BlockedDetailsDTO
 ) {
-  companion object {
-    fun from(message: PublisherErrorMessage, details: BlockedDetailsDTO): BlockedSubscriptionMessageDTO {
-      val originalMessage = message.subscriptionMessage.originalMessage
-      return BlockedSubscriptionMessageDTO(
-        null,
-        originalMessage.headers,
-        message.subscriptionMessage.spanId,
-        originalMessage.payload,
-        originalMessage.messageHeaders,
-        message.subscriptionMessage.subscription,
-        details
-      )
-    }
-
-    fun from(message: SubscriptionMessage, at: Instant, reason: String): BlockedSubscriptionMessageDTO {
-      val originalMessage = message.originalMessage
-      return BlockedSubscriptionMessageDTO(
-        null,
-        originalMessage.headers,
-        message.spanId,
-        originalMessage.payload,
-        originalMessage.messageHeaders,
-        message.subscription,
-        BlockedDetailsDTO(reason, at)
-      )
-    }
-  }
-
   @Suppress("DuplicatedCode")
   override fun equals(other: Any?): Boolean {
     if (this === other) return true

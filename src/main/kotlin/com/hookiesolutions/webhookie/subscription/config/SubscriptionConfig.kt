@@ -9,7 +9,7 @@ import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscrip
 import com.hookiesolutions.webhookie.common.message.subscription.GenericSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.NoSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
-import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionMessage
+import com.hookiesolutions.webhookie.common.message.subscription.UnsignedSubscriptionMessage
 import com.hookiesolutions.webhookie.common.service.TimeMachine
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
@@ -111,14 +111,14 @@ class SubscriptionConfig(
   fun blockSubscription(): GenericTransformer<PublisherErrorMessage, Mono<BlockedSubscriptionMessageDTO>> {
     return GenericTransformer { payload ->
       subscriptionService.blockSubscriptionFor(payload)
-        .map { BlockedSubscriptionMessageDTO.from(payload, it) }
+        .map { factory.createBlockedSubscriptionMessageDTO(payload, it) }
     }
   }
 
   @Bean
-  fun toBlockedSubscriptionMessageDTO(): GenericTransformer<SubscriptionMessage, BlockedSubscriptionMessageDTO> {
+  fun toBlockedSubscriptionMessageDTO(): GenericTransformer<UnsignedSubscriptionMessage, BlockedSubscriptionMessageDTO> {
     return GenericTransformer {
-      BlockedSubscriptionMessageDTO.from(it, timeMachine.now(), "New Message")
+      factory.createBlockedSubscriptionMessageDTO(it, timeMachine.now(), "New Message")
     }
   }
 
@@ -158,12 +158,12 @@ class SubscriptionConfig(
 
   @Bean
   fun subscriptionIsBlocked(): (GenericSubscriptionMessage) -> Boolean {
-    return { it is SubscriptionMessage && it.subscriptionIsBlocked }
+    return { it is SignableSubscriptionMessage && it.subscriptionIsBlocked }
   }
 
   @Bean
   fun subscriptionIsWorking(): (GenericSubscriptionMessage) -> Boolean {
-    return { it is SubscriptionMessage && it.subscriptionIsWorking }
+    return { it is SignableSubscriptionMessage && it.subscriptionIsWorking }
   }
 
   @Bean

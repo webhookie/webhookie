@@ -9,7 +9,7 @@ import java.time.Duration
  * @author Arthur Kazemi<bidadh@gmail.com>
  * @since 4/12/20 17:42
  */
-data class SubscriptionMessage(
+data class UnsignedSubscriptionMessage(
   override val originalMessage: ConsumerMessage,
   override val spanId: String,
   override val subscription: SubscriptionDTO,
@@ -18,7 +18,7 @@ data class SubscriptionMessage(
   override val subscriptionIsBlocked: Boolean = subscription.isBlocked,
   override val subscriptionIsWorking: Boolean = !subscription.isBlocked
 ): SignableSubscriptionMessage {
-  override fun retryableCopy(delay: Duration, numberOfRetries: Int): SubscriptionMessage {
+  override fun retryableCopy(delay: Duration, numberOfRetries: Int): UnsignedSubscriptionMessage {
     return this.copy(
       delay = delay,
       numberOfRetries = numberOfRetries
