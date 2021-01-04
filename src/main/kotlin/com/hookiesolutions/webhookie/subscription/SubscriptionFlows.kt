@@ -5,6 +5,7 @@ import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherErrorMessage
 import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscriptionMessageDTO
 import com.hookiesolutions.webhookie.common.message.subscription.GenericSubscriptionMessage
+import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionMessage
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
@@ -122,7 +123,7 @@ class SubscriptionFlows(
   @Bean
   fun signSubscriptionFlow(
     signSubscriptionMessageChannel: MessageChannel,
-    signSubscriptionMessage: GenericTransformer<SubscriptionMessage, Mono<SubscriptionMessage>>,
+    signSubscriptionMessage: GenericTransformer<SubscriptionMessage, Mono<SignableSubscriptionMessage>>,
     subscriptionChannel: MessageChannel
   ): IntegrationFlow {
     return integrationFlow {

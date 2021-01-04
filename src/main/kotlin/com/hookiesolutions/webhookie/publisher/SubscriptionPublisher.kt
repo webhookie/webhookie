@@ -2,7 +2,7 @@ package com.hookiesolutions.webhookie.publisher
 
 import com.hookiesolutions.webhookie.common.Constants
 import com.hookiesolutions.webhookie.common.message.publisher.GenericPublisherMessage
-import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionMessage
+import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
 import com.hookiesolutions.webhookie.publisher.config.PublisherProperties
 import org.slf4j.Logger
 import org.springframework.stereotype.Service
@@ -23,7 +23,7 @@ class SubscriptionPublisher(
   private val log: Logger,
   private val properties: PublisherProperties
 ) {
-  fun publish(msg: SubscriptionMessage): Mono<GenericPublisherMessage> {
+  fun publish(msg: SignableSubscriptionMessage): Mono<GenericPublisherMessage> {
     log.info( "'{}'ing '{}' message to '{}' ({}-{})",
       msg.subscription.httpMethod.name,
       msg.originalMessage.headers.contentType,

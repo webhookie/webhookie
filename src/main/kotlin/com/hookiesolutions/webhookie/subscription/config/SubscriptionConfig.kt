@@ -5,6 +5,7 @@ import com.hookiesolutions.webhookie.common.message.publisher.PublisherErrorMess
 import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscriptionMessageDTO
 import com.hookiesolutions.webhookie.common.message.subscription.GenericSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.NoSubscriptionMessage
+import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionMessage
 import com.hookiesolutions.webhookie.common.service.TimeMachine
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
@@ -62,7 +63,7 @@ class SubscriptionConfig(
   }
 
   @Bean
-  fun signSubscriptionMessage(): GenericTransformer<SubscriptionMessage, Mono<SubscriptionMessage>> {
+  fun signSubscriptionMessage(): GenericTransformer<SubscriptionMessage, Mono<SignableSubscriptionMessage>> {
     return GenericTransformer {
       subscriptionService.signSubscriptionMessage(it)
     }

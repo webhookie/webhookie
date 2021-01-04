@@ -1,6 +1,6 @@
 package com.hookiesolutions.webhookie.common.message.publisher
 
-import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionMessage
+import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
 
 /**
  *
@@ -8,6 +8,6 @@ import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionMes
  * @since 8/12/20 23:48
  */
 data class PublisherSuccessMessage(
-  override val subscriptionMessage: SubscriptionMessage,
+  override val subscriptionMessage: SignableSubscriptionMessage,
   val response: ServerResponse
 ): GenericPublisherMessage

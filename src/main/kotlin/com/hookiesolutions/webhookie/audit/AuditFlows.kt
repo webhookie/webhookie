@@ -19,7 +19,7 @@ import com.hookiesolutions.webhookie.common.message.publisher.PublisherResponseE
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherSuccessMessage
 import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscriptionMessageDTO
 import com.hookiesolutions.webhookie.common.message.subscription.NoSubscriptionMessage
-import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionMessage
+import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
 import org.slf4j.Logger
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -50,7 +50,7 @@ class AuditFlows(
   fun logSubscriptionMessage(): IntegrationFlow {
     return integrationFlow {
       channel(SUBSCRIPTION_CHANNEL_NAME)
-      handle { payload: SubscriptionMessage, _: MessageHeaders ->
+      handle { payload: SignableSubscriptionMessage, _: MessageHeaders ->
         log.info("{}, {}, {}, {}", payload.subscription.callbackUrl, payload.delay, payload.numberOfRetries, payload.spanId)
       }
     }
