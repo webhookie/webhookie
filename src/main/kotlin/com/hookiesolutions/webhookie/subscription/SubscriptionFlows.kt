@@ -37,10 +37,7 @@ import reactor.core.publisher.Mono
  * @since 2/12/20 13:43
  */
 @Configuration
-class SubscriptionFlows(
-  private val log: Logger,
-  private val mongoTemplate: ReactiveMongoTemplate,
-) {
+class SubscriptionFlows() {
   @Bean
   fun subscriptionFlow(
     toSubscriptionMessageFlux: GenericTransformer<ConsumerMessage, Flux<GenericSubscriptionMessage>>,
@@ -100,10 +97,11 @@ class SubscriptionFlows(
 
   @Bean
   fun unblockSubscriptionFlow(
+    mongoTemplate: ReactiveMongoTemplate,
     resendBlockedMessageChannel: MessageChannel
   ): IntegrationFlow {
     return IntegrationFlows
-      .from(unblockSubscriptionMongoEvent())
+      .from(unblockSubscriptionMongoEvent(mongoTemplate))
       .channel(resendBlockedMessageChannel)
       .get()
   }
@@ -138,13 +136,17 @@ class SubscriptionFlows(
   }
 
   @Bean
-  fun logBlockedSubscriptionHandler(): (BlockedSubscriptionMessage, MessageHeaders) -> Unit {
+  fun logBlockedSubscriptionHandler(
+    log: Logger
+  ): (BlockedSubscriptionMessage, MessageHeaders) -> Unit {
     return { payload: BlockedSubscriptionMessage, _: MessageHeaders ->
       log.warn("BlockedSubscriptionMessage was saved successfully: '{}'", payload.id)
     }
   }
 
-  private fun unblockSubscriptionMongoEvent(): MongoDbChangeStreamMessageProducerSpec {
+  private fun unblockSubscriptionMongoEvent(
+    mongoTemplate: ReactiveMongoTemplate
+  ): MongoDbChangeStreamMessageProducerSpec {
     val match = Aggregation.match(
       where("operationType")
         .`is`(OperationType.UPDATE.value)
