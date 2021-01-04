@@ -35,12 +35,12 @@ class PublisherChannels {
     .get()
 
   @Bean
-  fun retrySubscriptionMessageChannel(): PublishSubscribeChannel = MessageChannels
-    .publishSubscribe(Executors.newCachedThreadPool())
+  fun internalSubscriptionChannel(): MessageChannel = MessageChannels
+    .direct()
     .get()
 
   @Bean
-  fun internalSubscriptionChannel(): MessageChannel = MessageChannels
-    .direct()
+  fun retryablePublisherErrorChannel(): MessageChannel = MessageChannels
+    .publishSubscribe(Executors.newCachedThreadPool())
     .get()
 }

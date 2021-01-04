@@ -1,18 +1,22 @@
 package com.hookiesolutions.webhookie.subscription
 
 import com.hookiesolutions.webhookie.common.Constants.Channels.Consumer.Companion.CONSUMER_CHANNEL_NAME
+import com.hookiesolutions.webhookie.common.Constants.Channels.Publisher.Companion.RETRYABLE_PUBLISHER_ERROR_CHANNEL
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherErrorMessage
 import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscriptionMessageDTO
 import com.hookiesolutions.webhookie.common.message.subscription.GenericSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
+import com.hookiesolutions.webhookie.common.message.subscription.SignedSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionMessage
+import com.hookiesolutions.webhookie.subscription.config.SubscriptionProperties
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_BLOCK_DETAILS
 import com.mongodb.client.model.changestream.FullDocument
 import com.mongodb.client.model.changestream.OperationType
 import org.slf4j.Logger
+import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.mongodb.core.ChangeStreamOptions
@@ -20,6 +24,7 @@ import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.aggregation.Aggregation
 import org.springframework.data.mongodb.core.query.Criteria.where
 import org.springframework.integration.context.IntegrationContextUtils.NULL_CHANNEL_BEAN_NAME
+import org.springframework.integration.core.GenericSelector
 import org.springframework.integration.dsl.IntegrationFlow
 import org.springframework.integration.dsl.IntegrationFlows
 import org.springframework.integration.dsl.integrationFlow
@@ -37,7 +42,8 @@ import reactor.core.publisher.Mono
  * @since 2/12/20 13:43
  */
 @Configuration
-class SubscriptionFlows() {
+@EnableConfigurationProperties(SubscriptionProperties::class)
+class SubscriptionFlows {
   @Bean
   fun subscriptionFlow(
     toSubscriptionMessageFlux: GenericTransformer<ConsumerMessage, Flux<GenericSubscriptionMessage>>,
@@ -63,6 +69,40 @@ class SubscriptionFlows() {
           transform(toBlockedSubscriptionMessageDTO)
           channel(blockedSubscriptionChannel)
         })
+      }
+    }
+  }
+
+  @Bean
+  fun retryablePublisherErrorFlow(
+    requiresRetrySelector: GenericSelector<PublisherErrorMessage>,
+    requiresBlockSelector: GenericSelector<PublisherErrorMessage>,
+    unsuccessfulSubscriptionChannel: MessageChannel,
+    retrySubscriptionChannel: MessageChannel
+  ): IntegrationFlow {
+    return integrationFlow {
+      channel(RETRYABLE_PUBLISHER_ERROR_CHANNEL)
+      routeToRecipients {
+        recipient<PublisherErrorMessage>(retrySubscriptionChannel) { requiresRetrySelector.accept(it) }
+        recipient<PublisherErrorMessage>(unsuccessfulSubscriptionChannel) { requiresBlockSelector.accept(it) }
+        defaultOutputChannel(NULL_CHANNEL_BEAN_NAME)
+      }
+    }
+  }
+
+  @Bean
+  fun retrySubscriptionFlow(
+    retrySubscriptionChannel: MessageChannel,
+    signSubscriptionMessageChannel: MessageChannel,
+    subscriptionChannel: MessageChannel,
+    toDelayedSignableSubscriptionMessage: GenericTransformer<PublisherErrorMessage, SignableSubscriptionMessage>
+  ): IntegrationFlow {
+    return integrationFlow {
+      channel(retrySubscriptionChannel)
+      transform(toDelayedSignableSubscriptionMessage)
+      routeToRecipients {
+        recipient<SignableSubscriptionMessage>(subscriptionChannel) { it is SubscriptionMessage}
+        recipient<SignableSubscriptionMessage>(signSubscriptionMessageChannel) {it is SignedSubscriptionMessage}
       }
     }
   }
@@ -124,7 +164,7 @@ class SubscriptionFlows() {
   @Bean
   fun signSubscriptionFlow(
     signSubscriptionMessageChannel: MessageChannel,
-    signSubscriptionMessage: GenericTransformer<SubscriptionMessage, Mono<SignableSubscriptionMessage>>,
+    signSubscriptionMessage: GenericTransformer<SignableSubscriptionMessage, Mono<SignableSubscriptionMessage>>,
     subscriptionChannel: MessageChannel
   ): IntegrationFlow {
     return integrationFlow {

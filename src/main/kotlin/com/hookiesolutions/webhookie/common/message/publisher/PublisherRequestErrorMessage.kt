@@ -11,6 +11,5 @@ import org.springframework.http.HttpHeaders
 data class PublisherRequestErrorMessage(
   override val subscriptionMessage: SignableSubscriptionMessage,
   override val reason: String,
-  val headers: HttpHeaders,
-  override val isRetryable: Boolean = true
+  val headers: HttpHeaders
 ): PublisherErrorMessage

@@ -9,6 +9,5 @@ import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscri
  */
 data class PublisherOtherErrorMessage(
   override val subscriptionMessage: SignableSubscriptionMessage,
-  override val reason: String,
-  override val isRetryable: Boolean = false
+  override val reason: String
 ): PublisherErrorMessage

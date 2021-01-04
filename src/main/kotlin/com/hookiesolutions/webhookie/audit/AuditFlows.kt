@@ -5,13 +5,12 @@ import com.hookiesolutions.webhookie.common.Constants.Channels.Publisher.Compani
 import com.hookiesolutions.webhookie.common.Constants.Channels.Publisher.Companion.PUBLISHER_REQUEST_ERROR_CHANNEL
 import com.hookiesolutions.webhookie.common.Constants.Channels.Publisher.Companion.PUBLISHER_RESPONSE_ERROR_CHANNEL
 import com.hookiesolutions.webhookie.common.Constants.Channels.Publisher.Companion.PUBLISHER_SUCCESS_CHANNEL
-import com.hookiesolutions.webhookie.common.Constants.Channels.Publisher.Companion.RETRY_SUBSCRIPTION_MESSAGE_CHANNEL
+import com.hookiesolutions.webhookie.common.Constants.Channels.Publisher.Companion.RETRYABLE_PUBLISHER_ERROR_CHANNEL
 import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.BLOCKED_SUBSCRIPTION_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.NO_SUBSCRIPTION_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.SUBSCRIPTION_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.UNSUCCESSFUL_SUBSCRIPTION_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
-import com.hookiesolutions.webhookie.common.message.publisher.GenericPublisherMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherErrorMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherOtherErrorMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherRequestErrorMessage
@@ -119,8 +118,8 @@ class AuditFlows(
   @Bean
   fun logRetrySubscriptionMessageMessage(): IntegrationFlow {
     return integrationFlow {
-      channel(RETRY_SUBSCRIPTION_MESSAGE_CHANNEL)
-      handle { payload: GenericPublisherMessage, _: MessageHeaders ->
+      channel(RETRYABLE_PUBLISHER_ERROR_CHANNEL)
+      handle { payload: PublisherErrorMessage, _: MessageHeaders ->
         log.warn("{}, {}", payload.subscriptionMessage.subscription.callbackUrl, payload.subscriptionMessage.delay.seconds)
       }
     }

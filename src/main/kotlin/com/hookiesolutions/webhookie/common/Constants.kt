@@ -46,7 +46,7 @@ class Constants {
         const val PUBLISHER_RESPONSE_ERROR_CHANNEL = "publisherResponseErrorChannel"
         const val PUBLISHER_REQUEST_ERROR_CHANNEL = "publisherRequestErrorChannel"
         const val PUBLISHER_OTHER_ERROR_CHANNEL = "publisherOtherErrorChannel"
-        const val RETRY_SUBSCRIPTION_MESSAGE_CHANNEL = "retrySubscriptionMessageChannel"
+        const val RETRYABLE_PUBLISHER_ERROR_CHANNEL = "retryablePublisherErrorChannel"
       }
     }
   }

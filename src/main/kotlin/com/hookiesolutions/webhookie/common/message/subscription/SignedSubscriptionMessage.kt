@@ -15,6 +15,12 @@ data class SignedSubscriptionMessage(
   override val subscriptionIsWorking: Boolean = !subscription.isBlocked,
   val signature: SubscriptionSignature
 ): SignableSubscriptionMessage {
+  override fun retryableCopy(delay: Duration, numberOfRetries: Int): SignedSubscriptionMessage {
+    return this.copy(
+      delay = delay,
+      numberOfRetries = numberOfRetries
+    )
+  }
 
   override fun addMessageHeaders(headers: HttpHeaders) {
     super.addMessageHeaders(headers)

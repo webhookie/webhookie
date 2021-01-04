@@ -5,7 +5,6 @@ import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherErrorMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SignedSubscriptionMessage
-import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionMessage
 import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.byId
 import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
@@ -145,7 +144,7 @@ class SubscriptionService(
     }
   }
 
-  fun signSubscriptionMessage(subscriptionMessage: SubscriptionMessage): Mono<SignableSubscriptionMessage> {
+  fun signSubscriptionMessage(subscriptionMessage: SignableSubscriptionMessage): Mono<SignableSubscriptionMessage> {
     return mongoTemplate.findById(subscriptionMessage.subscription.id, Subscription::class.java)
       .map {
         if(it.callbackSecurity == null)  {
@@ -156,16 +155,12 @@ class SubscriptionService(
         val signature = signor.sign(it, subscriptionMessage.originalMessage, spanId)
           ?: return@map subscriptionMessage
 
-        val msg = subscriptionMessage.copy(
-          spanId = spanId
-        )
-
         SignedSubscriptionMessage(
-          originalMessage = msg.originalMessage,
-          spanId = msg.spanId,
-          subscription = msg.subscription,
-          delay = msg.delay,
-          numberOfRetries = msg.numberOfRetries,
+          originalMessage = subscriptionMessage.originalMessage,
+          spanId = spanId,
+          subscription = subscriptionMessage.subscription,
+          delay = subscriptionMessage.delay,
+          numberOfRetries = subscriptionMessage.numberOfRetries,
           signature = signature,
         )
       }

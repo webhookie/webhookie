@@ -10,4 +10,9 @@ interface SignableSubscriptionMessage: GenericSubscriptionMessage {
   val numberOfRetries: Int
   val subscriptionIsBlocked: Boolean
   val subscriptionIsWorking: Boolean
+
+  fun retryableCopy(
+    delay: Duration,
+    numberOfRetries: Int
+  ): SignableSubscriptionMessage
 }

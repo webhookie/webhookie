@@ -17,5 +17,12 @@ data class SubscriptionMessage(
   override val numberOfRetries: Int = 0,
   override val subscriptionIsBlocked: Boolean = subscription.isBlocked,
   override val subscriptionIsWorking: Boolean = !subscription.isBlocked
-): SignableSubscriptionMessage
+): SignableSubscriptionMessage {
+  override fun retryableCopy(delay: Duration, numberOfRetries: Int): SubscriptionMessage {
+    return this.copy(
+      delay = delay,
+      numberOfRetries = numberOfRetries
+    )
+  }
+}
 

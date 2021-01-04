@@ -7,5 +7,4 @@ package com.hookiesolutions.webhookie.common.message.publisher
  */
 interface PublisherErrorMessage: GenericPublisherMessage {
   val reason: String
-  val isRetryable: Boolean
 }

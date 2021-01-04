@@ -10,6 +10,5 @@ import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscri
 data class PublisherResponseErrorMessage(
   override val subscriptionMessage: SignableSubscriptionMessage,
   val response: ServerResponse,
-  override val reason: String,
-  override val isRetryable: Boolean = response.is5xxServerError || response.isNotFound
+  override val reason: String
 ): PublisherErrorMessage
