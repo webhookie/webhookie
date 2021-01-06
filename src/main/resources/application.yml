@@ -15,11 +15,6 @@ webhookie:
     roles:
       jwk-json-path: ${WH_SECURITY_ROLES_JSON_PATH:$.realm_access.roles} # if autoAssign is false and cannot find WH_CONSUMER then respond with 403
       auto-assign-consumer: ${WH_SECURITY_AUTO_ASSIGN_CONSUMER_ROLE:true}
-      role-mapping:
-        USER: WH_CONSUMER
-        ADMIN: WH_ADMIN
-        PROVIDER: WH_PROVIDER
-        ROLE1: WH_CONSUMER
     no-auth:
       pathMatchers:
         OPTIONS: /**
