@@ -1,12 +1,13 @@
 package com.hookiesolutions.webhookie.subscription.service
 
-import com.hookiesolutions.webhookie.common.CryptoUtils
-import com.hookiesolutions.webhookie.common.CryptoUtils.Companion.ALG
+import com.hookiesolutions.webhookie.subscription.utils.CryptoUtils
+import com.hookiesolutions.webhookie.subscription.utils.CryptoUtils.Companion.ALG
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionSignature
 import com.hookiesolutions.webhookie.common.service.TimeMachine
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import org.springframework.stereotype.Service
+import reactor.core.publisher.Mono
 
 
 /**
@@ -18,24 +19,18 @@ import org.springframework.stereotype.Service
 class SubscriptionSignor(
   private val timeMachine: TimeMachine
 ) {
-  fun sign(subscription: Subscription, consumerMessage: ConsumerMessage, spanId: String): SubscriptionSignature? {
-    return subscription.callbackSecurity
-      ?.let {
-        val time = timeMachine.now().toString()
-        val signatureValue =
-          "(request-target): ${subscription.httpMethod.name} ${subscription.callbackUrl}" +
-          " date: $time" +
-          " x-trace-id: ${consumerMessage.headers.traceId}" +
-          " x-span-id: $spanId"
-
-        val signature = CryptoUtils.hmac(signatureValue, it.secret.secret)
+  fun sign(subscription: Subscription, consumerMessage: ConsumerMessage, spanId: String): Mono<SubscriptionSignature> {
+    val time = timeMachine.now().toString()
+    return Mono.justOrEmpty(subscription.callbackSecurity)
+      .zipWhen { CryptoUtils.hmac(it.secret.secret, subscription, time, consumerMessage.headers.traceId, spanId) }
+      .map {
         SubscriptionSignature(
-          it.secret.keyId,
+          it.t1.secret.keyId,
           ALG,
           consumerMessage.headers.traceId,
           spanId,
           time,
-          signature
+          it.t2
         )
       }
   }

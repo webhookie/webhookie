@@ -8,6 +8,7 @@ import com.hookiesolutions.webhookie.common.message.publisher.PublisherRequestEr
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherResponseErrorMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherSuccessMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
+import org.slf4j.Logger
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.integration.dsl.IntegrationFlow
@@ -31,10 +32,29 @@ class PublisherFlows(
   private val retryablePublisherErrorChannel: MessageChannel
 ) {
   @Bean
-  fun publishSubscriptionFlow(): IntegrationFlow {
+  fun publishSubscriptionFlow(
+    globalPublisherErrorChannel: MessageChannel
+  ): IntegrationFlow {
     return integrationFlow {
       channel(SUBSCRIPTION_CHANNEL_NAME)
+      enrichHeaders {
+        this.defaultOverwrite(true)
+        this.errorChannel(globalPublisherErrorChannel)
+      }
       channel(internalSubscriptionChannel)
+    }
+  }
+
+  @Bean
+  fun publisherErrorHandler(
+    globalPublisherErrorChannel: MessageChannel,
+    log: Logger
+  ): IntegrationFlow {
+    return integrationFlow {
+      channel(globalPublisherErrorChannel)
+      handle {
+        log.error("Unexpected error occurred publishing message: '{}', '{}", it.payload, it.headers)
+      }
     }
   }
 
@@ -49,7 +69,7 @@ class PublisherFlows(
         recipient<GenericPublisherMessage>(publisherResponseErrorChannel) { it is PublisherResponseErrorMessage }
         recipient<GenericPublisherMessage>(publisherRequestErrorChannel) { it is PublisherRequestErrorMessage }
         recipient<GenericPublisherMessage>(publisherOtherErrorChannel) { it is PublisherOtherErrorMessage }
-        recipient<GenericPublisherMessage>(retryablePublisherErrorChannel) { it is PublisherErrorMessage}
+        recipient<GenericPublisherMessage>(retryablePublisherErrorChannel) { it is PublisherErrorMessage }
       }
     }
   }

@@ -43,4 +43,9 @@ class PublisherChannels {
   fun retryablePublisherErrorChannel(): MessageChannel = MessageChannels
     .publishSubscribe(Executors.newCachedThreadPool())
     .get()
+
+  @Bean
+  fun globalPublisherErrorChannel(): MessageChannel = MessageChannels
+    .publishSubscribe(Executors.newCachedThreadPool())
+    .get()
 }

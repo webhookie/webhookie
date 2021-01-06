@@ -9,6 +9,7 @@ import com.hookiesolutions.webhookie.common.Constants.Channels.Publisher.Compani
 import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.BLOCKED_SUBSCRIPTION_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.NO_SUBSCRIPTION_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.SUBSCRIPTION_CHANNEL_NAME
+import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.SUBSCRIPTION_ERROR_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.UNSUCCESSFUL_SUBSCRIPTION_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherErrorMessage
@@ -19,6 +20,7 @@ import com.hookiesolutions.webhookie.common.message.publisher.PublisherSuccessMe
 import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscriptionMessageDTO
 import com.hookiesolutions.webhookie.common.message.subscription.NoSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
+import com.hookiesolutions.webhookie.common.exception.messaging.SubscriptionMessageHandlingException
 import org.slf4j.Logger
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -51,6 +53,16 @@ class AuditFlows(
       channel(SUBSCRIPTION_CHANNEL_NAME)
       handle { payload: SignableSubscriptionMessage, _: MessageHeaders ->
         log.info("{}, {}, {}, {}", payload.subscription.callbackUrl, payload.delay, payload.numberOfRetries, payload.spanId)
+      }
+    }
+  }
+
+  @Bean
+  fun logSubscriptionErrorMessage(): IntegrationFlow {
+    return integrationFlow {
+      channel(SUBSCRIPTION_ERROR_CHANNEL_NAME)
+      handle { payload: SubscriptionMessageHandlingException, _: MessageHeaders ->
+        log.info("{}", payload)
       }
     }
   }

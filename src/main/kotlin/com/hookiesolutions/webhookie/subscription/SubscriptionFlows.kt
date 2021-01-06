@@ -8,6 +8,7 @@ import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscrip
 import com.hookiesolutions.webhookie.common.message.subscription.GenericSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SignedSubscriptionMessage
+import com.hookiesolutions.webhookie.common.exception.messaging.SubscriptionMessageHandlingException
 import com.hookiesolutions.webhookie.common.message.subscription.UnsignedSubscriptionMessage
 import com.hookiesolutions.webhookie.subscription.config.SubscriptionProperties
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
@@ -33,6 +34,7 @@ import org.springframework.integration.mongodb.dsl.MongoDbChangeStreamMessagePro
 import org.springframework.integration.transformer.GenericTransformer
 import org.springframework.messaging.MessageChannel
 import org.springframework.messaging.MessageHeaders
+import org.springframework.messaging.support.ErrorMessage
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
@@ -45,6 +47,28 @@ import reactor.core.publisher.Mono
 @EnableConfigurationProperties(SubscriptionProperties::class)
 class SubscriptionFlows {
   @Bean
+  fun subscriptionErrorHandler(
+    globalSubscriptionErrorChannel: MessageChannel,
+    subscriptionErrorChannel: MessageChannel,
+    log: Logger
+  ): IntegrationFlow {
+    return integrationFlow {
+      channel(globalSubscriptionErrorChannel)
+      routeToRecipients {
+        recipientFlow<ErrorMessage>({ it.payload.cause is SubscriptionMessageHandlingException }) {
+          transform<ErrorMessage> { it.payload.cause as SubscriptionMessageHandlingException }
+          channel(subscriptionErrorChannel)
+        }
+        recipientFlow<ErrorMessage>({ it.payload.cause !is SubscriptionMessageHandlingException }) {
+          handle {
+            log.error("Unexpected error occurred handling message: '{}', '{}", it.payload, it.headers)
+          }
+        }
+      }
+    }
+  }
+
+  @Bean
   fun subscriptionFlow(
     toSubscriptionMessageFlux: GenericTransformer<ConsumerMessage, Flux<GenericSubscriptionMessage>>,
     messageHasNoSubscription: (GenericSubscriptionMessage) -> Boolean,
@@ -54,11 +78,16 @@ class SubscriptionFlows {
     nonSignableWorkingSubscription: (GenericSubscriptionMessage) -> Boolean,
     signSubscriptionMessageChannel: MessageChannel,
     subscriptionChannel: MessageChannel,
+    globalSubscriptionErrorChannel: MessageChannel,
     noSubscriptionChannel: MessageChannel,
     blockedSubscriptionChannel: MessageChannel
   ): IntegrationFlow {
     return integrationFlow {
       channel(CONSUMER_CHANNEL_NAME)
+      enrichHeaders {
+        defaultOverwrite(true)
+        errorChannel(globalSubscriptionErrorChannel)
+      }
       transform(toSubscriptionMessageFlux)
       split()
       routeToRecipients {

@@ -20,6 +20,16 @@ class SubscriptionChannels {
     .get()
 
   @Bean
+  fun subscriptionErrorChannel(): PublishSubscribeChannel = MessageChannels
+    .publishSubscribe(Executors.newCachedThreadPool())
+    .get()
+
+  @Bean
+  fun globalSubscriptionErrorChannel(): PublishSubscribeChannel = MessageChannels
+    .publishSubscribe(Executors.newCachedThreadPool())
+    .get()
+
+  @Bean
   fun retrySubscriptionChannel(): PublishSubscribeChannel = MessageChannels
     .publishSubscribe(Executors.newCachedThreadPool())
     .get()

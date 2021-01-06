@@ -1,5 +1,6 @@
 package com.hookiesolutions.webhookie.subscription.config
 
+import com.hookiesolutions.webhookie.common.exception.messaging.SubscriptionMessageHandlingException
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.message.publisher.GenericPublisherMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherErrorMessage
@@ -15,6 +16,7 @@ import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMess
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.subscription.service.ConversionsFactory
 import com.hookiesolutions.webhookie.subscription.service.SubscriptionService
+import org.slf4j.Logger
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.integration.core.GenericSelector
@@ -104,6 +106,7 @@ class SubscriptionConfig(
       subscriptionService.findSubscriptionsFor(cm)
         .map { factory.subscriptionToSubscriptionMessage(it, cm) }
         .switchIfEmpty(NoSubscriptionMessage(cm).toMono())
+        .onErrorMap { SubscriptionMessageHandlingException(it.localizedMessage, cm.headers.traceId) }
     }
   }
 
@@ -112,6 +115,7 @@ class SubscriptionConfig(
     return GenericTransformer { payload ->
       subscriptionService.blockSubscriptionFor(payload)
         .map { factory.createBlockedSubscriptionMessageDTO(payload, it) }
+        .onErrorMap { SubscriptionMessageHandlingException(it.localizedMessage, payload.subscriptionMessage.originalMessage.headers.traceId, payload.subscriptionMessage.spanId) }
     }
   }
 
@@ -124,30 +128,44 @@ class SubscriptionConfig(
 
   @Bean
   fun toBlockedSubscriptionMessageFlux(): GenericTransformer<Subscription, Flux<BlockedSubscriptionMessage>> {
-    return GenericTransformer {
-      subscriptionService.findAllBlockedMessagesForSubscription(it.id!!)
+    return GenericTransformer { subscription ->
+      subscriptionService.findAllBlockedMessagesForSubscription(subscription.id!!)
+        .onErrorMap { SubscriptionMessageHandlingException(it.localizedMessage) }
     }
   }
 
   @Bean
   fun signSubscriptionMessage(): GenericTransformer<SignableSubscriptionMessage, Mono<SignableSubscriptionMessage>> {
-    return GenericTransformer {
-      subscriptionService.signSubscriptionMessage(it)
+    return GenericTransformer { msg ->
+      subscriptionService.signSubscriptionMessage(msg)
+        .onErrorMap { SubscriptionMessageHandlingException(it.localizedMessage, msg.originalMessage.headers.traceId, msg.spanId) }
     }
   }
 
   @Bean
   fun saveBlockedMessageMono(): GenericTransformer<BlockedSubscriptionMessageDTO, Mono<BlockedSubscriptionMessage>> {
-    return GenericTransformer {
-      val msg = factory.bmsDTOToBlockedSubscriptionMessage(it)
+    return GenericTransformer { bsmDTO ->
+      val msg = factory.bmsDTOToBlockedSubscriptionMessage(bsmDTO)
       subscriptionService.saveBlockedSubscriptionMessage(msg)
+        .onErrorMap { SubscriptionMessageHandlingException(it.localizedMessage, msg.originalMessage.headers.traceId) }
     }
   }
 
+  //TODO: refactor
   @Bean
-  fun resendAndRemoveSingleBlockedMessage(): (BlockedSubscriptionMessage, MessageHeaders) -> Unit {
+  fun resendAndRemoveSingleBlockedMessage(
+    log: Logger
+  ): (BlockedSubscriptionMessage, MessageHeaders) -> Unit {
     return { payload: BlockedSubscriptionMessage, _: MessageHeaders ->
       subscriptionService.resendAndRemoveSingleBlockedMessage(payload)
+        .onErrorMap { SubscriptionMessageHandlingException(it.localizedMessage, payload.originalMessage.headers.traceId) }
+        .subscribe {
+          if (it.deletedCount > 0) {
+            log.info("Blocked Message: '{}' was removed successfully!", payload.id)
+          } else {
+            log.warn("Was unable to remove Blocked Message: '{}'!", payload.id)
+          }
+        }
     }
   }
 
