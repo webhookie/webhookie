@@ -4,7 +4,6 @@ import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherErrorMessage
 import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscriptionMessageDTO
 import com.hookiesolutions.webhookie.common.message.subscription.GenericSubscriptionMessage
-import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.UnsignedSubscriptionMessage
 import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
 import com.hookiesolutions.webhookie.common.service.IdGenerator
@@ -49,12 +48,13 @@ class ConversionsFactory(
   }
 
   fun blockedSubscriptionMessageToSubscriptionMessage(
-    bsm: BlockedSubscriptionMessage
+    bsm: BlockedSubscriptionMessage,
+    subscription: Subscription
   ): UnsignedSubscriptionMessage {
     return UnsignedSubscriptionMessage(
       originalMessage = bsm.originalMessage,
       spanId = bsm.originalSpanId,
-      subscription = bsm.subscription
+      subscription = subscription.dto()
     )
   }
 

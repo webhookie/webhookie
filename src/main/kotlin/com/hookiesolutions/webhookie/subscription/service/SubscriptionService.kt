@@ -18,6 +18,7 @@ import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Compa
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Companion.topicIs
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Updates.Companion.blockSubscription
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Updates.Companion.unblockSubscription
+import com.hookiesolutions.webhookie.subscription.exception.SubscriptionException
 import com.hookiesolutions.webhookie.subscription.service.model.CreateSubscriptionRequest
 import com.mongodb.client.result.DeleteResult
 import org.slf4j.Logger
@@ -120,15 +121,21 @@ class SubscriptionService(
   //TODO: refactor
   @Transactional
   fun resendAndRemoveSingleBlockedMessage(bsm: BlockedSubscriptionMessage): Mono<DeleteResult> {
-    val subscriptionMessage = factory.blockedSubscriptionMessageToSubscriptionMessage(bsm)
-    val message = MessageBuilder
-      .withPayload(subscriptionMessage)
-      .copyHeadersIfAbsent(bsm.messageHeaders)
-      .build()
+    return mongoTemplate.findById(bsm.subscription.id, Subscription::class.java)
+      .switchIfEmpty { EntityNotFoundException("Subscription could not be found: ${bsm.subscription.id}").toMono() }
+      .flatMap {
+        val subscriptionMessage = factory.blockedSubscriptionMessageToSubscriptionMessage(bsm, it)
+        val message = MessageBuilder
+          .withPayload(subscriptionMessage)
+          .copyHeadersIfAbsent(bsm.messageHeaders)
+          .build()
 
-    return outputChannelFor(bsm.subscription)
-      .send(message)
-      .toMono()
+        outputChannelFor(bsm.subscription)
+          .send(message)
+          .toMono()
+      }
+      .filter { it }
+      .switchIfEmpty { SubscriptionException("Unable to publish blocked message: ${bsm.id}").toMono() }
       .flatMap { mongoTemplate.remove(bsm) }
   }
 
