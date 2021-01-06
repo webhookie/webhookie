@@ -27,7 +27,7 @@ import javax.annotation.PostConstruct
 @Configuration
 @EnableWebFluxSecurity
 @EnableReactiveMethodSecurity
-@EnableConfigurationProperties(WebHookieSecurityProperties::class, NoAuth::class, RolesConfig::class)
+@EnableConfigurationProperties(WebHookieSecurityProperties::class)
 class SecurityConfig(
   private val securityProperties: WebHookieSecurityProperties,
   private val audienceValidator: AudienceValidator,
