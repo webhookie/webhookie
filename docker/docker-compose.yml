@@ -10,6 +10,8 @@ services:
     - 8000:8080
   webhookie-kc:
     image: hookiesolutions/webhookie:1.0.0
+    volumes:
+      - ./kc-roles.yml:/etc/webhookie/roles.yml
     environment:
       - WH_DB_USERNAME=wh-dev-user
       - WH_DB_PASSWORD=5wOA2OYzb8NWN6TJ
@@ -26,12 +28,15 @@ services:
       - WH_SECURITY_LOGIN_URL=http://localhost:8080
       - WH_SECURITY_ROLES_JSON_PATH=$$.realm_access.roles
       - WH_SECURITY_AUTO_ASSIGN_CONSUMER_ROLE=true
+      - SPRING_CONFIG_IMPORT=optional:file:/etc/webhookie/roles.yml
     ports:
       - 8082:8080
     links:
       - keycloak:keycloak
   webhookie-auth0:
     image: hookiesolutions/webhookie:1.0.0
+    volumes:
+      - ./auth0-roles.yml:/etc/webhookie/roles.yml
     environment:
       - WH_DB_USERNAME=wh-dev-user
       - WH_DB_PASSWORD=5wOA2OYzb8NWN6TJ
@@ -48,5 +53,9 @@ services:
       - WH_SECURITY_LOGIN_URL=http://localhost:8080
       - WH_SECURITY_ROLES_JSON_PATH=$$['https://webhookie.com/roles']
       - WH_SECURITY_AUTO_ASSIGN_CONSUMER_ROLE=true
+      - SPRING_CONFIG_IMPORT=optional:file:/etc/webhookie/roles.yml
     ports:
       - 8081:8080
+volumes:
+  kc-roles.yml:
+  auth0-roles.yml:

@@ -1,0 +1,9 @@
+webhookie:
+  security:
+    roles:
+      role-mapping:
+        USER: WH_USER
+        ADMIN: WH_ADMIN
+        PROVIDER: WH_PROVIDER
+        CONSUMER: WH_CONSUMER
+        DEFAULT: WH_CONSUMER
