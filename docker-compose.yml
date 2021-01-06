@@ -8,3 +8,45 @@ services:
     ports:
     - 9900:9990
     - 8000:8080
+  webhookie-kc:
+    image: hookiesolutions/webhookie:1.0.0
+    environment:
+      - WH_DB_USERNAME=wh-dev-user
+      - WH_DB_PASSWORD=5wOA2OYzb8NWN6TJ
+      - WH_DB_HOST=cluster0.dglao.mongodb.net
+      - WH_DB_NAME=wh-dev-db
+      - WH_AMQP_PASSWORD=CGc2Q72jafhBj3dk0uycGDxAVfe8JAPt
+      - WH_AMQP_V_HOST=nbcwvmaw
+      - WH_AMQP_USERNAME=nbcwvmaw
+      - WH_AMQP_HOST=vulture.rmq.cloudamqp.com
+      - WH_IAM_ISSUER_URI=http://10.0.0.103:8000/auth/realms/webhookie
+      - WH_IAM_JWK_SET_URI=http://10.0.0.103:8000/auth/realms/webhookie/protocol/openid-connect/certs
+      - WH_IAM_JWS_ALG=RS256
+      - WH_SECURITY_AUD=account
+      - WH_SECURITY_LOGIN_URL=http://localhost:8080
+      - WH_SECURITY_ROLES_JSON_PATH=$$.realm_access.roles
+      - WH_SECURITY_AUTO_ASSIGN_CONSUMER_ROLE=true
+    ports:
+      - 8082:8080
+    links:
+      - keycloak:keycloak
+  webhookie-auth0:
+    image: hookiesolutions/webhookie:1.0.0
+    environment:
+      - WH_DB_USERNAME=wh-dev-user
+      - WH_DB_PASSWORD=5wOA2OYzb8NWN6TJ
+      - WH_DB_HOST=cluster0.dglao.mongodb.net
+      - WH_DB_NAME=wh-dev-db
+      - WH_AMQP_PASSWORD=CGc2Q72jafhBj3dk0uycGDxAVfe8JAPt
+      - WH_AMQP_V_HOST=nbcwvmaw
+      - WH_AMQP_USERNAME=nbcwvmaw
+      - WH_AMQP_HOST=vulture.rmq.cloudamqp.com
+      - WH_IAM_ISSUER_URI=https://webhookie.au.auth0.com/
+      - WH_IAM_JWK_SET_URI=https://webhookie.au.auth0.com/.well-known/jwks.json
+      - WH_IAM_JWS_ALG=RS256
+      - WH_SECURITY_AUD=KbsOSWkS6GWvmh20mg24UdnrKwgUMfvK
+      - WH_SECURITY_LOGIN_URL=http://localhost:8080
+      - WH_SECURITY_ROLES_JSON_PATH=$$['https://webhookie.com/roles']
+      - WH_SECURITY_AUTO_ASSIGN_CONSUMER_ROLE=true
+    ports:
+      - 8081:8080

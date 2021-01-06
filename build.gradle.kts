@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
 
 plugins {
 	id("org.springframework.boot") version "2.4.1"
@@ -84,4 +85,9 @@ tasks.withType<KotlinCompile> {
 		freeCompilerArgs = listOf("-Xjsr305=strict")
 		jvmTarget = "11"
 	}
+}
+
+tasks.getByName<BootBuildImage>("bootBuildImage") {
+	version = project.version.toString().replace("-SNAPSHOT", "")
+	imageName = "hookiesolutions/${project.name}:$version"
 }
