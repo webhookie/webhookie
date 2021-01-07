@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.integration.dsl.MessageChannels
 import org.springframework.messaging.SubscribableChannel
+import java.util.concurrent.Executors
 
 /**
  *
@@ -19,7 +20,9 @@ class ConsumerChannels {
 
   @Bean
   fun internalConsumerChannel(): SubscribableChannel {
-    return MessageChannels.publishSubscribe().get()
+    return MessageChannels
+      .publishSubscribe(Executors.newCachedThreadPool())
+      .get()
   }
 
   @Bean
