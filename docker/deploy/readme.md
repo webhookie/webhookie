@@ -1,6 +1,7 @@
 #NOTES
-**Product code is required in the configuration**
+###Product code is required in the configuration**
 
+**Failure Strategy:**
 * fail open (provide a warning message but maintain full functionality) or 
 * fail closed (disable all functionality in the application until a connection has been reestablished)
 * something specific to your application. We strongly recommend that you refrain from failing closed after less than two hours of metering failures.
