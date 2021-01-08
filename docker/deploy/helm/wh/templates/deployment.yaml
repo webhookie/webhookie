@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ required "You need to provide a value for .Values.app" .Values.app}}
+  namespace: "default"
+spec:
+  replicas: {{.Values.wh.replicas}}
+  selector:
+    matchLabels:
+      app: {{.Values.app}}
+  template:
+    metadata:
+      annotations:
+        rollme: {{ randAlphaNum 5 | quote }}
+      labels:
+        app: {{.Values.app}}
+    spec:
+      serviceAccountName: {{.Values.app}}sa
+      containers:
+      - image: "{{.Values.wh.imageName}}:{{.Values.wh.imageVersion}}"
+        imagePullPolicy: Always
+        name: {{.Values.app}}
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        env:
+        - name: AWS_REGION
+          value: {{ required "You need to provide a value for .Values.region" .Values.region}}
+        - name: PRODUCT_CODE
+          value: {{required "You need a AWS Marketplace product_code to test this sample application" .Values.productCode}}
+        - name: PRODUCT_VERSION
+          value: {{.Values.wh.imageVersion}}
+        - name: DIMENSIONS_TABLE
+          value: {{.Values.app}}DimensionsTable
+        - name: WH_DB_USERNAME
+          value: {{.Values.DbUsername}}
+        - name: WH_DB_PASSWORD
+          value: {{.Values.DbPassword}}
+        - name: WH_DB_HOST
+          value: {{.Values.DbHost}}
+        - name: WH_DB_NAME
+          value: {{.Values.DbName}}
+        - name: WH_AMQP_PASSWORD
+          value: {{.Values.AmqpPassword}}
+        - name: WH_AMQP_V_HOST
+          value: {{.Values.AmqpVHost}}
+        - name: WH_AMQP_USERNAME
+          value: {{.Values.AmqpUsername}}
+        - name: WH_AMQP_HOST
+          value: {{.Values.AmqpHost}}
+        - name: WH_IAM_ISSUER_URI
+          value: {{.Values.WhIamIssuerUri}}
+        - name: WH_IAM_JWK_SET_URI
+          value: {{.Values.WhIamJwkSetUri}}
+        - name: WH_IAM_JWS_ALG
+          value: {{.Values.WhIamJwsAlg}}
+        - name: WH_SECURITY_AUD
+          value: {{.Values.WhSecurityAud}}
+        - name: WH_SECURITY_LOGIN_URL
+          value: {{.Values.WhSecurityLoginUri}}
+        - name: WH_SECURITY_ROLES_JSON_PATH
+          value: {{.Values.WhSecurityRolesJsonPath}}
+        - name: SPRING_PROFILES_ACTIVE
+          value: auth0
