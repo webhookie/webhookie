@@ -7,17 +7,19 @@ import amf.client.parse.Async20Parser
 import amf.client.validate.ValidationReport
 import org.springframework.core.ResolvableType
 import org.springframework.core.io.buffer.DataBuffer
+import org.springframework.core.io.buffer.DataBufferUtils
 import org.springframework.http.MediaType
 import org.springframework.http.ReactiveHttpInputMessage
 import org.springframework.http.codec.HttpMessageReader
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import reactor.kotlin.core.publisher.toMono
 import java.nio.charset.Charset
 
 @Component
-class AsyncDocumentReader: HttpMessageReader<Document> {
+class AsyncDocumentReader(
+  private val reader: AsyncSpecReader
+) : HttpMessageReader<Document> {
   fun getSupportedMediaTypes(): MutableList<MediaType> {
     return mutableListOf(
       MediaType.TEXT_PLAIN,
@@ -37,31 +39,8 @@ class AsyncDocumentReader: HttpMessageReader<Document> {
   ): Flux<Document> {
     val charset: Charset = message.headers.contentType?.charset ?: Charset.defaultCharset()
 
-    return message.body
-      .map { bufferToDocument(it, charset)}
-  }
-
-  fun bufferToDocument(buffer: DataBuffer, charset: Charset): Document {
-    return try {
-      val msg = buffer.toString(charset)
-      val model: Document = Async20Parser()
-        .parseStringAsync(msg)
-        .get() as Document
-      val profileName = ProfileName.apply("Async20Profile")
-      val v: ValidationReport = AMF.validate(model, profileName) { profileName }
-        .get()
-
-      if(v.conforms()) {
-        model
-      } else {
-        val errorMsg = v.results()
-          .map { it.message() }
-          .reduceRight { s, acc -> "$s\\n$acc"}
-        throw IllegalArgumentException(errorMsg)
-      }
-    } catch (e: Exception) {
-      throw IllegalArgumentException(e.localizedMessage, e)
-    }
+    return DataBufferUtils.join(message.body)
+      .flatMapMany { reader.bufferToDocument(it, charset) }
   }
 
   override fun getReadableMediaTypes(): MutableList<MediaType> {
@@ -75,12 +54,50 @@ class AsyncDocumentReader: HttpMessageReader<Document> {
   ): Mono<Document> {
     val charset: Charset = message.headers.contentType?.charset ?: Charset.defaultCharset()
 
-    return message.body.toMono()
-      .map { bufferToDocument(it, charset) }
+    return DataBufferUtils.join(message.body)
+      .flatMap { reader.bufferToDocument(it, charset) }
   }
 
   companion object {
-    private const val TEXT_YAML_VALUE = "text/yaml"
+    const val TEXT_YAML_VALUE = "text/yaml"
     val TEXT_YAML = MediaType.valueOf(TEXT_YAML_VALUE)
+  }
+}
+
+@Component
+class AsyncSpecReader {
+  private val parser = Async20Parser()
+
+  init {
+    AMF.init().get()
+  }
+
+  companion object {
+    val ASYNC20_PROFILE: ProfileName = ProfileName.apply("Async20Profile")
+  }
+
+  fun bufferToDocument(buffer: DataBuffer, charset: Charset): Mono<Document> {
+    return Mono.create {
+      try {
+        val msg = buffer.toString(charset)
+
+        val model: Document = parser
+          .parseStringAsync(msg)
+          .get() as Document
+        val v: ValidationReport = AMF.validate(model, ASYNC20_PROFILE) { ASYNC20_PROFILE }
+          .get()
+
+        if (v.conforms()) {
+          it.success(model)
+        } else {
+          val errorMsg = v.results()
+            .map { it.message() }
+            .reduceRight { s, acc -> "$s\\n$acc" }
+          it.error(IllegalArgumentException(errorMsg))
+        }
+      } catch (e: Exception) {
+        it.error(IllegalArgumentException(e.localizedMessage, e))
+      }
+    }
   }
 }
