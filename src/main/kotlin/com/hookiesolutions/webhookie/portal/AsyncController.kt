@@ -15,7 +15,10 @@ class AsyncController(
   private val service: AsyncApiService
 ) {
   @PreAuthorize("hasAuthority('WH_CONSUMER')")
-  @PostMapping("/async/read", consumes = [TEXT_YAML_VALUE], produces = [APPLICATION_JSON_VALUE])
+  @PostMapping("/async/read",
+    consumes = [TEXT_YAML_VALUE, APPLICATION_JSON_VALUE],
+    produces = [APPLICATION_JSON_VALUE]
+  )
   fun read(@RequestBody body: Document): Mono<WebhookGroup> {
     return service.read(body)
   }
