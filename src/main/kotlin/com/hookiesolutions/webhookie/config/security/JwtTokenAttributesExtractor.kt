@@ -15,16 +15,20 @@ import reactor.core.publisher.Mono
 @Component
 class JwtTokenAttributesExtractor(
   private val log: Logger,
-  private val securityProperties: WebHookieSecurityProperties
 ) {
-  fun read(jwt: Jwt): Mono<List<String>> {
+  fun readList(jwt: Jwt, claimJsonPath: String): Mono<List<String>> {
+    return read(jwt, claimJsonPath)
+  }
+
+  fun <T> read(jwt: Jwt, claimJsonPath: String): Mono<T> {
     return Mono.create { sink ->
       try {
-        val roles: List<String> = JsonPathUtils.evaluate(jwt.claims, securityProperties.roles.jwkJsonPath)
-        sink.success(roles)
+        val value: T = JsonPathUtils.evaluate(jwt.claims, claimJsonPath)
+        sink.success(value)
       } catch (ex: Exception) {
-        log.error("Unable to extract jwt values! cause: '{}'", ex.localizedMessage)
-        sink.error(BadJwtException(ex.localizedMessage, ex))
+        val message = "Unable to extract jwt values for path: '$claimJsonPath'!"
+        log.error(message, ex)
+        sink.error(BadJwtException(message, ex))
       }
     }
   }

@@ -43,7 +43,7 @@ class AsyncDocumentEncoder: Encoder<Document>, HttpMessageWriter<Document> {
     return mutableListOf(
       MediaType.TEXT_PLAIN,
       MediaType.APPLICATION_JSON,
-      MediaType.valueOf("application/yml")
+      AsyncDocumentReader.TEXT_YAML
     )
   }
 
@@ -51,7 +51,7 @@ class AsyncDocumentEncoder: Encoder<Document>, HttpMessageWriter<Document> {
     return mutableListOf(
       MediaType.TEXT_PLAIN,
       MediaType.APPLICATION_JSON,
-      MediaType.valueOf("application/yml")
+      AsyncDocumentReader.TEXT_YAML
     )
   }
 

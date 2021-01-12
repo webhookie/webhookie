@@ -22,7 +22,7 @@ class AsyncDocumentReader: HttpMessageReader<Document> {
     return mutableListOf(
       MediaType.TEXT_PLAIN,
       MediaType.APPLICATION_JSON,
-      MediaType.valueOf("application/yml")
+      TEXT_YAML
     )
   }
 
@@ -77,5 +77,10 @@ class AsyncDocumentReader: HttpMessageReader<Document> {
 
     return message.body.toMono()
       .map { bufferToDocument(it, charset) }
+  }
+
+  companion object {
+    private const val TEXT_YAML_VALUE = "text/yaml"
+    val TEXT_YAML = MediaType.valueOf(TEXT_YAML_VALUE)
   }
 }

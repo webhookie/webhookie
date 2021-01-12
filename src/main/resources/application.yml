@@ -12,8 +12,10 @@ webhookie:
   security:
     audience: ${WH_SECURITY_AUD:account}
     login-url: ${WH_SECURITY_LOGIN_URL:http://localhost:8080}
+    groups:
+      jwk-json-path: ${WH_SECURITY_GROUPS_JSON_PATH:$.groups}
     roles:
-      jwk-json-path: ${WH_SECURITY_ROLES_JSON_PATH:$.realm_access.roles} # if autoAssign is false and cannot find WH_CONSUMER then respond with 403
+      jwk-json-path: ${WH_SECURITY_ROLES_JSON_PATH:$.realm_access.roles}
       auto-assign-consumer: ${WH_SECURITY_AUTO_ASSIGN_CONSUMER_ROLE:true}
     no-auth:
       pathMatchers:
