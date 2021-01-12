@@ -1,5 +1,6 @@
 package com.hookiesolutions.webhookie
 
+import amf.client.AMF
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.boot.runApplication
@@ -18,14 +19,16 @@ import reactor.tools.agent.ReactorDebugAgent
 class WebhookieApplication
 
 fun main(args: Array<String>) {
-	runApplication<WebhookieApplication>(*args)
+  AMF.init().get()
+
+  runApplication<WebhookieApplication>(*args)
 }
 
 @Configuration
 @Profile("dev")
 class DebugAgentConfig {
-	@EventListener(ApplicationReadyEvent::class)
-	fun initForDebug() {
-		ReactorDebugAgent.init()
-	}
+  @EventListener(ApplicationReadyEvent::class)
+  fun initForDebug() {
+    ReactorDebugAgent.init()
+  }
 }

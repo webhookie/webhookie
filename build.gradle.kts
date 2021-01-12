@@ -21,12 +21,15 @@ configurations {
 
 repositories {
 	maven { url = uri("https://repo.spring.io/milestone") }
+	maven { url = uri("https://repository-master.mulesoft.org/nexus/content/repositories/releases") }
+	maven { url = uri("https://jitpack.io") }
 	mavenCentral()
 }
 
 extra["springdocVersion"] = "1.5.0"
 extra["jsonPathVersion"] = "2.5.0"
 extra["bolEncryptedVersion"] = "2.6.0"
+extra["amfVersion"] = "4.5.1"
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
@@ -53,6 +56,8 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+
+	compileOnly("com.github.amlorg:amf-client_2.12:${property("amfVersion")}")
 
 	implementation("com.jayway.jsonpath:json-path:${property("jsonPathVersion")}")
 
