@@ -1,4 +1,4 @@
-package com.hookiesolutions.webhookie.config.security
+package com.hookiesolutions.webhookie.config.security.jwt
 
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.oauth2.jwt.Jwt

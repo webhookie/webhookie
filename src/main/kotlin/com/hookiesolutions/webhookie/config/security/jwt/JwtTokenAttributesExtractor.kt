@@ -1,4 +1,4 @@
-package com.hookiesolutions.webhookie.config.security
+package com.hookiesolutions.webhookie.config.security.jwt
 
 import org.slf4j.Logger
 import org.springframework.integration.json.JsonPathUtils

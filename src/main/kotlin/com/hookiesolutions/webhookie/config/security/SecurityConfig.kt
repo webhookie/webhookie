@@ -1,5 +1,7 @@
 package com.hookiesolutions.webhookie.config.security
 
+import com.hookiesolutions.webhookie.config.security.jwt.AudienceValidator
+import com.hookiesolutions.webhookie.config.security.jwt.JwtAuthoritiesConverter
 import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean

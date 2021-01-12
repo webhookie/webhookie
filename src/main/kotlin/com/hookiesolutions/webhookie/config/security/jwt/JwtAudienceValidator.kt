@@ -1,5 +1,6 @@
-package com.hookiesolutions.webhookie.config.security
+package com.hookiesolutions.webhookie.config.security.jwt
 
+import com.hookiesolutions.webhookie.config.security.WebHookieSecurityProperties
 import org.springframework.security.oauth2.core.OAuth2Error
 import org.springframework.security.oauth2.core.OAuth2TokenValidator
 import org.springframework.security.oauth2.core.OAuth2TokenValidatorResult
