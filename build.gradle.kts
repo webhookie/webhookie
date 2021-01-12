@@ -91,3 +91,9 @@ tasks.getByName<BootBuildImage>("bootBuildImage") {
 	version = project.version.toString().replace("-SNAPSHOT", "")
 	imageName = "hookiesolutions/${project.name}:$version"
 }
+
+configure<SourceSetContainer> {
+	named("main") {
+		java.srcDir("src/main/kotlin")
+	}
+}
