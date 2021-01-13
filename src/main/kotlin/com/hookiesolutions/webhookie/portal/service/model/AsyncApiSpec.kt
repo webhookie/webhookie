@@ -1,4 +1,4 @@
-package com.hookiesolutions.webhookie.portal.model
+package com.hookiesolutions.webhookie.portal.service.model
 
 data class AsyncApiSpec(
   val raw: String,

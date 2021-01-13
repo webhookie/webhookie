@@ -21,7 +21,14 @@ import java.nio.charset.Charset
 @Component
 class AsyncDocumentEncoder: Encoder<Document>, HttpMessageWriter<Document> {
   override fun canEncode(elementType: ResolvableType, mimeType: MimeType?): Boolean {
-    return elementType.isAssignableFrom(Document::class.java)
+    return false
+/*
+    return if(elementType.rawClass == null) {
+      false
+    } else {
+      return Document::class.java.isAssignableFrom(elementType.rawClass!!)
+    }
+*/
   }
 
   override fun encode(
@@ -56,7 +63,7 @@ class AsyncDocumentEncoder: Encoder<Document>, HttpMessageWriter<Document> {
   }
 
   override fun canWrite(elementType: ResolvableType, mediaType: MediaType?): Boolean {
-    return elementType.isAssignableFrom(Document::class.java)
+    return false
   }
 
   override fun write(

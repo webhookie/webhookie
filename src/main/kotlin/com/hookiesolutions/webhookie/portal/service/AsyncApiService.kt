@@ -3,8 +3,8 @@ package com.hookiesolutions.webhookie.portal.service
 import amf.client.model.document.Document
 import amf.plugins.domain.webapi.models.EndPoint
 import com.hookiesolutions.webhookie.common.service.YamlService
-import com.hookiesolutions.webhookie.portal.model.AsyncApiSpec
-import com.hookiesolutions.webhookie.portal.model.WebhookGroup
+import com.hookiesolutions.webhookie.portal.service.model.AsyncApiSpec
+import com.hookiesolutions.webhookie.portal.service.model.WebhookGroup
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
