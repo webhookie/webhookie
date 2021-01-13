@@ -8,7 +8,6 @@ import org.slf4j.Logger
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.event.EventListener
-import org.springframework.data.mongodb.config.GeoJsonConfiguration
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.index.MongoPersistentEntityIndexResolver
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext
@@ -27,7 +26,7 @@ class CompanyMongoConfig(
   private val mongoTemplate: ReactiveMongoTemplate,
   private val mongoMappingContext: MongoMappingContext,
   private val logger: Logger
-) : GeoJsonConfiguration() {
+) {
   @EventListener(ApplicationReadyEvent::class)
   fun initIndicesAfterStartup() {
     val resolver = MongoPersistentEntityIndexResolver(mongoMappingContext)
