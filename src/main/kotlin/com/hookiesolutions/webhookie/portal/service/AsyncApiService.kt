@@ -1,4 +1,4 @@
-package com.hookiesolutions.webhookie.portal
+package com.hookiesolutions.webhookie.portal.service
 
 import amf.client.model.document.Document
 import amf.plugins.domain.webapi.models.EndPoint

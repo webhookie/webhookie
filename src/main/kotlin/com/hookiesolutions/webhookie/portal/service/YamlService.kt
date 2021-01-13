@@ -1,4 +1,4 @@
-package com.hookiesolutions.webhookie.portal
+package com.hookiesolutions.webhookie.portal.service
 
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
