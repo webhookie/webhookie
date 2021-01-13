@@ -2,6 +2,7 @@ package com.hookiesolutions.webhookie.portal.service
 
 import amf.client.model.document.Document
 import amf.plugins.domain.webapi.models.EndPoint
+import com.hookiesolutions.webhookie.common.service.YamlService
 import com.hookiesolutions.webhookie.portal.model.AsyncApiSpec
 import com.hookiesolutions.webhookie.portal.model.WebhookGroup
 import org.springframework.stereotype.Service

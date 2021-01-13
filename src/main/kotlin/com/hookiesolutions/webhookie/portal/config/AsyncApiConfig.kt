@@ -3,8 +3,8 @@ package com.hookiesolutions.webhookie.portal.config
 import amf.ProfileName
 import amf.client.parse.Async20Parser
 import amf.client.parse.Parser
-import com.hookiesolutions.webhookie.portal.io.AsyncDocumentEncoder
-import com.hookiesolutions.webhookie.portal.io.AsyncDocumentReader
+import com.hookiesolutions.webhookie.portal.web.io.AsyncDocumentEncoder
+import com.hookiesolutions.webhookie.portal.web.io.AsyncDocumentReader
 import org.springframework.boot.web.codec.CodecCustomizer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

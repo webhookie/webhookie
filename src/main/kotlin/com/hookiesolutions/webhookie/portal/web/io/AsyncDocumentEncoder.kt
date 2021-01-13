@@ -1,4 +1,4 @@
-package com.hookiesolutions.webhookie.portal.io
+package com.hookiesolutions.webhookie.portal.web.io
 
 import amf.client.model.document.Document
 import org.reactivestreams.Publisher
