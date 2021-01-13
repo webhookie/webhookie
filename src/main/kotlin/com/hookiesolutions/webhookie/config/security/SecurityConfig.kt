@@ -40,8 +40,8 @@ class SecurityConfig(
   private val jwtAuthoritiesConverter: JwtAuthoritiesConverter
 ) {
 
-
   //TODO: there must be a better way customizing DefaultMethodSecurityExpressionHandler for Webflux Security
+  // Maybe look into https://www.youtube.com/watch?v=x0UE5THrSZM
   @Bean
   fun handler(
     permissionEvaluator: AllowAllPermissionEvaluator,
