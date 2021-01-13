@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Configuration
  * @since 11/1/21 15:34
  */
 @Configuration
-class PortalWebConfig {
+class AsyncApiConfig {
   @Bean
   fun asyncCodecCustomizer(
     reader: AsyncDocumentReader,
