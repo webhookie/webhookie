@@ -1,6 +1,6 @@
 package com.hookiesolutions.webhookie.consumer.web
 
-import com.hookiesolutions.webhookie.consumer.web.PublisherController.Companion.CONSUMER_REQUEST_MAPPING
+import com.hookiesolutions.webhookie.consumer.web.PublisherController.Companion.REQUEST_MAPPING_CONSUMER
 import org.springdoc.core.GroupedOpenApi
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Configuration
 class ConsumerAPIDocs {
   @Bean
   fun consumerOpenApi(): GroupedOpenApi {
-    val paths = arrayOf("${CONSUMER_REQUEST_MAPPING}/**")
+    val paths = arrayOf("${REQUEST_MAPPING_CONSUMER}/**")
     return GroupedOpenApi
       .builder()
       .group("consumer")

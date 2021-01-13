@@ -5,7 +5,7 @@ import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_TOPIC
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_TRACE_ID
 import com.hookiesolutions.webhookie.config.web.OpenAPIConfig
-import com.hookiesolutions.webhookie.consumer.web.PublisherController.Companion.CONSUMER_REQUEST_MAPPING
+import com.hookiesolutions.webhookie.consumer.web.PublisherController.Companion.REQUEST_MAPPING_CONSUMER
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.slf4j.Logger
 import org.springframework.http.HttpHeaders
@@ -27,7 +27,7 @@ import reactor.kotlin.core.publisher.toMono
  */
 @RestController
 @SecurityRequirement(name = OpenAPIConfig.BASIC_SCHEME)
-@RequestMapping(CONSUMER_REQUEST_MAPPING)
+@RequestMapping(REQUEST_MAPPING_CONSUMER)
 class PublisherController(
   private val log: Logger,
   private val internalConsumerChannel: SubscribableChannel
@@ -56,6 +56,6 @@ class PublisherController(
   }
 
   companion object {
-    const val CONSUMER_REQUEST_MAPPING = "/consumer"
+    const val REQUEST_MAPPING_CONSUMER = "/consumer"
   }
 }
