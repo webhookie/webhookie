@@ -7,6 +7,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
+import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler
+import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
 import org.springframework.security.config.web.server.ServerHttpSecurity
@@ -37,6 +39,19 @@ class SecurityConfig(
   private val resourceServerProperties: OAuth2ResourceServerProperties,
   private val jwtAuthoritiesConverter: JwtAuthoritiesConverter
 ) {
+
+
+  //TODO: there must be a better way customizing DefaultMethodSecurityExpressionHandler for Webflux Security
+  @Bean
+  fun handler(
+    permissionEvaluator: AllowAllPermissionEvaluator,
+    @Suppress("SpringJavaInjectionPointsAutowiringInspection")
+    methodSecurityExpressionHandler: DefaultMethodSecurityExpressionHandler
+  ): MethodSecurityExpressionHandler {
+    methodSecurityExpressionHandler.setPermissionEvaluator(permissionEvaluator)
+    return methodSecurityExpressionHandler
+  }
+
   @Bean
   internal fun springSecurityFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain {
     return http {
