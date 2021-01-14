@@ -26,7 +26,7 @@ repositories {
 	mavenCentral()
 }
 
-extra["springdocVersion"] = "1.5.0"
+extra["springdocVersion"] = "1.5.2"
 extra["jsonPathVersion"] = "2.5.0"
 extra["bolEncryptedVersion"] = "2.6.0"
 extra["amfVersion"] = "4.5.1"
