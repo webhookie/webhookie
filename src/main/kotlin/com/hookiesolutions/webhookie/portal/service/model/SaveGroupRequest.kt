@@ -8,7 +8,7 @@ import javax.validation.constraints.NotBlank
  * @author Arthur Kazemi<bidadh@gmail.com>
  * @since 13/1/21 18:34
  */
-data class CreateGroupRequest(
+data class SaveGroupRequest(
   @field:NotBlank
   val name: String,
   @field:NotBlank

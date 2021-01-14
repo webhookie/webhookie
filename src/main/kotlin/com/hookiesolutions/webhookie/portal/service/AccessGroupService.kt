@@ -6,7 +6,7 @@ import com.hookiesolutions.webhookie.common.exception.EntityNotFoundException
 import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.byId
 import com.hookiesolutions.webhookie.portal.domain.AccessGroup.Updates.Companion.updateGroupDetails
 import com.hookiesolutions.webhookie.portal.domain.ConsumerGroup
-import com.hookiesolutions.webhookie.portal.service.model.CreateGroupRequest
+import com.hookiesolutions.webhookie.portal.service.model.SaveGroupRequest
 import org.slf4j.Logger
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.data.mongodb.core.FindAndModifyOptions
@@ -29,7 +29,7 @@ class AccessGroupService(
   private val log: Logger
 ) {
   @PreAuthorize("hasAuthority('$ROLE_ADMIN')")
-  fun createConsumerGroup(body: CreateGroupRequest): Mono<ConsumerGroup> {
+  fun createConsumerGroup(body: SaveGroupRequest): Mono<ConsumerGroup> {
     return mongoTemplate.insert(body.consumerGroup())
       .doOnSuccess {
         log.info("Consumer Group saved successfully with id: '{}'", it.id)
@@ -61,7 +61,7 @@ class AccessGroupService(
       .switchIfEmpty(EntityNotFoundException("Consumer Group '$id' cannot be found").toMono())
   }
 
-  fun updateConsumerGroupsById(id: String, body: CreateGroupRequest): Mono<ConsumerGroup> {
+  fun updateConsumerGroupsById(id: String, body: SaveGroupRequest): Mono<ConsumerGroup> {
     log.info("Updating Consumer Group by id: '{}'", id)
     return mongoTemplate
       .findAndModify(

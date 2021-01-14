@@ -2,7 +2,7 @@ package com.hookiesolutions.webhookie.portal.web
 
 import com.hookiesolutions.webhookie.portal.domain.ConsumerGroup
 import com.hookiesolutions.webhookie.portal.service.AccessGroupService
-import com.hookiesolutions.webhookie.portal.service.model.CreateGroupRequest
+import com.hookiesolutions.webhookie.portal.service.model.SaveGroupRequest
 import com.hookiesolutions.webhookie.portal.web.AccessGroupController.Companion.REQUEST_MAPPING_PORTAL_ADMIN
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -32,7 +32,7 @@ class AccessGroupController(
     consumes = [MediaType.APPLICATION_JSON_VALUE],
     produces = [MediaType.APPLICATION_JSON_VALUE]
   )
-  fun createConsumerGroup(@RequestBody @Valid bodyMono: Mono<CreateGroupRequest>): Mono<ConsumerGroup> {
+  fun createConsumerGroup(@RequestBody @Valid bodyMono: Mono<SaveGroupRequest>): Mono<ConsumerGroup> {
     return bodyMono
       .flatMap { accessGroupService.createConsumerGroup(it) }
   }
@@ -58,7 +58,7 @@ class AccessGroupController(
     consumes = [MediaType.APPLICATION_JSON_VALUE],
     produces = [MediaType.APPLICATION_JSON_VALUE]
   )
-  fun updateConsumerGroup(@PathVariable id: String, @RequestBody @Valid bodyMono: Mono<CreateGroupRequest>): Mono<ConsumerGroup> {
+  fun updateConsumerGroup(@PathVariable id: String, @RequestBody @Valid bodyMono: Mono<SaveGroupRequest>): Mono<ConsumerGroup> {
     return bodyMono
       .flatMap { accessGroupService.updateConsumerGroupsById(id, it) }
   }
