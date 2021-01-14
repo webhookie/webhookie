@@ -9,6 +9,7 @@ import org.springframework.dao.DuplicateKeyException
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 /**
@@ -33,5 +34,10 @@ class AccessGroupService(
       .doOnError {
         log.error(it.localizedMessage)
       }
+  }
+
+  fun allConsumerGroups(): Flux<ConsumerGroup> {
+    log.info("Fetching all enabled Consumer Groups...")
+    return mongoTemplate.findAll(ConsumerGroup::class.java)
   }
 }

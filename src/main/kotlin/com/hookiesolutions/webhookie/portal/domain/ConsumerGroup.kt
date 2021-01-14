@@ -17,5 +17,6 @@ data class ConsumerGroup(
   override val name: String,
   override val description: String,
   @Indexed(unique = true)
-  override val iamGroupName: String
+  override val iamGroupName: String,
+  override val enabled: Boolean = true
 ) : AccessGroup, AbstractEntity()
