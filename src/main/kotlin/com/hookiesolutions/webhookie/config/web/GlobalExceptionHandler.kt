@@ -1,6 +1,7 @@
 package com.hookiesolutions.webhookie.config.web
 
 import com.hookiesolutions.webhookie.common.exception.EmptyResultException
+import com.hookiesolutions.webhookie.common.exception.EntityExistsException
 import com.hookiesolutions.webhookie.common.exception.EntityNotFoundException
 import com.hookiesolutions.webhookie.common.exception.ValidationException
 import org.springframework.dao.DuplicateKeyException
@@ -52,6 +53,16 @@ class GlobalExceptionHandler {
   @ResponseStatus(HttpStatus.CONFLICT)
   fun handleDuplicateKeyException(ex: DuplicateKeyException): Mono<Any> {
     return mutableMapOf("message" to ex.localizedMessage).toMono()
+  }
+
+  @ExceptionHandler(EntityExistsException::class)
+  @ResponseStatus(HttpStatus.CONFLICT)
+  fun handleEntityExistsException(ex: EntityExistsException): Mono<Any> {
+    return mutableMapOf(
+      "message" to ex.localizedMessage,
+      "key" to ex.key
+    )
+      .toMono()
   }
 
   @ExceptionHandler(EmptyResultException::class)
