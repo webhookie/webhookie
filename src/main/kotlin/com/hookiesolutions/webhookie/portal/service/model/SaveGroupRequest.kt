@@ -1,6 +1,8 @@
 package com.hookiesolutions.webhookie.portal.service.model
 
+import com.hookiesolutions.webhookie.portal.domain.AccessGroup
 import com.hookiesolutions.webhookie.portal.domain.ConsumerGroup
+import com.hookiesolutions.webhookie.portal.domain.ProviderGroup
 import javax.validation.constraints.NotBlank
 
 /**
@@ -16,7 +18,11 @@ data class SaveGroupRequest(
   @field:NotBlank
   val iamGroupName: String
 ) {
-  fun consumerGroup(): ConsumerGroup {
-    return ConsumerGroup(name, description, iamGroupName)
+  fun accessGroup(clazz: Class<out AccessGroup>): AccessGroup {
+    return if(clazz == ConsumerGroup::class.java) {
+      ConsumerGroup(name, description, iamGroupName)
+    } else {
+      ProviderGroup(name, description, iamGroupName)
+    }
   }
 }

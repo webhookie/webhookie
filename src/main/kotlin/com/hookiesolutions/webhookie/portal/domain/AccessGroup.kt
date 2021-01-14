@@ -12,6 +12,7 @@ import org.springframework.data.mongodb.core.query.Update
  * @since 13/1/21 14:05
  */
 interface AccessGroup {
+  var id: String?
   val name: String
   val description: String
   val iamGroupName: String

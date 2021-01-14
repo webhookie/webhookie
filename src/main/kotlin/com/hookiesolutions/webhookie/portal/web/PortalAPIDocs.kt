@@ -1,6 +1,6 @@
 package com.hookiesolutions.webhookie.portal.web
 
-import com.hookiesolutions.webhookie.portal.web.AccessGroupController.Companion.REQUEST_MAPPING_PORTAL_ADMIN
+import com.hookiesolutions.webhookie.portal.web.AbstractAccessGroupController.Companion.REQUEST_MAPPING_PORTAL_ADMIN
 import org.springdoc.core.GroupedOpenApi
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
