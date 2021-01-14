@@ -42,17 +42,20 @@ class AccessGroupService(
       }
   }
 
+  @PreAuthorize("hasAuthority('$ROLE_ADMIN')")
   fun allConsumerGroups(): Flux<ConsumerGroup> {
     log.info("Fetching all Consumer Groups...")
     return mongoTemplate.findAll(ConsumerGroup::class.java)
   }
 
+  @PreAuthorize("hasAuthority('$ROLE_ADMIN')")
   fun consumerGroupsById(id: String): Mono<ConsumerGroup> {
     log.info("Fetching Consumer Group by id: '{}'", id)
     return mongoTemplate.findById(id, ConsumerGroup::class.java)
       .switchIfEmpty(EntityNotFoundException("Consumer Group '$id' cannot be found").toMono())
   }
 
+  @PreAuthorize("hasAuthority('$ROLE_ADMIN')")
   fun deleteConsumerGroupsById(id: String): Mono<Boolean> {
     log.info("Deleting Consumer Group by id: '{}'", id)
     return mongoTemplate.remove(query(byId(id)), ConsumerGroup::class.java)
@@ -61,6 +64,7 @@ class AccessGroupService(
       .switchIfEmpty(EntityNotFoundException("Consumer Group '$id' cannot be found").toMono())
   }
 
+  @PreAuthorize("hasAuthority('$ROLE_ADMIN')")
   fun updateConsumerGroupsById(id: String, body: SaveGroupRequest): Mono<ConsumerGroup> {
     log.info("Updating Consumer Group by id: '{}'", id)
     return mongoTemplate
