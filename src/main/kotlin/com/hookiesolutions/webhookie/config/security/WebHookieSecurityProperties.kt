@@ -9,7 +9,8 @@ data class WebHookieSecurityProperties(
   val audience: String,
   val loginUrl: String,
   val roles: RolesConfig,
-  val groups: GroupsConfig,
+  val groups: PathConfig,
+  val email: PathConfig,
   val noAuth: NoAuth = NoAuth()
 ) {
   data class NoAuth(
@@ -22,7 +23,7 @@ data class WebHookieSecurityProperties(
     val roleMapping: Map<String, String> = mapOf()
   )
 
-  data class GroupsConfig(
+  data class PathConfig(
     val jwkJsonPath: String
   )
 }

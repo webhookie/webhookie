@@ -22,9 +22,11 @@ class JwtAuthoritiesConverter(
   override fun convert(jwt: Jwt): Mono<AbstractAuthenticationToken>? {
     val rolesMono = tokenAttributesExtractor.readList(jwt, securityProperties.roles.jwkJsonPath)
     val groupsMono = tokenAttributesExtractor.readList(jwt, securityProperties.groups.jwkJsonPath)
+    val emailMono: Mono<String> = tokenAttributesExtractor.read(jwt, securityProperties.email.jwkJsonPath)
     return rolesMono
       .map { authoritiesMapper.map(it) }
       .zipWith(groupsMono)
-      .map { WebhookieJwtAuthenticationToken(jwt, it.t1, it.t2) }
+      .zipWith(emailMono)
+      .map { WebhookieJwtAuthenticationToken(jwt, it.t1.t1, it.t1.t2, it.t2) }
   }
 }

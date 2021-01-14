@@ -7,5 +7,6 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 data class WebhookieJwtAuthenticationToken(
   val jwt: Jwt,
   val roles: Collection<GrantedAuthority>,
-  val groups: List<String>
+  val groups: List<String>,
+  val email: String
 ): JwtAuthenticationToken(jwt, roles)

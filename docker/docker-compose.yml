@@ -27,7 +27,8 @@ services:
       - WH_SECURITY_AUD=account
       - WH_SECURITY_LOGIN_URL=http://localhost:8080
       - WH_SECURITY_ROLES_JSON_PATH=$$.realm_access.roles
-      - WH_SECURITY_GROUPS_JSON_PATH=$$.roles
+      - WH_SECURITY_GROUPS_JSON_PATH=$$.groups
+      - WH_SECURITY_EMAIL_JSON_PATH=$$.email
       - WH_SECURITY_AUTO_ASSIGN_CONSUMER_ROLE=true
       - SPRING_CONFIG_IMPORT=optional:file:/etc/webhookie/roles.yml
     ports:
@@ -54,6 +55,7 @@ services:
       - WH_SECURITY_LOGIN_URL=http://localhost:8080
       - WH_SECURITY_ROLES_JSON_PATH=$$['https://webhookie.com/roles']
       - WH_SECURITY_GROUPS_JSON_PATH=$$['https://webhookie.com/groups']
+      - WH_SECURITY_EMAIL_JSON_PATH=$$.email
       - WH_SECURITY_AUTO_ASSIGN_CONSUMER_ROLE=true
       - SPRING_CONFIG_IMPORT=optional:file:/etc/webhookie/roles.yml
     ports:
