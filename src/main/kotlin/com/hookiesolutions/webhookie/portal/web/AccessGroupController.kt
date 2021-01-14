@@ -1,9 +1,11 @@
 package com.hookiesolutions.webhookie.portal.web
 
+import com.hookiesolutions.webhookie.config.web.OpenAPIConfig
 import com.hookiesolutions.webhookie.portal.domain.ConsumerGroup
 import com.hookiesolutions.webhookie.portal.service.AccessGroupService
 import com.hookiesolutions.webhookie.portal.service.model.SaveGroupRequest
 import com.hookiesolutions.webhookie.portal.web.AccessGroupController.Companion.REQUEST_MAPPING_PORTAL_ADMIN
+import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -24,6 +26,7 @@ import javax.validation.Valid
  */
 @RestController
 @RequestMapping(REQUEST_MAPPING_PORTAL_ADMIN)
+@SecurityRequirement(name = OpenAPIConfig.OAUTH2_SCHEME)
 class AccessGroupController(
   private val accessGroupService: AccessGroupService
 ) {

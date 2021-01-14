@@ -1,9 +1,12 @@
 package com.hookiesolutions.webhookie.config.web
 
-import io.swagger.v3.oas.annotations.OpenAPIDefinition
-import io.swagger.v3.oas.annotations.enums.SecuritySchemeType
-import io.swagger.v3.oas.annotations.info.Info
-import io.swagger.v3.oas.annotations.security.SecurityScheme
+import io.swagger.v3.oas.models.Components
+import io.swagger.v3.oas.models.OpenAPI
+import io.swagger.v3.oas.models.info.Info
+import io.swagger.v3.oas.models.security.OAuthFlow
+import io.swagger.v3.oas.models.security.OAuthFlows
+import io.swagger.v3.oas.models.security.SecurityScheme
+import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 /**
@@ -12,19 +15,34 @@ import org.springframework.context.annotation.Configuration
  * @since 3/12/20 17:33
  */
 @Configuration
+/*
 @OpenAPIDefinition(
     info = Info(
         title = "webhookie API",
         version = "1.0.0"
     )
 )
-@SecurityScheme(
-    name = OpenAPIConfig.BASIC_SCHEME,
-    type = SecuritySchemeType.HTTP,
-    scheme = "basic"
-)
+*/
+//@SecurityScheme(
+//  name = OpenAPIConfig.OAUTH2_SCHEME,
+//  type = SecuritySchemeType.OAUTH2,
+//  scheme = "oauth2",
+////  openIdConnectUrl = "https://webhookie.au.auth0.com/.well-known/openid-configuration",
+//  flows = OAuthFlows(
+//    authorizationCode = OAuthFlow(
+//      authorizationUrl = "https://webhookie.au.auth0.com/authorize",
+//      tokenUrl = "https://webhookie.au.auth0.com/oauth/token"
+//    )
+//  ),
+//
+//  extensions = [
+//    Extension(name = "x-tokenName", properties = [
+//      ExtensionProperty(name = "id_token", value = "id_token")
+//    ])
+//  ]
+//)
 class OpenAPIConfig {
   companion object {
-    const val BASIC_SCHEME = "basicScheme"
+    const val OAUTH2_SCHEME = "oauth2Scheme"
   }
 }

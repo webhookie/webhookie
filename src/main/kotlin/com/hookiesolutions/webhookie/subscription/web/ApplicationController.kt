@@ -21,7 +21,7 @@ import javax.validation.Valid
  * @since 17/12/20 18:18
  */
 @RestController
-@SecurityRequirement(name = OpenAPIConfig.BASIC_SCHEME)
+@SecurityRequirement(name = OpenAPIConfig.OAUTH2_SCHEME)
 class ApplicationController(
   private val log: Logger,
   private val companyService: CompanyService

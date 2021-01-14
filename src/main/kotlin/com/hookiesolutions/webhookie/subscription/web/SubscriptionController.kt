@@ -29,7 +29,7 @@ import javax.validation.Valid
  * @since 17/12/20 18:20
  */
 @RestController
-@SecurityRequirement(name = OpenAPIConfig.BASIC_SCHEME)
+@SecurityRequirement(name = OpenAPIConfig.OAUTH2_SCHEME)
 class SubscriptionController(
   private val timeMachine: TimeMachine,
   private val mongoTemplate: ReactiveMongoTemplate,

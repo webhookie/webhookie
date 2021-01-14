@@ -26,7 +26,7 @@ import reactor.kotlin.core.publisher.toMono
  * @since 2/12/20 13:47
  */
 @RestController
-@SecurityRequirement(name = OpenAPIConfig.BASIC_SCHEME)
+@SecurityRequirement(name = OpenAPIConfig.OAUTH2_SCHEME)
 @RequestMapping(REQUEST_MAPPING_CONSUMER)
 class PublisherController(
   private val log: Logger,
