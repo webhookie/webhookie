@@ -6,6 +6,7 @@ import com.hookiesolutions.webhookie.portal.service.model.CreateGroupRequest
 import com.hookiesolutions.webhookie.portal.web.AccessGroupController.Companion.REQUEST_MAPPING_PORTAL_ADMIN
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -40,6 +41,14 @@ class AccessGroupController(
   )
   fun allConsumerGroups(): Flux<ConsumerGroup> {
     return accessGroupService.allConsumerGroups()
+  }
+
+  @GetMapping(
+    value = ["$REQUEST_MAPPING_CONSUMER_GROUPS/{id}"],
+    produces = [MediaType.APPLICATION_JSON_VALUE]
+  )
+  fun getConsumerGroup(@PathVariable id: String): Mono<ConsumerGroup> {
+    return accessGroupService.consumerGroupsById(id)
   }
 
   companion object {
