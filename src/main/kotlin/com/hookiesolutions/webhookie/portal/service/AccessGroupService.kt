@@ -3,11 +3,13 @@ package com.hookiesolutions.webhookie.portal.service
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_ADMIN
 import com.hookiesolutions.webhookie.common.exception.EntityExistsException
 import com.hookiesolutions.webhookie.common.exception.EntityNotFoundException
+import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.byId
 import com.hookiesolutions.webhookie.portal.domain.ConsumerGroup
 import com.hookiesolutions.webhookie.portal.service.model.CreateGroupRequest
 import org.slf4j.Logger
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
+import org.springframework.data.mongodb.core.query.Query.query
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
@@ -46,6 +48,14 @@ class AccessGroupService(
   fun consumerGroupsById(id: String): Mono<ConsumerGroup> {
     log.info("Fetching Consumer Group by id: '{}'", id)
     return mongoTemplate.findById(id, ConsumerGroup::class.java)
+      .switchIfEmpty(EntityNotFoundException("Consumer Group '$id' cannot be found").toMono())
+  }
+
+  fun deleteConsumerGroupsById(id: String): Mono<Boolean> {
+    log.info("Deleting Consumer Group by id: '{}'", id)
+    return mongoTemplate.remove(query(byId(id)), ConsumerGroup::class.java)
+      .map { it.deletedCount == 1L }
+      .filter { it }
       .switchIfEmpty(EntityNotFoundException("Consumer Group '$id' cannot be found").toMono())
   }
 }

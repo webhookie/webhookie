@@ -5,6 +5,7 @@ import com.hookiesolutions.webhookie.portal.service.AccessGroupService
 import com.hookiesolutions.webhookie.portal.service.model.CreateGroupRequest
 import com.hookiesolutions.webhookie.portal.web.AccessGroupController.Companion.REQUEST_MAPPING_PORTAL_ADMIN
 import org.springframework.http.MediaType
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -49,6 +50,15 @@ class AccessGroupController(
   )
   fun getConsumerGroup(@PathVariable id: String): Mono<ConsumerGroup> {
     return accessGroupService.consumerGroupsById(id)
+  }
+
+  @DeleteMapping(
+    value = ["$REQUEST_MAPPING_CONSUMER_GROUPS/{id}"],
+    produces = [MediaType.TEXT_PLAIN_VALUE]
+  )
+  fun deleteConsumerGroup(@PathVariable id: String): Mono<String> {
+    return accessGroupService.deleteConsumerGroupsById(id)
+      .map { it.toString() }
   }
 
   companion object {
