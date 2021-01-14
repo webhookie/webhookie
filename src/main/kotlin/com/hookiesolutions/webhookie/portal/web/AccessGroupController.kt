@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -50,6 +51,16 @@ class AccessGroupController(
   )
   fun getConsumerGroup(@PathVariable id: String): Mono<ConsumerGroup> {
     return accessGroupService.consumerGroupsById(id)
+  }
+
+  @PutMapping(
+    value = ["$REQUEST_MAPPING_CONSUMER_GROUPS/{id}"],
+    consumes = [MediaType.APPLICATION_JSON_VALUE],
+    produces = [MediaType.APPLICATION_JSON_VALUE]
+  )
+  fun updateConsumerGroup(@PathVariable id: String, @RequestBody @Valid bodyMono: Mono<CreateGroupRequest>): Mono<ConsumerGroup> {
+    return bodyMono
+      .flatMap { accessGroupService.updateConsumerGroupsById(id, it) }
   }
 
   @DeleteMapping(

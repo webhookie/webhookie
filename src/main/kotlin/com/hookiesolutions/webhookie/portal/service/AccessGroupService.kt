@@ -4,10 +4,12 @@ import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.R
 import com.hookiesolutions.webhookie.common.exception.EntityExistsException
 import com.hookiesolutions.webhookie.common.exception.EntityNotFoundException
 import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.byId
+import com.hookiesolutions.webhookie.portal.domain.AccessGroup.Updates.Companion.updateGroupDetails
 import com.hookiesolutions.webhookie.portal.domain.ConsumerGroup
 import com.hookiesolutions.webhookie.portal.service.model.CreateGroupRequest
 import org.slf4j.Logger
 import org.springframework.dao.DuplicateKeyException
+import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.query.Query.query
 import org.springframework.security.access.prepost.PreAuthorize
@@ -56,6 +58,21 @@ class AccessGroupService(
     return mongoTemplate.remove(query(byId(id)), ConsumerGroup::class.java)
       .map { it.deletedCount == 1L }
       .filter { it }
+      .switchIfEmpty(EntityNotFoundException("Consumer Group '$id' cannot be found").toMono())
+  }
+
+  fun updateConsumerGroupsById(id: String, body: CreateGroupRequest): Mono<ConsumerGroup> {
+    log.info("Updating Consumer Group by id: '{}'", id)
+    return mongoTemplate
+      .findAndModify(
+        query(byId(id)),
+        updateGroupDetails(body.consumerGroup()),
+        FindAndModifyOptions.options().returnNew(true),
+        ConsumerGroup::class.java
+      )
+      .onErrorMap(DuplicateKeyException::class.java) {
+        EntityExistsException(body.iamGroupName, "Duplicate IAM Group mapping: ${body.iamGroupName}")
+      }
       .switchIfEmpty(EntityNotFoundException("Consumer Group '$id' cannot be found").toMono())
   }
 }
