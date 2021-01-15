@@ -10,6 +10,12 @@ webhookie:
   security:
     audience: KbsOSWkS6GWvmh20mg24UdnrKwgUMfvK
     login-url: http://localhost:8080
+    oauth2:
+      authorization-uri: authorize
+      token-uri: oauth/token
+      token-name: id_token
+    email:
+      jwk-json-path: $.email
     groups:
       jwk-json-path: $['https://webhookie.com/groups']
     roles:

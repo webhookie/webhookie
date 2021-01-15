@@ -10,6 +10,12 @@ webhookie:
   security:
     audience: account
     login-url: http://localhost:8080
+    oauth2:
+      authorization-uri: /protocol/openid-connect/auth
+      token-uri: /protocol/openid-connect/token
+      token-name: access_token
+    email:
+      jwk-json-path: $.email
     groups:
       jwk-json-path: $.groups
     roles:

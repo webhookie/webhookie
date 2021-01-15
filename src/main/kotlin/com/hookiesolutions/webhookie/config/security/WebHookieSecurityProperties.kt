@@ -11,6 +11,7 @@ data class WebHookieSecurityProperties(
   val roles: RolesConfig,
   val groups: PathConfig,
   val email: PathConfig,
+  val oauth2: OAuth2Properties,
   val noAuth: NoAuth = NoAuth()
 ) {
   data class NoAuth(
@@ -25,5 +26,11 @@ data class WebHookieSecurityProperties(
 
   data class PathConfig(
     val jwkJsonPath: String
+  )
+
+  data class OAuth2Properties(
+    val authorizationUri: String,
+    val tokenUri: String,
+    val tokenName: String = "access_token"
   )
 }

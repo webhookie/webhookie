@@ -14,6 +14,10 @@ webhookie:
     login-url: ${WH_SECURITY_LOGIN_URL:http://localhost:8080}
     groups:
       jwk-json-path: ${WH_SECURITY_GROUPS_JSON_PATH:$.groups}
+    oauth2:
+      authorization-uri: ${WH_SECURITY_OAUTH2_AUTHORIZATION_URI:/protocol/openid-connect/auth}
+      token-uri: ${WH_SECURITY_OAUTH2_TOKEN_URI:/protocol/openid-connect/token}
+      token-name: ${WH_SECURITY_OAUTH2_TOKEN_NAME:access_token}
     email:
       jwk-json-path: ${WH_SECURITY_EMAIL_JSON_PATH:$.email}
     roles:
