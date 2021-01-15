@@ -58,4 +58,8 @@ class ConsumerGroupController(
   override fun deleteGroup(@PathVariable id: String): Mono<String> {
     return super.deleteAccessGroup(id)
   }
+
+  companion object {
+    const val REQUEST_MAPPING_CONSUMER_GROUPS = "/consumergroups"
+  }
 }

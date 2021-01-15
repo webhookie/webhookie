@@ -30,10 +30,4 @@ abstract class AbstractAccessGroupController<T: AccessGroup>(
   fun deleteAccessGroup(id: String): Mono<String> {
     return accessGroupService.deleteGroupsById(id, ConsumerGroup::class.java)
   }
-
-  companion object {
-    const val REQUEST_MAPPING_PORTAL_ADMIN = "/portal/admin"
-    const val REQUEST_MAPPING_CONSUMER_GROUPS = "/consumergroups"
-    const val REQUEST_MAPPING_PROVIDER_GROUPS = "/providergroups"
-  }
 }

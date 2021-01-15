@@ -3,7 +3,7 @@ package com.hookiesolutions.webhookie.portal.web
 import com.hookiesolutions.webhookie.config.web.OpenAPIConfig
 import com.hookiesolutions.webhookie.portal.domain.AccessGroup
 import com.hookiesolutions.webhookie.portal.service.model.SaveGroupRequest
-import com.hookiesolutions.webhookie.portal.web.AbstractAccessGroupController.Companion.REQUEST_MAPPING_PORTAL_ADMIN
+import com.hookiesolutions.webhookie.portal.web.AccessGroupController.Companion.REQUEST_MAPPING_PORTAL_ADMIN
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -45,5 +45,9 @@ interface AccessGroupController {
     produces = [MediaType.TEXT_PLAIN_VALUE]
   )
   fun deleteGroup(id: String): Mono<String>
+
+  companion object {
+    const val REQUEST_MAPPING_PORTAL_ADMIN = "/portal/admin"
+  }
 }
 
