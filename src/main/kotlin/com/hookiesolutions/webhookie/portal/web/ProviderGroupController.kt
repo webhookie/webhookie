@@ -16,8 +16,8 @@ import javax.validation.Valid
 
 @RestController
 class ProviderGroupController(
-  private val serviceDelegator: AccessGroupServiceDelegator<ProviderGroup>
-): AccessGroupController {
+  override val serviceDelegator: AccessGroupServiceDelegator<ProviderGroup>
+): AccessGroupController<ProviderGroup> {
 
   @PostMapping(
     value = [REQUEST_MAPPING_PROVIDER_GROUPS]

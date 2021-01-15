@@ -21,8 +21,8 @@ import javax.validation.Valid
  */
 @RestController
 class ConsumerGroupController(
-  private val serviceDelegator: AccessGroupServiceDelegator<ConsumerGroup>
-): AccessGroupController {
+  override val serviceDelegator: AccessGroupServiceDelegator<ConsumerGroup>
+): AccessGroupController<ConsumerGroup> {
 
   @PostMapping(
     value = [REQUEST_MAPPING_CONSUMER_GROUPS]

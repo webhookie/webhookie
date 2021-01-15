@@ -2,6 +2,7 @@ package com.hookiesolutions.webhookie.portal.web
 
 import com.hookiesolutions.webhookie.config.web.OpenAPIConfig
 import com.hookiesolutions.webhookie.portal.domain.AccessGroup
+import com.hookiesolutions.webhookie.portal.service.AccessGroupServiceDelegator
 import com.hookiesolutions.webhookie.portal.service.model.SaveGroupRequest
 import com.hookiesolutions.webhookie.portal.web.AccessGroupController.Companion.REQUEST_MAPPING_PORTAL_ADMIN
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
@@ -18,28 +19,30 @@ import javax.validation.Valid
 
 @RequestMapping(REQUEST_MAPPING_PORTAL_ADMIN)
 @SecurityRequirement(name = OpenAPIConfig.OAUTH2_SCHEME)
-interface AccessGroupController {
+interface AccessGroupController<T: AccessGroup> {
+  val serviceDelegator: AccessGroupServiceDelegator<T>
+
   @PostMapping(
     consumes = [MediaType.APPLICATION_JSON_VALUE],
     produces = [MediaType.APPLICATION_JSON_VALUE]
   )
-  fun createGroup(@RequestBody @Valid bodyMono: Mono<SaveGroupRequest>): Mono<out AccessGroup>
+  fun createGroup(@RequestBody @Valid bodyMono: Mono<SaveGroupRequest>): Mono<T>
 
   @GetMapping(
     produces = [MediaType.APPLICATION_JSON_VALUE]
   )
-  fun allGroups(): Flux<out AccessGroup>
+  fun allGroups(): Flux<T>
 
   @GetMapping(
     produces = [MediaType.APPLICATION_JSON_VALUE]
   )
-  fun getGroup(id: String): Mono<out AccessGroup>
+  fun getGroup(id: String): Mono<T>
 
   @PutMapping(
     consumes = [MediaType.APPLICATION_JSON_VALUE],
     produces = [MediaType.APPLICATION_JSON_VALUE]
   )
-  fun updateGroup(id: String, bodyMono: Mono<SaveGroupRequest>): Mono<out AccessGroup>
+  fun updateGroup(id: String, bodyMono: Mono<SaveGroupRequest>): Mono<T>
 
   @DeleteMapping(
     produces = [MediaType.TEXT_PLAIN_VALUE]
