@@ -28,35 +28,35 @@ class ConsumerGroupController(
     value = [REQUEST_MAPPING_CONSUMER_GROUPS]
   )
   override fun createGroup(@RequestBody @Valid bodyMono: Mono<SaveGroupRequest>): Mono<ConsumerGroup> {
-    return serviceDelegator.createAccessGroup(bodyMono)
+    return super.createGroup(bodyMono)
   }
 
   @GetMapping(
     value = [REQUEST_MAPPING_CONSUMER_GROUPS]
   )
   override fun allGroups(): Flux<ConsumerGroup> {
-    return serviceDelegator.allAccessGroups()
+    return super.allGroups()
   }
 
   @GetMapping(
     value = ["$REQUEST_MAPPING_CONSUMER_GROUPS/{id}"]
   )
   override fun getGroup(@PathVariable id: String): Mono<ConsumerGroup> {
-    return serviceDelegator.getAccessGroup(id)
+    return super.getGroup(id)
   }
 
   @PutMapping(
     value = ["$REQUEST_MAPPING_CONSUMER_GROUPS/{id}"]
   )
   override fun updateGroup(@PathVariable id: String, @RequestBody @Valid bodyMono: Mono<SaveGroupRequest>): Mono<ConsumerGroup> {
-    return serviceDelegator.updateAccessGroup(id, bodyMono)
+    return super.updateGroup(id, bodyMono)
   }
 
   @DeleteMapping(
     value = ["$REQUEST_MAPPING_CONSUMER_GROUPS/{id}"]
   )
   override fun deleteGroup(@PathVariable id: String): Mono<String> {
-    return serviceDelegator.deleteAccessGroup(id)
+    return super.deleteGroup(id)
   }
 
   companion object {

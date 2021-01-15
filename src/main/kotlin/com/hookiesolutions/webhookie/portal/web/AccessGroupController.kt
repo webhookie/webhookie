@@ -26,28 +26,38 @@ interface AccessGroupController<T: AccessGroup> {
     consumes = [MediaType.APPLICATION_JSON_VALUE],
     produces = [MediaType.APPLICATION_JSON_VALUE]
   )
-  fun createGroup(@RequestBody @Valid bodyMono: Mono<SaveGroupRequest>): Mono<T>
+  fun createGroup(@RequestBody @Valid bodyMono: Mono<SaveGroupRequest>): Mono<T> {
+    return serviceDelegator.createAccessGroup(bodyMono)
+  }
 
   @GetMapping(
     produces = [MediaType.APPLICATION_JSON_VALUE]
   )
-  fun allGroups(): Flux<T>
+  fun allGroups(): Flux<T> {
+    return serviceDelegator.allAccessGroups()
+  }
 
   @GetMapping(
     produces = [MediaType.APPLICATION_JSON_VALUE]
   )
-  fun getGroup(id: String): Mono<T>
+  fun getGroup(id: String): Mono<T> {
+    return serviceDelegator.getAccessGroup(id)
+  }
 
   @PutMapping(
     consumes = [MediaType.APPLICATION_JSON_VALUE],
     produces = [MediaType.APPLICATION_JSON_VALUE]
   )
-  fun updateGroup(id: String, bodyMono: Mono<SaveGroupRequest>): Mono<T>
+  fun updateGroup(id: String, bodyMono: Mono<SaveGroupRequest>): Mono<T> {
+    return serviceDelegator.updateAccessGroup(id, bodyMono)
+  }
 
   @DeleteMapping(
     produces = [MediaType.TEXT_PLAIN_VALUE]
   )
-  fun deleteGroup(id: String): Mono<String>
+  fun deleteGroup(id: String): Mono<String> {
+    return serviceDelegator.deleteAccessGroup(id)
+  }
 
   companion object {
     const val REQUEST_MAPPING_PORTAL_ADMIN = "/portal/admin"
