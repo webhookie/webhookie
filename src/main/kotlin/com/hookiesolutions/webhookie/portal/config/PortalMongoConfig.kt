@@ -1,6 +1,7 @@
 package com.hookiesolutions.webhookie.portal.config
 
 import com.hookiesolutions.webhookie.portal.domain.ConsumerGroup
+import com.hookiesolutions.webhookie.portal.domain.ProviderGroup
 import org.slf4j.Logger
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.annotation.Configuration
@@ -29,7 +30,8 @@ class PortalMongoConfig(
     val resolver = MongoPersistentEntityIndexResolver(mongoMappingContext)
 
     Flux.just(
-      ConsumerGroup::class.java
+      ConsumerGroup::class.java,
+      ProviderGroup::class.java
     )
       .flatMap { clazz ->
         resolver
