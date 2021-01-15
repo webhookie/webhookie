@@ -1,7 +1,7 @@
 package com.hookiesolutions.webhookie.portal.web
 
 import com.hookiesolutions.webhookie.portal.domain.ProviderGroup
-import com.hookiesolutions.webhookie.portal.service.AccessGroupService
+import com.hookiesolutions.webhookie.portal.service.AccessGroupServiceDelegator
 import com.hookiesolutions.webhookie.portal.service.model.SaveGroupRequest
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -16,41 +16,42 @@ import javax.validation.Valid
 
 @RestController
 class ProviderGroupController(
-  accessGroupService: AccessGroupService
-): AccessGroupController, AbstractAccessGroupController<ProviderGroup>(accessGroupService, ProviderGroup::class.java) {
+  private val serviceDelegator: AccessGroupServiceDelegator<ProviderGroup>
+): AccessGroupController {
+
   @PostMapping(
     value = [REQUEST_MAPPING_PROVIDER_GROUPS]
   )
   override fun createGroup(@RequestBody @Valid bodyMono: Mono<SaveGroupRequest>): Mono<ProviderGroup> {
-    return super.createAccessGroup(bodyMono)
+    return serviceDelegator.createAccessGroup(bodyMono)
   }
 
   @GetMapping(
     value = [REQUEST_MAPPING_PROVIDER_GROUPS]
   )
   override fun allGroups(): Flux<ProviderGroup> {
-    return super.allAccessGroups()
+    return serviceDelegator.allAccessGroups()
   }
 
   @GetMapping(
     value = ["$REQUEST_MAPPING_PROVIDER_GROUPS/{id}"]
   )
   override fun getGroup(@PathVariable id: String): Mono<ProviderGroup> {
-    return super.getAccessGroup(id)
+    return serviceDelegator.getAccessGroup(id)
   }
 
   @PutMapping(
     value = ["$REQUEST_MAPPING_PROVIDER_GROUPS/{id}"]
   )
   override fun updateGroup(@PathVariable id: String, @RequestBody @Valid bodyMono: Mono<SaveGroupRequest>): Mono<ProviderGroup> {
-    return super.updateAccessGroup(id, bodyMono)
+    return serviceDelegator.updateAccessGroup(id, bodyMono)
   }
 
   @DeleteMapping(
     value = ["$REQUEST_MAPPING_PROVIDER_GROUPS/{id}"]
   )
   override fun deleteGroup(@PathVariable id: String): Mono<String> {
-    return super.deleteAccessGroup(id)
+    return serviceDelegator.deleteAccessGroup(id)
   }
 
   companion object {

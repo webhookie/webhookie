@@ -1,12 +1,11 @@
-package com.hookiesolutions.webhookie.portal.web
+package com.hookiesolutions.webhookie.portal.service
 
 import com.hookiesolutions.webhookie.portal.domain.AccessGroup
-import com.hookiesolutions.webhookie.portal.service.AccessGroupService
 import com.hookiesolutions.webhookie.portal.service.model.SaveGroupRequest
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
-abstract class AbstractAccessGroupController<T: AccessGroup>(
+class AccessGroupServiceDelegator<T: AccessGroup>(
   private val accessGroupService: AccessGroupService,
   private val clazz: Class<T>
 ) {
