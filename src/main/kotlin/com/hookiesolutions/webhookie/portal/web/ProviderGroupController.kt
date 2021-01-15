@@ -1,6 +1,5 @@
 package com.hookiesolutions.webhookie.portal.web
 
-import com.hookiesolutions.webhookie.portal.domain.AccessGroup
 import com.hookiesolutions.webhookie.portal.domain.ProviderGroup
 import com.hookiesolutions.webhookie.portal.service.AccessGroupService
 import com.hookiesolutions.webhookie.portal.service.model.SaveGroupRequest
@@ -22,28 +21,28 @@ class ProviderGroupController(
   @PostMapping(
     value = [REQUEST_MAPPING_PROVIDER_GROUPS]
   )
-  override fun createGroup(@RequestBody @Valid bodyMono: Mono<SaveGroupRequest>): Mono<out AccessGroup> {
+  override fun createGroup(@RequestBody @Valid bodyMono: Mono<SaveGroupRequest>): Mono<ProviderGroup> {
     return super.createAccessGroup(bodyMono)
   }
 
   @GetMapping(
     value = [REQUEST_MAPPING_PROVIDER_GROUPS]
   )
-  override fun allGroups(): Flux<out AccessGroup> {
+  override fun allGroups(): Flux<ProviderGroup> {
     return super.allAccessGroups()
   }
 
   @GetMapping(
     value = ["$REQUEST_MAPPING_PROVIDER_GROUPS/{id}"]
   )
-  override fun getGroup(@PathVariable id: String): Mono<out AccessGroup> {
+  override fun getGroup(@PathVariable id: String): Mono<ProviderGroup> {
     return super.getAccessGroup(id)
   }
 
   @PutMapping(
     value = ["$REQUEST_MAPPING_PROVIDER_GROUPS/{id}"]
   )
-  override fun updateGroup(@PathVariable id: String, @RequestBody @Valid bodyMono: Mono<SaveGroupRequest>): Mono<out AccessGroup> {
+  override fun updateGroup(@PathVariable id: String, @RequestBody @Valid bodyMono: Mono<SaveGroupRequest>): Mono<ProviderGroup> {
     return super.updateAccessGroup(id, bodyMono)
   }
 

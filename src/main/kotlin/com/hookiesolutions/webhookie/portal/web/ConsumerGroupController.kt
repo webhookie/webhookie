@@ -1,6 +1,5 @@
 package com.hookiesolutions.webhookie.portal.web
 
-import com.hookiesolutions.webhookie.portal.domain.AccessGroup
 import com.hookiesolutions.webhookie.portal.domain.ConsumerGroup
 import com.hookiesolutions.webhookie.portal.service.AccessGroupService
 import com.hookiesolutions.webhookie.portal.service.model.SaveGroupRequest
@@ -27,28 +26,28 @@ class ConsumerGroupController(
   @PostMapping(
     value = [REQUEST_MAPPING_CONSUMER_GROUPS]
   )
-  override fun createGroup(@RequestBody @Valid bodyMono: Mono<SaveGroupRequest>): Mono<out AccessGroup> {
+  override fun createGroup(@RequestBody @Valid bodyMono: Mono<SaveGroupRequest>): Mono<ConsumerGroup> {
     return super.createAccessGroup(bodyMono)
   }
 
   @GetMapping(
     value = [REQUEST_MAPPING_CONSUMER_GROUPS]
   )
-  override fun allGroups(): Flux<out AccessGroup> {
+  override fun allGroups(): Flux<ConsumerGroup> {
     return super.allAccessGroups()
   }
 
   @GetMapping(
     value = ["$REQUEST_MAPPING_CONSUMER_GROUPS/{id}"]
   )
-  override fun getGroup(@PathVariable id: String): Mono<out AccessGroup> {
+  override fun getGroup(@PathVariable id: String): Mono<ConsumerGroup> {
     return super.getAccessGroup(id)
   }
 
   @PutMapping(
     value = ["$REQUEST_MAPPING_CONSUMER_GROUPS/{id}"]
   )
-  override fun updateGroup(@PathVariable id: String, @RequestBody @Valid bodyMono: Mono<SaveGroupRequest>): Mono<out AccessGroup> {
+  override fun updateGroup(@PathVariable id: String, @RequestBody @Valid bodyMono: Mono<SaveGroupRequest>): Mono<ConsumerGroup> {
     return super.updateAccessGroup(id, bodyMono)
   }
 
