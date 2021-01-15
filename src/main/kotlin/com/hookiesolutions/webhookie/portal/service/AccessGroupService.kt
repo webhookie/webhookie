@@ -8,12 +8,12 @@ import com.hookiesolutions.webhookie.portal.domain.AccessGroup
 import com.hookiesolutions.webhookie.portal.domain.AccessGroup.Updates.Companion.updateGroupDetails
 import com.hookiesolutions.webhookie.portal.service.model.SaveGroupRequest
 import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.query.Query.query
 import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
@@ -23,13 +23,14 @@ import reactor.kotlin.core.publisher.toMono
  * @author Arthur Kazemi<bidadh@gmail.com>
  * @since 13/1/21 18:32
  */
-@Service
-class AccessGroupService(
+class AccessGroupService<T: AccessGroup>(
   private val mongoTemplate: ReactiveMongoTemplate,
-  private val log: Logger
+  private val clazz: Class<T>
 ) {
+  private val log: Logger = LoggerFactory.getLogger(AccessGroupService::class.java)
+  
   @PreAuthorize("hasAuthority('$ROLE_ADMIN')")
-  fun createGroup(bodyMono: Mono<SaveGroupRequest>, clazz: Class<out AccessGroup>): Mono<out AccessGroup> {
+  fun createGroup(bodyMono: Mono<SaveGroupRequest>): Mono<T> {
     return bodyMono
       .flatMap { body ->
         mongoTemplate.insert(body.accessGroup(clazz))
@@ -37,8 +38,9 @@ class AccessGroupService(
             EntityExistsException(body.iamGroupName, "Duplicate IAM Group mapping: ${body.iamGroupName}")
           }
       }
+      .cast(clazz)
       .doOnSuccess {
-        log.info("Access Group saved successfully with id: '{}'", it.id)
+        log.info("'{}' Access Group saved successfully with id: '{}'", clazz.simpleName, it.id)
       }
       .doOnError {
         log.error(it.localizedMessage)
@@ -46,21 +48,21 @@ class AccessGroupService(
   }
 
   @PreAuthorize("hasAuthority('$ROLE_ADMIN')")
-  fun allGroups(clazz: Class<out AccessGroup>): Flux<out AccessGroup> {
-    log.info("Fetching all Access Groups...")
+  fun allGroups(): Flux<T> {
+    log.info("Fetching all '{}' Access Groups...", clazz.simpleName)
     return mongoTemplate.findAll(clazz)
   }
 
   @PreAuthorize("hasAuthority('$ROLE_ADMIN')")
-  fun groupsById(id: String, clazz: Class<out AccessGroup>): Mono<out AccessGroup> {
-    log.info("Fetching Access Group by id: '{}'", id)
+  fun groupsById(id: String): Mono<T> {
+    log.info("Fetching '{}' Access Group by id: '{}'", clazz.simpleName, id)
     return mongoTemplate.findById(id, clazz)
       .switchIfEmpty(EntityNotFoundException("Access Group '$id' cannot be found").toMono())
   }
 
   @PreAuthorize("hasAuthority('$ROLE_ADMIN')")
-  fun deleteGroupsById(id: String, clazz: Class<out AccessGroup>): Mono<String> {
-    log.info("Deleting Access Group by id: '{}'", id)
+  fun deleteGroupsById(id: String): Mono<String> {
+    log.info("Deleting '{}' Access Group by id: '{}'", clazz.simpleName, id)
     return mongoTemplate.remove(query(byId(id)), clazz)
       .map { it.deletedCount == 1L }
       .filter { it }
@@ -69,8 +71,8 @@ class AccessGroupService(
   }
 
   @PreAuthorize("hasAuthority('$ROLE_ADMIN')")
-  fun updateGroupsById(id: String, bodyMono: Mono<SaveGroupRequest>, clazz: Class<out AccessGroup>): Mono<out AccessGroup> {
-    log.info("Updating Access Group by id: '{}'", id)
+  fun updateGroupsById(id: String, bodyMono: Mono<SaveGroupRequest>): Mono<T> {
+    log.info("Updating '{}' Access Group by id: '{}'", clazz.simpleName, id)
     return bodyMono
       .flatMap { body ->
         mongoTemplate

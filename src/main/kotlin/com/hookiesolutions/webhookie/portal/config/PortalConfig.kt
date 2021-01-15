@@ -6,6 +6,7 @@ import com.hookiesolutions.webhookie.portal.service.AccessGroupService
 import com.hookiesolutions.webhookie.portal.service.AccessGroupServiceDelegator
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 
 /**
  *
@@ -16,15 +17,15 @@ import org.springframework.context.annotation.Configuration
 class PortalConfig {
   @Bean
   fun consumerGroupServiceDelegator(
-    accessGroupService: AccessGroupService
+    mongoTemplate: ReactiveMongoTemplate
   ): AccessGroupServiceDelegator<ConsumerGroup> {
-    return AccessGroupServiceDelegator(accessGroupService, ConsumerGroup::class.java)
+    return AccessGroupServiceDelegator(AccessGroupService(mongoTemplate, ConsumerGroup::class.java))
   }
 
   @Bean
   fun providerGroupServiceDelegator(
-    accessGroupService: AccessGroupService
+    mongoTemplate: ReactiveMongoTemplate
   ): AccessGroupServiceDelegator<ProviderGroup> {
-    return AccessGroupServiceDelegator(accessGroupService, ProviderGroup::class.java)
+    return AccessGroupServiceDelegator(AccessGroupService(mongoTemplate, ProviderGroup::class.java))
   }
 }

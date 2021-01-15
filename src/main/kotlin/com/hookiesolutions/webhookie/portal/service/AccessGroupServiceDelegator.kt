@@ -6,30 +6,25 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 class AccessGroupServiceDelegator<T: AccessGroup>(
-  private val accessGroupService: AccessGroupService,
-  private val clazz: Class<T>
+  private val accessGroupService: AccessGroupService<T>
 ) {
   fun createAccessGroup(bodyMono: Mono<SaveGroupRequest>): Mono<T> {
-    return accessGroupService.createGroup(bodyMono, clazz)
-      .cast(clazz)
+    return accessGroupService.createGroup(bodyMono)
   }
 
   fun allAccessGroups(): Flux<T> {
-    return accessGroupService.allGroups(clazz)
-      .cast(clazz)
+    return accessGroupService.allGroups()
   }
 
   fun getAccessGroup(id: String): Mono<T> {
-    return accessGroupService.groupsById(id, clazz)
-      .cast(clazz)
+    return accessGroupService.groupsById(id)
   }
 
   fun updateAccessGroup(id: String, bodyMono: Mono<SaveGroupRequest>): Mono<T> {
-    return accessGroupService.updateGroupsById(id, bodyMono, clazz)
-      .cast(clazz)
+    return accessGroupService.updateGroupsById(id, bodyMono)
   }
 
   fun deleteAccessGroup(id: String): Mono<String> {
-    return accessGroupService.deleteGroupsById(id, clazz)
+    return accessGroupService.deleteGroupsById(id)
   }
 }
