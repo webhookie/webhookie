@@ -4,6 +4,7 @@ import amf.client.model.document.Document
 import amf.plugins.domain.webapi.models.EndPoint
 import com.hookiesolutions.webhookie.common.service.YamlService
 import com.hookiesolutions.webhookie.portal.service.model.AsyncApiSpec
+import com.hookiesolutions.webhookie.portal.service.model.Topic
 import com.hookiesolutions.webhookie.portal.service.model.WebhookGroup
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
@@ -27,8 +28,9 @@ class AsyncApiService(
     val name: String? = readString(body, "core#name")
     val version: String? = readString(body, "core#version")
     val description: String? = readString(body, "core#description")
-    val topics: List<String> = readList(body, "apiContract#endpoint") {
-      (it as EndPoint).path().value()
+    val topics: List<Topic> = readList(body, "apiContract#endpoint") {
+      val endPoint = it as EndPoint
+      Topic(endPoint.path().value(), endPoint.description().value())
     }
 
     return when {

@@ -3,9 +3,6 @@ package com.hookiesolutions.webhookie.portal.config
 import amf.ProfileName
 import amf.client.parse.Async20Parser
 import amf.client.parse.Parser
-import com.hookiesolutions.webhookie.portal.web.io.AsyncDocumentEncoder
-import com.hookiesolutions.webhookie.portal.web.io.AsyncDocumentReader
-import org.springframework.boot.web.codec.CodecCustomizer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
@@ -16,17 +13,6 @@ import org.springframework.context.annotation.Configuration
  */
 @Configuration
 class AsyncApiConfig {
-  @Bean
-  fun asyncCodecCustomizer(
-    reader: AsyncDocumentReader,
-    encoder: AsyncDocumentEncoder
-  ): CodecCustomizer {
-    return CodecCustomizer {
-      it.customCodecs().register(reader)
-      it.customCodecs().register(encoder)
-    }
-  }
-
   @Bean
   fun async20Parser(): Parser {
     return Async20Parser()
