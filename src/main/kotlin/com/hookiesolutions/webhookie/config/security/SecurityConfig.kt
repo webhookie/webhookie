@@ -5,7 +5,6 @@ import com.hookiesolutions.webhookie.config.security.jwt.AudienceValidator
 import com.hookiesolutions.webhookie.config.security.jwt.JwtAuthoritiesConverter
 import com.hookiesolutions.webhookie.portal.web.AccessGroupController.Companion.REQUEST_MAPPING_PORTAL_ADMIN
 import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties
-import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
@@ -33,7 +32,6 @@ import javax.annotation.PostConstruct
 @Configuration
 @EnableWebFluxSecurity
 @EnableReactiveMethodSecurity
-@EnableConfigurationProperties(WebHookieSecurityProperties::class)
 class SecurityConfig(
   private val securityProperties: WebHookieSecurityProperties,
   private val audienceValidator: AudienceValidator,

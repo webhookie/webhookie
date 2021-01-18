@@ -1,11 +1,9 @@
 package com.hookiesolutions.webhookie.consumer
 
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
-import com.hookiesolutions.webhookie.consumer.config.ConsumerErrorExchangeProperties
 import com.hookiesolutions.webhookie.consumer.config.ConsumerProperties
 import org.springframework.amqp.core.AmqpTemplate
 import org.springframework.amqp.rabbit.connection.ConnectionFactory
-import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.integration.amqp.dsl.Amqp
@@ -23,7 +21,6 @@ import org.springframework.retry.support.RetryTemplate
  * @since 2/12/20 13:36
  */
 @Configuration
-@EnableConfigurationProperties(ConsumerProperties::class, ConsumerErrorExchangeProperties::class)
 class ConsumerFlows(
   private val internalConsumerChannel: SubscribableChannel,
   private val consumerChannel: SubscribableChannel,
