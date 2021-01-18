@@ -1,6 +1,6 @@
 package com.hookiesolutions.webhookie.subscription.service.model
 
-import javax.validation.constraints.NotEmpty
+import javax.validation.constraints.NotBlank
 
 /**
  *
@@ -8,6 +8,6 @@ import javax.validation.constraints.NotEmpty
  * @since 17/12/20 22:45
  */
 data class CreateApplicationRequest(
-  @field:NotEmpty
+  @field:NotBlank
   val name: String
 )

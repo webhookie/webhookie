@@ -1,7 +1,7 @@
 package com.hookiesolutions.webhookie.subscription.service.model
 
 import com.hookiesolutions.webhookie.subscription.domain.Company
-import javax.validation.constraints.NotEmpty
+import javax.validation.constraints.NotBlank
 
 /**
  *
@@ -9,7 +9,7 @@ import javax.validation.constraints.NotEmpty
  * @since 3/12/20 17:53
  */
 data class CreateCompanyRequest(
-  @field:NotEmpty
+  @field:NotBlank
   val name: String
 ) {
   fun company(): Company {
