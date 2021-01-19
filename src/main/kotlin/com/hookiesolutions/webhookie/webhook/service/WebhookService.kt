@@ -1,7 +1,7 @@
 package com.hookiesolutions.webhookie.webhook.service
 
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_PROVIDER
-import com.hookiesolutions.webhookie.common.service.SecurityHandler
+import com.hookiesolutions.webhookie.security.service.SecurityHandler
 import com.hookiesolutions.webhookie.portal.service.AccessGroupVerifier
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup
 import com.hookiesolutions.webhookie.webhook.domain.WebhookRepository

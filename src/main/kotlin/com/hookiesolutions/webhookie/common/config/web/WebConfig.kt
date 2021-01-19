@@ -1,4 +1,4 @@
-package com.hookiesolutions.webhookie.config.web
+package com.hookiesolutions.webhookie.common.config.web
 
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.reactive.config.EnableWebFlux

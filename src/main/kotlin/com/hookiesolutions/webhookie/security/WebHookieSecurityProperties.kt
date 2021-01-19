@@ -1,4 +1,4 @@
-package com.hookiesolutions.webhookie.config.security
+package com.hookiesolutions.webhookie.security
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConstructorBinding

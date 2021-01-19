@@ -1,4 +1,4 @@
-package com.hookiesolutions.webhookie.config.security
+package com.hookiesolutions.webhookie.security
 
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_CONSUMER
 import org.springframework.security.core.GrantedAuthority

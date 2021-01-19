@@ -1,8 +1,8 @@
-package com.hookiesolutions.webhookie.config.security
+package com.hookiesolutions.webhookie.security
 
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_ADMIN
-import com.hookiesolutions.webhookie.config.security.jwt.AudienceValidator
-import com.hookiesolutions.webhookie.config.security.jwt.JwtAuthoritiesConverter
+import com.hookiesolutions.webhookie.security.jwt.AudienceValidator
+import com.hookiesolutions.webhookie.security.jwt.JwtAuthoritiesConverter
 import com.hookiesolutions.webhookie.portal.web.PortalAPIDocs.Companion.REQUEST_MAPPING_PORTAL_ADMIN
 import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties
 import org.springframework.context.annotation.Bean

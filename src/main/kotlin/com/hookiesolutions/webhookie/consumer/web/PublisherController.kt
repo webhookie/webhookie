@@ -4,7 +4,7 @@ import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.HE
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_AUTHORIZED_SUBSCRIBER
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_TOPIC
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_TRACE_ID
-import com.hookiesolutions.webhookie.config.web.OpenAPIConfig
+import com.hookiesolutions.webhookie.common.config.web.OpenAPIConfig
 import com.hookiesolutions.webhookie.consumer.web.PublisherController.Companion.REQUEST_MAPPING_CONSUMER
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.slf4j.Logger

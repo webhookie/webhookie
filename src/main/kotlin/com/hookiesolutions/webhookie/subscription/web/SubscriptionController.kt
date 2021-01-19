@@ -4,7 +4,7 @@ import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Compani
 import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
 import com.hookiesolutions.webhookie.common.service.TimeMachine
-import com.hookiesolutions.webhookie.config.web.OpenAPIConfig
+import com.hookiesolutions.webhookie.common.config.web.OpenAPIConfig
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.subscription.service.SubscriptionService
 import com.hookiesolutions.webhookie.subscription.service.model.CreateSubscriptionRequest

@@ -1,6 +1,6 @@
 package com.hookiesolutions.webhookie.portal.web
 
-import com.hookiesolutions.webhookie.config.web.OpenAPIConfig
+import com.hookiesolutions.webhookie.common.config.web.OpenAPIConfig
 import com.hookiesolutions.webhookie.portal.domain.AccessGroup
 import com.hookiesolutions.webhookie.portal.service.AccessGroupServiceDelegator
 import com.hookiesolutions.webhookie.portal.service.model.SaveGroupRequest

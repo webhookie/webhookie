@@ -1,4 +1,4 @@
-package com.hookiesolutions.webhookie.config.web
+package com.hookiesolutions.webhookie.common.config.web
 
 import com.hookiesolutions.webhookie.common.exception.EmptyResultException
 import com.hookiesolutions.webhookie.common.exception.EntityExistsException

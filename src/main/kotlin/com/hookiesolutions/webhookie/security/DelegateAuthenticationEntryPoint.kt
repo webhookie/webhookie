@@ -1,4 +1,4 @@
-package com.hookiesolutions.webhookie.config.security
+package com.hookiesolutions.webhookie.security
 
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.oauth2.server.resource.web.server.BearerTokenServerAuthenticationEntryPoint

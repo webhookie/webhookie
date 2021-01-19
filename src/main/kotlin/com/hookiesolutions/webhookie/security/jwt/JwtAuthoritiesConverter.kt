@@ -1,7 +1,7 @@
-package com.hookiesolutions.webhookie.config.security.jwt
+package com.hookiesolutions.webhookie.security.jwt
 
-import com.hookiesolutions.webhookie.config.security.AuthoritiesMapper
-import com.hookiesolutions.webhookie.config.security.WebHookieSecurityProperties
+import com.hookiesolutions.webhookie.security.AuthoritiesMapper
+import com.hookiesolutions.webhookie.security.WebHookieSecurityProperties
 import org.springframework.core.convert.converter.Converter
 import org.springframework.security.authentication.AbstractAuthenticationToken
 import org.springframework.security.oauth2.jwt.Jwt

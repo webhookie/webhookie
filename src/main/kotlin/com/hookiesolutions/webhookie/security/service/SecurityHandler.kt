@@ -1,28 +1,28 @@
-package com.hookiesolutions.webhookie.config.mongo
+package com.hookiesolutions.webhookie.security.service
 
-import com.hookiesolutions.webhookie.config.security.jwt.WebhookieJwtAuthenticationToken
-import org.springframework.data.domain.ReactiveAuditorAware
+import com.hookiesolutions.webhookie.security.jwt.WebhookieJwtAuthenticationToken
 import org.springframework.security.core.Authentication
-import org.springframework.stereotype.Component
-import reactor.core.publisher.Mono
 import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.security.core.context.SecurityContext
-
+import org.springframework.stereotype.Component
+import reactor.core.publisher.Mono
 
 /**
  *
  * @author Arthur Kazemi<bidadh@gmail.com>
- * @since 14/1/21 11:54
+ * @since 19/1/21 19:36
  */
 @Component
-class SpringSecurityReactiveAuditorAware: ReactiveAuditorAware<String> {
-  override fun getCurrentAuditor(): Mono<String> {
+class SecurityHandler {
+  fun token(): Mono<WebhookieJwtAuthenticationToken> {
     return ReactiveSecurityContextHolder.getContext()
       .map(SecurityContext::getAuthentication)
       .filter(Authentication::isAuthenticated)
       .cast(WebhookieJwtAuthenticationToken::class.java)
-      .map {
-        it.email
-      }
+  }
+
+  fun groups(): Mono<List<String>> {
+    return token()
+      .map { it.groups }
   }
 }

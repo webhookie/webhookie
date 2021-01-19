@@ -1,6 +1,6 @@
 package com.hookiesolutions.webhookie.subscription.web
 
-import com.hookiesolutions.webhookie.config.web.OpenAPIConfig
+import com.hookiesolutions.webhookie.common.config.web.OpenAPIConfig
 import com.hookiesolutions.webhookie.subscription.domain.Application
 import com.hookiesolutions.webhookie.subscription.service.CompanyService
 import com.hookiesolutions.webhookie.subscription.service.model.CreateApplicationRequest

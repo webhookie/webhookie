@@ -1,4 +1,4 @@
-package com.hookiesolutions.webhookie.config
+package com.hookiesolutions.webhookie.common.config
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

@@ -1,6 +1,6 @@
-package com.hookiesolutions.webhookie.config.web
+package com.hookiesolutions.webhookie.common.config.web
 
-import com.hookiesolutions.webhookie.config.security.WebHookieSecurityProperties
+import com.hookiesolutions.webhookie.security.WebHookieSecurityProperties
 import io.swagger.v3.oas.models.Components
 import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.info.Info
