@@ -1,12 +1,12 @@
-package com.hookiesolutions.webhookie.portal.service
+package com.hookiesolutions.webhookie.webhook.service
 
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_PROVIDER
 import com.hookiesolutions.webhookie.common.service.SecurityHandler
-import com.hookiesolutions.webhookie.portal.domain.group.ConsumerGroup
-import com.hookiesolutions.webhookie.portal.domain.group.ProviderGroup
-import com.hookiesolutions.webhookie.portal.domain.webhook.WebhookGroup
-import com.hookiesolutions.webhookie.portal.domain.webhook.WebhookRepository
-import com.hookiesolutions.webhookie.portal.service.model.WebhookGroupRequest
+import com.hookiesolutions.webhookie.portal.domain.ConsumerGroup
+import com.hookiesolutions.webhookie.portal.domain.ProviderGroup
+import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup
+import com.hookiesolutions.webhookie.webhook.domain.WebhookRepository
+import com.hookiesolutions.webhookie.webhook.service.model.WebhookGroupRequest
 import org.slf4j.Logger
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service

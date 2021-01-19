@@ -1,8 +1,8 @@
-package com.hookiesolutions.webhookie.portal.domain.webhook
+package com.hookiesolutions.webhookie.webhook.domain
 
-import com.hookiesolutions.webhookie.portal.domain.group.AccessGroup
-import com.hookiesolutions.webhookie.portal.domain.group.AccessGroup.Queries.Companion.iamGroupNameIn
-import com.hookiesolutions.webhookie.portal.domain.webhook.WebhookGroup.Queries.Companion.accessibleForProviderWith
+import com.hookiesolutions.webhookie.portal.domain.AccessGroup
+import com.hookiesolutions.webhookie.portal.domain.AccessGroup.Queries.Companion.iamGroupNameIn
+import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Queries.Companion.accessibleForProviderWith
 import org.slf4j.Logger
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.query.Query.query

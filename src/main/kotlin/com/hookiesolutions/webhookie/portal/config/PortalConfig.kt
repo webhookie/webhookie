@@ -1,7 +1,7 @@
 package com.hookiesolutions.webhookie.portal.config
 
-import com.hookiesolutions.webhookie.portal.domain.group.ConsumerGroup
-import com.hookiesolutions.webhookie.portal.domain.group.ProviderGroup
+import com.hookiesolutions.webhookie.portal.domain.ConsumerGroup
+import com.hookiesolutions.webhookie.portal.domain.ProviderGroup
 import com.hookiesolutions.webhookie.portal.service.AccessGroupService
 import com.hookiesolutions.webhookie.portal.service.AccessGroupServiceDelegator
 import org.springframework.context.annotation.Bean

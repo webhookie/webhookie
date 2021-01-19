@@ -4,8 +4,8 @@ import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.R
 import com.hookiesolutions.webhookie.common.exception.EntityExistsException
 import com.hookiesolutions.webhookie.common.exception.EntityNotFoundException
 import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.byId
-import com.hookiesolutions.webhookie.portal.domain.group.AccessGroup
-import com.hookiesolutions.webhookie.portal.domain.group.AccessGroup.Updates.Companion.updateGroupDetails
+import com.hookiesolutions.webhookie.portal.domain.AccessGroup
+import com.hookiesolutions.webhookie.portal.domain.AccessGroup.Updates.Companion.updateGroupDetails
 import com.hookiesolutions.webhookie.portal.service.model.SaveGroupRequest
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

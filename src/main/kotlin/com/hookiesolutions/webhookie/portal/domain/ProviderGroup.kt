@@ -1,4 +1,4 @@
-package com.hookiesolutions.webhookie.portal.domain.group
+package com.hookiesolutions.webhookie.portal.domain
 
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
 import org.springframework.data.annotation.TypeAlias
@@ -11,9 +11,9 @@ import org.springframework.data.mongodb.core.mapping.Document
  * @since 13/1/21 14:08
  */
 
-@Document(collection = "consumer_group")
-@TypeAlias("consumerGroup")
-data class ConsumerGroup(
+@Document(collection = "provider_group")
+@TypeAlias("providerGroup")
+data class ProviderGroup(
   override val name: String,
   override val description: String,
   @Indexed(unique = true)

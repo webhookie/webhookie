@@ -1,6 +1,6 @@
-package com.hookiesolutions.webhookie.portal.config
+package com.hookiesolutions.webhookie.webhook.config
 
-import com.hookiesolutions.webhookie.portal.web.reader.WebhookGroupRequestReader
+import com.hookiesolutions.webhookie.webhook.web.reader.WebhookGroupRequestReader
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.codec.ServerCodecConfigurer
 import org.springframework.web.reactive.config.WebFluxConfigurer
@@ -11,7 +11,7 @@ import org.springframework.web.reactive.config.WebFluxConfigurer
  * @since 19/1/21 12:23
  */
 @Configuration
-class PortalWebConfig(
+class WebhookWebConfig(
   private val reader: WebhookGroupRequestReader,
 ): WebFluxConfigurer {
   override fun configureHttpMessageCodecs(configurer: ServerCodecConfigurer) {

@@ -1,4 +1,4 @@
-package com.hookiesolutions.webhookie.portal.domain.webhook
+package com.hookiesolutions.webhookie.webhook.domain
 
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository
 

@@ -1,11 +1,10 @@
-package com.hookiesolutions.webhookie.portal.web
+package com.hookiesolutions.webhookie.webhook.web
 
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_PROVIDER
-import com.hookiesolutions.webhookie.portal.domain.webhook.WebhookGroup
-import com.hookiesolutions.webhookie.portal.service.WebhookService
-import com.hookiesolutions.webhookie.portal.service.model.WebhookGroupRequest
-import com.hookiesolutions.webhookie.portal.web.PortalAPIDocs.Companion.REQUEST_MAPPING_PORTAL_ADMIN
-import com.hookiesolutions.webhookie.portal.web.WebhookGroupsController.Companion.REQUEST_MAPPING_WEBHOOK_GROUPS
+import com.hookiesolutions.webhookie.webhook.config.WebhookGroupsAPIDocs.Companion.REQUEST_MAPPING_WEBHOOK_GROUPS
+import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup
+import com.hookiesolutions.webhookie.webhook.service.WebhookService
+import com.hookiesolutions.webhookie.webhook.service.model.WebhookGroupRequest
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.GetMapping
@@ -23,7 +22,7 @@ import javax.validation.Valid
  * @since 19/1/21 15:16
  */
 @RestController
-@RequestMapping("$REQUEST_MAPPING_PORTAL_ADMIN$REQUEST_MAPPING_WEBHOOK_GROUPS")
+@RequestMapping(REQUEST_MAPPING_WEBHOOK_GROUPS)
 class WebhookGroupsController(
   private val service: WebhookService
 ) {
@@ -43,9 +42,5 @@ class WebhookGroupsController(
   )
   fun getWebhookGroups(): Flux<WebhookGroup> {
     return service.findProviderWebhookGroups()
-  }
-
-  companion object {
-    const val REQUEST_MAPPING_WEBHOOK_GROUPS = "/webhookgroups"
   }
 }

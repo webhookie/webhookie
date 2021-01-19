@@ -1,10 +1,10 @@
-package com.hookiesolutions.webhookie.portal.web.reader
+package com.hookiesolutions.webhookie.webhook.web.reader
 
 import amf.client.model.document.Document
 import amf.plugins.domain.webapi.models.EndPoint
 import com.hookiesolutions.webhookie.common.service.YamlService
-import com.hookiesolutions.webhookie.portal.domain.webhook.Topic
-import com.hookiesolutions.webhookie.portal.service.model.AsyncApiSpec
+import com.hookiesolutions.webhookie.webhook.domain.Topic
+import com.hookiesolutions.webhookie.webhook.service.model.AsyncApiSpec
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono

@@ -1,6 +1,6 @@
 package com.hookiesolutions.webhookie.portal.service
 
-import com.hookiesolutions.webhookie.portal.domain.group.AccessGroup
+import com.hookiesolutions.webhookie.portal.domain.AccessGroup
 import com.hookiesolutions.webhookie.portal.service.model.SaveGroupRequest
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono

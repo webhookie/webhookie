@@ -1,4 +1,4 @@
-package com.hookiesolutions.webhookie.portal.config
+package com.hookiesolutions.webhookie.webhook.config
 
 import amf.ProfileName
 import amf.client.parse.Async20Parser

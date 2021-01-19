@@ -1,9 +1,9 @@
-package com.hookiesolutions.webhookie.portal.domain.webhook
+package com.hookiesolutions.webhookie.webhook.domain
 
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
-import com.hookiesolutions.webhookie.portal.domain.webhook.WebhookGroup.Keys.Companion.KEY_CONSUMER_ACCESS
-import com.hookiesolutions.webhookie.portal.domain.webhook.WebhookGroup.Keys.Companion.KEY_CONSUMER_IAM_GROUPS
-import com.hookiesolutions.webhookie.portal.domain.webhook.WebhookGroup.Keys.Companion.KEY_PROVIDER_IAM_GROUPS
+import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.KEY_CONSUMER_ACCESS
+import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.KEY_CONSUMER_IAM_GROUPS
+import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.KEY_PROVIDER_IAM_GROUPS
 import org.springframework.data.annotation.TypeAlias
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.query.Criteria

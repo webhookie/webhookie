@@ -1,10 +1,10 @@
-package com.hookiesolutions.webhookie.portal.web.reader
+package com.hookiesolutions.webhookie.webhook.web.reader
 
 import com.hookiesolutions.webhookie.common.service.ReactiveObjectMapper
-import com.hookiesolutions.webhookie.portal.domain.webhook.ConsumerAccess
-import com.hookiesolutions.webhookie.portal.domain.webhook.ProviderAccess
-import com.hookiesolutions.webhookie.portal.service.model.AsyncApiSpec
-import com.hookiesolutions.webhookie.portal.service.model.WebhookGroupRequest
+import com.hookiesolutions.webhookie.webhook.domain.ConsumerAccess
+import com.hookiesolutions.webhookie.webhook.domain.ProviderAccess
+import com.hookiesolutions.webhookie.webhook.service.model.AsyncApiSpec
+import com.hookiesolutions.webhookie.webhook.service.model.WebhookGroupRequest
 import org.reactivestreams.Publisher
 import org.springframework.core.ResolvableType
 import org.springframework.core.io.buffer.DataBufferUtils
@@ -75,11 +75,11 @@ class WebhookGroupRequestReader(
   }
 
   private fun specMono(innerRequest: InnerWebhookGroupRequest): Mono<String> {
-    return if (innerRequest.spec is String) {
-      innerRequest.spec.toMono()
+    return if (innerRequest.asyncApiSpec is String) {
+      innerRequest.asyncApiSpec.toMono()
     } else {
       objectMapper
-        .writeValueAsString(innerRequest.spec)
+        .writeValueAsString(innerRequest.asyncApiSpec)
     }
   }
 
@@ -95,7 +95,7 @@ class WebhookGroupRequestReader(
   }
 
   data class InnerWebhookGroupRequest(
-    val spec: Any,
+    val asyncApiSpec: Any,
     val consumerGroups: List<String>,
     val providerGroups: List<String>,
     val consumerAccess: ConsumerAccess,

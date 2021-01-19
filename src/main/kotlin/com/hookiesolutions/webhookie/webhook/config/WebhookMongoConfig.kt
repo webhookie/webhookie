@@ -1,7 +1,6 @@
-package com.hookiesolutions.webhookie.portal.config
+package com.hookiesolutions.webhookie.webhook.config
 
-import com.hookiesolutions.webhookie.portal.domain.ConsumerGroup
-import com.hookiesolutions.webhookie.portal.domain.ProviderGroup
+import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup
 import org.slf4j.Logger
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.annotation.Configuration
@@ -20,7 +19,7 @@ import reactor.kotlin.core.publisher.toMono
  * @since 13/1/21 14:10
  */
 @Configuration
-class PortalMongoConfig(
+class WebhookMongoConfig(
   private val mongoTemplate: ReactiveMongoTemplate,
   private val mongoMappingContext: MongoMappingContext,
   private val logger: Logger
@@ -30,8 +29,7 @@ class PortalMongoConfig(
     val resolver = MongoPersistentEntityIndexResolver(mongoMappingContext)
 
     Flux.just(
-      ConsumerGroup::class.java,
-      ProviderGroup::class.java
+      WebhookGroup::class.java
     )
       .flatMap { clazz ->
         resolver

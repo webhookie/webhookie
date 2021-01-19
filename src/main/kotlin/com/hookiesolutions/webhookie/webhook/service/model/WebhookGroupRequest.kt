@@ -1,8 +1,8 @@
-package com.hookiesolutions.webhookie.portal.service.model
+package com.hookiesolutions.webhookie.webhook.service.model
 
-import com.hookiesolutions.webhookie.portal.domain.webhook.ConsumerAccess
-import com.hookiesolutions.webhookie.portal.domain.webhook.ProviderAccess
-import com.hookiesolutions.webhookie.portal.domain.webhook.WebhookGroup
+import com.hookiesolutions.webhookie.webhook.domain.ConsumerAccess
+import com.hookiesolutions.webhookie.webhook.domain.ProviderAccess
+import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup
 
 data class WebhookGroupRequest(
   val asyncApiSpec: AsyncApiSpec,
