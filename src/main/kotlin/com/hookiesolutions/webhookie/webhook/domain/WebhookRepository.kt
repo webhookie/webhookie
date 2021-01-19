@@ -1,15 +1,11 @@
 package com.hookiesolutions.webhookie.webhook.domain
 
-import com.hookiesolutions.webhookie.portal.domain.AccessGroup
-import com.hookiesolutions.webhookie.portal.domain.AccessGroup.Queries.Companion.iamGroupNameIn
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Queries.Companion.accessibleForProviderWith
-import org.slf4j.Logger
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.query.Query.query
 import org.springframework.stereotype.Repository
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import reactor.kotlin.core.publisher.toMono
 
 /**
  *
@@ -19,25 +15,8 @@ import reactor.kotlin.core.publisher.toMono
 @Repository
 class WebhookRepository(
   private val mongoTemplate: ReactiveMongoTemplate,
-  private val repository: WebhookGroupRepository,
-  private val log: Logger
+  private val repository: WebhookGroupRepository
 ) {
-  fun fetchConsumerGroups(groups: List<String>, clazz: Class<out AccessGroup>): Mono<List<String>> {
-    return mongoTemplate.find(query(iamGroupNameIn(groups)), clazz)
-      .map { it.iamGroupName }
-      .collectList()
-      .flatMap {
-        val notExistingGroups = groups.minus(it)
-        return@flatMap if (notExistingGroups.isEmpty()) {
-          it.toMono()
-        } else {
-          val error = "{ $notExistingGroups } could not be found in ${clazz.simpleName}s!"
-          log.error(error)
-          Mono.error(IllegalArgumentException(error))
-        }
-      }
-  }
-
   fun save(group: WebhookGroup): Mono<WebhookGroup> {
     return repository.save(group)
   }

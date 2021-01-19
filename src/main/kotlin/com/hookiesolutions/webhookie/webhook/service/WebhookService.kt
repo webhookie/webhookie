@@ -2,8 +2,7 @@ package com.hookiesolutions.webhookie.webhook.service
 
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_PROVIDER
 import com.hookiesolutions.webhookie.common.service.SecurityHandler
-import com.hookiesolutions.webhookie.portal.domain.ConsumerGroup
-import com.hookiesolutions.webhookie.portal.domain.ProviderGroup
+import com.hookiesolutions.webhookie.portal.service.AccessGroupVerifier
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup
 import com.hookiesolutions.webhookie.webhook.domain.WebhookRepository
 import com.hookiesolutions.webhookie.webhook.service.model.WebhookGroupRequest
@@ -23,14 +22,15 @@ import reactor.kotlin.core.publisher.toMono
 class WebhookService(
   private val repository: WebhookRepository,
   private val securityHandler: SecurityHandler,
+  private val accessGroupVerifier: AccessGroupVerifier,
   private val log: Logger
 ) {
   @PreAuthorize("hasAuthority('${ROLE_PROVIDER}')")
   fun createGroup(request: WebhookGroupRequest): Mono<WebhookGroup> {
     return request
       .toMono()
-      .flatMap { repository.fetchConsumerGroups(request.consumerGroups, ConsumerGroup::class.java) }
-      .flatMap { repository.fetchConsumerGroups(request.providerGroups, ProviderGroup::class.java) }
+      .flatMap { accessGroupVerifier.verifyConsumerGroups(request.consumerGroups) }
+      .flatMap { accessGroupVerifier.verifyProviderGroups(request.providerGroups) }
       .map { request.toWebhookGroup()}
       .flatMap {
         log.info("Saving WebhookGroup: '{}'", it.name)
