@@ -56,6 +56,7 @@ class Constants {
     class Roles {
       companion object {
         const val ROLE_CONSUMER: String = "WH_CONSUMER"
+        const val ROLE_PROVIDER: String = "WH_PROVIDER"
         const val ROLE_ADMIN: String = "WH_ADMIN"
       }
     }
