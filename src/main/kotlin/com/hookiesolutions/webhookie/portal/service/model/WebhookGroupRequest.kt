@@ -5,7 +5,7 @@ import com.hookiesolutions.webhookie.portal.domain.webhook.ProviderAccess
 import com.hookiesolutions.webhookie.portal.domain.webhook.WebhookGroup
 
 data class WebhookGroupRequest(
-  val spec: AsyncApiSpec,
+  val asyncApiSpec: AsyncApiSpec,
   val consumerGroups: List<String>,
   val providerGroups: List<String>,
   val consumerAccess: ConsumerAccess,
@@ -13,12 +13,12 @@ data class WebhookGroupRequest(
 ) {
   fun toWebhookGroup(): WebhookGroup {
     return WebhookGroup(
-      this.spec.name,
-      this.spec.version,
-      this.spec.description,
-      this.spec.topics,
-      this.spec.raw,
-      this.spec.spec,
+      this.asyncApiSpec.name,
+      this.asyncApiSpec.version,
+      this.asyncApiSpec.description,
+      this.asyncApiSpec.topics,
+      this.asyncApiSpec.raw,
+      this.asyncApiSpec.spec,
       this.consumerGroups,
       this.providerGroups,
       this.consumerAccess,

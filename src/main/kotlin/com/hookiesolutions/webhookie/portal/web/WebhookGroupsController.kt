@@ -8,12 +8,13 @@ import com.hookiesolutions.webhookie.portal.web.PortalAPIDocs.Companion.REQUEST_
 import com.hookiesolutions.webhookie.portal.web.WebhookGroupsController.Companion.REQUEST_MAPPING_WEBHOOK_GROUPS
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import reactor.kotlin.core.publisher.toMono
 import javax.validation.Valid
 
 /**
@@ -34,6 +35,14 @@ class WebhookGroupsController(
   )
   fun createWebhookGroup(@RequestBody @Valid request: WebhookGroupRequest): Mono<WebhookGroup> {
     return service.createGroup(request)
+  }
+
+  @GetMapping(
+    "",
+    produces = [MediaType.APPLICATION_JSON_VALUE]
+  )
+  fun getWebhookGroups(): Flux<WebhookGroup> {
+    return service.findProviderWebhookGroups()
   }
 
   companion object {
