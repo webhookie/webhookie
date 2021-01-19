@@ -1,8 +1,8 @@
-package com.hookiesolutions.webhookie.portal.domain
+package com.hookiesolutions.webhookie.portal.domain.group
 
-import com.hookiesolutions.webhookie.portal.domain.AccessGroup.Keys.Companion.KEY_DESCRIPTION
-import com.hookiesolutions.webhookie.portal.domain.AccessGroup.Keys.Companion.KEY_IAM_GROUP_NAME
-import com.hookiesolutions.webhookie.portal.domain.AccessGroup.Keys.Companion.KEY_NAME
+import com.hookiesolutions.webhookie.portal.domain.group.AccessGroup.Keys.Companion.KEY_DESCRIPTION
+import com.hookiesolutions.webhookie.portal.domain.group.AccessGroup.Keys.Companion.KEY_IAM_GROUP_NAME
+import com.hookiesolutions.webhookie.portal.domain.group.AccessGroup.Keys.Companion.KEY_NAME
 import org.springframework.data.mongodb.core.query.Update
 
 

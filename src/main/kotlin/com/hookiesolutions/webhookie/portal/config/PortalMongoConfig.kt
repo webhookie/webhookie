@@ -1,7 +1,7 @@
 package com.hookiesolutions.webhookie.portal.config
 
-import com.hookiesolutions.webhookie.portal.domain.ConsumerGroup
-import com.hookiesolutions.webhookie.portal.domain.ProviderGroup
+import com.hookiesolutions.webhookie.portal.domain.group.ConsumerGroup
+import com.hookiesolutions.webhookie.portal.domain.group.ProviderGroup
 import org.slf4j.Logger
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.annotation.Configuration

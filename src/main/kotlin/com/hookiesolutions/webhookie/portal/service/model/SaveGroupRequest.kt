@@ -1,8 +1,8 @@
 package com.hookiesolutions.webhookie.portal.service.model
 
-import com.hookiesolutions.webhookie.portal.domain.AccessGroup
-import com.hookiesolutions.webhookie.portal.domain.ConsumerGroup
-import com.hookiesolutions.webhookie.portal.domain.ProviderGroup
+import com.hookiesolutions.webhookie.portal.domain.group.AccessGroup
+import com.hookiesolutions.webhookie.portal.domain.group.ConsumerGroup
+import com.hookiesolutions.webhookie.portal.domain.group.ProviderGroup
 import javax.validation.constraints.NotBlank
 
 /**

@@ -1,6 +1,6 @@
 package com.hookiesolutions.webhookie.portal.web.group
 
-import com.hookiesolutions.webhookie.portal.domain.ProviderGroup
+import com.hookiesolutions.webhookie.portal.domain.group.ProviderGroup
 import com.hookiesolutions.webhookie.portal.service.AccessGroupServiceDelegator
 import com.hookiesolutions.webhookie.portal.service.model.SaveGroupRequest
 import org.springframework.web.bind.annotation.DeleteMapping

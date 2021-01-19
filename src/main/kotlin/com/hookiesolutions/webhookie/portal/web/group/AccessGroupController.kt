@@ -1,7 +1,7 @@
 package com.hookiesolutions.webhookie.portal.web.group
 
 import com.hookiesolutions.webhookie.config.web.OpenAPIConfig
-import com.hookiesolutions.webhookie.portal.domain.AccessGroup
+import com.hookiesolutions.webhookie.portal.domain.group.AccessGroup
 import com.hookiesolutions.webhookie.portal.service.AccessGroupServiceDelegator
 import com.hookiesolutions.webhookie.portal.service.model.SaveGroupRequest
 import com.hookiesolutions.webhookie.portal.web.PortalAPIDocs.Companion.REQUEST_MAPPING_PORTAL_ADMIN
