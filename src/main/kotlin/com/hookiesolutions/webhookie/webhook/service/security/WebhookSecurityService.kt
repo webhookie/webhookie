@@ -1,4 +1,4 @@
-package com.hookiesolutions.webhookie.webhook.service
+package com.hookiesolutions.webhookie.webhook.service.security
 
 import com.hookiesolutions.webhookie.security.service.SecurityHandler
 import com.hookiesolutions.webhookie.webhook.domain.ConsumerAccess
