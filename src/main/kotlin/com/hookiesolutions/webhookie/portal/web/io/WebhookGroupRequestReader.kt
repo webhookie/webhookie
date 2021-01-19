@@ -30,7 +30,8 @@ class WebhookGroupRequestReader(
   }
 
   override fun canRead(elementType: ResolvableType, mediaType: MediaType?): Boolean {
-    return elementType.isAssignableFrom(WebhookGroupRequest::class.java)
+    return (elementType.resolve() == WebhookGroupRequest::class.java) &&
+        getSupportedMediaTypes().contains(mediaType)
   }
 
   override fun read(
