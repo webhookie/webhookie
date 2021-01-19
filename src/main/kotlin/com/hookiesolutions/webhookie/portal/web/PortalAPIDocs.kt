@@ -1,6 +1,5 @@
 package com.hookiesolutions.webhookie.portal.web
 
-import com.hookiesolutions.webhookie.portal.web.AccessGroupController.Companion.REQUEST_MAPPING_PORTAL_ADMIN
 import org.springdoc.core.GroupedOpenApi
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -20,5 +19,9 @@ class PortalAPIDocs {
       .group("Admin Portal")
       .pathsToMatch(*paths)
       .build()
+  }
+
+  companion object {
+    const val REQUEST_MAPPING_PORTAL_ADMIN = "/portal/admin"
   }
 }

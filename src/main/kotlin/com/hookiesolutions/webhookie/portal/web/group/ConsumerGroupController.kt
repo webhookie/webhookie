@@ -1,6 +1,6 @@
-package com.hookiesolutions.webhookie.portal.web
+package com.hookiesolutions.webhookie.portal.web.group
 
-import com.hookiesolutions.webhookie.portal.domain.ProviderGroup
+import com.hookiesolutions.webhookie.portal.domain.ConsumerGroup
 import com.hookiesolutions.webhookie.portal.service.AccessGroupServiceDelegator
 import com.hookiesolutions.webhookie.portal.service.model.SaveGroupRequest
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -14,47 +14,52 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import javax.validation.Valid
 
+/**
+ *
+ * @author Arthur Kazemi<bidadh@gmail.com>
+ * @since 13/1/21 18:42
+ */
 @RestController
-class ProviderGroupController(
-  override val serviceDelegator: AccessGroupServiceDelegator<ProviderGroup>
-): AccessGroupController<ProviderGroup> {
+class ConsumerGroupController(
+  override val serviceDelegator: AccessGroupServiceDelegator<ConsumerGroup>
+): AccessGroupController<ConsumerGroup> {
 
   @PostMapping(
-    value = [REQUEST_MAPPING_PROVIDER_GROUPS]
+    value = [REQUEST_MAPPING_CONSUMER_GROUPS]
   )
-  override fun createGroup(@RequestBody @Valid bodyMono: Mono<SaveGroupRequest>): Mono<ProviderGroup> {
+  override fun createGroup(@RequestBody @Valid bodyMono: Mono<SaveGroupRequest>): Mono<ConsumerGroup> {
     return super.createGroup(bodyMono)
   }
 
   @GetMapping(
-    value = [REQUEST_MAPPING_PROVIDER_GROUPS]
+    value = [REQUEST_MAPPING_CONSUMER_GROUPS]
   )
-  override fun allGroups(): Flux<ProviderGroup> {
+  override fun allGroups(): Flux<ConsumerGroup> {
     return super.allGroups()
   }
 
   @GetMapping(
-    value = ["$REQUEST_MAPPING_PROVIDER_GROUPS/{id}"]
+    value = ["$REQUEST_MAPPING_CONSUMER_GROUPS/{id}"]
   )
-  override fun getGroup(@PathVariable id: String): Mono<ProviderGroup> {
+  override fun getGroup(@PathVariable id: String): Mono<ConsumerGroup> {
     return super.getGroup(id)
   }
 
   @PutMapping(
-    value = ["$REQUEST_MAPPING_PROVIDER_GROUPS/{id}"]
+    value = ["$REQUEST_MAPPING_CONSUMER_GROUPS/{id}"]
   )
-  override fun updateGroup(@PathVariable id: String, @RequestBody @Valid bodyMono: Mono<SaveGroupRequest>): Mono<ProviderGroup> {
+  override fun updateGroup(@PathVariable id: String, @RequestBody @Valid bodyMono: Mono<SaveGroupRequest>): Mono<ConsumerGroup> {
     return super.updateGroup(id, bodyMono)
   }
 
   @DeleteMapping(
-    value = ["$REQUEST_MAPPING_PROVIDER_GROUPS/{id}"]
+    value = ["$REQUEST_MAPPING_CONSUMER_GROUPS/{id}"]
   )
   override fun deleteGroup(@PathVariable id: String): Mono<String> {
     return super.deleteGroup(id)
   }
 
   companion object {
-    const val REQUEST_MAPPING_PROVIDER_GROUPS = "/providergroups"
+    const val REQUEST_MAPPING_CONSUMER_GROUPS = "/consumergroups"
   }
 }
