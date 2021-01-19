@@ -1,11 +1,10 @@
-package com.hookiesolutions.webhookie.portal.service
+package com.hookiesolutions.webhookie.portal.web.io
 
 import amf.client.model.document.Document
 import amf.plugins.domain.webapi.models.EndPoint
 import com.hookiesolutions.webhookie.common.service.YamlService
+import com.hookiesolutions.webhookie.portal.domain.Topic
 import com.hookiesolutions.webhookie.portal.service.model.AsyncApiSpec
-import com.hookiesolutions.webhookie.portal.service.model.Topic
-import com.hookiesolutions.webhookie.portal.service.model.WebhookGroup
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
@@ -23,8 +22,7 @@ import java.util.stream.Stream
 class AsyncApiService(
   private val yamlService: YamlService
 ) {
-
-  fun read(body: Document): Mono<WebhookGroup> {
+  fun readMono(body: Document): Mono<AsyncApiSpec> {
     val name: String? = readString(body, "core#name")
     val version: String? = readString(body, "core#version")
     val description: String? = readString(body, "core#description")
@@ -47,7 +45,7 @@ class AsyncApiService(
         val yaml = body.raw().get()
         yamlService.read(yaml)
           .map {
-            WebhookGroup(name, version, description, topics, AsyncApiSpec(yaml, it))
+            AsyncApiSpec(name, version, description, topics, yaml, it)
           }
           .toMono()
       }
