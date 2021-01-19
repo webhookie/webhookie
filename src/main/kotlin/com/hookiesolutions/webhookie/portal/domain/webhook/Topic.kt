@@ -1,4 +1,4 @@
-package com.hookiesolutions.webhookie.portal.domain
+package com.hookiesolutions.webhookie.portal.domain.webhook
 
 data class Topic(
   val path: String,

@@ -1,6 +1,6 @@
 package com.hookiesolutions.webhookie.portal.service.model
 
-import com.hookiesolutions.webhookie.portal.domain.Topic
+import com.hookiesolutions.webhookie.portal.domain.webhook.Topic
 
 data class AsyncApiSpec(
   val name: String,

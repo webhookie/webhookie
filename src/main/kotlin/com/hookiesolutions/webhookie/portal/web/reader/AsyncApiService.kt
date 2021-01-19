@@ -3,7 +3,7 @@ package com.hookiesolutions.webhookie.portal.web.reader
 import amf.client.model.document.Document
 import amf.plugins.domain.webapi.models.EndPoint
 import com.hookiesolutions.webhookie.common.service.YamlService
-import com.hookiesolutions.webhookie.portal.domain.Topic
+import com.hookiesolutions.webhookie.portal.domain.webhook.Topic
 import com.hookiesolutions.webhookie.portal.service.model.AsyncApiSpec
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
