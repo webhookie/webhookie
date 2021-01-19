@@ -1,4 +1,4 @@
-package com.hookiesolutions.webhookie.portal.web.io
+package com.hookiesolutions.webhookie.portal.web.reader
 
 import com.hookiesolutions.webhookie.common.service.ReactiveObjectMapper
 import com.hookiesolutions.webhookie.portal.domain.ConsumerAccess

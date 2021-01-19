@@ -1,4 +1,4 @@
-package com.hookiesolutions.webhookie.portal.web.io
+package com.hookiesolutions.webhookie.portal.web.reader
 
 import amf.ProfileName
 import amf.client.AMF
