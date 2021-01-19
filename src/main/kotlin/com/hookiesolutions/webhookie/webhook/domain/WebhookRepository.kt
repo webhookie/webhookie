@@ -27,4 +27,8 @@ class WebhookRepository(
       WebhookGroup::class.java
     )
   }
+
+  fun byId(id: String): Mono<WebhookGroup> {
+    return repository.findById(id)
+  }
 }

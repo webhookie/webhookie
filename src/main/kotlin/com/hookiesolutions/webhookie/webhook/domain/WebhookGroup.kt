@@ -27,10 +27,10 @@ data class WebhookGroup(
   val providerIAMGroups: List<String>,
   val consumerAccess: ConsumerAccess,
   val providerAccess: ProviderAccess,
-): AbstractEntity() {
+) : AbstractEntity() {
   class Queries {
     companion object {
-      fun consumerGroupsIn(groups: List<String>): Criteria {
+      private fun consumerGroupsIn(groups: List<String>): Criteria {
         return where(KEY_CONSUMER_IAM_GROUPS).`in`(groups)
       }
 
