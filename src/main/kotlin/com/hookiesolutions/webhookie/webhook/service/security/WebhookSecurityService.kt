@@ -1,8 +1,8 @@
 package com.hookiesolutions.webhookie.webhook.service.security
 
 import com.hookiesolutions.webhookie.security.service.SecurityHandler
-import com.hookiesolutions.webhookie.webhook.domain.ConsumerAccess
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup
+import com.hookiesolutions.webhookie.webhook.service.security.voter.WebhookGroupConsumeAccessVoter
 import org.slf4j.Logger
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Component
@@ -18,6 +18,7 @@ import java.util.function.Supplier
 @Component
 class WebhookSecurityService(
   private val securityHandler: SecurityHandler,
+  private val consumerAccessVoters: List<WebhookGroupConsumeAccessVoter>,
   private val log: Logger
 ) {
   fun groups(): Mono<List<String>> {
@@ -25,22 +26,20 @@ class WebhookSecurityService(
   }
 
   fun webhookGroupIsConsumableFor(webhookGroup: WebhookGroup, tokenGroups: List<String>): Boolean {
-    if(log.isDebugEnabled) {
-      log.debug("Checking WebhookGroup '{}', '{}', '{} Consume Access for token groups: '{}'",
+    if (log.isDebugEnabled) {
+      log.debug(
+        "Checking WebhookGroup '{}', '{}', '{} Consume Access for token groups: '{}'",
         webhookGroup.name,
         webhookGroup.consumerAccess,
         webhookGroup.consumerIAMGroups,
-        tokenGroups)
+        tokenGroups
+      )
     }
-    
-    return if (webhookGroup.consumerAccess == ConsumerAccess.PUBLIC) {
-      true
-    } else {
-      tokenGroups.any {
-        webhookGroup.consumerIAMGroups.contains(it) ||
-        webhookGroup.providerIAMGroups.contains(it)
+
+    return consumerAccessVoters
+      .any {
+        it.vote(webhookGroup, tokenGroups)
       }
-    }
   }
 
   fun verifyConsumeAccess(webhookGroupSupplier: Supplier<Mono<WebhookGroup>>): Mono<WebhookGroup> {
@@ -49,10 +48,10 @@ class WebhookSecurityService(
       .flatMap {
         val webhookGroup = it.t2
         val tokenGroups = it.t1
-        return@flatMap if(webhookGroupIsConsumableFor(webhookGroup, tokenGroups)) {
+        return@flatMap if (webhookGroupIsConsumableFor(webhookGroup, tokenGroups)) {
           webhookGroup.toMono()
         } else {
-          if(log.isDebugEnabled) {
+          if (log.isDebugEnabled) {
             log.debug("Access is denied for current user to read WebhookGroup: '{}'", webhookGroup.name)
           }
           Mono.error(AccessDeniedException("Access Denied!"))
