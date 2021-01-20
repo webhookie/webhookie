@@ -1,7 +1,9 @@
 package com.hookiesolutions.webhookie.webhook.domain
 
 import com.hookiesolutions.webhookie.common.exception.EntityNotFoundException
+import com.hookiesolutions.webhookie.common.model.DeletableEntity
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Queries.Companion.accessibleForProviderWith
+import com.hookiesolutions.webhookie.webhook.service.security.annotation.VerifyCanDeleteWebhookGroup
 import com.hookiesolutions.webhookie.webhook.service.security.annotation.VerifyWebhookGroupConsumeAccess
 import com.hookiesolutions.webhookie.webhook.service.security.annotation.VerifyWebhookGroupWriteAccess
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
@@ -43,8 +45,9 @@ class WebhookRepository(
     return fetchById(id)
   }
 
-  fun delete(entity: WebhookGroup): Mono<Void> {
-    return repository.delete(entity)
+  @VerifyCanDeleteWebhookGroup
+  fun delete(deletableWebhookGroup: DeletableEntity<WebhookGroup>): Mono<Void> {
+    return repository.delete(deletableWebhookGroup.entity)
   }
 
   private fun fetchById(id: String): Mono<WebhookGroup> {

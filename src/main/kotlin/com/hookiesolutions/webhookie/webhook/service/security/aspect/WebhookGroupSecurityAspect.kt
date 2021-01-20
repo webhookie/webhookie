@@ -1,12 +1,16 @@
 package com.hookiesolutions.webhookie.webhook.service.security.aspect
 
+import com.hookiesolutions.webhookie.common.model.DeletableEntity
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup
 import com.hookiesolutions.webhookie.webhook.service.security.WebhookSecurityService
+import org.aspectj.lang.JoinPoint
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect
+import org.aspectj.lang.annotation.Before
 import org.aspectj.lang.annotation.Pointcut
 import org.slf4j.Logger
+import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 
@@ -32,12 +36,16 @@ class WebhookGroupSecurityAspect(
   fun annotatedVerifyWebhookGroupWriteAccess() {
   }
 
+  @Pointcut("@annotation(com.hookiesolutions.webhookie.webhook.service.security.annotation.VerifyCanDeleteWebhookGroup)")
+  fun annotatedVerifyCanDeleteWebhookGroup() {
+  }
+
   @Pointcut("execution(reactor.core.publisher.Mono<com.hookiesolutions.webhookie.webhook.domain.WebhookGroup> *(..))")
   fun returnsMonoWebhookGroup() {
   }
 
   @Around("annotatedWithVerifyWebhookGroupConsumeAccess() && returnsMonoWebhookGroup()")
-  fun checkAccess(pjp: ProceedingJoinPoint): Mono<WebhookGroup> {
+  fun checkReadAccess(pjp: ProceedingJoinPoint): Mono<WebhookGroup> {
     @Suppress("UNCHECKED_CAST")
     val mono: Mono<WebhookGroup> = pjp.proceed() as Mono<WebhookGroup>
 
@@ -51,8 +59,8 @@ class WebhookGroupSecurityAspect(
     }
   }
 
-  @Around("annotatedVerifyWebhookGroupWriteAccess()")
-  fun fetchAndCheckWriteAccess(pjp: ProceedingJoinPoint): Any {
+  @Around("annotatedVerifyWebhookGroupWriteAccess() && returnsMonoWebhookGroup()")
+  fun checkWriteAccess(pjp: ProceedingJoinPoint): Any {
     @Suppress("UNCHECKED_CAST")
     val mono: Mono<WebhookGroup> = pjp.proceed() as Mono<WebhookGroup>
 
@@ -63,6 +71,13 @@ class WebhookGroupSecurityAspect(
             log.debug("Verifying WebhookGroup '{}' Write Access...", it.name)
           }
         }
+    }
+  }
+
+  @Before("annotatedVerifyCanDeleteWebhookGroup() && args(deletableEntity)")
+  fun checkDeleteAccess(jp: JoinPoint, deletableEntity: DeletableEntity<WebhookGroup>) {
+    if(!deletableEntity.deletable) {
+      throw AccessDeniedException("Entity is not deletable!")
     }
   }
 }

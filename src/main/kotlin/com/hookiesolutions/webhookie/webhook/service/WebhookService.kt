@@ -2,6 +2,7 @@ package com.hookiesolutions.webhookie.webhook.service
 
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_PROVIDER
 import com.hookiesolutions.webhookie.portal.service.AccessGroupVerifier
+import com.hookiesolutions.webhookie.common.model.DeletableEntity
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup
 import com.hookiesolutions.webhookie.webhook.domain.WebhookRepository
 import com.hookiesolutions.webhookie.webhook.service.model.WebhookGroupRequest
@@ -54,6 +55,7 @@ class WebhookService(
   @PreAuthorize("hasAuthority('${ROLE_PROVIDER}')")
   fun deleteWebhookGroup(id: String): Mono<String> {
     return repository.findByIdVerifyingWriteAccess(id)
+      .map { DeletableEntity(it, true) }
       .flatMap { repository.delete(it) }
       .map { id }
   }
