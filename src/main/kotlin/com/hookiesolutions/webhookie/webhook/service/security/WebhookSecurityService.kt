@@ -3,11 +3,13 @@ package com.hookiesolutions.webhookie.webhook.service.security
 import com.hookiesolutions.webhookie.security.service.SecurityHandler
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup
 import com.hookiesolutions.webhookie.webhook.service.security.voter.WebhookGroupConsumeAccessVoter
+import com.hookiesolutions.webhookie.webhook.service.security.voter.WebhookGroupProvideAccessVoter
 import org.slf4j.Logger
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
+import java.util.function.BiFunction
 import java.util.function.Supplier
 
 /**
@@ -19,13 +21,42 @@ import java.util.function.Supplier
 class WebhookSecurityService(
   private val securityHandler: SecurityHandler,
   private val consumerAccessVoters: List<WebhookGroupConsumeAccessVoter>,
+  private val providerAccessVoters: List<WebhookGroupProvideAccessVoter>,
   private val log: Logger
 ) {
   fun groups(): Mono<List<String>> {
     return securityHandler.groups()
   }
 
-  fun webhookGroupIsConsumableFor(webhookGroup: WebhookGroup, tokenGroups: List<String>): Boolean {
+  fun verifyReadAccess(webhookGroupSupplier: Supplier<Mono<WebhookGroup>>): Mono<WebhookGroup> {
+    return verifyAccess(webhookGroupSupplier, this::webhookGroupIsReadableFor)
+  }
+
+  fun verifyWriteAccess(webhookGroupSupplier: Supplier<Mono<WebhookGroup>>): Mono<WebhookGroup> {
+    return verifyAccess(webhookGroupSupplier, this::webhookGroupIsWritableFor)
+  }
+
+  private fun verifyAccess(
+    webhookGroupSupplier: Supplier<Mono<WebhookGroup>>,
+    verifier: BiFunction<WebhookGroup, List<String>, Boolean>
+  ): Mono<WebhookGroup> {
+    return groups()
+      .zipWith(webhookGroupSupplier.get())
+      .flatMap {
+        val webhookGroup = it.t2
+        val tokenGroups = it.t1
+        return@flatMap if (verifier.apply(webhookGroup, tokenGroups)) {
+          webhookGroup.toMono()
+        } else {
+          if (log.isDebugEnabled) {
+            log.debug("Access is denied for current user to read WebhookGroup: '{}'", webhookGroup.name)
+          }
+          Mono.error(AccessDeniedException("Access Denied!"))
+        }
+      }
+  }
+
+  fun webhookGroupIsReadableFor(webhookGroup: WebhookGroup, tokenGroups: List<String>): Boolean {
     if (log.isDebugEnabled) {
       log.debug(
         "Checking WebhookGroup '{}', '{}', '{} Consume Access for token groups: '{}'",
@@ -42,20 +73,20 @@ class WebhookSecurityService(
       }
   }
 
-  fun verifyConsumeAccess(webhookGroupSupplier: Supplier<Mono<WebhookGroup>>): Mono<WebhookGroup> {
-    return groups()
-      .zipWith(webhookGroupSupplier.get())
-      .flatMap {
-        val webhookGroup = it.t2
-        val tokenGroups = it.t1
-        return@flatMap if (webhookGroupIsConsumableFor(webhookGroup, tokenGroups)) {
-          webhookGroup.toMono()
-        } else {
-          if (log.isDebugEnabled) {
-            log.debug("Access is denied for current user to read WebhookGroup: '{}'", webhookGroup.name)
-          }
-          Mono.error(AccessDeniedException("Access Denied!"))
-        }
+  fun webhookGroupIsWritableFor(webhookGroup: WebhookGroup, tokenGroups: List<String>): Boolean {
+    if (log.isDebugEnabled) {
+      log.debug(
+        "Checking WebhookGroup '{}', '{}', '{} Provide Access for token groups: '{}'",
+        webhookGroup.name,
+        webhookGroup.providerAccess,
+        webhookGroup.providerIAMGroups,
+        tokenGroups
+      )
+    }
+
+    return providerAccessVoters
+      .any {
+        it.vote(webhookGroup, tokenGroups)
       }
   }
 }

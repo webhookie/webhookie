@@ -25,21 +25,42 @@ class WebhookGroupSecurityAspect(
 ) {
 
   @Pointcut("@annotation(com.hookiesolutions.webhookie.webhook.service.security.annotation.VerifyWebhookGroupConsumeAccess)")
-  fun annotatedWithVerifyWebhookGroupConsumeAccess() {}
+  fun annotatedWithVerifyWebhookGroupConsumeAccess() {
+  }
+
+  @Pointcut("@annotation(com.hookiesolutions.webhookie.webhook.service.security.annotation.VerifyWebhookGroupWriteAccess)")
+  fun annotatedVerifyWebhookGroupWriteAccess() {
+  }
 
   @Pointcut("execution(reactor.core.publisher.Mono<com.hookiesolutions.webhookie.webhook.domain.WebhookGroup> *(..))")
-  fun returnsMonoWebhookGroup() {}
+  fun returnsMonoWebhookGroup() {
+  }
 
   @Around("annotatedWithVerifyWebhookGroupConsumeAccess() && returnsMonoWebhookGroup()")
   fun checkAccess(pjp: ProceedingJoinPoint): Mono<WebhookGroup> {
     @Suppress("UNCHECKED_CAST")
     val mono: Mono<WebhookGroup> = pjp.proceed() as Mono<WebhookGroup>
 
-    return securityService.verifyConsumeAccess {
+    return securityService.verifyReadAccess {
       mono
         .doOnNext {
-          if(log.isDebugEnabled) {
+          if (log.isDebugEnabled) {
             log.debug("Verifying WebhookGroup '{}' Consume Access...", it.name)
+          }
+        }
+    }
+  }
+
+  @Around("annotatedVerifyWebhookGroupWriteAccess()")
+  fun fetchAndCheckWriteAccess(pjp: ProceedingJoinPoint): Any {
+    @Suppress("UNCHECKED_CAST")
+    val mono: Mono<WebhookGroup> = pjp.proceed() as Mono<WebhookGroup>
+
+    return securityService.verifyWriteAccess {
+      mono
+        .doOnNext {
+          if (log.isDebugEnabled) {
+            log.debug("Verifying WebhookGroup '{}' Write Access...", it.name)
           }
         }
     }

@@ -7,6 +7,7 @@ import com.hookiesolutions.webhookie.webhook.service.WebhookService
 import com.hookiesolutions.webhookie.webhook.service.model.WebhookGroupRequest
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -34,7 +35,7 @@ class WebhookGroupsController(
     produces = [MediaType.APPLICATION_JSON_VALUE]
   )
   fun createWebhookGroup(@RequestBody @Valid request: WebhookGroupRequest): Mono<WebhookGroup> {
-    return service.createGroup(request)
+    return service.createWebhookGroup(request)
   }
 
   @GetMapping(
@@ -50,6 +51,14 @@ class WebhookGroupsController(
     produces = [MediaType.APPLICATION_JSON_VALUE]
   )
   fun getWebhookGroup(@PathVariable id: String): Mono<WebhookGroup> {
-    return service.readWebhookGroupById(id)
+    return service.readWebhookGroup(id)
+  }
+
+  @DeleteMapping(
+    "/{id}",
+    produces = [MediaType.TEXT_PLAIN_VALUE]
+  )
+  fun deleteWebhookGroup(@PathVariable id: String): Mono<String> {
+    return service.deleteWebhookGroup(id)
   }
 }
