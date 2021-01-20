@@ -25,6 +25,14 @@ class WebhookSecurityService(
   }
 
   fun webhookGroupIsConsumableFor(webhookGroup: WebhookGroup, tokenGroups: List<String>): Boolean {
+    if(log.isDebugEnabled) {
+      log.debug("Checking WebhookGroup '{}', '{}', '{} Consume Access for token groups: '{}'",
+        webhookGroup.name,
+        webhookGroup.consumerAccess,
+        webhookGroup.consumerIAMGroups,
+        tokenGroups)
+    }
+    
     return if (webhookGroup.consumerAccess == ConsumerAccess.PUBLIC) {
       true
     } else {
@@ -40,10 +48,13 @@ class WebhookSecurityService(
       .zipWith(webhookGroupSupplier.get())
       .flatMap {
         val webhookGroup = it.t2
-        return@flatMap if(webhookGroupIsConsumableFor(webhookGroup, it.t1)) {
+        val tokenGroups = it.t1
+        return@flatMap if(webhookGroupIsConsumableFor(webhookGroup, tokenGroups)) {
           webhookGroup.toMono()
         } else {
-          log.error("Access is denied for current user to view WebhookGroup: '{}'", webhookGroup.name)
+          if(log.isDebugEnabled) {
+            log.debug("Access is denied for current user to read WebhookGroup: '{}'", webhookGroup.name)
+          }
           Mono.error(AccessDeniedException("Access Denied!"))
         }
       }

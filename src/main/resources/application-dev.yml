@@ -3,8 +3,9 @@ spring:
     user:
       name: wh-user
       password: password
-#logging:
-#  level:
+logging:
+  level:
 #    web: DEBUG
 #    org.springframework.amqp: DEBUG
 #    org.springframework.integration: DEBUG
+    com.hookiesolutions.webhookie.webhook.service.security: DEBUG

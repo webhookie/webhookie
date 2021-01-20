@@ -6,6 +6,7 @@ import com.hookiesolutions.webhookie.portal.service.AccessGroupVerifier
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup
 import com.hookiesolutions.webhookie.webhook.domain.WebhookRepository
 import com.hookiesolutions.webhookie.webhook.service.model.WebhookGroupRequest
+import com.hookiesolutions.webhookie.webhook.service.security.annotation.VerifyWebhookGroupConsumeAccess
 import com.hookiesolutions.webhookie.webhook.service.security.WebhookSecurityService
 import org.slf4j.Logger
 import org.springframework.security.access.prepost.PreAuthorize
@@ -49,10 +50,9 @@ class WebhookService(
   }
 
   @PreAuthorize("hasAuthority('${ROLE_PROVIDER}')")
+  @VerifyWebhookGroupConsumeAccess
   fun readWebhookGroupById(id: String): Mono<WebhookGroup> {
-    return securityService.verifyConsumeAccess {
-      repository.byId(id)
-        .switchIfEmpty { EntityNotFoundException("WebhookGroup with id: '{$id}' could not be found").toMono() }
-    }
+    return repository.byId(id)
+      .switchIfEmpty { EntityNotFoundException("WebhookGroup with id: '{$id}' could not be found").toMono() }
   }
 }
