@@ -23,7 +23,7 @@ class SubscriptionAPIDocs {
     )
     return GroupedOpenApi
       .builder()
-      .group("subscription")
+      .group("Subscription")
       .pathsToMatch(*paths)
       .build()
   }

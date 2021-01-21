@@ -3,7 +3,7 @@ package com.hookiesolutions.webhookie.security
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_ADMIN
 import com.hookiesolutions.webhookie.security.jwt.AudienceValidator
 import com.hookiesolutions.webhookie.security.jwt.JwtAuthoritiesConverter
-import com.hookiesolutions.webhookie.portal.web.PortalAPIDocs.Companion.REQUEST_MAPPING_PORTAL_ADMIN
+import com.hookiesolutions.webhookie.admin.web.AdminAPIDocs.Companion.REQUEST_MAPPING_ADMIN
 import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -65,7 +65,7 @@ class SecurityConfig(
             authorize(pathMatchers(HttpMethod.valueOf(it.key), *it.value), permitAll)
           }
 
-        authorize(pathMatchers("$REQUEST_MAPPING_PORTAL_ADMIN/**"), hasAuthority(ROLE_ADMIN))
+        authorize(pathMatchers("$REQUEST_MAPPING_ADMIN/**"), hasAuthority(ROLE_ADMIN))
 
         authorize()
       }

@@ -1,4 +1,4 @@
-package com.hookiesolutions.webhookie.portal.web
+package com.hookiesolutions.webhookie.admin.web
 
 import org.springdoc.core.GroupedOpenApi
 import org.springframework.context.annotation.Bean
@@ -10,18 +10,18 @@ import org.springframework.context.annotation.Configuration
  * @since 14/1/21 13:53
  */
 @Configuration
-class PortalAPIDocs {
+class AdminAPIDocs {
   @Bean
-  fun portalOpenApi(): GroupedOpenApi {
-    val paths = arrayOf("${REQUEST_MAPPING_PORTAL_ADMIN}/**")
+  fun adminOpenApi(): GroupedOpenApi {
+    val paths = arrayOf("${REQUEST_MAPPING_ADMIN}/**")
     return GroupedOpenApi
       .builder()
-      .group("Admin Portal")
+      .group("Admin")
       .pathsToMatch(*paths)
       .build()
   }
 
   companion object {
-    const val REQUEST_MAPPING_PORTAL_ADMIN = "/portal/admin"
+    const val REQUEST_MAPPING_ADMIN = "/admin"
   }
 }

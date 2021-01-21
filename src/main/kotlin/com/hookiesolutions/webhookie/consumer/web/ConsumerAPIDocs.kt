@@ -17,7 +17,7 @@ class ConsumerAPIDocs {
     val paths = arrayOf("${REQUEST_MAPPING_CONSUMER}/**")
     return GroupedOpenApi
       .builder()
-      .group("consumer")
+      .group("Consumer")
       .pathsToMatch(*paths)
       .build()
   }

@@ -1,10 +1,12 @@
 package com.hookiesolutions.webhookie.webhook.web
 
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_PROVIDER
+import com.hookiesolutions.webhookie.common.config.web.OpenAPIConfig.Companion.OAUTH2_SCHEME
 import com.hookiesolutions.webhookie.webhook.config.WebhookGroupsAPIDocs.Companion.REQUEST_MAPPING_WEBHOOK_GROUPS
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup
 import com.hookiesolutions.webhookie.webhook.service.WebhookService
 import com.hookiesolutions.webhookie.webhook.service.model.WebhookGroupRequest
+import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -26,6 +28,7 @@ import javax.validation.Valid
  */
 @RestController
 @RequestMapping(REQUEST_MAPPING_WEBHOOK_GROUPS)
+@SecurityRequirement(name = OAUTH2_SCHEME)
 class WebhookGroupsController(
   private val service: WebhookService
 ) {

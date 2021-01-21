@@ -1,6 +1,6 @@
 package com.hookiesolutions.webhookie.subscription.web
 
-import com.hookiesolutions.webhookie.common.config.web.OpenAPIConfig
+import com.hookiesolutions.webhookie.common.config.web.OpenAPIConfig.Companion.OAUTH2_SCHEME
 import com.hookiesolutions.webhookie.subscription.domain.Company
 import com.hookiesolutions.webhookie.subscription.service.CompanyService
 import com.hookiesolutions.webhookie.subscription.service.model.CreateCompanyRequest
@@ -21,7 +21,7 @@ import javax.validation.Valid
  * @since 3/12/20 17:34
  */
 @RestController
-@SecurityRequirement(name = OpenAPIConfig.OAUTH2_SCHEME)
+@SecurityRequirement(name = OAUTH2_SCHEME)
 @RequestMapping(REQUEST_MAPPING_COMPANY)
 class CompanyController(
   private val log: Logger,

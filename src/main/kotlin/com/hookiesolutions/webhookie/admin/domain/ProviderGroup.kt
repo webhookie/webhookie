@@ -1,4 +1,4 @@
-package com.hookiesolutions.webhookie.portal.domain
+package com.hookiesolutions.webhookie.admin.domain
 
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
 import org.springframework.data.annotation.TypeAlias

@@ -1,10 +1,10 @@
-package com.hookiesolutions.webhookie.portal.web
+package com.hookiesolutions.webhookie.admin.web
 
-import com.hookiesolutions.webhookie.common.config.web.OpenAPIConfig
-import com.hookiesolutions.webhookie.portal.domain.AccessGroup
-import com.hookiesolutions.webhookie.portal.service.AccessGroupServiceDelegator
-import com.hookiesolutions.webhookie.portal.service.model.SaveGroupRequest
-import com.hookiesolutions.webhookie.portal.web.PortalAPIDocs.Companion.REQUEST_MAPPING_PORTAL_ADMIN
+import com.hookiesolutions.webhookie.admin.domain.AccessGroup
+import com.hookiesolutions.webhookie.admin.service.AccessGroupServiceDelegator
+import com.hookiesolutions.webhookie.admin.service.model.SaveGroupRequest
+import com.hookiesolutions.webhookie.admin.web.AdminAPIDocs.Companion.REQUEST_MAPPING_ADMIN
+import com.hookiesolutions.webhookie.common.config.web.OpenAPIConfig.Companion.OAUTH2_SCHEME
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -17,8 +17,8 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import javax.validation.Valid
 
-@RequestMapping(REQUEST_MAPPING_PORTAL_ADMIN)
-@SecurityRequirement(name = OpenAPIConfig.OAUTH2_SCHEME)
+@RequestMapping(REQUEST_MAPPING_ADMIN)
+@SecurityRequirement(name = OAUTH2_SCHEME)
 interface AccessGroupController<T: AccessGroup> {
   val serviceDelegator: AccessGroupServiceDelegator<T>
 

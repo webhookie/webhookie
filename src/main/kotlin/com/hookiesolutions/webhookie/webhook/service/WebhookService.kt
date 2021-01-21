@@ -3,7 +3,7 @@ package com.hookiesolutions.webhookie.webhook.service
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_PROVIDER
 import com.hookiesolutions.webhookie.common.model.DeletableEntity
 import com.hookiesolutions.webhookie.common.model.UpdatableEntity
-import com.hookiesolutions.webhookie.portal.service.AccessGroupVerifier
+import com.hookiesolutions.webhookie.admin.service.AccessGroupVerifier
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup
 import com.hookiesolutions.webhookie.webhook.domain.WebhookRepository
 import com.hookiesolutions.webhookie.webhook.service.model.WebhookGroupRequest

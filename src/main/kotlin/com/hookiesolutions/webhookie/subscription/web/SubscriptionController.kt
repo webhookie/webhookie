@@ -1,10 +1,10 @@
 package com.hookiesolutions.webhookie.subscription.web
 
+import com.hookiesolutions.webhookie.common.config.web.OpenAPIConfig.Companion.OAUTH2_SCHEME
 import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.byId
 import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
 import com.hookiesolutions.webhookie.common.service.TimeMachine
-import com.hookiesolutions.webhookie.common.config.web.OpenAPIConfig
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.subscription.service.SubscriptionService
 import com.hookiesolutions.webhookie.subscription.service.model.CreateSubscriptionRequest
@@ -29,7 +29,7 @@ import javax.validation.Valid
  * @since 17/12/20 18:20
  */
 @RestController
-@SecurityRequirement(name = OpenAPIConfig.OAUTH2_SCHEME)
+@SecurityRequirement(name = OAUTH2_SCHEME)
 class SubscriptionController(
   private val timeMachine: TimeMachine,
   private val mongoTemplate: ReactiveMongoTemplate,

@@ -1,8 +1,8 @@
-package com.hookiesolutions.webhookie.portal.service
+package com.hookiesolutions.webhookie.admin.service
 
-import com.hookiesolutions.webhookie.portal.domain.AccessGroup
-import com.hookiesolutions.webhookie.portal.domain.ConsumerGroup
-import com.hookiesolutions.webhookie.portal.domain.ProviderGroup
+import com.hookiesolutions.webhookie.admin.domain.AccessGroup
+import com.hookiesolutions.webhookie.admin.domain.ConsumerGroup
+import com.hookiesolutions.webhookie.admin.domain.ProviderGroup
 import org.slf4j.Logger
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.query.Query

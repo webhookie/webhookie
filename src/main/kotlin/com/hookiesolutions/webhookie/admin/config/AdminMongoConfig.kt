@@ -1,7 +1,7 @@
-package com.hookiesolutions.webhookie.portal.config
+package com.hookiesolutions.webhookie.admin.config
 
-import com.hookiesolutions.webhookie.portal.domain.ConsumerGroup
-import com.hookiesolutions.webhookie.portal.domain.ProviderGroup
+import com.hookiesolutions.webhookie.admin.domain.ConsumerGroup
+import com.hookiesolutions.webhookie.admin.domain.ProviderGroup
 import org.slf4j.Logger
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.annotation.Configuration
@@ -20,7 +20,7 @@ import reactor.kotlin.core.publisher.toMono
  * @since 13/1/21 14:10
  */
 @Configuration
-class PortalMongoConfig(
+class AdminMongoConfig(
   private val mongoTemplate: ReactiveMongoTemplate,
   private val mongoMappingContext: MongoMappingContext,
   private val logger: Logger
