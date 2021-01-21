@@ -3,7 +3,6 @@ package com.hookiesolutions.webhookie.webhook.service
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_PROVIDER
 import com.hookiesolutions.webhookie.common.model.DeletableEntity
 import com.hookiesolutions.webhookie.common.model.UpdatableEntity
-import com.hookiesolutions.webhookie.admin.service.AccessGroupVerifier
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup
 import com.hookiesolutions.webhookie.webhook.domain.WebhookRepository
 import com.hookiesolutions.webhookie.webhook.service.model.WebhookGroupRequest
@@ -23,13 +22,12 @@ import reactor.core.publisher.Mono
 class WebhookService(
   private val repository: WebhookRepository,
   private val securityService: WebhookSecurityService,
-  private val accessGroupVerifier: AccessGroupVerifier,
+  private val adminServiceDelegate: AdminServiceDelegate,
   private val log: Logger
 ) {
   @PreAuthorize("hasAuthority('${ROLE_PROVIDER}')")
   fun createWebhookGroup(request: WebhookGroupRequest): Mono<WebhookGroup> {
-    return accessGroupVerifier.verifyConsumerGroups(request.consumerGroups)
-      .zipWhen { accessGroupVerifier.verifyProviderGroups(request.providerGroups) }
+    return verifyRequestGroups(request)
       .map { request.toWebhookGroup()}
       .flatMap {
         log.info("Saving WebhookGroup: '{}'", it.title)
@@ -61,9 +59,12 @@ class WebhookService(
   @PreAuthorize("hasAuthority('${ROLE_PROVIDER}')")
   fun updateWebhookGroup(id: String, request: WebhookGroupRequest): Mono<WebhookGroup> {
     return repository.findByIdVerifyingWriteAccess(id)
-      .flatMap { accessGroupVerifier.verifyConsumerGroups(request.consumerGroups) }
-      .flatMap { accessGroupVerifier.verifyProviderGroups(request.providerGroups) }
+      .flatMap { verifyRequestGroups(request) }
       .map { UpdatableEntity(request.toWebhookGroup(id), true) }
       .flatMap { repository.update(it) }
+  }
+
+  private fun verifyRequestGroups(request: WebhookGroupRequest): Mono<Boolean> {
+    return adminServiceDelegate.verifyGroups(request.consumerGroups, request.providerGroups)
   }
 }
