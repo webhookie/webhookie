@@ -63,9 +63,7 @@ class WebhookService(
 
   @PreAuthorize("hasAuthority('${ROLE_PROVIDER}')")
   fun updateWebhookGroup(id: String, request: WebhookGroupRequest): Mono<WebhookGroup> {
-    return request
-      .toMono()
-      .flatMap { repository.findByIdVerifyingWriteAccess(id) }
+    return repository.findByIdVerifyingWriteAccess(id)
       .flatMap { accessGroupVerifier.verifyConsumerGroups(request.consumerGroups) }
       .flatMap { accessGroupVerifier.verifyProviderGroups(request.providerGroups) }
       .map { UpdatableEntity(request.toWebhookGroup(id), true) }
