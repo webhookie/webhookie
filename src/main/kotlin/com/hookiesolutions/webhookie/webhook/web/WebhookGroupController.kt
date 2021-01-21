@@ -2,7 +2,7 @@ package com.hookiesolutions.webhookie.webhook.web
 
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_PROVIDER
 import com.hookiesolutions.webhookie.common.config.web.OpenAPIConfig.Companion.OAUTH2_SCHEME
-import com.hookiesolutions.webhookie.webhook.config.WebhookGroupsAPIDocs.Companion.REQUEST_MAPPING_WEBHOOK_GROUPS
+import com.hookiesolutions.webhookie.webhook.config.WebhookGroupAPIDocs.Companion.REQUEST_MAPPING_WEBHOOK_GROUPS
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup
 import com.hookiesolutions.webhookie.webhook.service.WebhookService
 import com.hookiesolutions.webhookie.webhook.service.model.WebhookGroupRequest
@@ -29,7 +29,7 @@ import javax.validation.Valid
 @RestController
 @RequestMapping(REQUEST_MAPPING_WEBHOOK_GROUPS)
 @SecurityRequirement(name = OAUTH2_SCHEME)
-class WebhookGroupsController(
+class WebhookGroupController(
   private val service: WebhookService
 ) {
   @PreAuthorize("hasAuthority('$ROLE_PROVIDER')")

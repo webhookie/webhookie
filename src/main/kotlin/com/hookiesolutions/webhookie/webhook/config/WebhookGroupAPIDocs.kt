@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration
  * @since 19/1/21 20:09
  */
 @Configuration
-class WebhookGroupsAPIDocs {
+class WebhookGroupAPIDocs {
   @Bean
   fun webhookOpenApi(): GroupedOpenApi {
     val paths = arrayOf("${REQUEST_MAPPING_WEBHOOK_GROUPS}/**")
