@@ -13,7 +13,6 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import reactor.kotlin.core.publisher.toMono
 
 /**
  *
@@ -29,10 +28,8 @@ class WebhookService(
 ) {
   @PreAuthorize("hasAuthority('${ROLE_PROVIDER}')")
   fun createWebhookGroup(request: WebhookGroupRequest): Mono<WebhookGroup> {
-    return request
-      .toMono()
-      .flatMap { accessGroupVerifier.verifyConsumerGroups(request.consumerGroups) }
-      .flatMap { accessGroupVerifier.verifyProviderGroups(request.providerGroups) }
+    return accessGroupVerifier.verifyConsumerGroups(request.consumerGroups)
+      .zipWhen { accessGroupVerifier.verifyProviderGroups(request.providerGroups) }
       .map { request.toWebhookGroup()}
       .flatMap {
         log.info("Saving WebhookGroup: '{}'", it.title)
