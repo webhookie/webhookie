@@ -49,7 +49,7 @@ class WebhookSecurityService(
           webhookGroup.toMono()
         } else {
           if (log.isDebugEnabled) {
-            log.debug("Access is denied for current user to read WebhookGroup: '{}'", webhookGroup.name)
+            log.debug("Access is denied for current user to read WebhookGroup: '{}'", webhookGroup.title)
           }
           Mono.error(AccessDeniedException("Access Denied!"))
         }
@@ -60,7 +60,7 @@ class WebhookSecurityService(
     if (log.isDebugEnabled) {
       log.debug(
         "Checking WebhookGroup '{}', '{}', '{} Consume Access for token groups: '{}'",
-        webhookGroup.name,
+        webhookGroup.title,
         webhookGroup.consumerAccess,
         webhookGroup.consumerIAMGroups,
         tokenGroups
@@ -77,7 +77,7 @@ class WebhookSecurityService(
     if (log.isDebugEnabled) {
       log.debug(
         "Checking WebhookGroup '{}', '{}', '{} Provide Access for token groups: '{}'",
-        webhookGroup.name,
+        webhookGroup.title,
         webhookGroup.providerAccess,
         webhookGroup.providerIAMGroups,
         tokenGroups

@@ -8,4 +8,4 @@ package com.hookiesolutions.webhookie.webhook.service.security.annotation
  */
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
-annotation class VerifyWebhookGroupConsumeAccess
+annotation class VerifyWebhookGroupReadAccess

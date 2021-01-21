@@ -1,11 +1,17 @@
 package com.hookiesolutions.webhookie.webhook.domain
 
+import com.hookiesolutions.webhookie.common.exception.EntityExistsException
 import com.hookiesolutions.webhookie.common.exception.EntityNotFoundException
+import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.byId
 import com.hookiesolutions.webhookie.common.model.DeletableEntity
+import com.hookiesolutions.webhookie.common.model.UpdatableEntity
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Queries.Companion.accessibleForProviderWith
-import com.hookiesolutions.webhookie.webhook.service.security.annotation.VerifyCanDeleteWebhookGroup
-import com.hookiesolutions.webhookie.webhook.service.security.annotation.VerifyWebhookGroupConsumeAccess
+import com.hookiesolutions.webhookie.webhook.service.security.annotation.VerifyWebhookGroupCanBeDeleted
+import com.hookiesolutions.webhookie.webhook.service.security.annotation.VerifyWebhookGroupCanBeUpdated
+import com.hookiesolutions.webhookie.webhook.service.security.annotation.VerifyWebhookGroupReadAccess
 import com.hookiesolutions.webhookie.webhook.service.security.annotation.VerifyWebhookGroupWriteAccess
+import org.springframework.dao.DuplicateKeyException
+import org.springframework.data.mongodb.core.FindAndReplaceOptions
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.query.Query.query
 import org.springframework.stereotype.Repository
@@ -26,6 +32,10 @@ class WebhookRepository(
 ) {
   fun save(group: WebhookGroup): Mono<WebhookGroup> {
     return repository.save(group)
+      .onErrorMap(DuplicateKeyException::class.java) {
+        val key = group.topics.toString()
+        EntityExistsException(key, "Duplicate WebhookGroup topics provided: $key")
+      }
   }
 
   fun findProviderWebhookGroups(myGroups: List<String>): Flux<WebhookGroup> {
@@ -35,7 +45,7 @@ class WebhookRepository(
     )
   }
 
-  @VerifyWebhookGroupConsumeAccess
+  @VerifyWebhookGroupReadAccess
   fun findByIdVerifyingReadAccess(id: String): Mono<WebhookGroup> {
     return fetchById(id)
   }
@@ -45,9 +55,23 @@ class WebhookRepository(
     return fetchById(id)
   }
 
-  @VerifyCanDeleteWebhookGroup
+  @VerifyWebhookGroupCanBeDeleted
   fun delete(deletableWebhookGroup: DeletableEntity<WebhookGroup>): Mono<Void> {
     return repository.delete(deletableWebhookGroup.entity)
+  }
+
+  @VerifyWebhookGroupCanBeUpdated
+  fun update(updatableEntity: UpdatableEntity<WebhookGroup>): Mono<WebhookGroup> {
+    return mongoTemplate
+      .update(WebhookGroup::class.java)
+      .matching(query(byId(updatableEntity.entity.id)))
+      .replaceWith(updatableEntity.entity)
+      .withOptions(FindAndReplaceOptions.options().returnNew())
+      .findAndReplace()
+      .onErrorMap(DuplicateKeyException::class.java) {
+        val key = updatableEntity.entity.topics.toString()
+        EntityExistsException(key, "Duplicate WebhookGroup topics provided: $key")
+      }
   }
 
   private fun fetchById(id: String): Mono<WebhookGroup> {

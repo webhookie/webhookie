@@ -1,8 +1,9 @@
 package com.hookiesolutions.webhookie.webhook.service
 
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_PROVIDER
-import com.hookiesolutions.webhookie.portal.service.AccessGroupVerifier
 import com.hookiesolutions.webhookie.common.model.DeletableEntity
+import com.hookiesolutions.webhookie.common.model.UpdatableEntity
+import com.hookiesolutions.webhookie.portal.service.AccessGroupVerifier
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup
 import com.hookiesolutions.webhookie.webhook.domain.WebhookRepository
 import com.hookiesolutions.webhookie.webhook.service.model.WebhookGroupRequest
@@ -34,7 +35,7 @@ class WebhookService(
       .flatMap { accessGroupVerifier.verifyProviderGroups(request.providerGroups) }
       .map { request.toWebhookGroup()}
       .flatMap {
-        log.info("Saving WebhookGroup: '{}'", it.name)
+        log.info("Saving WebhookGroup: '{}'", it.title)
         repository.save(it)
       }
   }
@@ -58,5 +59,16 @@ class WebhookService(
       .map { DeletableEntity(it, true) }
       .flatMap { repository.delete(it) }
       .map { id }
+  }
+
+  @PreAuthorize("hasAuthority('${ROLE_PROVIDER}')")
+  fun updateWebhookGroup(id: String, request: WebhookGroupRequest): Mono<WebhookGroup> {
+    return request
+      .toMono()
+      .flatMap { repository.findByIdVerifyingWriteAccess(id) }
+      .flatMap { accessGroupVerifier.verifyConsumerGroups(request.consumerGroups) }
+      .flatMap { accessGroupVerifier.verifyProviderGroups(request.providerGroups) }
+      .map { UpdatableEntity(request.toWebhookGroup(id), true) }
+      .flatMap { repository.update(it) }
   }
 }

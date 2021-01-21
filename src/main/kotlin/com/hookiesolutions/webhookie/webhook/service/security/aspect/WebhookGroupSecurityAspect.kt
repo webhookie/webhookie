@@ -1,6 +1,7 @@
 package com.hookiesolutions.webhookie.webhook.service.security.aspect
 
 import com.hookiesolutions.webhookie.common.model.DeletableEntity
+import com.hookiesolutions.webhookie.common.model.UpdatableEntity
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup
 import com.hookiesolutions.webhookie.webhook.service.security.WebhookSecurityService
 import org.aspectj.lang.JoinPoint
@@ -28,23 +29,27 @@ class WebhookGroupSecurityAspect(
   private val log: Logger
 ) {
 
-  @Pointcut("@annotation(com.hookiesolutions.webhookie.webhook.service.security.annotation.VerifyWebhookGroupConsumeAccess)")
-  fun annotatedWithVerifyWebhookGroupConsumeAccess() {
+  @Pointcut("@annotation(com.hookiesolutions.webhookie.webhook.service.security.annotation.VerifyWebhookGroupReadAccess)")
+  fun annotatedVerifyWebhookGroupReadAccess() {
   }
 
   @Pointcut("@annotation(com.hookiesolutions.webhookie.webhook.service.security.annotation.VerifyWebhookGroupWriteAccess)")
   fun annotatedVerifyWebhookGroupWriteAccess() {
   }
 
-  @Pointcut("@annotation(com.hookiesolutions.webhookie.webhook.service.security.annotation.VerifyCanDeleteWebhookGroup)")
-  fun annotatedVerifyCanDeleteWebhookGroup() {
+  @Pointcut("@annotation(com.hookiesolutions.webhookie.webhook.service.security.annotation.VerifyWebhookGroupCanBeDeleted)")
+  fun annotatedVerifyWebhookGroupCanBeDeleted() {
+  }
+
+  @Pointcut("@annotation(com.hookiesolutions.webhookie.webhook.service.security.annotation.VerifyWebhookGroupCanBeUpdated)")
+  fun annotatedVerifyWebhookGroupCanBeUpdated() {
   }
 
   @Pointcut("execution(reactor.core.publisher.Mono<com.hookiesolutions.webhookie.webhook.domain.WebhookGroup> *(..))")
   fun returnsMonoWebhookGroup() {
   }
 
-  @Around("annotatedWithVerifyWebhookGroupConsumeAccess() && returnsMonoWebhookGroup()")
+  @Around("annotatedVerifyWebhookGroupReadAccess() && returnsMonoWebhookGroup()")
   fun checkReadAccess(pjp: ProceedingJoinPoint): Mono<WebhookGroup> {
     @Suppress("UNCHECKED_CAST")
     val mono: Mono<WebhookGroup> = pjp.proceed() as Mono<WebhookGroup>
@@ -53,7 +58,7 @@ class WebhookGroupSecurityAspect(
       mono
         .doOnNext {
           if (log.isDebugEnabled) {
-            log.debug("Verifying WebhookGroup '{}' Consume Access...", it.name)
+            log.debug("Verifying WebhookGroup '{}' Consume Access...", it.title)
           }
         }
     }
@@ -68,16 +73,23 @@ class WebhookGroupSecurityAspect(
       mono
         .doOnNext {
           if (log.isDebugEnabled) {
-            log.debug("Verifying WebhookGroup '{}' Write Access...", it.name)
+            log.debug("Verifying WebhookGroup '{}' Write Access...", it.title)
           }
         }
     }
   }
 
-  @Before("annotatedVerifyCanDeleteWebhookGroup() && args(deletableEntity)")
+  @Before("annotatedVerifyWebhookGroupCanBeDeleted() && args(deletableEntity)")
   fun checkDeleteAccess(jp: JoinPoint, deletableEntity: DeletableEntity<WebhookGroup>) {
     if(!deletableEntity.deletable) {
       throw AccessDeniedException("Entity is not deletable!")
+    }
+  }
+
+  @Before("annotatedVerifyWebhookGroupCanBeUpdated() && args(updatableEntity)")
+  fun checkUpdateAccess(jp: JoinPoint, updatableEntity: UpdatableEntity<WebhookGroup>) {
+    if(!updatableEntity.updatable) {
+      throw AccessDeniedException("Entity is not updatable!")
     }
   }
 }

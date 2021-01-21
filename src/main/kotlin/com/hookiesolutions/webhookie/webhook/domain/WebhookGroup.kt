@@ -17,12 +17,11 @@ import org.springframework.data.mongodb.core.query.Criteria.where
 @Document(collection = "webhook_group")
 @TypeAlias("webhookGroup")
 data class WebhookGroup(
-  val name: String,
+  val title: String,
   val webhookVersion: String,
   val description: String?,
   val topics: List<Topic>,
   val raw: String,
-  val spec: Map<String, Any>,
   val consumerIAMGroups: List<String>,
   val providerIAMGroups: List<String>,
   val consumerAccess: ConsumerAccess,
