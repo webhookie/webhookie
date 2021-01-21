@@ -4,7 +4,7 @@ import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.R
 import com.hookiesolutions.webhookie.common.config.web.OpenAPIConfig.Companion.OAUTH2_SCHEME
 import com.hookiesolutions.webhookie.webhook.config.WebhookGroupAPIDocs.Companion.REQUEST_MAPPING_WEBHOOK_GROUPS
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup
-import com.hookiesolutions.webhookie.webhook.service.WebhookService
+import com.hookiesolutions.webhookie.webhook.service.WebhookGroupService
 import com.hookiesolutions.webhookie.webhook.service.model.WebhookGroupRequest
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.springframework.http.MediaType
@@ -30,7 +30,7 @@ import javax.validation.Valid
 @RequestMapping(REQUEST_MAPPING_WEBHOOK_GROUPS)
 @SecurityRequirement(name = OAUTH2_SCHEME)
 class WebhookGroupController(
-  private val service: WebhookService
+  private val service: WebhookGroupService
 ) {
   @PreAuthorize("hasAuthority('$ROLE_PROVIDER')")
   @PostMapping(

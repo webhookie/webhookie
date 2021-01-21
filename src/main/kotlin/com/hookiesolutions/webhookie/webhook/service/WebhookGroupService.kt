@@ -4,7 +4,7 @@ import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.R
 import com.hookiesolutions.webhookie.common.model.DeletableEntity
 import com.hookiesolutions.webhookie.common.model.UpdatableEntity
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup
-import com.hookiesolutions.webhookie.webhook.domain.WebhookRepository
+import com.hookiesolutions.webhookie.webhook.domain.WebhookGroupRepository
 import com.hookiesolutions.webhookie.webhook.service.model.WebhookGroupRequest
 import com.hookiesolutions.webhookie.webhook.service.security.WebhookSecurityService
 import org.slf4j.Logger
@@ -19,8 +19,8 @@ import reactor.core.publisher.Mono
  * @since 19/1/21 15:31
  */
 @Service
-class WebhookService(
-  private val repository: WebhookRepository,
+class WebhookGroupService(
+  private val repository: WebhookGroupRepository,
   private val securityService: WebhookSecurityService,
   private val adminServiceDelegate: AdminServiceDelegate,
   private val log: Logger
