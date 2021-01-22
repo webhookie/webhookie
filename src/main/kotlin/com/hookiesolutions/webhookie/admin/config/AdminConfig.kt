@@ -1,7 +1,9 @@
 package com.hookiesolutions.webhookie.admin.config
 
+import com.hookiesolutions.webhookie.admin.domain.AccessGroupRepository
 import com.hookiesolutions.webhookie.admin.domain.ConsumerGroup
 import com.hookiesolutions.webhookie.admin.domain.ProviderGroup
+import com.hookiesolutions.webhookie.admin.service.AccessGroupFactory
 import com.hookiesolutions.webhookie.admin.service.AccessGroupService
 import com.hookiesolutions.webhookie.admin.service.AccessGroupServiceDelegator
 import com.hookiesolutions.webhookie.admin.service.EntityEventPublisher
@@ -15,14 +17,20 @@ import org.springframework.data.mongodb.core.ReactiveMongoTemplate
  * @since 15/1/21 12:11
  */
 @Configuration
-class AdminConfig {
+class AdminConfig(
+  private val factory: AccessGroupFactory
+) {
   @Bean
   fun consumerGroupServiceDelegator(
     mongoTemplate: ReactiveMongoTemplate,
     publisher: EntityEventPublisher
   ): AccessGroupServiceDelegator<ConsumerGroup> {
     return AccessGroupServiceDelegator(
-      AccessGroupService(mongoTemplate, ConsumerGroup::class.java),
+      AccessGroupService(
+        AccessGroupRepository(mongoTemplate, ConsumerGroup::class.java),
+        factory,
+        ConsumerGroup::class.java
+      ),
       publisher
     )
   }
@@ -33,7 +41,11 @@ class AdminConfig {
     publisher: EntityEventPublisher
   ): AccessGroupServiceDelegator<ProviderGroup> {
     return AccessGroupServiceDelegator(
-      AccessGroupService(mongoTemplate, ProviderGroup::class.java),
+      AccessGroupService(
+        AccessGroupRepository(mongoTemplate, ProviderGroup::class.java),
+        factory,
+        ProviderGroup::class.java
+      ),
       publisher
     )
   }

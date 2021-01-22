@@ -22,8 +22,8 @@ class ProviderGroupController(
   @PostMapping(
     value = [REQUEST_MAPPING_PROVIDER_GROUPS]
   )
-  override fun createGroup(@RequestBody @Valid bodyMono: Mono<SaveGroupRequest>): Mono<ProviderGroup> {
-    return super.createGroup(bodyMono)
+  override fun createGroup(@RequestBody @Valid body: SaveGroupRequest): Mono<ProviderGroup> {
+    return super.createGroup(body)
   }
 
   @GetMapping(
@@ -43,7 +43,7 @@ class ProviderGroupController(
   @PutMapping(
     value = ["$REQUEST_MAPPING_PROVIDER_GROUPS/{id}"]
   )
-  override fun updateGroup(@PathVariable id: String, @RequestBody @Valid bodyMono: Mono<SaveGroupRequest>): Mono<ProviderGroup> {
+  override fun updateGroup(@PathVariable id: String, @RequestBody @Valid bodyMono: SaveGroupRequest): Mono<ProviderGroup> {
     return super.updateGroup(id, bodyMono)
   }
 

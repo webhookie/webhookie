@@ -29,8 +29,8 @@ interface AccessGroupController<T: AccessGroup> {
     produces = [MediaType.APPLICATION_JSON_VALUE]
   )
   @ResponseStatus(HttpStatus.CREATED)
-  fun createGroup(@RequestBody @Valid bodyMono: Mono<SaveGroupRequest>): Mono<T> {
-    return serviceDelegator.createAccessGroup(bodyMono)
+  fun createGroup(@RequestBody @Valid body: SaveGroupRequest): Mono<T> {
+    return serviceDelegator.createAccessGroup(body)
   }
 
   @GetMapping(
@@ -51,7 +51,7 @@ interface AccessGroupController<T: AccessGroup> {
     consumes = [MediaType.APPLICATION_JSON_VALUE],
     produces = [MediaType.APPLICATION_JSON_VALUE]
   )
-  fun updateGroup(id: String, bodyMono: Mono<SaveGroupRequest>): Mono<T> {
+  fun updateGroup(id: String, bodyMono: SaveGroupRequest): Mono<T> {
     return serviceDelegator.updateAccessGroup(id, bodyMono)
   }
 

@@ -27,8 +27,8 @@ class ConsumerGroupController(
   @PostMapping(
     value = [REQUEST_MAPPING_CONSUMER_GROUPS]
   )
-  override fun createGroup(@RequestBody @Valid bodyMono: Mono<SaveGroupRequest>): Mono<ConsumerGroup> {
-    return super.createGroup(bodyMono)
+  override fun createGroup(@RequestBody @Valid body: SaveGroupRequest): Mono<ConsumerGroup> {
+    return super.createGroup(body)
   }
 
   @GetMapping(
@@ -48,7 +48,7 @@ class ConsumerGroupController(
   @PutMapping(
     value = ["$REQUEST_MAPPING_CONSUMER_GROUPS/{id}"]
   )
-  override fun updateGroup(@PathVariable id: String, @RequestBody @Valid bodyMono: Mono<SaveGroupRequest>): Mono<ConsumerGroup> {
+  override fun updateGroup(@PathVariable id: String, @RequestBody @Valid bodyMono: SaveGroupRequest): Mono<ConsumerGroup> {
     return super.updateGroup(id, bodyMono)
   }
 
