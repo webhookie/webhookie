@@ -1,12 +1,14 @@
 package com.hookiesolutions.webhookie.admin.service
 
-import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_ADMIN
-import com.hookiesolutions.webhookie.common.exception.EntityExistsException
-import com.hookiesolutions.webhookie.common.exception.EntityNotFoundException
-import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.byId
 import com.hookiesolutions.webhookie.admin.domain.AccessGroup
 import com.hookiesolutions.webhookie.admin.domain.AccessGroup.Updates.Companion.updateGroupDetails
 import com.hookiesolutions.webhookie.admin.service.model.SaveGroupRequest
+import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_ADMIN
+import com.hookiesolutions.webhookie.common.exception.EntityExistsException
+import com.hookiesolutions.webhookie.common.exception.EntityNotFoundException
+import com.hookiesolutions.webhookie.common.message.entity.EntityDeletedMessage
+import com.hookiesolutions.webhookie.common.message.entity.EntityUpdatedMessage
+import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.byId
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.dao.DuplicateKeyException
@@ -23,12 +25,12 @@ import reactor.kotlin.core.publisher.toMono
  * @author Arthur Kazemi<bidadh@gmail.com>
  * @since 13/1/21 18:32
  */
-class AccessGroupService<T: AccessGroup>(
+class AccessGroupService<T : AccessGroup>(
   private val mongoTemplate: ReactiveMongoTemplate,
-  private val clazz: Class<T>
+  private val clazz: Class<T>,
 ) {
   private val log: Logger = LoggerFactory.getLogger(AccessGroupService::class.java)
-  
+
   @PreAuthorize("hasAuthority('$ROLE_ADMIN')")
   fun createGroup(bodyMono: Mono<SaveGroupRequest>): Mono<T> {
     return bodyMono
@@ -61,30 +63,38 @@ class AccessGroupService<T: AccessGroup>(
   }
 
   @PreAuthorize("hasAuthority('$ROLE_ADMIN')")
-  fun deleteGroupsById(id: String): Mono<String> {
+  fun deleteGroupsById(id: String): Mono<EntityDeletedMessage<T>> {
     log.info("Deleting '{}' Access Group by id: '{}'", clazz.simpleName, id)
-    return mongoTemplate.remove(query(byId(id)), clazz)
-      .map { it.deletedCount == 1L }
-      .filter { it }
+    return mongoTemplate.findById(id, clazz)
       .switchIfEmpty(EntityNotFoundException("Access Group '$id' cannot be found").toMono())
-      .map { it.toString() }
+      .zipWhen { mongoTemplate.remove(query(byId(id)), clazz) }
+      .map { EntityDeletedMessage(clazz.simpleName, it.t1) }
+      .doOnNext { log.info("{} with id '{}' was deleted successfully", clazz.simpleName, id) }
   }
 
   @PreAuthorize("hasAuthority('$ROLE_ADMIN')")
-  fun updateGroupsById(id: String, bodyMono: Mono<SaveGroupRequest>): Mono<T> {
+  fun updateGroupsById(id: String, bodyMono: Mono<SaveGroupRequest>): Mono<EntityUpdatedMessage<T>> {
     log.info("Updating '{}' Access Group by id: '{}'", clazz.simpleName, id)
-    return bodyMono
-      .flatMap { body ->
-        mongoTemplate
-          .findAndModify(
-            query(byId(id)),
-            updateGroupDetails(body.accessGroup(clazz)),
-            FindAndModifyOptions.options().returnNew(true),
-            clazz
-          )
-          .onErrorMap(DuplicateKeyException::class.java) {
-            EntityExistsException(body.iamGroupName, "Duplicate IAM Group mapping: ${body.iamGroupName}")
+    return mongoTemplate.findById(id, clazz)
+      .zipWith(bodyMono)
+      .flatMap {
+        val oldValue = it.t1
+        val body = it.t2
+        oldValue
+          .toMono()
+          .zipWhen {
+            mongoTemplate
+              .findAndModify(
+                query(byId(id)),
+                updateGroupDetails(body.accessGroup(clazz)),
+                FindAndModifyOptions.options().returnNew(true),
+                clazz
+              )
+              .onErrorMap(DuplicateKeyException::class.java) {
+                EntityExistsException(body.iamGroupName, "Duplicate IAM Group mapping: ${body.iamGroupName}")
+              }
           }
+          .map { value -> EntityUpdatedMessage(clazz.simpleName, value.t1, value.t2) }
       }
       .switchIfEmpty(EntityNotFoundException("Access Group '$id' cannot be found").toMono())
   }

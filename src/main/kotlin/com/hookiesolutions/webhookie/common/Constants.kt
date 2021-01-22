@@ -50,6 +50,13 @@ class Constants {
         const val RETRYABLE_PUBLISHER_ERROR_CHANNEL = "retryablePublisherErrorChannel"
       }
     }
+
+    class Admin {
+      companion object {
+        const val ADMIN_ACCESS_GROUP_DELETED_CHANNEL_NAME = "groupHasBeenDeletedChannel"
+        const val ADMIN_ACCESS_GROUP_UPDATED_CHANNEL_NAME = "groupHasBeenUpdatedChannel"
+      }
+    }
   }
 
   class Security {
