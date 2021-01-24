@@ -10,10 +10,13 @@ import com.hookiesolutions.webhookie.webhook.service.security.annotation.VerifyW
 import com.hookiesolutions.webhookie.webhook.service.security.annotation.VerifyWebhookGroupCanBeUpdated
 import com.hookiesolutions.webhookie.webhook.service.security.annotation.VerifyWebhookGroupReadAccess
 import com.hookiesolutions.webhookie.webhook.service.security.annotation.VerifyWebhookGroupWriteAccess
+import com.mongodb.client.result.UpdateResult
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.data.mongodb.core.FindAndReplaceOptions
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
+import org.springframework.data.mongodb.core.query.Criteria.where
 import org.springframework.data.mongodb.core.query.Query.query
+import org.springframework.data.mongodb.core.query.Update
 import org.springframework.stereotype.Repository
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -77,5 +80,23 @@ class WebhookGroupRepository(
   private fun fetchById(id: String): Mono<WebhookGroup> {
     return mongoRepository.findById(id)
       .switchIfEmpty { EntityNotFoundException("WebhookGroup with id: '{$id}' could not be found").toMono() }
+  }
+
+  fun removeAccessGroup(value: String, attr: String): Mono<UpdateResult> {
+    return mongoTemplate
+      .updateMulti(
+        query(where(attr).`is`(value)),
+        Update().pull(attr, value),
+        WebhookGroup::class.java
+      )
+  }
+
+  fun updateAccessGroup(oldValue: String, newValue: String, attr: String): Mono<UpdateResult> {
+    return mongoTemplate
+      .updateMulti(
+        query(where(attr).`is`(oldValue)),
+        Update().set("$attr.$", newValue),
+        WebhookGroup::class.java
+      )
   }
 }

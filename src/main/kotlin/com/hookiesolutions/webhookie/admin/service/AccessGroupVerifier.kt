@@ -20,18 +20,19 @@ class AccessGroupVerifier(
   private val mongoTemplate: ReactiveMongoTemplate,
   private val log: Logger
 ) {
-  fun verifyConsumerGroups(groups: List<String>): Mono<List<String>> {
+  fun verifyConsumerGroups(groups: Set<String>): Mono<Set<String>> {
     return verifyGroups(groups, ConsumerGroup::class.java)
   }
 
-  fun verifyProviderGroups(groups: List<String>): Mono<List<String>> {
+  fun verifyProviderGroups(groups: Set<String>): Mono<Set<String>> {
     return verifyGroups(groups, ProviderGroup::class.java)
   }
 
-  private fun verifyGroups(groups: List<String>, clazz: Class<out AccessGroup>): Mono<List<String>> {
+  private fun verifyGroups(groups: Set<String>, clazz: Class<out AccessGroup>): Mono<Set<String>> {
     return mongoTemplate.find(Query.query(AccessGroup.Queries.iamGroupNameIn(groups)), clazz)
       .map { it.iamGroupName }
       .collectList()
+      .map { it.toSet() }
       .flatMap {
         val notExistingGroups = groups.minus(it)
         return@flatMap if (notExistingGroups.isEmpty()) {

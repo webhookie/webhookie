@@ -22,8 +22,8 @@ data class WebhookGroup(
   val description: String?,
   val topics: List<Topic>,
   val raw: String,
-  val consumerIAMGroups: List<String>,
-  val providerIAMGroups: List<String>,
+  val consumerIAMGroups: Set<String>,
+  val providerIAMGroups: Set<String>,
   val consumerAccess: ConsumerAccess,
   val providerAccess: ProviderAccess,
 ) : AbstractEntity() {

@@ -96,8 +96,8 @@ class WebhookGroupRequestReader(
 
   data class InnerWebhookGroupRequest(
     val asyncApiSpec: Any,
-    val consumerGroups: List<String>,
-    val providerGroups: List<String>,
+    val consumerGroups: Set<String>,
+    val providerGroups: Set<String>,
     val consumerAccess: ConsumerAccess,
     val providerAccess: ProviderAccess,
   )

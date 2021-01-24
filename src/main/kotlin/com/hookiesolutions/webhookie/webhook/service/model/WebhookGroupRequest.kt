@@ -6,8 +6,8 @@ import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup
 
 data class WebhookGroupRequest(
   val asyncApiSpec: AsyncApiSpec,
-  val consumerGroups: List<String>,
-  val providerGroups: List<String>,
+  val consumerGroups: Set<String>,
+  val providerGroups: Set<String>,
   val consumerAccess: ConsumerAccess,
   val providerAccess: ProviderAccess,
 ) {

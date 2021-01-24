@@ -14,8 +14,8 @@ class AdminServiceDelegate(
   private val accessGroupVerifier: AccessGroupVerifier
 ) {
   fun verifyGroups(
-    consumerGroups: List<String>,
-    providerGroups: List<String>,
+    consumerGroups: Set<String>,
+    providerGroups: Set<String>,
   ): Mono<Boolean> {
     return accessGroupVerifier.verifyConsumerGroups(consumerGroups)
       .zipWhen { accessGroupVerifier.verifyProviderGroups(providerGroups) }
