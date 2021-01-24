@@ -1,5 +1,6 @@
 package com.hookiesolutions.webhookie.admin.domain
 
+import com.hookiesolutions.webhookie.common.annotation.Open
 import com.hookiesolutions.webhookie.common.exception.EntityExistsException
 import com.hookiesolutions.webhookie.common.exception.EntityNotFoundException
 import com.hookiesolutions.webhookie.common.message.entity.EntityUpdatedMessage
@@ -18,9 +19,10 @@ import reactor.kotlin.core.publisher.toMono
  * @author Arthur Kazemi<bidadh@gmail.com>
  * @since 22/1/21 15:17
  */
-class AccessGroupRepository<T: AccessGroup>(
-  private val mongoTemplate: ReactiveMongoTemplate,
-  private val clazz: Class<T>,
+@Open
+abstract class AccessGroupRepository<T: AccessGroup>(
+  val mongoTemplate: ReactiveMongoTemplate,
+  val clazz: Class<T>
 ) {
   fun save(group: T): Mono<T> {
     return mongoTemplate.save(group)

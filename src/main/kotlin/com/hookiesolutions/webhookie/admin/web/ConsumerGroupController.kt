@@ -1,7 +1,7 @@
 package com.hookiesolutions.webhookie.admin.web
 
 import com.hookiesolutions.webhookie.admin.domain.ConsumerGroup
-import com.hookiesolutions.webhookie.admin.service.AccessGroupServiceDelegator
+import com.hookiesolutions.webhookie.admin.service.ConsumerGroupService
 import com.hookiesolutions.webhookie.admin.service.model.SaveGroupRequest
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -21,7 +21,7 @@ import javax.validation.Valid
  */
 @RestController
 class ConsumerGroupController(
-  override val serviceDelegator: AccessGroupServiceDelegator<ConsumerGroup>
+  override val service: ConsumerGroupService
 ): AccessGroupController<ConsumerGroup> {
 
   @PostMapping(

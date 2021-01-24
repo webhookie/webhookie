@@ -1,7 +1,7 @@
 package com.hookiesolutions.webhookie.admin.web
 
 import com.hookiesolutions.webhookie.admin.domain.AccessGroup
-import com.hookiesolutions.webhookie.admin.service.AccessGroupServiceDelegator
+import com.hookiesolutions.webhookie.admin.service.AccessGroupService
 import com.hookiesolutions.webhookie.admin.service.model.SaveGroupRequest
 import com.hookiesolutions.webhookie.admin.web.AdminAPIDocs.Companion.REQUEST_MAPPING_ADMIN
 import com.hookiesolutions.webhookie.common.config.web.OpenAPIConfig.Companion.OAUTH2_SCHEME
@@ -22,7 +22,7 @@ import javax.validation.Valid
 @RequestMapping(REQUEST_MAPPING_ADMIN)
 @SecurityRequirement(name = OAUTH2_SCHEME)
 interface AccessGroupController<T: AccessGroup> {
-  val serviceDelegator: AccessGroupServiceDelegator<T>
+  val service: AccessGroupService<T>
 
   @PostMapping(
     consumes = [MediaType.APPLICATION_JSON_VALUE],
@@ -30,21 +30,21 @@ interface AccessGroupController<T: AccessGroup> {
   )
   @ResponseStatus(HttpStatus.CREATED)
   fun createGroup(@RequestBody @Valid body: SaveGroupRequest): Mono<T> {
-    return serviceDelegator.createAccessGroup(body)
+    return service.createGroup(body)
   }
 
   @GetMapping(
     produces = [MediaType.APPLICATION_JSON_VALUE]
   )
   fun allGroups(): Flux<T> {
-    return serviceDelegator.allAccessGroups()
+    return service.allGroups()
   }
 
   @GetMapping(
     produces = [MediaType.APPLICATION_JSON_VALUE]
   )
   fun getGroup(id: String): Mono<T> {
-    return serviceDelegator.getAccessGroup(id)
+    return service.groupById(id)
   }
 
   @PutMapping(
@@ -52,14 +52,14 @@ interface AccessGroupController<T: AccessGroup> {
     produces = [MediaType.APPLICATION_JSON_VALUE]
   )
   fun updateGroup(id: String, bodyMono: SaveGroupRequest): Mono<T> {
-    return serviceDelegator.updateAccessGroup(id, bodyMono)
+    return service.updateGroupById(id, bodyMono)
   }
 
   @DeleteMapping(
     produces = [MediaType.TEXT_PLAIN_VALUE]
   )
   fun deleteGroup(id: String): Mono<String> {
-    return serviceDelegator.deleteAccessGroup(id)
+    return service.deleteGroupById(id)
   }
 }
 
