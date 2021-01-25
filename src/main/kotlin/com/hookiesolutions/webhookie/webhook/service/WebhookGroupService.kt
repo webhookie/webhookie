@@ -46,6 +46,7 @@ class WebhookGroupService(
       }
   }
 
+  @PreAuthorize("permitAll()")
   fun findMyWebhookGroups(pageable: Pageable): Flux<WebhookGroup> {
     return securityService.tokenGroups()
       .switchIfEmpty(emptyList<String>().toMono())
