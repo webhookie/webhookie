@@ -1,11 +1,13 @@
 package com.hookiesolutions.webhookie.webhook.web
 
+import com.fasterxml.jackson.annotation.JsonView
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_PROVIDER
 import com.hookiesolutions.webhookie.common.config.web.OpenAPIConfig.Companion.OAUTH2_SCHEME
 import com.hookiesolutions.webhookie.webhook.config.WebhookGroupAPIDocs.Companion.REQUEST_MAPPING_WEBHOOK_GROUPS
-import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup
 import com.hookiesolutions.webhookie.webhook.service.WebhookGroupService
 import com.hookiesolutions.webhookie.webhook.service.model.WebhookGroupRequest
+import com.hookiesolutions.webhookie.webhook.web.response.WebhookGroupResponse
+import com.hookiesolutions.webhookie.webhook.web.response.WebhookGroupViews
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -41,24 +43,38 @@ class WebhookGroupController(
     produces = [MediaType.APPLICATION_JSON_VALUE]
   )
   @ResponseStatus(HttpStatus.CREATED)
-  fun createWebhookGroup(@RequestBody @Valid request: WebhookGroupRequest): Mono<WebhookGroup> {
+  fun createWebhookGroup(@RequestBody @Valid request: WebhookGroupRequest): Mono<WebhookGroupResponse> {
     return service.createWebhookGroup(request)
+      .map { WebhookGroupResponse(it) }
   }
 
   @GetMapping(
     "",
     produces = [MediaType.APPLICATION_JSON_VALUE]
   )
-  fun getWebhookGroups(): Flux<WebhookGroup> {
+  @JsonView(WebhookGroupViews.Full::class)
+  fun getWebhookGroups(): Flux<WebhookGroupResponse> {
     return service.findProviderWebhookGroups()
+      .map { WebhookGroupResponse(it) }
+  }
+
+  @GetMapping(
+    "/summary",
+    produces = [MediaType.APPLICATION_JSON_VALUE]
+  )
+  @JsonView(WebhookGroupViews.Summary::class)
+  fun getWebhookGroupsSummary(): Flux<WebhookGroupResponse> {
+    return service.findProviderWebhookGroups()
+      .map { WebhookGroupResponse(it) }
   }
 
   @GetMapping(
     "/{id}",
     produces = [MediaType.APPLICATION_JSON_VALUE]
   )
-  fun getWebhookGroup(@PathVariable id: String): Mono<WebhookGroup> {
+  fun getWebhookGroup(@PathVariable id: String): Mono<WebhookGroupResponse> {
     return service.readWebhookGroup(id)
+      .map { WebhookGroupResponse(it) }
   }
 
   @DeleteMapping(
@@ -77,7 +93,8 @@ class WebhookGroupController(
   fun updateWebhookGroup(
     @PathVariable id: String,
     @RequestBody @Valid request: WebhookGroupRequest
-  ): Mono<WebhookGroup> {
+  ): Mono<WebhookGroupResponse> {
     return service.updateWebhookGroup(id, request)
+      .map { WebhookGroupResponse(it) }
   }
 }
