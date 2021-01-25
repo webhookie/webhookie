@@ -6,7 +6,7 @@ import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Compani
 import com.hookiesolutions.webhookie.common.model.DeletableEntity
 import com.hookiesolutions.webhookie.common.model.UpdatableEntity
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.KEY_NUMBER_OF_TOPICS
-import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Queries.Companion.accessibleForProviderWith
+import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Queries.Companion.accessibleForGroups
 import com.hookiesolutions.webhookie.webhook.service.security.annotation.VerifyWebhookGroupCanBeDeleted
 import com.hookiesolutions.webhookie.webhook.service.security.annotation.VerifyWebhookGroupCanBeUpdated
 import com.hookiesolutions.webhookie.webhook.service.security.annotation.VerifyWebhookGroupReadAccess
@@ -44,8 +44,8 @@ class WebhookGroupRepository(
       }
   }
 
-  fun findProviderWebhookGroups(myGroups: List<String>, pageable: Pageable): Flux<WebhookGroup> {
-    val query = query(accessibleForProviderWith(myGroups))
+  fun findMyWebhookGroups(tokenGroups: List<String>, pageable: Pageable): Flux<WebhookGroup> {
+    val query = query(accessibleForGroups(tokenGroups))
     if(pageable.isUnpaged) {
       query.with(DEFAULT_SORT)
     } else {

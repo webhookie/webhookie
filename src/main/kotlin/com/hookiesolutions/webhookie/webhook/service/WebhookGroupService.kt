@@ -2,6 +2,7 @@ package com.hookiesolutions.webhookie.webhook.service
 
 import com.hookiesolutions.webhookie.common.Constants.Channels.Admin.Companion.ADMIN_ACCESS_GROUP_DELETED_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Channels.Admin.Companion.ADMIN_ACCESS_GROUP_UPDATED_CHANNEL_NAME
+import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_CONSUMER
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_PROVIDER
 import com.hookiesolutions.webhookie.common.message.entity.EntityDeletedMessage
 import com.hookiesolutions.webhookie.common.message.entity.EntityModifiedMessage
@@ -46,11 +47,11 @@ class WebhookGroupService(
       }
   }
 
-  @PreAuthorize("hasAuthority('${ROLE_PROVIDER}')")
-  fun findProviderWebhookGroups(pageable: Pageable): Flux<WebhookGroup> {
-    return securityService.groups()
+  @PreAuthorize("hasAnyAuthority('${ROLE_PROVIDER}, ${ROLE_CONSUMER}')")
+  fun findMyWebhookGroups(pageable: Pageable): Flux<WebhookGroup> {
+    return securityService.tokenGroups()
       .flatMapMany {
-        repository.findProviderWebhookGroups(it, pageable)
+        repository.findMyWebhookGroups(it, pageable)
       }
   }
 

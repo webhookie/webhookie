@@ -44,12 +44,12 @@ data class WebhookGroup(
         return where(KEY_CONSUMER_ACCESS).`is`(ConsumerAccess.PUBLIC)
       }
 
-      fun accessibleForProviderWith(groups: List<String>): Criteria {
+      fun accessibleForGroups(groups: List<String>): Criteria {
         return Criteria()
           .orOperator(
+            publicForConsumers(),
             consumerGroupsIn(groups),
             providerGroupsIn(groups),
-            publicForConsumers()
           )
       }
     }

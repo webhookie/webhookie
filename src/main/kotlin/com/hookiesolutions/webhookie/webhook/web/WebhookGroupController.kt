@@ -1,7 +1,6 @@
 package com.hookiesolutions.webhookie.webhook.web
 
 import com.fasterxml.jackson.annotation.JsonView
-import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_PROVIDER
 import com.hookiesolutions.webhookie.common.config.web.OpenAPIConfig.Companion.OAUTH2_SCHEME
 import com.hookiesolutions.webhookie.webhook.config.WebhookGroupAPIDocs.Companion.REQUEST_MAPPING_WEBHOOK_GROUPS
 import com.hookiesolutions.webhookie.webhook.service.WebhookGroupService
@@ -12,7 +11,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -37,7 +35,6 @@ import javax.validation.Valid
 class WebhookGroupController(
   private val service: WebhookGroupService
 ) {
-  @PreAuthorize("hasAuthority('$ROLE_PROVIDER')")
   @PostMapping(
     "",
     consumes = [MediaType.APPLICATION_JSON_VALUE],
@@ -55,7 +52,7 @@ class WebhookGroupController(
   )
   @JsonView(WebhookGroupViews.Full::class)
   fun getWebhookGroups(pageable: Pageable): Flux<WebhookGroupResponse> {
-    return service.findProviderWebhookGroups(pageable)
+    return service.findMyWebhookGroups(pageable)
       .map { WebhookGroupResponse(it) }
   }
 
@@ -65,7 +62,7 @@ class WebhookGroupController(
   )
   @JsonView(WebhookGroupViews.Summary::class)
   fun getWebhookGroupsSummary(pageable: Pageable): Flux<WebhookGroupResponse> {
-    return service.findProviderWebhookGroups(pageable)
+    return service.findMyWebhookGroups(pageable)
       .map { WebhookGroupResponse(it) }
   }
 

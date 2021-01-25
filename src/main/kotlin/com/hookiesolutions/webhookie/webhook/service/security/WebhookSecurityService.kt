@@ -24,8 +24,8 @@ class WebhookSecurityService(
   private val providerAccessVoters: List<WebhookGroupProvideAccessVoter>,
   private val log: Logger
 ) {
-  fun groups(): Mono<List<String>> {
-    return securityHandler.groups()
+  fun tokenGroups(): Mono<List<String>> {
+    return securityHandler.tokenGroups()
   }
 
   fun verifyReadAccess(webhookGroupSupplier: Supplier<Mono<WebhookGroup>>): Mono<WebhookGroup> {
@@ -40,7 +40,7 @@ class WebhookSecurityService(
     webhookGroupSupplier: Supplier<Mono<WebhookGroup>>,
     verifier: BiFunction<WebhookGroup, List<String>, Boolean>
   ): Mono<WebhookGroup> {
-    return groups()
+    return tokenGroups()
       .zipWith(webhookGroupSupplier.get())
       .flatMap {
         val webhookGroup = it.t2
