@@ -1,7 +1,13 @@
 package com.hookiesolutions.webhookie.common.config.web
 
 import org.springframework.context.annotation.Configuration
+import org.springframework.data.domain.Pageable
 import org.springframework.web.reactive.config.EnableWebFlux
+import org.springframework.web.reactive.config.WebFluxConfigurer
+import org.springframework.web.reactive.result.method.annotation.ArgumentResolverConfigurer
+import org.springframework.data.web.ReactivePageableHandlerMethodArgumentResolver
+import org.springframework.data.web.ReactiveSortHandlerMethodArgumentResolver
+
 
 /**
  *
@@ -10,4 +16,11 @@ import org.springframework.web.reactive.config.EnableWebFlux
  */
 @Configuration
 @EnableWebFlux
-class WebConfig
+class WebConfig: WebFluxConfigurer {
+  override fun configureArgumentResolvers(configurer: ArgumentResolverConfigurer) {
+    val pageableArgumentResolver =
+      ReactivePageableHandlerMethodArgumentResolver(ReactiveSortHandlerMethodArgumentResolver())
+    pageableArgumentResolver.setFallbackPageable(Pageable.unpaged())
+    configurer.addCustomResolver(pageableArgumentResolver)
+  }
+}

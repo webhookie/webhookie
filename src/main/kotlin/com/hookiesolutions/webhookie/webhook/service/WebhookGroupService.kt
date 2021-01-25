@@ -15,6 +15,7 @@ import com.hookiesolutions.webhookie.webhook.domain.WebhookGroupRepository
 import com.hookiesolutions.webhookie.webhook.service.model.WebhookGroupRequest
 import com.hookiesolutions.webhookie.webhook.service.security.WebhookSecurityService
 import org.slf4j.Logger
+import org.springframework.data.domain.Pageable
 import org.springframework.integration.annotation.ServiceActivator
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
@@ -46,10 +47,10 @@ class WebhookGroupService(
   }
 
   @PreAuthorize("hasAuthority('${ROLE_PROVIDER}')")
-  fun findProviderWebhookGroups(): Flux<WebhookGroup> {
+  fun findProviderWebhookGroups(pageable: Pageable): Flux<WebhookGroup> {
     return securityService.groups()
       .flatMapMany {
-        repository.findProviderWebhookGroups(it)
+        repository.findProviderWebhookGroups(it, pageable)
       }
   }
 

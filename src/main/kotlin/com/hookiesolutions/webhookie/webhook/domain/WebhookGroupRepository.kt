@@ -5,6 +5,7 @@ import com.hookiesolutions.webhookie.common.exception.EntityNotFoundException
 import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.byId
 import com.hookiesolutions.webhookie.common.model.DeletableEntity
 import com.hookiesolutions.webhookie.common.model.UpdatableEntity
+import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.KEY_NUMBER_OF_TOPICS
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Queries.Companion.accessibleForProviderWith
 import com.hookiesolutions.webhookie.webhook.service.security.annotation.VerifyWebhookGroupCanBeDeleted
 import com.hookiesolutions.webhookie.webhook.service.security.annotation.VerifyWebhookGroupCanBeUpdated
@@ -12,6 +13,8 @@ import com.hookiesolutions.webhookie.webhook.service.security.annotation.VerifyW
 import com.hookiesolutions.webhookie.webhook.service.security.annotation.VerifyWebhookGroupWriteAccess
 import com.mongodb.client.result.UpdateResult
 import org.springframework.dao.DuplicateKeyException
+import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.FindAndReplaceOptions
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria.where
@@ -41,9 +44,15 @@ class WebhookGroupRepository(
       }
   }
 
-  fun findProviderWebhookGroups(myGroups: List<String>): Flux<WebhookGroup> {
+  fun findProviderWebhookGroups(myGroups: List<String>, pageable: Pageable): Flux<WebhookGroup> {
+    val query = query(accessibleForProviderWith(myGroups))
+    if(pageable.isUnpaged) {
+      query.with(DEFAULT_SORT)
+    } else {
+      query.with(pageable)
+    }
     return mongoTemplate.find(
-      query(accessibleForProviderWith(myGroups)),
+      query,
       WebhookGroup::class.java
     )
   }
@@ -98,5 +107,9 @@ class WebhookGroupRepository(
         Update().set("$attr.$", newValue),
         WebhookGroup::class.java
       )
+  }
+
+  companion object {
+    private val DEFAULT_SORT = Sort.by(KEY_NUMBER_OF_TOPICS).descending()
   }
 }

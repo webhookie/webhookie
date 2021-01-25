@@ -5,6 +5,7 @@ import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.KEY_CONSUMER_IAM_GROUPS
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.KEY_PROVIDER_IAM_GROUPS
 import org.springframework.data.annotation.TypeAlias
+import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Criteria.where
@@ -26,6 +27,8 @@ data class WebhookGroup(
   val providerIAMGroups: Set<String>,
   val consumerAccess: ConsumerAccess,
   val providerAccess: ProviderAccess,
+  @Indexed
+  val numberOfTopics: Int = topics.size
 ) : AbstractEntity() {
   class Queries {
     companion object {
@@ -57,6 +60,7 @@ data class WebhookGroup(
       const val KEY_CONSUMER_IAM_GROUPS = "consumerIAMGroups"
       const val KEY_PROVIDER_IAM_GROUPS = "providerIAMGroups"
       const val KEY_CONSUMER_ACCESS = "consumerAccess"
+      const val KEY_NUMBER_OF_TOPICS = "numberOfTopics"
     }
   }
 }

@@ -16,7 +16,5 @@ class WebhookWebConfig(
 ): WebFluxConfigurer {
   override fun configureHttpMessageCodecs(configurer: ServerCodecConfigurer) {
     configurer.customCodecs().register(reader)
-
-    super.configureHttpMessageCodecs(configurer)
   }
 }

@@ -9,6 +9,7 @@ import com.hookiesolutions.webhookie.webhook.service.model.WebhookGroupRequest
 import com.hookiesolutions.webhookie.webhook.web.response.WebhookGroupResponse
 import com.hookiesolutions.webhookie.webhook.web.response.WebhookGroupViews
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
+import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
@@ -53,8 +54,8 @@ class WebhookGroupController(
     produces = [MediaType.APPLICATION_JSON_VALUE]
   )
   @JsonView(WebhookGroupViews.Full::class)
-  fun getWebhookGroups(): Flux<WebhookGroupResponse> {
-    return service.findProviderWebhookGroups()
+  fun getWebhookGroups(pageable: Pageable): Flux<WebhookGroupResponse> {
+    return service.findProviderWebhookGroups(pageable)
       .map { WebhookGroupResponse(it) }
   }
 
@@ -63,8 +64,8 @@ class WebhookGroupController(
     produces = [MediaType.APPLICATION_JSON_VALUE]
   )
   @JsonView(WebhookGroupViews.Summary::class)
-  fun getWebhookGroupsSummary(): Flux<WebhookGroupResponse> {
-    return service.findProviderWebhookGroups()
+  fun getWebhookGroupsSummary(pageable: Pageable): Flux<WebhookGroupResponse> {
+    return service.findProviderWebhookGroups(pageable)
       .map { WebhookGroupResponse(it) }
   }
 

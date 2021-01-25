@@ -1,0 +1,7 @@
+logging:
+  level:
+    web: DEBUG
+    org.springframework.amqp: DEBUG
+    org.springframework.integration: DEBUG
+    org.springframework.data.mongodb: DEBUG
+    com.hookiesolutions.webhookie.webhook.service.security: DEBUG
