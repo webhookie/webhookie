@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component
 @Component
 @Order(Ordered.LOWEST_PRECEDENCE)
 class ProviderGroupWebhookGroupVoter: WebhookGroupConsumeAccessVoter, WebhookGroupProvideAccessVoter {
-  override fun vote(webhookGroup: WebhookGroup, tokenGroups: List<String>): Boolean {
+  override fun vote(webhookGroup: WebhookGroup, tokenGroups: Collection<String>): Boolean {
     return tokenGroups.any {
       webhookGroup.providerIAMGroups.contains(it)
     }

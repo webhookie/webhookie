@@ -8,5 +8,5 @@ import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup
  * @since 20/1/21 13:59
  */
 interface WebhookGroupProvideAccessVoter {
-  fun vote(webhookGroup: WebhookGroup, tokenGroups: List<String>): Boolean
+  fun vote(webhookGroup: WebhookGroup, tokenGroups: Collection<String>): Boolean
 }

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 class PubliclyConsumableWebhookGroupVoter : WebhookGroupConsumeAccessVoter {
-  override fun vote(webhookGroup: WebhookGroup, tokenGroups: List<String>): Boolean {
+  override fun vote(webhookGroup: WebhookGroup, tokenGroups: Collection<String>): Boolean {
     return webhookGroup.consumerAccess == ConsumerAccess.PUBLIC
   }
 }

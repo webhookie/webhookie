@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 class AllProviderWebhookGroupVoter: WebhookGroupProvideAccessVoter {
-  override fun vote(webhookGroup: WebhookGroup, tokenGroups: List<String>): Boolean {
+  override fun vote(webhookGroup: WebhookGroup, tokenGroups: Collection<String>): Boolean {
     return webhookGroup.providerAccess == ProviderAccess.ALL
   }
 }

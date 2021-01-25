@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component
 @Component
 @Order(100)
 class ConsumerGroupWebhookGroupVoter: WebhookGroupConsumeAccessVoter {
-  override fun vote(webhookGroup: WebhookGroup, tokenGroups: List<String>): Boolean {
+  override fun vote(webhookGroup: WebhookGroup, tokenGroups: Collection<String>): Boolean {
     return tokenGroups.any {
       webhookGroup.consumerIAMGroups.contains(it)
     }

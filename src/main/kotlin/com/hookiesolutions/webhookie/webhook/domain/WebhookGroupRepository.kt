@@ -44,7 +44,7 @@ class WebhookGroupRepository(
       }
   }
 
-  fun findMyWebhookGroups(tokenGroups: List<String>, pageable: Pageable): Flux<WebhookGroup> {
+  fun findMyWebhookGroups(tokenGroups: Collection<String>, pageable: Pageable): Flux<WebhookGroup> {
     val query = query(accessibleForGroups(tokenGroups))
     if(pageable.isUnpaged) {
       query.with(DEFAULT_SORT)

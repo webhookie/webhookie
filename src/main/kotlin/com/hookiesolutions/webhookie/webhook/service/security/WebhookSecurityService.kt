@@ -38,7 +38,7 @@ class WebhookSecurityService(
 
   private fun verifyAccess(
     webhookGroupSupplier: Supplier<Mono<WebhookGroup>>,
-    verifier: BiFunction<WebhookGroup, List<String>, Boolean>
+    verifier: BiFunction<WebhookGroup, Collection<String>, Boolean>
   ): Mono<WebhookGroup> {
     return tokenGroups()
       .zipWith(webhookGroupSupplier.get())
@@ -56,7 +56,7 @@ class WebhookSecurityService(
       }
   }
 
-  fun webhookGroupIsReadableFor(webhookGroup: WebhookGroup, tokenGroups: List<String>): Boolean {
+  fun webhookGroupIsReadableFor(webhookGroup: WebhookGroup, tokenGroups: Collection<String>): Boolean {
     if (log.isDebugEnabled) {
       log.debug(
         "Checking WebhookGroup '{}', '{}', '{} Consume Access for token groups: '{}'",
@@ -73,7 +73,7 @@ class WebhookSecurityService(
       }
   }
 
-  fun webhookGroupIsWritableFor(webhookGroup: WebhookGroup, tokenGroups: List<String>): Boolean {
+  fun webhookGroupIsWritableFor(webhookGroup: WebhookGroup, tokenGroups: Collection<String>): Boolean {
     if (log.isDebugEnabled) {
       log.debug(
         "Checking WebhookGroup '{}', '{}', '{} Provide Access for token groups: '{}'",

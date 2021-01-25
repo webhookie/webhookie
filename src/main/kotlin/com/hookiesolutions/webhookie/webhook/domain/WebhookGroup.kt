@@ -32,11 +32,11 @@ data class WebhookGroup(
 ) : AbstractEntity() {
   class Queries {
     companion object {
-      private fun consumerGroupsIn(groups: List<String>): Criteria {
+      private fun consumerGroupsIn(groups: Collection<String>): Criteria {
         return where(KEY_CONSUMER_IAM_GROUPS).`in`(groups)
       }
 
-      private fun providerGroupsIn(groups: List<String>): Criteria {
+      private fun providerGroupsIn(groups: Collection<String>): Criteria {
         return where(KEY_PROVIDER_IAM_GROUPS).`in`(groups)
       }
 
@@ -44,7 +44,7 @@ data class WebhookGroup(
         return where(KEY_CONSUMER_ACCESS).`is`(ConsumerAccess.PUBLIC)
       }
 
-      fun accessibleForGroups(groups: List<String>): Criteria {
+      fun accessibleForGroups(groups: Collection<String>): Criteria {
         return Criteria()
           .orOperator(
             publicForConsumers(),
