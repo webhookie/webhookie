@@ -163,9 +163,11 @@ class SubscriptionFlows {
   @Bean
   fun unblockSubscriptionFlow(
     mongoTemplate: ReactiveMongoTemplate,
+    toBlockedSubscriptionMessageFlux: GenericTransformer<Subscription, Flux<BlockedSubscriptionMessage>>,
     resendBlockedMessageChannel: MessageChannel
   ): IntegrationFlow {
     return integrationFlow(unblockSubscriptionMongoEvent(mongoTemplate)) {
+      transform(toBlockedSubscriptionMessageFlux)
       channel(resendBlockedMessageChannel)
     }
   }
@@ -173,12 +175,10 @@ class SubscriptionFlows {
   @Bean
   fun resendBlockedMessageFlow(
     resendBlockedMessageChannel: MessageChannel,
-    toBlockedSubscriptionMessageFlux: GenericTransformer<Subscription, Flux<BlockedSubscriptionMessage>>,
     resendAndRemoveSingleBlockedMessage: (BlockedSubscriptionMessage, MessageHeaders) -> Unit
   ): IntegrationFlow {
     return integrationFlow {
       channel(resendBlockedMessageChannel)
-      transform(toBlockedSubscriptionMessageFlux)
       split()
       handle(resendAndRemoveSingleBlockedMessage)
       channel(NULL_CHANNEL_BEAN_NAME)
