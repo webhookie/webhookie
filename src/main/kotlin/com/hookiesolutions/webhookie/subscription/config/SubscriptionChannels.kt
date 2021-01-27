@@ -56,7 +56,6 @@ class SubscriptionChannels {
 
   @Bean
   fun resendBlockedMessageChannel(): MessageChannel = MessageChannels
-    .executor(Executors.newCachedThreadPool())
+    .flux()
     .get()
-
 }

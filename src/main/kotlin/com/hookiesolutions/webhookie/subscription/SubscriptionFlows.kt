@@ -168,6 +168,7 @@ class SubscriptionFlows {
   ): IntegrationFlow {
     return integrationFlow(unblockSubscriptionMongoEvent(mongoTemplate)) {
       transform(toBlockedSubscriptionMessageFlux)
+      split()
       channel(resendBlockedMessageChannel)
     }
   }
@@ -179,7 +180,6 @@ class SubscriptionFlows {
   ): IntegrationFlow {
     return integrationFlow {
       channel(resendBlockedMessageChannel)
-      split()
       handle(resendAndRemoveSingleBlockedMessage)
       channel(NULL_CHANNEL_BEAN_NAME)
     }
