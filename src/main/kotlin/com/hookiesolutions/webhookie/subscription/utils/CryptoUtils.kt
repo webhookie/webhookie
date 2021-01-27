@@ -18,7 +18,7 @@ class CryptoUtils {
 
     fun hmac(secret: String, subscription: Subscription, time: String, traceId: String, spanId: String): Mono<String> {
       val signatureValue =
-        "(request-target): ${subscription.httpMethod.name} ${subscription.callbackUrl}" +
+        "(request-target): ${subscription.requestTarget()}" +
             " date: $time" +
             " x-trace-id: $traceId" +
             " x-span-id: $spanId"

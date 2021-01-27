@@ -70,7 +70,7 @@ class SubscriptionController(
     consumes = [MediaType.APPLICATION_JSON_VALUE],
     produces = [MediaType.APPLICATION_JSON_VALUE],
   )
-  fun createSubscription(@PathVariable applicationId: String, @RequestBody body: @Valid CreateSubscriptionRequest): Mono<SubscriptionDTO> {
+  fun createSubscription(@PathVariable applicationId: String, @RequestBody @Valid body: CreateSubscriptionRequest): Mono<SubscriptionDTO> {
     log.info("Creating '{}' subscription for application: '{}'", body.topic, applicationId)
     return subscriptionService.createSubscriptionFor(applicationId, body)
       .map { it.dto() }

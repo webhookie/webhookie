@@ -188,13 +188,13 @@ class SubscriptionConfig(
   fun toBeSignedWorkingSubscription(
     subscriptionIsWorking: (GenericSubscriptionMessage) -> Boolean
   ): (GenericSubscriptionMessage) -> Boolean {
-    return { subscriptionIsWorking.invoke(it) && (it as SignableSubscriptionMessage).subscription.callbackSecurity != null }
+    return { subscriptionIsWorking.invoke(it) && (it as SignableSubscriptionMessage).subscription.callback.security != null }
   }
 
   @Bean
   fun nonSignableWorkingSubscription(
     subscriptionIsWorking: (GenericSubscriptionMessage) -> Boolean
   ): (GenericSubscriptionMessage) -> Boolean {
-    return { subscriptionIsWorking.invoke(it) && (it as SignableSubscriptionMessage).subscription.callbackSecurity == null }
+    return { subscriptionIsWorking.invoke(it) && (it as SignableSubscriptionMessage).subscription.callback.security == null }
   }
 }

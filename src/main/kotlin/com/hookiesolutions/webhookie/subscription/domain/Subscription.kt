@@ -3,6 +3,7 @@ package com.hookiesolutions.webhookie.subscription.domain
 import com.hookiesolutions.webhookie.common.model.AbstractDocument.Keys.Companion.KEY_VERSION
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
 import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
+import com.hookiesolutions.webhookie.common.model.dto.Callback
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_BLOCK_DETAILS
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_TOPIC
@@ -12,7 +13,6 @@ import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Criteria.where
 import org.springframework.data.mongodb.core.query.Update
-import org.springframework.http.HttpMethod
 
 /**
  *
@@ -27,9 +27,7 @@ data class Subscription(
   val applicationId: String,
   @Indexed
   val topic: String,
-  val callbackUrl: String,
-  val httpMethod: HttpMethod,
-  val callbackSecurity: CallbackSecurity? = null,
+  val callback: Callback,
   val blockedDetails: BlockedDetailsDTO? = null
 ) : AbstractEntity() {
   fun dto(): SubscriptionDTO {
@@ -39,11 +37,13 @@ data class Subscription(
       companyId,
       applicationId,
       topic,
-      callbackUrl,
-      httpMethod,
-      callbackSecurity?.dto(),
+      callback,
       blockedDetails
     )
+  }
+
+  fun requestTarget(): String {
+    return callback.requestTarget()
   }
 
   class Queries {

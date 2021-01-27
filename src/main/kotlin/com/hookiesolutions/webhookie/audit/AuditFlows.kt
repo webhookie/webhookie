@@ -52,7 +52,7 @@ class AuditFlows(
     return integrationFlow {
       channel(SUBSCRIPTION_CHANNEL_NAME)
       handle { payload: SignableSubscriptionMessage, _: MessageHeaders ->
-        log.info("{}, {}, {}, {}", payload.subscription.callbackUrl, payload.delay, payload.numberOfRetries, payload.spanId)
+        log.info("{}, {}, {}, {}", payload.subscription.callback.url, payload.delay, payload.numberOfRetries, payload.spanId)
       }
     }
   }
@@ -72,7 +72,7 @@ class AuditFlows(
     return integrationFlow {
       channel(BLOCKED_SUBSCRIPTION_CHANNEL_NAME)
       handle { payload: BlockedSubscriptionMessageDTO, _: MessageHeaders ->
-        log.info("BLOCKED SUBSCRIPTION {}, {}, {}, {}", payload.subscription.callbackUrl, payload.subscription.topic, payload.originalSpanId)
+        log.info("BLOCKED SUBSCRIPTION {}, {}, {}, {}", payload.subscription.callback.url, payload.subscription.topic, payload.originalSpanId)
       }
     }
   }
@@ -92,7 +92,7 @@ class AuditFlows(
     return integrationFlow {
       channel(PUBLISHER_SUCCESS_CHANNEL)
       handle { payload: PublisherSuccessMessage, _: MessageHeaders ->
-        log.warn("'{}', {}", payload.response.status, payload.subscriptionMessage.subscription.callbackUrl)
+        log.warn("'{}', {}", payload.response.status, payload.subscriptionMessage.subscription.callback.url)
       }
     }
   }
@@ -102,7 +102,7 @@ class AuditFlows(
     return integrationFlow {
       channel(PUBLISHER_REQUEST_ERROR_CHANNEL)
       handle { payload: PublisherRequestErrorMessage, _: MessageHeaders ->
-        log.warn("{}, {}", payload.subscriptionMessage.subscription.callbackUrl, payload.reason)
+        log.warn("{}, {}", payload.subscriptionMessage.subscription.callback.url, payload.reason)
       }
     }
   }
@@ -112,7 +112,7 @@ class AuditFlows(
     return integrationFlow {
       channel(PUBLISHER_RESPONSE_ERROR_CHANNEL)
       handle { payload: PublisherResponseErrorMessage, _: MessageHeaders ->
-        log.warn("'{}', {}, {}", payload.response.status, payload.subscriptionMessage.subscription.callbackUrl, payload.reason)
+        log.warn("'{}', {}, {}", payload.response.status, payload.subscriptionMessage.subscription.callback.url, payload.reason)
       }
     }
   }
@@ -122,7 +122,7 @@ class AuditFlows(
     return integrationFlow {
       channel(PUBLISHER_OTHER_ERROR_CHANNEL)
       handle { payload: PublisherOtherErrorMessage, _: MessageHeaders ->
-        log.warn("{}, {}", payload.subscriptionMessage.subscription.callbackUrl, payload.reason)
+        log.warn("{}, {}", payload.subscriptionMessage.subscription.callback.url, payload.reason)
       }
     }
   }
@@ -132,7 +132,7 @@ class AuditFlows(
     return integrationFlow {
       channel(RETRYABLE_PUBLISHER_ERROR_CHANNEL)
       handle { payload: PublisherErrorMessage, _: MessageHeaders ->
-        log.warn("{}, {}", payload.subscriptionMessage.subscription.callbackUrl, payload.subscriptionMessage.delay.seconds)
+        log.warn("{}, {}", payload.subscriptionMessage.subscription.callback.url, payload.subscriptionMessage.delay.seconds)
       }
     }
   }
@@ -142,7 +142,7 @@ class AuditFlows(
     return integrationFlow {
       channel(UNSUCCESSFUL_SUBSCRIPTION_CHANNEL_NAME)
       handle { payload: PublisherErrorMessage, _: MessageHeaders ->
-        log.warn("{}, {}", payload.subscriptionMessage.subscription.callbackUrl, payload.subscriptionMessage.delay.seconds)
+        log.warn("{}, {}", payload.subscriptionMessage.subscription.callback.url, payload.subscriptionMessage.delay.seconds)
       }
     }
   }

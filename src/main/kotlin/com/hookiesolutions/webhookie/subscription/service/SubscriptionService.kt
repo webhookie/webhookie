@@ -68,7 +68,7 @@ class SubscriptionService(
   }
 
   fun saveBlockedSubscriptionMessage(message: BlockedSubscriptionMessage): Mono<BlockedSubscriptionMessage> {
-    log.info("Saving BlockedSubscriptionMessage: '{}'", message.subscription.callbackUrl)
+    log.info("Saving BlockedSubscriptionMessage: '{}'", message.subscription.callback.url)
     return mongoTemplate.save(message)
   }
 
@@ -79,7 +79,7 @@ class SubscriptionService(
 
     log.info(
       "updating subscription: '{}' as and the reason is: '{}'",
-      subscription.callbackUrl,
+      subscription.callback.url,
       details.reason
     )
 
@@ -140,7 +140,7 @@ class SubscriptionService(
   }
 
   private fun outputChannelFor(subscription: SubscriptionDTO): MessageChannel {
-    return if(subscription.callbackSecurity == null) {
+    return if(subscription.callback.security == null) {
       subscriptionChannel
     } else {
       signSubscriptionMessageChannel

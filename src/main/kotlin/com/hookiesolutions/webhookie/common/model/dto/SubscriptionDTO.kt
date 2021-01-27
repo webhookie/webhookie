@@ -1,7 +1,5 @@
 package com.hookiesolutions.webhookie.common.model.dto
 
-import org.springframework.http.HttpMethod
-
 /**
  *
  * @author Arthur Kazemi<bidadh@gmail.com>
@@ -13,9 +11,7 @@ data class SubscriptionDTO(
   val companyId: String,
   val applicationId: String,
   val topic: String,
-  val callbackUrl: String,
-  val httpMethod: HttpMethod,
-  val callbackSecurity: CallbackSecurityDTO? = null,
+  val callback: Callback,
   val blockedDetails: BlockedDetailsDTO? = null
 ) {
   val isBlocked: Boolean

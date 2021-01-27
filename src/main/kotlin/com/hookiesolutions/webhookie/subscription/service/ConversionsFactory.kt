@@ -6,6 +6,7 @@ import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscrip
 import com.hookiesolutions.webhookie.common.message.subscription.GenericSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.UnsignedSubscriptionMessage
 import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
+import com.hookiesolutions.webhookie.common.model.dto.Callback
 import com.hookiesolutions.webhookie.common.service.IdGenerator
 import com.hookiesolutions.webhookie.subscription.domain.Application
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
@@ -34,9 +35,11 @@ class ConversionsFactory(
       application.companyId,
       application.id!!,
       request.topic,
-      request.callbackUrl,
-      request.httpMethod,
-      request.callbackSecurity
+      Callback(
+        request.callbackUrl,
+        request.httpMethod,
+        request.callbackSecurity
+      )
     )
   }
 

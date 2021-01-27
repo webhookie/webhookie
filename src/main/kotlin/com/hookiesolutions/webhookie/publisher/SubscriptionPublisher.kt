@@ -23,9 +23,9 @@ class SubscriptionPublisher(
 ) {
   fun publish(msg: SignableSubscriptionMessage): Mono<GenericPublisherMessage> {
     log.info( "'{}'ing '{}' message to '{}' ({}-{})",
-      msg.subscription.httpMethod.name,
+      msg.subscription.callback.httpMethod.name,
       msg.originalMessage.headers.contentType,
-      msg.subscription.callbackUrl,
+      msg.subscription.callback.url,
       msg.originalMessage.headers.traceId,
       msg.spanId
     )
@@ -34,8 +34,8 @@ class SubscriptionPublisher(
       .delay(msg.delay)
       .flatMap {
         WebClient
-          .create(msg.subscription.callbackUrl)
-          .method(msg.subscription.httpMethod)
+          .create(msg.subscription.callback.url)
+          .method(msg.subscription.callback.httpMethod)
           .contentType(msg.originalMessage.mediaType)
           .body(BodyInserters.fromValue(msg.originalMessage.payload))
           .header(Constants.Queue.Headers.WH_HEADER_SPAN_ID, msg.spanId)

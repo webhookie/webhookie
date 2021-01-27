@@ -21,7 +21,7 @@ class SubscriptionSignor(
 ) {
   fun sign(subscription: Subscription, consumerMessage: ConsumerMessage, spanId: String): Mono<SubscriptionSignature> {
     val time = timeMachine.now().toString()
-    return Mono.justOrEmpty(subscription.callbackSecurity)
+    return Mono.justOrEmpty(subscription.callback.security)
       .zipWhen { CryptoUtils.hmac(it.secret.secret, subscription, time, consumerMessage.headers.traceId, spanId) }
       .map {
         SubscriptionSignature(
