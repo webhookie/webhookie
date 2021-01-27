@@ -44,28 +44,6 @@ import reactor.core.publisher.Mono
 @Configuration
 class SubscriptionFlows {
   @Bean
-  fun subscriptionErrorHandler(
-    globalSubscriptionErrorChannel: MessageChannel,
-    subscriptionErrorChannel: MessageChannel,
-    log: Logger
-  ): IntegrationFlow {
-    return integrationFlow {
-      channel(globalSubscriptionErrorChannel)
-      routeToRecipients {
-        recipientFlow<ErrorMessage>({ it.payload.cause is SubscriptionMessageHandlingException }) {
-          transform<ErrorMessage> { it.payload.cause as SubscriptionMessageHandlingException }
-          channel(subscriptionErrorChannel)
-        }
-        recipientFlow<ErrorMessage>({ it.payload.cause !is SubscriptionMessageHandlingException }) {
-          handle {
-            log.error("Unexpected error occurred handling message: '{}', '{}", it.payload, it.headers)
-          }
-        }
-      }
-    }
-  }
-
-  @Bean
   fun subscriptionFlow(
     toSubscriptionMessageFlux: GenericTransformer<ConsumerMessage, Flux<GenericSubscriptionMessage>>,
     messageHasNoSubscription: (GenericSubscriptionMessage) -> Boolean,
@@ -95,6 +73,28 @@ class SubscriptionFlows {
           transform(toBlockedSubscriptionMessageDTO)
           channel(blockedSubscriptionChannel)
         })
+      }
+    }
+  }
+
+  @Bean
+  fun subscriptionErrorHandler(
+    globalSubscriptionErrorChannel: MessageChannel,
+    subscriptionErrorChannel: MessageChannel,
+    log: Logger
+  ): IntegrationFlow {
+    return integrationFlow {
+      channel(globalSubscriptionErrorChannel)
+      routeToRecipients {
+        recipientFlow<ErrorMessage>({ it.payload.cause is SubscriptionMessageHandlingException }) {
+          transform<ErrorMessage> { it.payload.cause as SubscriptionMessageHandlingException }
+          channel(subscriptionErrorChannel)
+        }
+        recipientFlow<ErrorMessage>({ it.payload.cause !is SubscriptionMessageHandlingException }) {
+          handle {
+            log.error("Unexpected error occurred handling message: '{}', '{}", it.payload, it.headers)
+          }
+        }
       }
     }
   }

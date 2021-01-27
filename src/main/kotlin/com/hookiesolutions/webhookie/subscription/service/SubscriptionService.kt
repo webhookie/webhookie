@@ -14,7 +14,7 @@ import com.hookiesolutions.webhookie.subscription.domain.Application
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage.Queries.Companion.bySubscriptionId
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
-import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_COMPANY_ID
+import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Companion.isAuthorized
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Companion.topicIs
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Updates.Companion.blockSubscription
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Updates.Companion.unblockSubscription
@@ -56,9 +56,7 @@ class SubscriptionService(
 
     var criteria = topicIs(consumerMessage.headers.topic)
     if(consumerMessage.headers.authorizedSubscribers.isNotEmpty()) {
-      criteria = criteria
-        .and(KEY_COMPANY_ID).
-        `in`(consumerMessage.headers.authorizedSubscribers)
+      criteria = criteria.andOperator(isAuthorized(consumerMessage.headers.authorizedSubscribers))
     }
 
     return mongoTemplate.find(

@@ -6,6 +6,7 @@ import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
 import com.hookiesolutions.webhookie.common.model.dto.Callback
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_BLOCK_DETAILS
+import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_COMPANY_ID
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_TOPIC
 import org.springframework.data.annotation.TypeAlias
 import org.springframework.data.mongodb.core.index.Indexed
@@ -50,6 +51,11 @@ data class Subscription(
     companion object {
       fun topicIs(topic: String): Criteria {
         return where(KEY_TOPIC).`is`(topic)
+      }
+
+      fun isAuthorized(companyIdSet: Set<String>): Criteria {
+        return where(KEY_COMPANY_ID)
+          .`in`(companyIdSet)
       }
     }
   }
