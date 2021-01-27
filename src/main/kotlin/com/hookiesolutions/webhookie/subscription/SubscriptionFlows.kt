@@ -25,7 +25,6 @@ import org.springframework.data.mongodb.core.query.Criteria.where
 import org.springframework.integration.context.IntegrationContextUtils.NULL_CHANNEL_BEAN_NAME
 import org.springframework.integration.core.GenericSelector
 import org.springframework.integration.dsl.IntegrationFlow
-import org.springframework.integration.dsl.IntegrationFlows
 import org.springframework.integration.dsl.integrationFlow
 import org.springframework.integration.mongodb.dsl.MongoDb
 import org.springframework.integration.mongodb.dsl.MongoDbChangeStreamMessageProducerSpec
@@ -166,10 +165,9 @@ class SubscriptionFlows {
     mongoTemplate: ReactiveMongoTemplate,
     resendBlockedMessageChannel: MessageChannel
   ): IntegrationFlow {
-    return IntegrationFlows
-      .from(unblockSubscriptionMongoEvent(mongoTemplate))
-      .channel(resendBlockedMessageChannel)
-      .get()
+    return integrationFlow(unblockSubscriptionMongoEvent(mongoTemplate)) {
+      channel(resendBlockedMessageChannel)
+    }
   }
 
   @Bean
