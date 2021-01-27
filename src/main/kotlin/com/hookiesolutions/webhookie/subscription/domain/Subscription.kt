@@ -62,13 +62,13 @@ data class Subscription(
 
   class Updates {
     companion object {
-      fun unblockSubscription(): Update {
+      fun unblockSubscriptionUpdate(): Update {
         return Update()
           .unset(KEY_BLOCK_DETAILS)
           .inc(KEY_VERSION, 1)
       }
 
-      fun blockSubscription(details: BlockedDetailsDTO): Update {
+      fun blockSubscriptionUpdate(details: BlockedDetailsDTO): Update {
         return Update()
           .set(KEY_BLOCK_DETAILS, details)
           .inc(KEY_VERSION, 1)

@@ -4,6 +4,9 @@ import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherErrorMessage
 import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscriptionMessageDTO
 import com.hookiesolutions.webhookie.common.message.subscription.GenericSubscriptionMessage
+import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
+import com.hookiesolutions.webhookie.common.message.subscription.SignedSubscriptionMessage
+import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionSignature
 import com.hookiesolutions.webhookie.common.message.subscription.UnsignedSubscriptionMessage
 import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
 import com.hookiesolutions.webhookie.common.model.dto.Callback
@@ -26,7 +29,7 @@ import java.time.Instant
 class ConversionsFactory(
   private val idGenerator: IdGenerator
 ) {
-  fun createSubscriptionRequestToSubscription(
+  fun subscriptionFromCreateSubscriptionRequest(
     request: CreateSubscriptionRequest,
     application: Application
   ): Subscription {
@@ -118,4 +121,16 @@ class ConversionsFactory(
       BlockedDetailsDTO(reason, at)
     )
   }
+
+  fun createSignedSubscriptionMessage(
+    subscriptionMessage: SignableSubscriptionMessage,
+    signature: SubscriptionSignature,
+  ) = SignedSubscriptionMessage(
+    originalMessage = subscriptionMessage.originalMessage,
+    spanId = signature.spanId,
+    subscription = subscriptionMessage.subscription,
+    delay = subscriptionMessage.delay,
+    numberOfRetries = subscriptionMessage.numberOfRetries,
+    signature = signature,
+  )
 }

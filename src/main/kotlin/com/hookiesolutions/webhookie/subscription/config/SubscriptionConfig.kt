@@ -157,7 +157,8 @@ class SubscriptionConfig(
     log: Logger
   ): (BlockedSubscriptionMessage, MessageHeaders) -> Unit {
     return { payload: BlockedSubscriptionMessage, _: MessageHeaders ->
-      subscriptionService.resendAndRemoveSingleBlockedMessage(payload)
+      subscriptionService
+        .resendAndRemoveSingleBlockedMessage(payload)
         .onErrorMap { SubscriptionMessageHandlingException(it.localizedMessage, payload.originalMessage.headers.traceId) }
         .subscribe {
           if (it.deletedCount > 0) {
