@@ -23,7 +23,7 @@ class AuthenticationSuccessHandler(
   ): Mono<Void> {
 
     val auth = authentication as WebhookieJwtAuthenticationToken
-    log.debug("authenticated user: '{}', '{}', '{}", auth.email, auth.roles, auth.groups)
+    log.debug("authenticated user: '{}', '{}', '{}', '{}'", auth.entity, auth.email, auth.roles, auth.groups)
 
     return Mono.empty()
   }

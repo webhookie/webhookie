@@ -29,6 +29,7 @@ services:
       - WH_SECURITY_ROLES_JSON_PATH=$$.realm_access.roles
       - WH_SECURITY_GROUPS_JSON_PATH=$$.groups
       - WH_SECURITY_EMAIL_JSON_PATH=$$.email
+      - WH_SECURITY_ENTITY_JSON_PATH=$$.entity
       - WH_SECURITY_AUTO_ASSIGN_CONSUMER_ROLE=true
       - WH_SECURITY_OAUTH2_AUTHORIZATION_URI=/protocol/openid-connect/auth
       - WH_SECURITY_OAUTH2_TOKEN_URI=/protocol/openid-connect/token
@@ -59,6 +60,7 @@ services:
       - WH_SECURITY_ROLES_JSON_PATH=$$['https://webhookie.com/roles']
       - WH_SECURITY_GROUPS_JSON_PATH=$$['https://webhookie.com/groups']
       - WH_SECURITY_EMAIL_JSON_PATH=$$.email
+      - WH_SECURITY_ENTITY_JSON_PATH=$$['https://webhookie.com/entity']
       - WH_SECURITY_AUTO_ASSIGN_CONSUMER_ROLE=true
       - WH_SECURITY_OAUTH2_AUTHORIZATION_URI=authorize
       - WH_SECURITY_OAUTH2_TOKEN_URI=oauth/token

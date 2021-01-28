@@ -11,6 +11,7 @@ data class WebHookieSecurityProperties(
   val roles: RolesConfig,
   val groups: PathConfig,
   val email: PathConfig,
+  val entity: PathConfig,
   val oauth2: OAuth2Properties,
   val noAuth: NoAuth = NoAuth()
 ) {

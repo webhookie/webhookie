@@ -16,6 +16,8 @@ webhookie:
       token-name: access_token
     email:
       jwk-json-path: $.email
+    entity:
+      jwk-json-path: $.entity
     groups:
       jwk-json-path: $.groups
     roles:

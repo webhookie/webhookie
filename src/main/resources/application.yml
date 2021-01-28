@@ -20,6 +20,8 @@ webhookie:
       token-name: ${WH_SECURITY_OAUTH2_TOKEN_NAME:access_token}
     email:
       jwk-json-path: ${WH_SECURITY_EMAIL_JSON_PATH:$.email}
+    entity:
+      jwk-json-path: ${WH_SECURITY_ENTITY_JSON_PATH:$.entity}
     roles:
       jwk-json-path: ${WH_SECURITY_ROLES_JSON_PATH:$.realm_access.roles}
       auto-assign-consumer: ${WH_SECURITY_AUTO_ASSIGN_CONSUMER_ROLE:true}
