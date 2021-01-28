@@ -2,10 +2,13 @@ package com.hookiesolutions.webhookie.security
 
 import com.hookiesolutions.webhookie.admin.web.AdminAPIDocs.Companion.REQUEST_MAPPING_ADMIN
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_ADMIN
+import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_CONSUMER
 import com.hookiesolutions.webhookie.security.customizer.AllowAllPermissionEvaluator
 import com.hookiesolutions.webhookie.security.customizer.DelegateAuthenticationEntryPoint
 import com.hookiesolutions.webhookie.security.jwt.AudienceValidator
 import com.hookiesolutions.webhookie.security.jwt.JwtAuthoritiesConverter
+import com.hookiesolutions.webhookie.subscription.web.SubscriptionAPIDocs.Companion.REQUEST_MAPPING_APPLICATIONS
+import com.hookiesolutions.webhookie.subscription.web.SubscriptionAPIDocs.Companion.REQUEST_MAPPING_SUBSCRIPTIONS
 import com.hookiesolutions.webhookie.webhook.config.WebhookGroupAPIDocs.Companion.REQUEST_MAPPING_WEBHOOK_GROUPS
 import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties
 import org.springframework.context.annotation.Bean
@@ -69,6 +72,8 @@ class SecurityConfig(
           }
 
         authorize(pathMatchers("$REQUEST_MAPPING_ADMIN/**"), hasAuthority(ROLE_ADMIN))
+        authorize(pathMatchers("$REQUEST_MAPPING_APPLICATIONS/**"), hasAuthority(ROLE_CONSUMER))
+        authorize(pathMatchers("$REQUEST_MAPPING_SUBSCRIPTIONS/**"), hasAuthority(ROLE_CONSUMER))
         authorize(pathMatchers(HttpMethod.GET,"${REQUEST_MAPPING_WEBHOOK_GROUPS}/**"), permitAll)
 
         authorize()

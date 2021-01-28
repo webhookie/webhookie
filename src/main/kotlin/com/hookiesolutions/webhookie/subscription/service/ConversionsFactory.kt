@@ -13,7 +13,6 @@ import com.hookiesolutions.webhookie.common.model.dto.Callback
 import com.hookiesolutions.webhookie.common.service.IdGenerator
 import com.hookiesolutions.webhookie.subscription.domain.Application
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
-import com.hookiesolutions.webhookie.subscription.domain.Company
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.subscription.service.model.CreateApplicationRequest
 import com.hookiesolutions.webhookie.subscription.service.model.CreateSubscriptionRequest
@@ -35,7 +34,7 @@ class ConversionsFactory(
   ): Subscription {
     return Subscription(
       request.name,
-      application.companyId,
+      application.entity,
       application.id!!,
       request.topic,
       Callback(
@@ -48,9 +47,10 @@ class ConversionsFactory(
 
   fun createApplicationRequestToApplication(
     request: CreateApplicationRequest,
-    company: Company
+    entity: String
   ): Application {
-    return Application(request.name, company.id!!)
+    val callback = Callback(request.callbackUrl, request.httpMethod, request.callbackSecurity)
+    return Application(request.name, entity, callback)
   }
 
   fun blockedSubscriptionMessageToSubscriptionMessage(

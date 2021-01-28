@@ -1,6 +1,7 @@
 package com.hookiesolutions.webhookie.subscription.domain
 
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
+import com.hookiesolutions.webhookie.common.model.dto.Callback
 import org.springframework.data.annotation.TypeAlias
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
@@ -16,5 +17,6 @@ data class Application(
   @Indexed(unique = true)
   val name: String,
   @Indexed
-  val companyId: String
+  val entity: String,
+  val callback: Callback
 ): AbstractEntity()

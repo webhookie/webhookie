@@ -9,8 +9,8 @@ import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Updates.Companion.blockSubscriptionUpdate
 import com.hookiesolutions.webhookie.subscription.service.SubscriptionService
 import com.hookiesolutions.webhookie.subscription.service.model.CreateSubscriptionRequest
-import com.hookiesolutions.webhookie.subscription.web.ApplicationController.Companion.REQUEST_MAPPING_APPLICATION
-import com.hookiesolutions.webhookie.subscription.web.CompanyController.Companion.REQUEST_MAPPING_COMPANY
+import com.hookiesolutions.webhookie.subscription.web.SubscriptionAPIDocs.Companion.REQUEST_MAPPING_APPLICATIONS
+import com.hookiesolutions.webhookie.subscription.web.SubscriptionAPIDocs.Companion.REQUEST_MAPPING_SUBSCRIPTIONS
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.slf4j.Logger
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
@@ -38,7 +38,7 @@ class SubscriptionController(
   private val subscriptionService: SubscriptionService,
 ) {
   @PatchMapping(
-    "$REQUEST_MAPPING_COMPANY$REQUEST_MAPPING_SUBSCRIPTION/{id}/unblock",
+    "$REQUEST_MAPPING_SUBSCRIPTIONS/{id}/unblock",
     produces = [MediaType.TEXT_PLAIN_VALUE]
   )
   fun unblockSubscription(@PathVariable id: String): Mono<String> {
@@ -48,7 +48,7 @@ class SubscriptionController(
   }
 
   @PatchMapping(
-    "$REQUEST_MAPPING_COMPANY$REQUEST_MAPPING_SUBSCRIPTION/{id}/block",
+    "$REQUEST_MAPPING_SUBSCRIPTIONS/{id}/block",
     produces = [MediaType.TEXT_PLAIN_VALUE]
   )
   fun blockSubscription(@PathVariable id: String): Mono<String> {
@@ -67,7 +67,7 @@ class SubscriptionController(
   }
 
   @PostMapping(
-    "$REQUEST_MAPPING_APPLICATION/{applicationId}$REQUEST_MAPPING_SUBSCRIPTION",
+    "$REQUEST_MAPPING_APPLICATIONS/{applicationId}$REQUEST_MAPPING_SUBSCRIPTIONS",
     consumes = [MediaType.APPLICATION_JSON_VALUE],
     produces = [MediaType.APPLICATION_JSON_VALUE],
   )
@@ -75,9 +75,5 @@ class SubscriptionController(
     log.info("Creating '{}' subscription for application: '{}'", body.topic, applicationId)
     return subscriptionService.createSubscriptionFor(applicationId, body)
       .map { it.dto() }
-  }
-
-  companion object {
-    const val REQUEST_MAPPING_SUBSCRIPTION = "/subscription"
   }
 }

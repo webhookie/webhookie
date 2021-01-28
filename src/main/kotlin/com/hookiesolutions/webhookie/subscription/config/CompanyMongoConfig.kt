@@ -2,7 +2,6 @@ package com.hookiesolutions.webhookie.subscription.config
 
 import com.hookiesolutions.webhookie.subscription.domain.Application
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
-import com.hookiesolutions.webhookie.subscription.domain.Company
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import org.slf4j.Logger
 import org.springframework.boot.context.event.ApplicationReadyEvent
@@ -32,7 +31,6 @@ class CompanyMongoConfig(
     val resolver = MongoPersistentEntityIndexResolver(mongoMappingContext)
 
     Flux.just(
-      Company::class.java,
       BlockedSubscriptionMessage::class.java,
       Application::class.java,
       Subscription::class.java
