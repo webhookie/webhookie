@@ -25,7 +25,7 @@ class WebhookSecurityService(
   private val log: Logger
 ) {
   fun tokenGroups(): Mono<List<String>> {
-    return securityHandler.tokenGroups()
+    return securityHandler.groups()
   }
 
   fun verifyReadAccess(webhookGroupSupplier: Supplier<Mono<WebhookGroup>>): Mono<WebhookGroup> {

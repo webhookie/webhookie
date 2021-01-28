@@ -21,8 +21,13 @@ class SecurityHandler {
       .cast(WebhookieJwtAuthenticationToken::class.java)
   }
 
-  fun tokenGroups(): Mono<List<String>> {
+  fun groups(): Mono<List<String>> {
     return token()
       .map { it.groups }
+  }
+
+  fun entity(): Mono<String> {
+    return token()
+      .map { it.entity }
   }
 }
