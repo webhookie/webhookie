@@ -11,10 +11,8 @@ import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMess
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.subscription.domain.SubscriptionRepository
 import com.hookiesolutions.webhookie.subscription.service.model.CreateSubscriptionRequest
-import com.mongodb.client.result.DeleteResult
 import org.slf4j.Logger
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
@@ -31,7 +29,6 @@ class SubscriptionService(
   private val signor: SubscriptionSignor,
   private val idGenerator: IdGenerator,
   private val factory: ConversionsFactory,
-  private val manualPublisher: BlockedMessagePublisher,
   private val repository: SubscriptionRepository,
   private val applicationRepository: ApplicationRepository
 ) {
@@ -89,13 +86,10 @@ class SubscriptionService(
       .doOnNext { log.info("Subscription '{}' was created successfully", it.name) }
   }
 
-  //TODO: refactor
-  @Transactional
-  fun resendAndRemoveSingleBlockedMessage(bsm: BlockedSubscriptionMessage): Mono<DeleteResult> {
+  fun deleteBlockedMessage(bsm: BlockedSubscriptionMessage): Mono<BlockedSubscriptionMessage> {
     return repository
-      .findSubscriptionById(bsm.subscription.id)
-      .flatMap { manualPublisher.resendBlockedSubscriptionMessage(bsm, it) }
-      .flatMap { repository.deleteBlockedSubscriptionMessage(bsm) }
+      .deleteBlockedSubscriptionMessage(bsm)
+      .map { bsm }
   }
 
   fun signSubscriptionMessage(subscriptionMessage: SignableSubscriptionMessage): Mono<SignableSubscriptionMessage> {
@@ -103,5 +97,11 @@ class SubscriptionService(
       .findSubscriptionById(subscriptionMessage.subscription.id)
       .flatMap { signor.sign(it, subscriptionMessage.originalMessage, idGenerator.generate()) }
       .map { factory.createSignedSubscriptionMessage(subscriptionMessage, it) }
+  }
+
+  fun enrichBlockedSubscriptionMessageReloadingSubscription(message: BlockedSubscriptionMessage): Mono<BlockedSubscriptionMessage> {
+    return repository
+      .findSubscriptionById(message.subscription.id)
+      .map { factory.updateBlockedSubscriptionMessageWithSubscription(message, it) }
   }
 }

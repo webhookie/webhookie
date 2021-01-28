@@ -2,9 +2,9 @@ package com.hookiesolutions.webhookie.subscription.config
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.integration.channel.FluxMessageChannel
 import org.springframework.integration.channel.PublishSubscribeChannel
 import org.springframework.integration.dsl.MessageChannels
-import org.springframework.messaging.MessageChannel
 import java.util.concurrent.Executors
 
 /**
@@ -55,7 +55,7 @@ class SubscriptionChannels {
     .get()
 
   @Bean
-  fun resendBlockedMessageChannel(): MessageChannel = MessageChannels
+  fun resendBlockedMessageChannel(): FluxMessageChannel = MessageChannels
     .flux()
     .get()
 }

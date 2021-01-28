@@ -54,13 +54,12 @@ class ConversionsFactory(
   }
 
   fun blockedSubscriptionMessageToSubscriptionMessage(
-    bsm: BlockedSubscriptionMessage,
-    subscription: Subscription
+    bsm: BlockedSubscriptionMessage
   ): UnsignedSubscriptionMessage {
     return UnsignedSubscriptionMessage(
       originalMessage = bsm.originalMessage,
       spanId = bsm.originalSpanId,
-      subscription = subscription.dto()
+      subscription = bsm.subscription
     )
   }
 
@@ -133,4 +132,17 @@ class ConversionsFactory(
     numberOfRetries = subscriptionMessage.numberOfRetries,
     signature = signature,
   )
+
+  fun updateBlockedSubscriptionMessageWithSubscription(
+    message: BlockedSubscriptionMessage,
+    subscription: Subscription,
+  ): BlockedSubscriptionMessage {
+    val copy = message.copy(subscription = subscription.dto())
+    copy.id = message.id
+    copy.createdBy = message.createdBy
+    copy.createdDate = message.createdDate
+    copy.lastModifiedDate = message.lastModifiedDate
+    copy.lastModifiedBy = message.lastModifiedBy
+    return copy
+  }
 }

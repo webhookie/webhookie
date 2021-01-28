@@ -22,6 +22,7 @@ import org.springframework.data.mongodb.core.ChangeStreamOptions
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.aggregation.Aggregation
 import org.springframework.data.mongodb.core.query.Criteria.where
+import org.springframework.integration.channel.FluxMessageChannel
 import org.springframework.integration.context.IntegrationContextUtils.NULL_CHANNEL_BEAN_NAME
 import org.springframework.integration.core.GenericSelector
 import org.springframework.integration.dsl.IntegrationFlow
@@ -41,7 +42,9 @@ import reactor.core.publisher.Mono
  * @since 2/12/20 13:43
  */
 @Configuration
-class SubscriptionFlows {
+class SubscriptionFlows(
+  private val log: Logger
+) {
   @Bean
   fun subscriptionFlow(
     toSubscriptionMessageFlux: GenericTransformer<ConsumerMessage, Flux<GenericSubscriptionMessage>>,
@@ -79,8 +82,7 @@ class SubscriptionFlows {
   @Bean
   fun subscriptionErrorHandler(
     globalSubscriptionErrorChannel: MessageChannel,
-    subscriptionErrorChannel: MessageChannel,
-    log: Logger
+    subscriptionErrorChannel: MessageChannel
   ): IntegrationFlow {
     return integrationFlow {
       channel(globalSubscriptionErrorChannel)
@@ -149,14 +151,15 @@ class SubscriptionFlows {
   @Bean
   fun blockedSubscriptionMessageFlow(
     blockedSubscriptionChannel: MessageChannel,
-    saveBlockedMessageMono: GenericTransformer<BlockedSubscriptionMessageDTO, Mono<BlockedSubscriptionMessage>>,
-    logBlockedSubscriptionHandler: (BlockedSubscriptionMessage, MessageHeaders) -> Unit
+    saveBlockedMessage: GenericTransformer<BlockedSubscriptionMessageDTO, Mono<BlockedSubscriptionMessage>>
   ): IntegrationFlow {
     return integrationFlow {
       channel(blockedSubscriptionChannel)
-      transform(saveBlockedMessageMono)
+      transform(saveBlockedMessage)
       split()
-      handle(logBlockedSubscriptionHandler)
+      handle{ payload: BlockedSubscriptionMessage, _: MessageHeaders ->
+        log.warn("BlockedSubscriptionMessage was saved successfully: '{}'", payload.id)
+      }
     }
   }
 
@@ -164,7 +167,7 @@ class SubscriptionFlows {
   fun unblockSubscriptionFlow(
     mongoTemplate: ReactiveMongoTemplate,
     toBlockedSubscriptionMessageFlux: GenericTransformer<Subscription, Flux<BlockedSubscriptionMessage>>,
-    resendBlockedMessageChannel: MessageChannel
+    resendBlockedMessageChannel: FluxMessageChannel
   ): IntegrationFlow {
     return integrationFlow(unblockSubscriptionMongoEvent(mongoTemplate)) {
       transform(toBlockedSubscriptionMessageFlux)
@@ -175,13 +178,31 @@ class SubscriptionFlows {
 
   @Bean
   fun resendBlockedMessageFlow(
-    resendBlockedMessageChannel: MessageChannel,
-    resendAndRemoveSingleBlockedMessage: (BlockedSubscriptionMessage, MessageHeaders) -> Unit
+    resendBlockedMessageChannel: FluxMessageChannel,
+    signSubscriptionMessageChannel: MessageChannel,
+    subscriptionChannel: MessageChannel,
+    toSignableSubscriptionMessageReloadingSubscription: GenericTransformer<BlockedSubscriptionMessage, Mono<SignableSubscriptionMessage>>,
+    deleteBlockedMessage: GenericTransformer<BlockedSubscriptionMessage, Mono<BlockedSubscriptionMessage>>
   ): IntegrationFlow {
     return integrationFlow {
       channel(resendBlockedMessageChannel)
-      handle(resendAndRemoveSingleBlockedMessage)
-      channel(NULL_CHANNEL_BEAN_NAME)
+      routeToRecipients {
+        recipientFlow {
+          transform(toSignableSubscriptionMessageReloadingSubscription)
+          split()
+          routeToRecipients {
+            recipient<SignableSubscriptionMessage>(subscriptionChannel) { it.subscription.callback.security == null }
+            recipient<SignableSubscriptionMessage>(signSubscriptionMessageChannel) { it.subscription.callback.security != null }
+          }
+        }
+        recipientFlow {
+          transform(deleteBlockedMessage)
+          split()
+          handle { bsm: BlockedSubscriptionMessage, _ ->
+            log.info("Blocked Message '{}' was deleted successfully", bsm.id)
+          }
+        }
+      }
     }
   }
 
@@ -196,15 +217,6 @@ class SubscriptionFlows {
       transform(signSubscriptionMessage)
       split()
       channel(subscriptionChannel)
-    }
-  }
-
-  @Bean
-  fun logBlockedSubscriptionHandler(
-    log: Logger
-  ): (BlockedSubscriptionMessage, MessageHeaders) -> Unit {
-    return { payload: BlockedSubscriptionMessage, _: MessageHeaders ->
-      log.warn("BlockedSubscriptionMessage was saved successfully: '{}'", payload.id)
     }
   }
 

@@ -16,12 +16,10 @@ import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMess
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.subscription.service.ConversionsFactory
 import com.hookiesolutions.webhookie.subscription.service.SubscriptionService
-import org.slf4j.Logger
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.integration.core.GenericSelector
 import org.springframework.integration.transformer.GenericTransformer
-import org.springframework.messaging.MessageHeaders
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
@@ -143,7 +141,7 @@ class SubscriptionConfig(
   }
 
   @Bean
-  fun saveBlockedMessageMono(): GenericTransformer<BlockedSubscriptionMessageDTO, Mono<BlockedSubscriptionMessage>> {
+  fun saveBlockedMessage(): GenericTransformer<BlockedSubscriptionMessageDTO, Mono<BlockedSubscriptionMessage>> {
     return GenericTransformer { bsmDTO ->
       val msg = factory.bmsDTOToBlockedSubscriptionMessage(bsmDTO)
       subscriptionService.saveBlockedSubscriptionMessage(msg)
@@ -151,22 +149,20 @@ class SubscriptionConfig(
     }
   }
 
-  //TODO: refactor
   @Bean
-  fun resendAndRemoveSingleBlockedMessage(
-    log: Logger
-  ): (BlockedSubscriptionMessage, MessageHeaders) -> Unit {
-    return { payload: BlockedSubscriptionMessage, _: MessageHeaders ->
+  fun deleteBlockedMessage(): GenericTransformer<BlockedSubscriptionMessage, Mono<BlockedSubscriptionMessage>> {
+    return GenericTransformer { bsm ->
+      subscriptionService.deleteBlockedMessage(bsm)
+        .onErrorMap { SubscriptionMessageHandlingException(it.localizedMessage, bsm.originalMessage.headers.traceId) }
+    }
+  }
+
+  @Bean
+  fun toSignableSubscriptionMessageReloadingSubscription(): GenericTransformer<BlockedSubscriptionMessage, Mono<SignableSubscriptionMessage>> {
+    return GenericTransformer {
       subscriptionService
-        .resendAndRemoveSingleBlockedMessage(payload)
-        .onErrorMap { SubscriptionMessageHandlingException(it.localizedMessage, payload.originalMessage.headers.traceId) }
-        .subscribe {
-          if (it.deletedCount > 0) {
-            log.info("Blocked Message: '{}' was removed successfully!", payload.id)
-          } else {
-            log.warn("Was unable to remove Blocked Message: '{}'!", payload.id)
-          }
-        }
+        .enrichBlockedSubscriptionMessageReloadingSubscription(it)
+        .map { factory.blockedSubscriptionMessageToSubscriptionMessage(it) }
     }
   }
 
