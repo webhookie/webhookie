@@ -19,15 +19,23 @@ class JwtAuthoritiesConverter(
   private val tokenAttributesExtractor: JwtTokenAttributesExtractor
 ) : Converter<Jwt, Mono<AbstractAuthenticationToken>> {
   override fun convert(jwt: Jwt): Mono<AbstractAuthenticationToken>? {
-    val rolesMono = tokenAttributesExtractor.readList(jwt, securityProperties.roles.jwkJsonPath)
-    val groupsMono = tokenAttributesExtractor.readList(jwt, securityProperties.groups.jwkJsonPath)
-    val emailMono: Mono<String> = tokenAttributesExtractor.read(jwt, securityProperties.email.jwkJsonPath)
-    val entityMono: Mono<String> = tokenAttributesExtractor.read(jwt, securityProperties.entity.jwkJsonPath)
-    return rolesMono
+    val rolesMono = tokenAttributesExtractor
+      .readList(jwt, securityProperties.roles.jwkJsonPath)
       .map { authoritiesMapper.map(it) }
-      .zipWith(groupsMono)
-      .zipWith(emailMono)
-      .zipWith(entityMono)
-      .map { WebhookieJwtAuthenticationToken(jwt, it.t1.t1.t1, it.t1.t1.t2, it.t1.t2, it.t2) }
+
+    val groupsMono = tokenAttributesExtractor
+      .readList(jwt, securityProperties.groups.jwkJsonPath)
+
+    val emailMono: Mono<String> = tokenAttributesExtractor
+      .read(jwt, securityProperties.email.jwkJsonPath)
+
+    val entityMono: Mono<String> = tokenAttributesExtractor
+      .read(jwt, securityProperties.entity.jwkJsonPath)
+
+    return Mono
+      .zip(rolesMono, groupsMono, emailMono, entityMono)
+      .map {
+        WebhookieJwtAuthenticationToken(jwt, it.t1, it.t2, it.t3, it.t4)
+      }
   }
 }
