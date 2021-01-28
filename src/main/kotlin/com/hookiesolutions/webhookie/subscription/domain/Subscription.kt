@@ -6,7 +6,7 @@ import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
 import com.hookiesolutions.webhookie.common.model.dto.Callback
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_BLOCK_DETAILS
-import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_COMPANY_ID
+import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_ENTITY
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_TOPIC
 import org.springframework.data.annotation.TypeAlias
 import org.springframework.data.mongodb.core.index.Indexed
@@ -24,7 +24,7 @@ import org.springframework.data.mongodb.core.query.Update
 @TypeAlias("subscription")
 data class Subscription(
   val name: String,
-  val companyId: String,
+  val entity: String,
   val applicationId: String,
   @Indexed
   val topic: String,
@@ -35,7 +35,7 @@ data class Subscription(
     return SubscriptionDTO(
       id!!,
       name,
-      companyId,
+      entity,
       applicationId,
       topic,
       callback,
@@ -53,9 +53,9 @@ data class Subscription(
         return where(KEY_TOPIC).`is`(topic)
       }
 
-      fun isAuthorized(companyIdSet: Set<String>): Criteria {
-        return where(KEY_COMPANY_ID)
-          .`in`(companyIdSet)
+      fun isAuthorized(entities: Set<String>): Criteria {
+        return where(KEY_ENTITY)
+          .`in`(entities)
       }
     }
   }
@@ -79,7 +79,7 @@ data class Subscription(
   class Keys {
     companion object {
       const val KEY_TOPIC = "topic"
-      const val KEY_COMPANY_ID = "companyId"
+      const val KEY_ENTITY = "entity"
       const val KEY_BLOCK_DETAILS = "blockedDetails"
     }
   }

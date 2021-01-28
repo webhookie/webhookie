@@ -8,7 +8,7 @@ package com.hookiesolutions.webhookie.common.model.dto
 data class SubscriptionDTO(
   val id: String,
   val name: String,
-  val companyId: String,
+  val entity: String,
   val applicationId: String,
   val topic: String,
   val callback: Callback,
