@@ -3,3 +3,6 @@ spring:
     user:
       name: wh-user
       password: password
+logging:
+  level:
+    com.hookiesolutions.webhookie: DEBUG
