@@ -1,4 +1,4 @@
-package com.hookiesolutions.webhookie.security
+package com.hookiesolutions.webhookie.security.customizer
 
 import org.springframework.security.access.PermissionEvaluator
 import org.springframework.security.core.Authentication

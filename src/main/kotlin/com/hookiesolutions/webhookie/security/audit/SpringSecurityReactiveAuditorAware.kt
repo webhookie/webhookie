@@ -1,4 +1,4 @@
-package com.hookiesolutions.webhookie.security
+package com.hookiesolutions.webhookie.security.audit
 
 import com.hookiesolutions.webhookie.security.jwt.WebhookieJwtAuthenticationToken
 import org.springframework.data.domain.ReactiveAuditorAware

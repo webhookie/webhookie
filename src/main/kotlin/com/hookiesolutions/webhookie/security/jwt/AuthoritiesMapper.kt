@@ -1,6 +1,7 @@
-package com.hookiesolutions.webhookie.security
+package com.hookiesolutions.webhookie.security.jwt
 
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_CONSUMER
+import com.hookiesolutions.webhookie.security.WebHookieSecurityProperties
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.stereotype.Component
