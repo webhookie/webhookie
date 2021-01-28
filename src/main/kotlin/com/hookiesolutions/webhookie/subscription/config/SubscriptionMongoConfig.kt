@@ -21,7 +21,7 @@ import reactor.kotlin.core.publisher.toMono
  * @since 3/12/20 17:33
  */
 @Configuration
-class CompanyMongoConfig(
+class SubscriptionMongoConfig(
   private val mongoTemplate: ReactiveMongoTemplate,
   private val mongoMappingContext: MongoMappingContext,
   private val logger: Logger
