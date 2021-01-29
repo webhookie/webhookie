@@ -16,7 +16,6 @@ import java.net.URL;
 public class IRIValidator implements ConstraintValidator<IRI, String> {
   @Override
   public void initialize(IRI constraintAnnotation) {
-    System.out.println(1);
   }
 
   @Override

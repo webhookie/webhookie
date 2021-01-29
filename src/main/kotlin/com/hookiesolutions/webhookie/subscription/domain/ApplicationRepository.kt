@@ -3,6 +3,7 @@ package com.hookiesolutions.webhookie.subscription.domain
 import com.hookiesolutions.webhookie.common.exception.EntityExistsException
 import com.hookiesolutions.webhookie.common.exception.EntityNotFoundException
 import com.hookiesolutions.webhookie.subscription.domain.Application.Queries.Companion.applicationsByEntity
+import com.hookiesolutions.webhookie.subscription.service.security.annotation.VerifyApplicationReadAccess
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.query.Query.query
@@ -42,7 +43,12 @@ class ApplicationRepository(
       )
   }
 
+  @VerifyApplicationReadAccess
   fun findById(id: String): Mono<Application> {
+    return fetchById(id)
+  }
+
+  private fun fetchById(id: String): Mono<Application> {
     return mongoTemplate.findById(id, Application::class.java)
       .switchIfEmpty(EntityNotFoundException("Application '$id' cannot be found").toMono())
   }
