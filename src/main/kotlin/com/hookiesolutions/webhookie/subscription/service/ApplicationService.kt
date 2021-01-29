@@ -41,6 +41,6 @@ class ApplicationService(
   @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")
   fun applicationById(id: String): Mono<Application> {
     log.info("Fetching Application by id: '{}'", id)
-    return repository.findById(id)
+    return repository.findByIdVerifyingReadAccess(id)
   }
 }

@@ -44,7 +44,7 @@ class ApplicationRepository(
   }
 
   @VerifyApplicationReadAccess
-  fun findById(id: String): Mono<Application> {
+  fun findByIdVerifyingReadAccess(id: String): Mono<Application> {
     return fetchById(id)
   }
 
