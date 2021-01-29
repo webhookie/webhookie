@@ -8,6 +8,7 @@ import com.hookiesolutions.webhookie.subscription.service.model.CreateApplicatio
 import org.slf4j.Logger
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 /**
@@ -20,13 +21,20 @@ class ApplicationService(
   private val log: Logger,
   private val factory: ConversionsFactory,
   private val securityHandler: SecurityHandler,
-  private val applicationRepository: ApplicationRepository
+  private val repository: ApplicationRepository
 ) {
   @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")
   fun createApplication(body: CreateApplicationRequest): Mono<Application> {
     return securityHandler.entity()
       .map { factory.createApplicationRequestToApplication(body, it) }
-      .flatMap { applicationRepository.save(it) }
+      .flatMap { repository.save(it) }
       .doOnNext { log.info("Application '{}' was created successfully", it.name) }
+  }
+
+  @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")
+  fun userApplications(): Flux<Application> {
+    return securityHandler.entity()
+      .doOnNext { log.info("Fetching all applications for entity: '{}'", it) }
+      .flatMapMany { repository.userApplications(it) }
   }
 }

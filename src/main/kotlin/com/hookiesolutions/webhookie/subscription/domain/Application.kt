@@ -2,9 +2,12 @@ package com.hookiesolutions.webhookie.subscription.domain
 
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
 import com.hookiesolutions.webhookie.common.model.dto.Callback
+import com.hookiesolutions.webhookie.subscription.domain.Application.Keys.Companion.KEY_ENTITY
 import org.springframework.data.annotation.TypeAlias
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
+import org.springframework.data.mongodb.core.query.Criteria
+import org.springframework.data.mongodb.core.query.Criteria.where
 
 /**
  *
@@ -19,4 +22,18 @@ data class Application(
   @Indexed
   val entity: String,
   val callback: Callback
-): AbstractEntity()
+): AbstractEntity() {
+  class Queries {
+    companion object {
+      fun applicationsByEntity(entity: String): Criteria {
+        return where(KEY_ENTITY).`is`(entity)
+      }
+    }
+  }
+
+  class Keys {
+    companion object {
+      const val KEY_ENTITY = "entity"
+    }
+  }
+}
