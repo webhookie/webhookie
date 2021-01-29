@@ -10,6 +10,7 @@ import org.slf4j.Logger
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -48,4 +49,11 @@ class ApplicationController(
     return service.userApplications()
   }
 
+  @GetMapping(
+    "/{id}",
+    produces = [MediaType.APPLICATION_JSON_VALUE]
+  )
+  fun getGroup(@PathVariable id: String): Mono<Application> {
+    return service.applicationById(id)
+  }
 }

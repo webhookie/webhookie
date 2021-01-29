@@ -41,4 +41,9 @@ class ApplicationRepository(
         Application::class.java
       )
   }
+
+  fun findById(id: String): Mono<Application> {
+    return mongoTemplate.findById(id, Application::class.java)
+      .switchIfEmpty(EntityNotFoundException("Application '$id' cannot be found").toMono())
+  }
 }

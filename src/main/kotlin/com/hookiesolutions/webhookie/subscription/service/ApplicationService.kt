@@ -37,4 +37,10 @@ class ApplicationService(
       .doOnNext { log.info("Fetching all applications for entity: '{}'", it) }
       .flatMapMany { repository.userApplications(it) }
   }
+
+  @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")
+  fun applicationById(id: String): Mono<Application> {
+    log.info("Fetching Application by id: '{}'", id)
+    return repository.findById(id)
+  }
 }
