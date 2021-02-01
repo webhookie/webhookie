@@ -5,10 +5,10 @@ import com.hookiesolutions.webhookie.common.exception.EntityNotFoundException
 import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.byId
 import com.hookiesolutions.webhookie.common.model.DeletableEntity
 import com.hookiesolutions.webhookie.common.model.UpdatableEntity
+import com.hookiesolutions.webhookie.common.service.security.annotation.VerifyEntityCanBeDeleted
+import com.hookiesolutions.webhookie.common.service.security.annotation.VerifyEntityCanBeUpdated
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.KEY_NUMBER_OF_TOPICS
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Queries.Companion.accessibleForGroups
-import com.hookiesolutions.webhookie.webhook.service.security.annotation.VerifyWebhookGroupCanBeDeleted
-import com.hookiesolutions.webhookie.webhook.service.security.annotation.VerifyWebhookGroupCanBeUpdated
 import com.hookiesolutions.webhookie.webhook.service.security.annotation.VerifyWebhookGroupReadAccess
 import com.hookiesolutions.webhookie.webhook.service.security.annotation.VerifyWebhookGroupWriteAccess
 import com.mongodb.client.result.UpdateResult
@@ -67,12 +67,12 @@ class WebhookGroupRepository(
     return fetchById(id)
   }
 
-  @VerifyWebhookGroupCanBeDeleted
+  @VerifyEntityCanBeDeleted
   fun delete(deletableWebhookGroup: DeletableEntity<WebhookGroup>): Mono<Void> {
     return mongoRepository.delete(deletableWebhookGroup.entity)
   }
 
-  @VerifyWebhookGroupCanBeUpdated
+  @VerifyEntityCanBeUpdated
   fun update(updatableEntity: UpdatableEntity<WebhookGroup>, id: String): Mono<WebhookGroup> {
     return mongoTemplate
       .update(WebhookGroup::class.java)

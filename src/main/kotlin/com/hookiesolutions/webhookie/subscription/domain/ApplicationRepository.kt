@@ -5,6 +5,8 @@ import com.hookiesolutions.webhookie.common.exception.EntityNotFoundException
 import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.byId
 import com.hookiesolutions.webhookie.common.model.DeletableEntity
 import com.hookiesolutions.webhookie.common.model.UpdatableEntity
+import com.hookiesolutions.webhookie.common.service.security.annotation.VerifyEntityCanBeDeleted
+import com.hookiesolutions.webhookie.common.service.security.annotation.VerifyEntityCanBeUpdated
 import com.hookiesolutions.webhookie.subscription.domain.Application.Queries.Companion.applicationConsumerGroupsIn
 import com.hookiesolutions.webhookie.subscription.domain.Application.Queries.Companion.applicationsByEntity
 import com.hookiesolutions.webhookie.subscription.service.security.annotation.VerifyApplicationReadAccess
@@ -61,11 +63,13 @@ class ApplicationRepository(
     return fetchById(id)
   }
 
+  @VerifyEntityCanBeDeleted
   fun delete(deletableEntity: DeletableEntity<Application>): Mono<String> {
     return mongoTemplate.remove(deletableEntity.entity)
       .map { deletableEntity.entity.id!! }
   }
 
+  @VerifyEntityCanBeUpdated
   fun update(updatableEntity: UpdatableEntity<Application>, id: String): Mono<Application> {
     return mongoTemplate
       .update(Application::class.java)

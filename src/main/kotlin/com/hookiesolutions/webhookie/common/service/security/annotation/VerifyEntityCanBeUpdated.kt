@@ -1,4 +1,4 @@
-package com.hookiesolutions.webhookie.webhook.service.security.annotation
+package com.hookiesolutions.webhookie.common.service.security.annotation
 
 /**
  *
@@ -7,4 +7,4 @@ package com.hookiesolutions.webhookie.webhook.service.security.annotation
  */
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
-annotation class VerifyWebhookGroupCanBeDeleted
+annotation class VerifyEntityCanBeUpdated
