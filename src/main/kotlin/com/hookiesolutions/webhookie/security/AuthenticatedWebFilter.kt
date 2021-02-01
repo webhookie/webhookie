@@ -27,6 +27,7 @@ class AuthenticatedWebFilter(
         successHandler.onAuthenticationSuccess(WebFilterExchange(exchange, chain), it)
       }
       .flatMap { chain.filter(exchange) }
+      .switchIfEmpty(chain.filter(exchange))
   }
 
   override fun getOrder(): Int {

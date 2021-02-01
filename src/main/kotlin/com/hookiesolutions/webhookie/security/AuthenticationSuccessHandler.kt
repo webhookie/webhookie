@@ -21,7 +21,6 @@ class AuthenticationSuccessHandler(
     webFilterExchange: WebFilterExchange,
     authentication: Authentication,
   ): Mono<Void> {
-
     val auth = authentication as WebhookieJwtAuthenticationToken
     log.debug("authenticated user: '{}', '{}', '{}', '{}'", auth.entity, auth.email, auth.roles, auth.groups)
 

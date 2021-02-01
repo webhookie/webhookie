@@ -26,7 +26,6 @@ class SecurityHandler {
 
   fun groups(): Mono<List<String>> {
     return token()
-      .switchIfEmpty { AccessDeniedException("Token is not provided").toMono() }
       .map { it.groups }
   }
 
