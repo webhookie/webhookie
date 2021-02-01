@@ -1,4 +1,4 @@
-package com.hookiesolutions.webhookie.webhook.service
+package com.hookiesolutions.webhookie.common.service
 
 import com.hookiesolutions.webhookie.admin.service.AccessGroupVerifier
 import org.springframework.stereotype.Service
@@ -19,6 +19,11 @@ class AdminServiceDelegate(
   ): Mono<Boolean> {
     return accessGroupVerifier.verifyConsumerGroups(consumerGroups)
       .zipWhen { accessGroupVerifier.verifyProviderGroups(providerGroups) }
+      .thenReturn(true)
+  }
+
+  fun verifyConsumerGroups(groups: Set<String>): Mono<Boolean> {
+    return accessGroupVerifier.verifyConsumerGroups(groups)
       .thenReturn(true)
   }
 }

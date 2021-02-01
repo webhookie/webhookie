@@ -8,6 +8,7 @@ import com.hookiesolutions.webhookie.common.message.entity.EntityModifiedMessage
 import com.hookiesolutions.webhookie.common.message.entity.EntityUpdatedMessage
 import com.hookiesolutions.webhookie.common.model.DeletableEntity
 import com.hookiesolutions.webhookie.common.model.UpdatableEntity
+import com.hookiesolutions.webhookie.common.service.AdminServiceDelegate
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.KEY_CONSUMER_IAM_GROUPS
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.KEY_PROVIDER_IAM_GROUPS
