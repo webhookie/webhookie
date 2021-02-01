@@ -2,9 +2,11 @@ package com.hookiesolutions.webhookie.subscription.domain
 
 import com.hookiesolutions.webhookie.common.exception.EntityExistsException
 import com.hookiesolutions.webhookie.common.exception.EntityNotFoundException
+import com.hookiesolutions.webhookie.common.model.DeletableEntity
 import com.hookiesolutions.webhookie.subscription.domain.Application.Queries.Companion.applicationConsumerGroupsIn
 import com.hookiesolutions.webhookie.subscription.domain.Application.Queries.Companion.applicationsByEntity
 import com.hookiesolutions.webhookie.subscription.service.security.annotation.VerifyApplicationReadAccess
+import com.hookiesolutions.webhookie.subscription.service.security.annotation.VerifyApplicationWriteAccess
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.query.Query.query
@@ -49,6 +51,16 @@ class ApplicationRepository(
   @VerifyApplicationReadAccess
   fun findByIdVerifyingReadAccess(id: String): Mono<Application> {
     return fetchById(id)
+  }
+
+  @VerifyApplicationWriteAccess
+  fun findByIdVerifyingWriteAccess(id: String): Mono<Application> {
+    return fetchById(id)
+  }
+
+  fun delete(deletableEntity: DeletableEntity<Application>): Mono<String> {
+    return mongoTemplate.remove(deletableEntity.entity)
+      .map { deletableEntity.entity.id!! }
   }
 
   private fun fetchById(id: String): Mono<Application> {

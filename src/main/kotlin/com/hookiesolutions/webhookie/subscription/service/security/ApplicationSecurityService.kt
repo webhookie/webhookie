@@ -19,10 +19,18 @@ class ApplicationSecurityService(
   private val securityHandler: SecurityHandler,
   private val applicationAccessVoter: ApplicationAccessVoter
 ) {
-  fun verifyReadAccess(applicationSupplier: Supplier<Mono<Application>>): Mono<Application> {
+  fun verifyAccess(applicationSupplier: Supplier<Mono<Application>>): Mono<Application> {
     return Mono.zip(applicationSupplier.get(), securityHandler.entity(), securityHandler.groups())
       .filter { applicationAccessVoter.vote(it.t1, it.t2, it.t3) }
       .map { it.t1 }
       .switchIfEmpty { AccessDeniedException("Access Denied!").toMono() }
+  }
+
+  fun verifyReadAccess(applicationSupplier: Supplier<Mono<Application>>): Mono<Application> {
+    return verifyAccess(applicationSupplier)
+  }
+
+  fun verifyWriteAccess(applicationSupplier: Supplier<Mono<Application>>): Mono<Application> {
+    return verifyAccess(applicationSupplier)
   }
 }

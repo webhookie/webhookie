@@ -25,6 +25,10 @@ class ApplicationSecurityAspect(
   fun annotatedVerifyApplicationReadAccess() {
   }
 
+  @Pointcut("@annotation(com.hookiesolutions.webhookie.subscription.service.security.annotation.VerifyApplicationWriteAccess)")
+  fun annotatedVerifyApplicationWriteAccess() {
+  }
+
   @Pointcut("execution(reactor.core.publisher.Mono<com.hookiesolutions.webhookie.subscription.domain.Application> *(..))")
   fun returnsMonoApplication() {
   }
@@ -44,6 +48,18 @@ class ApplicationSecurityAspect(
     }
   }
 
+  @Around("annotatedVerifyApplicationWriteAccess() && returnsMonoApplication()")
+  fun checkWriteAccess(pjp: ProceedingJoinPoint): Mono<Application> {
+    @Suppress("UNCHECKED_CAST")
+    val mono: Mono<Application> = pjp.proceed() as Mono<Application>
 
-
+    return securityService.verifyWriteAccess {
+      mono
+        .doOnNext {
+          if (log.isDebugEnabled) {
+            log.debug("Verifying Application '{}' Write Access...", it.name)
+          }
+        }
+    }
+  }
 }

@@ -1,6 +1,7 @@
 package com.hookiesolutions.webhookie.subscription.service
 
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_CONSUMER
+import com.hookiesolutions.webhookie.common.model.DeletableEntity
 import com.hookiesolutions.webhookie.common.service.AdminServiceDelegate
 import com.hookiesolutions.webhookie.security.service.SecurityHandler
 import com.hookiesolutions.webhookie.subscription.domain.Application
@@ -46,5 +47,12 @@ class ApplicationService(
   fun applicationById(id: String): Mono<Application> {
     log.info("Fetching Application by id: '{}'", id)
     return repository.findByIdVerifyingReadAccess(id)
+  }
+
+  @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")
+  fun deleteApplication(id: String): Mono<String> {
+    return repository.findByIdVerifyingWriteAccess(id)
+      .map { DeletableEntity(it, true) }
+      .flatMap { repository.delete(it) }
   }
 }
