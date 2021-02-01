@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.WebFilterChain
 import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.switchIfEmpty
 
 /**
  *
@@ -21,13 +22,17 @@ class AuthenticatedWebFilter(
   private val successHandler: ServerAuthenticationSuccessHandler
 ): OrderedWebFilter {
   override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
+    val filter = chain.filter(exchange)
+      .thenReturn("Done")
+
     return securityHandler
       .token()
       .doOnNext {
         successHandler.onAuthenticationSuccess(WebFilterExchange(exchange, chain), it)
       }
-      .flatMap { chain.filter(exchange) }
-      .switchIfEmpty(chain.filter(exchange))
+      .flatMap { filter }
+      .switchIfEmpty { filter }
+      .then()
   }
 
   override fun getOrder(): Int {
