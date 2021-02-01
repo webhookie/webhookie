@@ -11,19 +11,17 @@ data class WebhookGroupRequest(
   val consumerAccess: ConsumerAccess,
   val providerAccess: ProviderAccess,
 ) {
-  fun toWebhookGroup(id: String? = null): WebhookGroup {
-    val webhookGroup = WebhookGroup(
-      this.asyncApiSpec.name,
-      this.asyncApiSpec.version,
-      this.asyncApiSpec.description,
-      this.asyncApiSpec.topics,
-      this.asyncApiSpec.raw,
-      this.consumerGroups,
-      this.providerGroups,
-      this.consumerAccess,
-      this.providerAccess
+  fun toWebhookGroup(): WebhookGroup {
+    return WebhookGroup(
+      asyncApiSpec.name,
+      asyncApiSpec.version,
+      asyncApiSpec.description,
+      asyncApiSpec.topics,
+      asyncApiSpec.raw,
+      consumerGroups,
+      providerGroups,
+      consumerAccess,
+      providerAccess
     )
-    webhookGroup.id = id
-    return webhookGroup
   }
 }

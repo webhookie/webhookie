@@ -73,8 +73,8 @@ class WebhookGroupService(
   fun updateWebhookGroup(id: String, request: WebhookGroupRequest): Mono<WebhookGroup> {
     return repository.findByIdVerifyingWriteAccess(id)
       .flatMap { verifyRequestGroups(request) }
-      .map { UpdatableEntity(request.toWebhookGroup(id), true) }
-      .flatMap { repository.update(it) }
+      .map { UpdatableEntity(request.toWebhookGroup(), true) }
+      .flatMap { repository.update(it, id) }
   }
 
   @ServiceActivator(inputChannel = ADMIN_ACCESS_GROUP_DELETED_CHANNEL_NAME)

@@ -73,10 +73,10 @@ class WebhookGroupRepository(
   }
 
   @VerifyWebhookGroupCanBeUpdated
-  fun update(updatableEntity: UpdatableEntity<WebhookGroup>): Mono<WebhookGroup> {
+  fun update(updatableEntity: UpdatableEntity<WebhookGroup>, id: String): Mono<WebhookGroup> {
     return mongoTemplate
       .update(WebhookGroup::class.java)
-      .matching(query(byId(updatableEntity.entity.id)))
+      .matching(query(byId(id)))
       .replaceWith(updatableEntity.entity)
       .withOptions(FindAndReplaceOptions.options().returnNew())
       .findAndReplace()
