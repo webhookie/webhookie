@@ -74,7 +74,7 @@ class SecurityConfig(
         authorize(pathMatchers("$REQUEST_MAPPING_ADMIN/**"), hasAuthority(ROLE_ADMIN))
         authorize(pathMatchers("$REQUEST_MAPPING_APPLICATIONS/**"), hasAuthority(ROLE_CONSUMER))
         authorize(pathMatchers("$REQUEST_MAPPING_SUBSCRIPTIONS/**"), hasAuthority(ROLE_CONSUMER))
-        authorize(pathMatchers(HttpMethod.GET,"${REQUEST_MAPPING_WEBHOOK_GROUPS}/**"), permitAll)
+        authorize(pathMatchers(HttpMethod.GET,"$REQUEST_MAPPING_WEBHOOK_GROUPS/**"), permitAll)
 
         authorize()
       }
