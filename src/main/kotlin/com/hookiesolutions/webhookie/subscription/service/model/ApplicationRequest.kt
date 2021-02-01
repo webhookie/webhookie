@@ -1,6 +1,7 @@
 package com.hookiesolutions.webhookie.subscription.service.model
 
 import javax.validation.constraints.NotBlank
+import javax.validation.constraints.NotEmpty
 
 /**
  *
@@ -10,5 +11,7 @@ import javax.validation.constraints.NotBlank
 data class ApplicationRequest(
   @field:NotBlank
   val name: String,
+  val description: String? = null,
+  @field:NotEmpty
   val consumerGroups: Set<String>
 )

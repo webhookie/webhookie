@@ -19,6 +19,7 @@ import org.springframework.data.mongodb.core.query.Criteria.where
 data class Application(
   @Indexed(unique = true)
   val name: String,
+  val description: String? = null,
   @Indexed
   val entity: String,
   val consumerIAMGroups: Set<String>

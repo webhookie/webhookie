@@ -1,11 +1,12 @@
 package com.hookiesolutions.webhookie.admin.service
 
 import com.hookiesolutions.webhookie.admin.domain.AccessGroup
+import com.hookiesolutions.webhookie.admin.domain.AccessGroup.Queries.Companion.iamGroupNameIn
 import com.hookiesolutions.webhookie.admin.domain.ConsumerGroup
 import com.hookiesolutions.webhookie.admin.domain.ProviderGroup
 import org.slf4j.Logger
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
-import org.springframework.data.mongodb.core.query.Query
+import org.springframework.data.mongodb.core.query.Query.query
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
@@ -29,7 +30,7 @@ class AccessGroupVerifier(
   }
 
   private fun verifyGroups(groups: Set<String>, clazz: Class<out AccessGroup>): Mono<Set<String>> {
-    return mongoTemplate.find(Query.query(AccessGroup.Queries.iamGroupNameIn(groups)), clazz)
+    return mongoTemplate.find(query(iamGroupNameIn(groups)), clazz)
       .map { it.iamGroupName }
       .collectList()
       .map { it.toSet() }
@@ -43,5 +44,13 @@ class AccessGroupVerifier(
           Mono.error(IllegalArgumentException(error))
         }
       }
+  }
+
+  fun consumerGroupsIntersect(groups: Set<String>): Mono<Set<String>> {
+    return mongoTemplate.findAll(ConsumerGroup::class.java)
+      .map { it.iamGroupName }
+      .collectList()
+      .map { groups.intersect(it) }
+      .map { it.toSet() }
   }
 }

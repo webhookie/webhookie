@@ -47,9 +47,10 @@ class ConversionsFactory(
 
   fun createApplicationRequestToApplication(
     request: ApplicationRequest,
-    entity: String
-  ): Application {
-    return Application(request.name, entity, request.consumerGroups)
+    entity: String,
+    validConsumerGroups: Set<String>,
+    ): Application {
+    return Application(request.name, request.description, entity, validConsumerGroups)
   }
 
   fun blockedSubscriptionMessageToSubscriptionMessage(

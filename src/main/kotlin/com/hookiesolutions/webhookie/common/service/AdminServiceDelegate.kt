@@ -1,8 +1,11 @@
 package com.hookiesolutions.webhookie.common.service
 
 import com.hookiesolutions.webhookie.admin.service.AccessGroupVerifier
+import com.hookiesolutions.webhookie.security.service.SecurityHandler
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.switchIfEmpty
+import reactor.kotlin.core.publisher.toMono
 
 /**
  *
@@ -11,7 +14,8 @@ import reactor.core.publisher.Mono
  */
 @Service
 class AdminServiceDelegate(
-  private val accessGroupVerifier: AccessGroupVerifier
+  private val accessGroupVerifier: AccessGroupVerifier,
+  private val securityHandler: SecurityHandler
 ) {
   fun verifyGroups(
     consumerGroups: Set<String>,
@@ -22,8 +26,11 @@ class AdminServiceDelegate(
       .thenReturn(true)
   }
 
-  fun verifyConsumerGroups(groups: Set<String>): Mono<Boolean> {
-    return accessGroupVerifier.verifyConsumerGroups(groups)
-      .thenReturn(true)
+  fun extractMyValidConsumerGroups(groups: Set<String>): Mono<Set<String>> {
+    return accessGroupVerifier.consumerGroupsIntersect(groups)
+      .zipWhen { securityHandler.groups() }
+      .map { it.t1.intersect(it.t2) }
+      .filter { it.isNotEmpty() }
+      .switchIfEmpty { IllegalArgumentException("At least one valid ConsumerGroup is required").toMono() }
   }
 }

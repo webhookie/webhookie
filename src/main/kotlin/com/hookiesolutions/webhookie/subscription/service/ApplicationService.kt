@@ -29,9 +29,9 @@ class ApplicationService(
 ) {
   @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")
   fun createApplication(body: ApplicationRequest): Mono<Application> {
-    return adminServiceDelegate.verifyConsumerGroups(body.consumerGroups)
-      .flatMap { securityHandler.entity() }
-      .map { factory.createApplicationRequestToApplication(body, it) }
+    return adminServiceDelegate.extractMyValidConsumerGroups(body.consumerGroups)
+      .zipWith(securityHandler.entity())
+      .map { factory.createApplicationRequestToApplication(body, it.t2, it.t1) }
       .flatMap { repository.save(it) }
       .doOnNext { log.info("Application '{}' was created successfully", it.name) }
   }
@@ -59,9 +59,9 @@ class ApplicationService(
 
   @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")
   fun updateApplication(id: String, request: ApplicationRequest): Mono<Application> {
-    return repository.findByIdVerifyingWriteAccess(id)
-      .zipWhen { adminServiceDelegate.verifyConsumerGroups(request.consumerGroups) }
-      .map { it.t1.copy(name = request.name, consumerIAMGroups = request.consumerGroups) }
+    return adminServiceDelegate.extractMyValidConsumerGroups(request.consumerGroups)
+      .zipWhen { repository.findByIdVerifyingWriteAccess(id) }
+      .map { it.t2.copy(name = request.name, description = request.description, consumerIAMGroups = it.t1) }
       .map { UpdatableEntity(it, true) }
       .flatMap { repository.update(it, id) }
   }
