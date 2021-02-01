@@ -1,7 +1,7 @@
 package com.hookiesolutions.webhookie.subscription.domain
 
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
-import com.hookiesolutions.webhookie.common.model.dto.Callback
+import com.hookiesolutions.webhookie.subscription.domain.Application.Keys.Companion.KEY_CONSUMER_IAM_GROUPS
 import com.hookiesolutions.webhookie.subscription.domain.Application.Keys.Companion.KEY_ENTITY
 import org.springframework.data.annotation.TypeAlias
 import org.springframework.data.mongodb.core.index.Indexed
@@ -21,10 +21,14 @@ data class Application(
   val name: String,
   @Indexed
   val entity: String,
-  val callback: Callback
+  val consumerIAMGroups: Set<String>
 ): AbstractEntity() {
   class Queries {
     companion object {
+      fun applicationConsumerGroupsIn(groups: Collection<String>): Criteria {
+        return where(KEY_CONSUMER_IAM_GROUPS).`in`(groups)
+      }
+
       fun applicationsByEntity(entity: String): Criteria {
         return where(KEY_ENTITY).`is`(entity)
       }
@@ -34,6 +38,7 @@ data class Application(
   class Keys {
     companion object {
       const val KEY_ENTITY = "entity"
+      const val KEY_CONSUMER_IAM_GROUPS = "consumerIAMGroups"
     }
   }
 }

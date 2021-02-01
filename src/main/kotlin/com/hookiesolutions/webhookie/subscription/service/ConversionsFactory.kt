@@ -14,7 +14,7 @@ import com.hookiesolutions.webhookie.common.service.IdGenerator
 import com.hookiesolutions.webhookie.subscription.domain.Application
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
-import com.hookiesolutions.webhookie.subscription.service.model.CreateApplicationRequest
+import com.hookiesolutions.webhookie.subscription.service.model.ApplicationRequest
 import com.hookiesolutions.webhookie.subscription.service.model.CreateSubscriptionRequest
 import org.springframework.stereotype.Service
 import java.time.Instant
@@ -46,11 +46,10 @@ class ConversionsFactory(
   }
 
   fun createApplicationRequestToApplication(
-    request: CreateApplicationRequest,
+    request: ApplicationRequest,
     entity: String
   ): Application {
-    val callback = Callback(request.callbackUrl, request.httpMethod, request.callbackSecurity)
-    return Application(request.name, entity, callback)
+    return Application(request.name, entity, request.consumerGroups)
   }
 
   fun blockedSubscriptionMessageToSubscriptionMessage(

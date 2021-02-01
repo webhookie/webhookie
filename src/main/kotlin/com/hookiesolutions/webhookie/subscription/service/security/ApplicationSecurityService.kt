@@ -16,14 +16,13 @@ import java.util.function.Supplier
  */
 @Component
 class ApplicationSecurityService(
-  private val securityHandler: SecurityHandler
+  private val securityHandler: SecurityHandler,
+  private val applicationAccessVoter: ApplicationAccessVoter
 ) {
   fun verifyReadAccess(applicationSupplier: Supplier<Mono<Application>>): Mono<Application> {
-    return applicationSupplier.get()
-      .zipWith(securityHandler.entity())
-      .filter { it.t1.entity == it.t2 }
+    return Mono.zip(applicationSupplier.get(), securityHandler.entity(), securityHandler.groups())
+      .filter { applicationAccessVoter.vote(it.t1, it.t2, it.t3) }
       .map { it.t1 }
       .switchIfEmpty { AccessDeniedException("Access Denied!").toMono() }
   }
-
 }

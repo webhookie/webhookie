@@ -2,6 +2,7 @@ package com.hookiesolutions.webhookie.subscription.domain
 
 import com.hookiesolutions.webhookie.common.exception.EntityExistsException
 import com.hookiesolutions.webhookie.common.exception.EntityNotFoundException
+import com.hookiesolutions.webhookie.subscription.domain.Application.Queries.Companion.applicationConsumerGroupsIn
 import com.hookiesolutions.webhookie.subscription.domain.Application.Queries.Companion.applicationsByEntity
 import com.hookiesolutions.webhookie.subscription.service.security.annotation.VerifyApplicationReadAccess
 import org.springframework.dao.DuplicateKeyException
@@ -35,10 +36,12 @@ class ApplicationRepository(
       }
   }
 
-  fun userApplications(entity: String): Flux<Application> {
+  fun userApplications(entity: String, userGroups: Collection<String>): Flux<Application> {
+    val criteria = applicationsByEntity(entity)
+      .andOperator(applicationConsumerGroupsIn(userGroups))
     return mongoTemplate
       .find(
-        query(applicationsByEntity(entity)),
+        query(criteria),
         Application::class.java
       )
   }
