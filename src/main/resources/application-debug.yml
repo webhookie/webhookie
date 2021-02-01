@@ -5,4 +5,4 @@ logging:
     org.springframework.security: DEBUG
     org.springframework.integration: DEBUG
     org.springframework.data.mongodb: DEBUG
-    com.hookiesolutions.webhookie.webhook.service.security: DEBUG
+    com.hookiesolutions.webhookie: DEBUG
