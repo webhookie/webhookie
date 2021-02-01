@@ -2,6 +2,7 @@ package com.hookiesolutions.webhookie.subscription.service
 
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_CONSUMER
 import com.hookiesolutions.webhookie.common.model.DeletableEntity
+import com.hookiesolutions.webhookie.common.model.UpdatableEntity
 import com.hookiesolutions.webhookie.common.service.AdminServiceDelegate
 import com.hookiesolutions.webhookie.security.service.SecurityHandler
 import com.hookiesolutions.webhookie.subscription.domain.Application
@@ -54,5 +55,14 @@ class ApplicationService(
     return repository.findByIdVerifyingWriteAccess(id)
       .map { DeletableEntity(it, true) }
       .flatMap { repository.delete(it) }
+  }
+
+  @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")
+  fun updateApplication(id: String, request: ApplicationRequest): Mono<Application> {
+    return repository.findByIdVerifyingWriteAccess(id)
+      .zipWhen { adminServiceDelegate.verifyConsumerGroups(request.consumerGroups) }
+      .map { it.t1.copy(name = request.name, consumerIAMGroups = request.consumerGroups) }
+      .map { UpdatableEntity(it, true) }
+      .flatMap { repository.update(it, id) }
   }
 }

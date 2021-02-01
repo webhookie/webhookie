@@ -2,12 +2,15 @@ package com.hookiesolutions.webhookie.subscription.domain
 
 import com.hookiesolutions.webhookie.common.exception.EntityExistsException
 import com.hookiesolutions.webhookie.common.exception.EntityNotFoundException
+import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.byId
 import com.hookiesolutions.webhookie.common.model.DeletableEntity
+import com.hookiesolutions.webhookie.common.model.UpdatableEntity
 import com.hookiesolutions.webhookie.subscription.domain.Application.Queries.Companion.applicationConsumerGroupsIn
 import com.hookiesolutions.webhookie.subscription.domain.Application.Queries.Companion.applicationsByEntity
 import com.hookiesolutions.webhookie.subscription.service.security.annotation.VerifyApplicationReadAccess
 import com.hookiesolutions.webhookie.subscription.service.security.annotation.VerifyApplicationWriteAccess
 import org.springframework.dao.DuplicateKeyException
+import org.springframework.data.mongodb.core.FindAndReplaceOptions
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.query.Query.query
 import org.springframework.stereotype.Repository
@@ -61,6 +64,19 @@ class ApplicationRepository(
   fun delete(deletableEntity: DeletableEntity<Application>): Mono<String> {
     return mongoTemplate.remove(deletableEntity.entity)
       .map { deletableEntity.entity.id!! }
+  }
+
+  fun update(updatableEntity: UpdatableEntity<Application>, id: String): Mono<Application> {
+    return mongoTemplate
+      .update(Application::class.java)
+      .matching(query(byId(id)))
+      .replaceWith(updatableEntity.entity)
+      .withOptions(FindAndReplaceOptions.options().returnNew())
+      .findAndReplace()
+      .onErrorMap(DuplicateKeyException::class.java) {
+        val key = updatableEntity.entity.name
+        EntityExistsException(key, "Duplicate WebhookGroup topics provided: $key")
+      }
   }
 
   private fun fetchById(id: String): Mono<Application> {
