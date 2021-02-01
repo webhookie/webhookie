@@ -9,4 +9,8 @@ data class EntityUpdatedMessage<T>(
   override val type: String,
   val oldValue: T,
   val newValue: T,
-): EntityModifiedMessage
+): EntityModifiedMessage {
+  fun hasChanges(): Boolean {
+    return oldValue != newValue
+  }
+}

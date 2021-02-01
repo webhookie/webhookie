@@ -22,7 +22,9 @@ class EntityEventPublisher(
   }
 
   fun <T> publishUpdateEvent(payload: EntityUpdatedMessage<T>) {
-    val message = MessageBuilder.withPayload(payload).build()
-    groupHasBeenUpdatedChannel.send(message)
+    if(payload.hasChanges()) {
+      val message = MessageBuilder.withPayload(payload).build()
+      groupHasBeenUpdatedChannel.send(message)
+    }
   }
 }
