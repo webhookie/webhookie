@@ -159,9 +159,9 @@ class SubscriptionConfig(
 
   @Bean
   fun toSignableSubscriptionMessageReloadingSubscription(): GenericTransformer<BlockedSubscriptionMessage, Mono<SignableSubscriptionMessage>> {
-    return GenericTransformer {
+    return GenericTransformer { bsm ->
       subscriptionService
-        .enrichBlockedSubscriptionMessageReloadingSubscription(it)
+        .enrichBlockedSubscriptionMessageReloadingSubscription(bsm)
         .map { factory.blockedSubscriptionMessageToSubscriptionMessage(it) }
     }
   }
@@ -185,13 +185,13 @@ class SubscriptionConfig(
   fun toBeSignedWorkingSubscription(
     subscriptionIsWorking: (GenericSubscriptionMessage) -> Boolean
   ): (GenericSubscriptionMessage) -> Boolean {
-    return { subscriptionIsWorking.invoke(it) && (it as SignableSubscriptionMessage).subscription.callback.security != null }
+    return { subscriptionIsWorking.invoke(it) && (it is SignableSubscriptionMessage) && it.isSignable }
   }
 
   @Bean
   fun nonSignableWorkingSubscription(
     subscriptionIsWorking: (GenericSubscriptionMessage) -> Boolean
   ): (GenericSubscriptionMessage) -> Boolean {
-    return { subscriptionIsWorking.invoke(it) && (it as SignableSubscriptionMessage).subscription.callback.security == null }
+    return { subscriptionIsWorking.invoke(it) && (it is SignableSubscriptionMessage) && !it.isSignable }
   }
 }
