@@ -1,6 +1,10 @@
 package com.hookiesolutions.webhookie.subscription.service
 
+import com.hookiesolutions.webhookie.common.Constants.Channels.Admin.Companion.ADMIN_CONSUMER_GROUP_DELETED_CHANNEL_NAME
+import com.hookiesolutions.webhookie.common.Constants.Channels.Admin.Companion.ADMIN_CONSUMER_GROUP_UPDATED_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_CONSUMER
+import com.hookiesolutions.webhookie.common.message.entity.EntityDeletedMessage
+import com.hookiesolutions.webhookie.common.message.entity.EntityUpdatedMessage
 import com.hookiesolutions.webhookie.common.model.DeletableEntity
 import com.hookiesolutions.webhookie.common.model.UpdatableEntity
 import com.hookiesolutions.webhookie.common.service.AdminServiceDelegate
@@ -9,6 +13,7 @@ import com.hookiesolutions.webhookie.subscription.domain.Application
 import com.hookiesolutions.webhookie.subscription.domain.ApplicationRepository
 import com.hookiesolutions.webhookie.subscription.service.model.ApplicationRequest
 import org.slf4j.Logger
+import org.springframework.integration.annotation.ServiceActivator
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
@@ -64,5 +69,21 @@ class ApplicationService(
       .map { it.t2.copy(name = request.name, description = request.description, consumerIAMGroups = it.t1) }
       .map { UpdatableEntity(it, true) }
       .flatMap { repository.update(it, id) }
+  }
+
+  @ServiceActivator(inputChannel = ADMIN_CONSUMER_GROUP_DELETED_CHANNEL_NAME)
+  fun removeAccessGroup(message: EntityDeletedMessage<String>) {
+    repository.removeConsumerGroup(message.value)
+      .subscribe {
+        log.info("All '{}' ConsumerGroups removed", message.value)
+      }
+  }
+
+  @ServiceActivator(inputChannel = ADMIN_CONSUMER_GROUP_UPDATED_CHANNEL_NAME)
+  fun updateAccessGroup(message: EntityUpdatedMessage<String>) {
+    repository.updateConsumerGroup(message.oldValue, message.newValue)
+      .subscribe {
+        log.info("All '{}' ConsumerGroups updated to '{}'", message.oldValue, message.newValue)
+      }
   }
 }

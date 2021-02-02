@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Criteria.where
+import org.springframework.data.mongodb.core.query.Update
 
 /**
  *
@@ -30,8 +31,26 @@ data class Application(
         return where(KEY_CONSUMER_IAM_GROUPS).`in`(groups)
       }
 
+      fun applicationConsumerGroupsIs(value: String): Criteria {
+        return where(KEY_CONSUMER_IAM_GROUPS).`is`(value)
+      }
+
       fun applicationsByEntity(entity: String): Criteria {
         return where(KEY_ENTITY).`is`(entity)
+      }
+    }
+  }
+
+  class Updates {
+    companion object {
+      fun pullConsumerGroup(value: String): Update {
+        return Update()
+          .pull(KEY_CONSUMER_IAM_GROUPS, value)
+      }
+
+      fun setConsumerGroup(value: String): Update {
+        return Update()
+          .set("$KEY_CONSUMER_IAM_GROUPS.$", value)
       }
     }
   }

@@ -8,9 +8,13 @@ import com.hookiesolutions.webhookie.common.model.UpdatableEntity
 import com.hookiesolutions.webhookie.common.service.security.annotation.VerifyEntityCanBeDeleted
 import com.hookiesolutions.webhookie.common.service.security.annotation.VerifyEntityCanBeUpdated
 import com.hookiesolutions.webhookie.subscription.domain.Application.Queries.Companion.applicationConsumerGroupsIn
+import com.hookiesolutions.webhookie.subscription.domain.Application.Queries.Companion.applicationConsumerGroupsIs
 import com.hookiesolutions.webhookie.subscription.domain.Application.Queries.Companion.applicationsByEntity
+import com.hookiesolutions.webhookie.subscription.domain.Application.Updates.Companion.pullConsumerGroup
+import com.hookiesolutions.webhookie.subscription.domain.Application.Updates.Companion.setConsumerGroup
 import com.hookiesolutions.webhookie.subscription.service.security.annotation.VerifyApplicationReadAccess
 import com.hookiesolutions.webhookie.subscription.service.security.annotation.VerifyApplicationWriteAccess
+import com.mongodb.client.result.UpdateResult
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.data.mongodb.core.FindAndReplaceOptions
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
@@ -86,5 +90,23 @@ class ApplicationRepository(
   private fun fetchById(id: String): Mono<Application> {
     return mongoTemplate.findById(id, Application::class.java)
       .switchIfEmpty(EntityNotFoundException("Application '$id' cannot be found").toMono())
+  }
+
+  fun removeConsumerGroup(value: String): Mono<UpdateResult> {
+    return mongoTemplate
+      .updateMulti(
+        query(applicationConsumerGroupsIs(value)),
+        pullConsumerGroup(value),
+        Application::class.java
+      )
+  }
+
+  fun updateConsumerGroup(oldValue: String, newValue: String): Mono<UpdateResult> {
+    return mongoTemplate
+      .updateMulti(
+        query(applicationConsumerGroupsIs(oldValue)),
+        setConsumerGroup(newValue),
+        Application::class.java
+      )
   }
 }
