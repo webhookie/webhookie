@@ -3,7 +3,7 @@ package com.hookiesolutions.webhookie.subscription.domain
 import com.hookiesolutions.webhookie.common.model.AbstractDocument.Keys.Companion.KEY_VERSION
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
 import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
-import com.hookiesolutions.webhookie.common.model.dto.Callback
+import com.hookiesolutions.webhookie.common.model.dto.CallbackDTO
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_BLOCK_DETAILS
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_ENTITY
@@ -28,7 +28,7 @@ data class Subscription(
   val applicationId: String,
   @Indexed
   val topic: String,
-  val callback: Callback,
+  val callback: CallbackDTO,
   val blockedDetails: BlockedDetailsDTO? = null
 ) : AbstractEntity() {
   fun dto(): SubscriptionDTO {

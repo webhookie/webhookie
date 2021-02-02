@@ -11,7 +11,7 @@ data class SubscriptionDTO(
   val entity: String,
   val applicationId: String,
   val topic: String,
-  val callback: Callback,
+  val callback: CallbackDTO,
   val blockedDetails: BlockedDetailsDTO? = null
 ) {
   val isBlocked: Boolean
