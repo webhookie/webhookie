@@ -17,5 +17,5 @@ interface SignableSubscriptionMessage: GenericSubscriptionMessage {
   ): SignableSubscriptionMessage
 
   val isSignable: Boolean
-    get() = subscription.callback.security != null
+    get() = subscription.callback.isSignable
 }

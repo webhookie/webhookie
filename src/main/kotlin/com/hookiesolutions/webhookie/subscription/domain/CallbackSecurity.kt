@@ -1,7 +1,6 @@
 package com.hookiesolutions.webhookie.subscription.domain
 
 import com.bol.secure.Encrypted
-import com.hookiesolutions.webhookie.common.model.dto.CallbackSecurityDTO
 
 /**
  *
@@ -12,11 +11,7 @@ data class CallbackSecurity(
   val method: String = "HMAC",
   @Encrypted
   val secret: Secret
-) {
-  fun dto(): CallbackSecurityDTO {
-    return CallbackSecurityDTO(keyId = secret.keyId)
-  }
-}
+)
 
 data class Secret(
   val keyId: String,
