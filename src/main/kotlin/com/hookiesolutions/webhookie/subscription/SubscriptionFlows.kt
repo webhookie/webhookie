@@ -191,8 +191,8 @@ class SubscriptionFlows(
           transform(toSignableSubscriptionMessageReloadingSubscription)
           split()
           routeToRecipients {
-            recipient<SignableSubscriptionMessage>(subscriptionChannel) { it.subscription.callback.security == null }
-            recipient<SignableSubscriptionMessage>(signSubscriptionMessageChannel) { it.subscription.callback.security != null }
+            recipient<SignableSubscriptionMessage>(subscriptionChannel) { !it.isSignable }
+            recipient<SignableSubscriptionMessage>(signSubscriptionMessageChannel) { it.isSignable }
           }
         }
         recipientFlow {
