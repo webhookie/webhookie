@@ -16,12 +16,22 @@ import java.util.concurrent.Executors
 @EnablePublisher
 class AdminChannelsConfig {
   @Bean
-  fun groupHasBeenDeletedChannel(): MessageChannel = MessageChannels
+  fun consumerGroupHasBeenDeletedChannel(): MessageChannel = MessageChannels
     .publishSubscribe(Executors.newCachedThreadPool())
     .get()
 
   @Bean
-  fun groupHasBeenUpdatedChannel(): MessageChannel = MessageChannels
+  fun consumerGroupHasBeenUpdatedChannel(): MessageChannel = MessageChannels
+    .publishSubscribe(Executors.newCachedThreadPool())
+    .get()
+
+  @Bean
+  fun providerGroupHasBeenDeletedChannel(): MessageChannel = MessageChannels
+    .publishSubscribe(Executors.newCachedThreadPool())
+    .get()
+
+  @Bean
+  fun providerGroupHasBeenUpdatedChannel(): MessageChannel = MessageChannels
     .publishSubscribe(Executors.newCachedThreadPool())
     .get()
 }

@@ -53,8 +53,10 @@ class Constants {
 
     class Admin {
       companion object {
-        const val ADMIN_ACCESS_GROUP_DELETED_CHANNEL_NAME = "groupHasBeenDeletedChannel"
-        const val ADMIN_ACCESS_GROUP_UPDATED_CHANNEL_NAME = "groupHasBeenUpdatedChannel"
+        const val ADMIN_CONSUMER_GROUP_DELETED_CHANNEL_NAME = "consumerGroupHasBeenDeletedChannel"
+        const val ADMIN_CONSUMER_GROUP_UPDATED_CHANNEL_NAME = "consumerGroupHasBeenUpdatedChannel"
+        const val ADMIN_PROVIDER_GROUP_DELETED_CHANNEL_NAME = "providerGroupHasBeenDeletedChannel"
+        const val ADMIN_PROVIDER_GROUP_UPDATED_CHANNEL_NAME = "providerGroupHasBeenUpdatedChannel"
       }
     }
   }

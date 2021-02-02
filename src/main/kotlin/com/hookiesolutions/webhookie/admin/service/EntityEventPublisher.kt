@@ -1,5 +1,6 @@
 package com.hookiesolutions.webhookie.admin.service
 
+import com.hookiesolutions.webhookie.admin.domain.ConsumerGroup
 import com.hookiesolutions.webhookie.common.message.entity.EntityDeletedMessage
 import com.hookiesolutions.webhookie.common.message.entity.EntityUpdatedMessage
 import org.springframework.messaging.MessageChannel
@@ -13,18 +14,28 @@ import org.springframework.stereotype.Service
  */
 @Service
 class EntityEventPublisher(
-  private val groupHasBeenDeletedChannel: MessageChannel,
-  private val groupHasBeenUpdatedChannel: MessageChannel
+  private val consumerGroupHasBeenDeletedChannel: MessageChannel,
+  private val consumerGroupHasBeenUpdatedChannel: MessageChannel,
+  private val providerGroupHasBeenDeletedChannel: MessageChannel,
+  private val providerGroupHasBeenUpdatedChannel: MessageChannel
 ) {
-  fun <T> publishDeleteEvent(payload: EntityDeletedMessage<T>) {
+  fun <P,T> publishDeleteEvent(payload: EntityDeletedMessage<P>, deletedEntity: T) {
     val message = MessageBuilder.withPayload(payload).build()
-    groupHasBeenDeletedChannel.send(message)
+    if(deletedEntity is ConsumerGroup) {
+      consumerGroupHasBeenDeletedChannel.send(message)
+    } else {
+      providerGroupHasBeenDeletedChannel.send(message)
+    }
   }
 
-  fun <T> publishUpdateEvent(payload: EntityUpdatedMessage<T>) {
+  fun <P,T> publishUpdateEvent(payload: EntityUpdatedMessage<P>, updatedEntity: T) {
     if(payload.hasChanges()) {
       val message = MessageBuilder.withPayload(payload).build()
-      groupHasBeenUpdatedChannel.send(message)
+      if(updatedEntity is ConsumerGroup) {
+        consumerGroupHasBeenUpdatedChannel.send(message)
+      } else {
+        providerGroupHasBeenUpdatedChannel.send(message)
+      }
     }
   }
 }

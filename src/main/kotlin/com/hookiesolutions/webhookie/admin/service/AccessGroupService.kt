@@ -12,6 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
+import reactor.util.function.Tuples
 
 /**
  *
@@ -55,10 +56,9 @@ abstract class AccessGroupService<T : AccessGroup>(
     log.info("Deleting '{}' Access Group by id: '{}'", clazz.simpleName, id)
     return repository.findById(id)
       .zipWhen { repository.delete(it) }
-      .map { EntityDeletedMessage(clazz.simpleName, it.t1) }
       .doOnNext { log.info("{} with id '{}' was deleted successfully", clazz.simpleName, id) }
-      .map { EntityDeletedMessage(it.type, it.value.iamGroupName) }
-      .doOnNext { publisher.publishDeleteEvent(it) }
+      .map { Tuples.of(EntityDeletedMessage(clazz.simpleName, it.t1.iamGroupName), it.t1) }
+      .doOnNext { publisher.publishDeleteEvent(it.t1, it.t2) }
       .map { "Deleted" }
   }
 
@@ -69,7 +69,7 @@ abstract class AccessGroupService<T : AccessGroup>(
       .flatMap { repository.update(it, factory.createAccessGroup(body, clazz)) }
       .doOnNext {
         val message = EntityUpdatedMessage(it.type, it.oldValue.iamGroupName, it.newValue.iamGroupName)
-        publisher.publishUpdateEvent(message)
+        publisher.publishUpdateEvent(message, it.newValue)
       }
       .map { it.newValue }
   }
