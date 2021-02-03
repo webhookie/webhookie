@@ -13,9 +13,9 @@ import java.net.URL;
  * @since 17/12/20 23:59
  */
 @Component
-public class IRIValidator implements ConstraintValidator<IRI, String> {
+public class UrlValidator implements ConstraintValidator<Url, String> {
   @Override
-  public void initialize(IRI constraintAnnotation) {
+  public void initialize(Url constraintAnnotation) {
   }
 
   @Override

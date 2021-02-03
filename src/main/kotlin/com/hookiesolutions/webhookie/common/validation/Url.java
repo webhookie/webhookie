@@ -13,12 +13,12 @@ import java.lang.annotation.Target;
  * @since 17/12/20 23:44
  */
 @Documented
-@Constraint(validatedBy = { IRIValidator.class} )
+@Constraint(validatedBy = { UrlValidator.class} )
 @Target( { ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface IRI {
+public @interface Url {
   @SuppressWarnings("unused")
-  String message() default "Invalid IRI";
+  String message() default "Invalid Url";
 
   @SuppressWarnings("unused")
   Class<?>[] groups() default {};

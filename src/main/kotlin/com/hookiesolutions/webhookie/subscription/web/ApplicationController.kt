@@ -47,7 +47,7 @@ class ApplicationController(
   @GetMapping(
     produces = [MediaType.APPLICATION_JSON_VALUE]
   )
-  fun allGroups(): Flux<Application> {
+  fun allApplications(): Flux<Application> {
     return service.userApplications()
   }
 
@@ -55,7 +55,7 @@ class ApplicationController(
     "/{id}",
     produces = [MediaType.APPLICATION_JSON_VALUE]
   )
-  fun getGroup(@PathVariable id: String): Mono<Application> {
+  fun getApplication(@PathVariable id: String): Mono<Application> {
     return service.applicationById(id)
   }
 
@@ -63,7 +63,7 @@ class ApplicationController(
     "/{id}",
     produces = [MediaType.TEXT_PLAIN_VALUE]
   )
-  fun deleteWebhookGroup(@PathVariable id: String): Mono<String> {
+  fun deleteApplication(@PathVariable id: String): Mono<String> {
     return service.deleteApplication(id)
   }
 
@@ -72,7 +72,7 @@ class ApplicationController(
     consumes = [MediaType.APPLICATION_JSON_VALUE],
     produces = [MediaType.APPLICATION_JSON_VALUE]
   )
-  fun updateWebhookGroup(
+  fun updateApplication(
     @PathVariable id: String,
     @RequestBody @Valid request: ApplicationRequest
   ): Mono<Application> {

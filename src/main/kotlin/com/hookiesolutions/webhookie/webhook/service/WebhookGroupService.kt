@@ -7,8 +7,8 @@ import com.hookiesolutions.webhookie.common.Constants.Channels.Admin.Companion.A
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_PROVIDER
 import com.hookiesolutions.webhookie.common.message.entity.EntityDeletedMessage
 import com.hookiesolutions.webhookie.common.message.entity.EntityUpdatedMessage
-import com.hookiesolutions.webhookie.common.model.DeletableEntity
-import com.hookiesolutions.webhookie.common.model.UpdatableEntity
+import com.hookiesolutions.webhookie.common.model.DeletableEntity.Companion.deletable
+import com.hookiesolutions.webhookie.common.model.UpdatableEntity.Companion.updatable
 import com.hookiesolutions.webhookie.common.service.AdminServiceDelegate
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.KEY_CONSUMER_IAM_GROUPS
@@ -64,7 +64,7 @@ class WebhookGroupService(
   @PreAuthorize("hasAuthority('${ROLE_PROVIDER}')")
   fun deleteWebhookGroup(id: String): Mono<String> {
     return repository.findByIdVerifyingWriteAccess(id)
-      .map { DeletableEntity(it, true) }
+      .map { deletable(it) }
       .flatMap { repository.delete(it) }
       .map { id }
   }
@@ -73,7 +73,7 @@ class WebhookGroupService(
   fun updateWebhookGroup(id: String, request: WebhookGroupRequest): Mono<WebhookGroup> {
     return repository.findByIdVerifyingWriteAccess(id)
       .flatMap { verifyRequestGroups(request) }
-      .map { UpdatableEntity(request.toWebhookGroup(), true) }
+      .map { updatable(request.toWebhookGroup()) }
       .flatMap { repository.update(it, id) }
   }
 

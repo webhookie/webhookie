@@ -5,8 +5,8 @@ import com.hookiesolutions.webhookie.common.Constants.Channels.Admin.Companion.A
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_CONSUMER
 import com.hookiesolutions.webhookie.common.message.entity.EntityDeletedMessage
 import com.hookiesolutions.webhookie.common.message.entity.EntityUpdatedMessage
-import com.hookiesolutions.webhookie.common.model.DeletableEntity
-import com.hookiesolutions.webhookie.common.model.UpdatableEntity
+import com.hookiesolutions.webhookie.common.model.DeletableEntity.Companion.deletable
+import com.hookiesolutions.webhookie.common.model.UpdatableEntity.Companion.updatable
 import com.hookiesolutions.webhookie.common.service.AdminServiceDelegate
 import com.hookiesolutions.webhookie.security.service.SecurityHandler
 import com.hookiesolutions.webhookie.subscription.domain.Application
@@ -58,7 +58,7 @@ class ApplicationService(
   @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")
   fun deleteApplication(id: String): Mono<String> {
     return repository.findByIdVerifyingWriteAccess(id)
-      .map { DeletableEntity(it, true) }
+      .map { deletable(it) }
       .flatMap { repository.delete(it) }
   }
 
@@ -67,7 +67,7 @@ class ApplicationService(
     return adminServiceDelegate.extractMyValidConsumerGroups(request.consumerGroups)
       .zipWhen { repository.findByIdVerifyingWriteAccess(id) }
       .map { it.t2.copy(name = request.name, description = request.description, consumerIAMGroups = it.t1) }
-      .map { UpdatableEntity(it, true) }
+      .map { updatable(it) }
       .flatMap { repository.update(it, id) }
   }
 
