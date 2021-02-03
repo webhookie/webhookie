@@ -26,6 +26,7 @@ class SubscriptionAPIDocs {
 
   companion object {
     const val REQUEST_MAPPING_APPLICATIONS = "/applications"
+    const val REQUEST_MAPPING_CALLBACKS = "/callbacks"
     const val REQUEST_MAPPING_SUBSCRIPTIONS = "/subscriptions"
   }
 
