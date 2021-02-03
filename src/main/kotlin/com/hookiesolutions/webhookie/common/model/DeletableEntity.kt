@@ -6,7 +6,7 @@ data class DeletableEntity<T: AbstractEntity>(
 ) {
   companion object {
     fun <T: AbstractEntity> deletable(entity: T): DeletableEntity<T> {
-      return deletable(entity)
+      return DeletableEntity(entity, true)
     }
   }
 }
