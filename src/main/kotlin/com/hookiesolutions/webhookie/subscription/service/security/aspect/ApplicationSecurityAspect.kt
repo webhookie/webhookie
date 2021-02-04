@@ -2,7 +2,6 @@ package com.hookiesolutions.webhookie.subscription.service.security.aspect
 
 import com.hookiesolutions.webhookie.subscription.domain.Application
 import com.hookiesolutions.webhookie.subscription.domain.ApplicationRepository
-import com.hookiesolutions.webhookie.subscription.domain.Callback
 import com.hookiesolutions.webhookie.subscription.service.security.ApplicationSecurityService
 import com.hookiesolutions.webhookie.subscription.service.security.annotation.ApplicationAccessType
 import com.hookiesolutions.webhookie.subscription.service.security.annotation.VerifyApplicationAccessById
@@ -94,13 +93,13 @@ class ApplicationSecurityAspect(
       applicationMono
         .flatMap {
           @Suppress("UNCHECKED_CAST")
-          pjp.proceed() as Mono<Callback>
+          pjp.proceed() as Mono<*>
         }
     } else {
       applicationMono
         .flatMapMany {
           @Suppress("UNCHECKED_CAST")
-          pjp.proceed() as Flux<Callback>
+          pjp.proceed() as Flux<*>
         }
     }
   }
