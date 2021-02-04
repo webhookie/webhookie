@@ -55,14 +55,15 @@ class ApplicationSecurityAspect(
     @Suppress("UNCHECKED_CAST")
     val mono: Mono<Application> = pjp.proceed() as Mono<Application>
 
-    return securityService.verifyReadAccess {
-      mono
-        .doOnNext {
-          if (log.isDebugEnabled) {
-            log.debug("Verifying Application '{}' Read Access...", it.name)
+    return securityService
+      .verifyReadAccess {
+        mono
+          .doOnNext {
+            if (log.isDebugEnabled) {
+              log.debug("Verifying Application '{}' Read Access...", it.name)
+            }
           }
-        }
-    }
+      }
   }
 
   @Around("annotatedVerifyApplicationReadAccessById()")
@@ -93,7 +94,7 @@ class ApplicationSecurityAspect(
 
   private fun applicationData(pjp: ProceedingJoinPoint, applicationMono: Mono<Application>): CorePublisher<Callback> {
     val returnType: Class<*> = extractMethod(pjp).returnType
-    return if(Mono::class.java.isAssignableFrom(returnType)) {
+    return if (Mono::class.java.isAssignableFrom(returnType)) {
       @Suppress("UNCHECKED_CAST")
       val mono = pjp.proceed() as Mono<Callback>
       applicationMono.flatMap { mono }
@@ -109,13 +110,14 @@ class ApplicationSecurityAspect(
     @Suppress("UNCHECKED_CAST")
     val mono: Mono<Application> = pjp.proceed() as Mono<Application>
 
-    return securityService.verifyWriteAccess {
-      mono
-        .doOnNext {
-          if (log.isDebugEnabled) {
-            log.debug("Verifying Application '{}' Write Access...", it.name)
+    return securityService
+      .verifyWriteAccess {
+        mono
+          .doOnNext {
+            if (log.isDebugEnabled) {
+              log.debug("Verifying Application '{}' Write Access...", it.name)
+            }
           }
-        }
-    }
+      }
   }
 }

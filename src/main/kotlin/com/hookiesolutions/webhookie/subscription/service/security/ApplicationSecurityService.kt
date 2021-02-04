@@ -2,6 +2,7 @@ package com.hookiesolutions.webhookie.subscription.service.security
 
 import com.hookiesolutions.webhookie.security.service.SecurityHandler
 import com.hookiesolutions.webhookie.subscription.domain.Application
+import org.slf4j.Logger
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
@@ -17,7 +18,8 @@ import java.util.function.Supplier
 @Component
 class ApplicationSecurityService(
   private val securityHandler: SecurityHandler,
-  private val applicationAccessVoter: ApplicationAccessVoter
+  private val applicationAccessVoter: ApplicationAccessVoter,
+  private val log: Logger
 ) {
   fun verifyAccess(applicationSupplier: Supplier<Mono<Application>>): Mono<Application> {
     return Mono.zip(applicationSupplier.get(), securityHandler.entity(), securityHandler.groups())
@@ -28,9 +30,15 @@ class ApplicationSecurityService(
 
   fun verifyReadAccess(applicationSupplier: Supplier<Mono<Application>>): Mono<Application> {
     return verifyAccess(applicationSupplier)
+      .doOnError {
+        log.warn("Application Read Access is Denied for the current user")
+      }
   }
 
   fun verifyWriteAccess(applicationSupplier: Supplier<Mono<Application>>): Mono<Application> {
     return verifyAccess(applicationSupplier)
+      .doOnError {
+        log.warn("Application Write Access is Denied for the current user")
+      }
   }
 }
