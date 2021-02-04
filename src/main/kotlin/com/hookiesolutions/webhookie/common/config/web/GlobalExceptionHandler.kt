@@ -59,7 +59,7 @@ class GlobalExceptionHandler {
   @ResponseStatus(HttpStatus.CONFLICT)
   fun handleEntityExistsException(ex: EntityExistsException): Mono<Any> {
     return mutableMapOf(
-      "message" to ex.localizedMessage,
+      "message" to "Duplicate Key",
       "key" to ex.key
     )
       .toMono()

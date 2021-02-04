@@ -27,7 +27,7 @@ abstract class AccessGroupRepository<T: AccessGroup>(
   fun save(group: T): Mono<T> {
     return mongoTemplate.save(group)
       .onErrorMap(DuplicateKeyException::class.java) {
-        EntityExistsException(group.iamGroupName, "Duplicate IAM Group mapping: ${group.iamGroupName}")
+        EntityExistsException(it.localizedMessage)
       }
   }
 
@@ -52,7 +52,7 @@ abstract class AccessGroupRepository<T: AccessGroup>(
       .withOptions(FindAndReplaceOptions.options().returnNew())
       .findAndReplace()
       .onErrorMap(DuplicateKeyException::class.java) {
-        EntityExistsException(newGroup.iamGroupName, "Duplicate IAM Group mapping: ${newGroup.iamGroupName}")
+        EntityExistsException(it.localizedMessage)
       }
       .map { EntityUpdatedMessage(clazz.simpleName, group, it) }
   }

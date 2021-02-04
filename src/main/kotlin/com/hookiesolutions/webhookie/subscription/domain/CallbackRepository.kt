@@ -36,8 +36,7 @@ class CallbackRepository(
     return mongoTemplate
       .save(callback)
       .onErrorMap(DuplicateKeyException::class.java) {
-        val key = callback.details.requestTarget()
-        EntityExistsException(key, "Duplicate Callback: $key")
+        EntityExistsException(it.localizedMessage)
       }
   }
 
@@ -65,8 +64,7 @@ class CallbackRepository(
       .withOptions(FindAndReplaceOptions.options().returnNew())
       .findAndReplace()
       .onErrorMap(DuplicateKeyException::class.java) {
-        val key = updatableEntity.entity.details.requestTarget()
-        EntityExistsException(key, "Duplicate WebhookGroup topics provided: $key")
+        EntityExistsException(it.localizedMessage)
       }
   }
 }

@@ -21,6 +21,11 @@ import org.springframework.data.mongodb.core.query.Criteria.where
     name = "request_target",
     def = "{'details.httpMethod' : 1, 'details.url': 1}",
     unique = true
+  ),
+  CompoundIndex(
+    name = "name_application",
+    def = "{'applicationId' : 1, 'name': 1}",
+    unique = true
   )
 )
 data class Callback(

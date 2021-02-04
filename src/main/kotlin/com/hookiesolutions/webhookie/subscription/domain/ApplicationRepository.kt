@@ -43,7 +43,7 @@ class ApplicationRepository(
     return mongoTemplate
       .save(application)
       .onErrorMap(DuplicateKeyException::class.java) {
-        EntityExistsException(application.name, "Duplicate Application: ${application.name}")
+        EntityExistsException(it.localizedMessage)
       }
   }
 
@@ -82,8 +82,7 @@ class ApplicationRepository(
       .withOptions(FindAndReplaceOptions.options().returnNew())
       .findAndReplace()
       .onErrorMap(DuplicateKeyException::class.java) {
-        val key = updatableEntity.entity.name
-        EntityExistsException(key, "Duplicate WebhookGroup topics provided: $key")
+        EntityExistsException(it.localizedMessage)
       }
   }
 

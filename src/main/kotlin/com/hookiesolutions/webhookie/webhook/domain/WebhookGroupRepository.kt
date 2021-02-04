@@ -39,8 +39,7 @@ class WebhookGroupRepository(
   fun save(group: WebhookGroup): Mono<WebhookGroup> {
     return mongoRepository.save(group)
       .onErrorMap(DuplicateKeyException::class.java) {
-        val key = group.topics.toString()
-        EntityExistsException(key, "Duplicate WebhookGroup topics provided: $key")
+        EntityExistsException(it.localizedMessage)
       }
   }
 
@@ -81,8 +80,7 @@ class WebhookGroupRepository(
       .withOptions(FindAndReplaceOptions.options().returnNew())
       .findAndReplace()
       .onErrorMap(DuplicateKeyException::class.java) {
-        val key = updatableEntity.entity.topics.toString()
-        EntityExistsException(key, "Duplicate WebhookGroup topics provided: $key")
+        EntityExistsException(it.localizedMessage)
       }
   }
 

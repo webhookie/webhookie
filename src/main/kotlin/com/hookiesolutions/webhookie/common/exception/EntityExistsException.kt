@@ -6,6 +6,8 @@ package com.hookiesolutions.webhookie.common.exception
  * @since 13/1/21 19:41
  */
 class EntityExistsException(
-  val key: String,
-  message: String
-): RuntimeException(message)
+  override val message: String
+): RuntimeException(message) {
+  val key: String
+    get() = message.substringAfter("dup key:")
+}
