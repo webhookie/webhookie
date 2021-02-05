@@ -9,17 +9,19 @@ import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Updates.Companion.blockSubscriptionUpdate
 import com.hookiesolutions.webhookie.subscription.service.SubscriptionService
 import com.hookiesolutions.webhookie.subscription.service.model.CreateSubscriptionRequest
-import com.hookiesolutions.webhookie.subscription.web.SubscriptionAPIDocs.Companion.REQUEST_MAPPING_APPLICATIONS
 import com.hookiesolutions.webhookie.subscription.web.SubscriptionAPIDocs.Companion.REQUEST_MAPPING_SUBSCRIPTIONS
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.slf4j.Logger
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.query.Query
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Mono
 import javax.validation.Valid
@@ -31,12 +33,24 @@ import javax.validation.Valid
  */
 @RestController
 @SecurityRequirement(name = OAUTH2_SCHEME)
+@RequestMapping(REQUEST_MAPPING_SUBSCRIPTIONS)
 class SubscriptionController(
   private val timeMachine: TimeMachine,
   private val mongoTemplate: ReactiveMongoTemplate,
   private val log: Logger,
   private val subscriptionService: SubscriptionService,
 ) {
+  @PostMapping(
+    "",
+    consumes = [MediaType.APPLICATION_JSON_VALUE],
+    produces = [MediaType.APPLICATION_JSON_VALUE],
+  )
+  @ResponseStatus(HttpStatus.CREATED)
+  fun createSubscription(@RequestBody @Valid request: CreateSubscriptionRequest): Mono<SubscriptionDTO> {
+    return subscriptionService.createSubscription(request)
+      .map { it.dto() }
+  }
+
   @PatchMapping(
     "$REQUEST_MAPPING_SUBSCRIPTIONS/{id}/unblock",
     produces = [MediaType.TEXT_PLAIN_VALUE]
@@ -64,16 +78,5 @@ class SubscriptionController(
         log.info("Subscription({}) was blocked because '{}'", id, details.reason)
       }
       .map { details.reason }
-  }
-
-  @PostMapping(
-    "$REQUEST_MAPPING_APPLICATIONS/{applicationId}$REQUEST_MAPPING_SUBSCRIPTIONS",
-    consumes = [MediaType.APPLICATION_JSON_VALUE],
-    produces = [MediaType.APPLICATION_JSON_VALUE],
-  )
-  fun createSubscription(@PathVariable applicationId: String, @RequestBody @Valid body: CreateSubscriptionRequest): Mono<SubscriptionDTO> {
-    log.info("Creating '{}' subscription for application: '{}'", body.topic, applicationId)
-    return subscriptionService.createSubscriptionFor(applicationId, body)
-      .map { it.dto() }
   }
 }

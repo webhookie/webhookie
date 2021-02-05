@@ -8,6 +8,7 @@ import com.hookiesolutions.webhookie.common.service.IdGenerator
 import com.hookiesolutions.webhookie.common.service.TimeMachine
 import com.hookiesolutions.webhookie.subscription.domain.ApplicationRepository
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
+import com.hookiesolutions.webhookie.subscription.domain.CallbackRepository
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.subscription.domain.SubscriptionRepository
 import com.hookiesolutions.webhookie.subscription.service.model.CreateSubscriptionRequest
@@ -30,8 +31,19 @@ class SubscriptionService(
   private val idGenerator: IdGenerator,
   private val factory: ConversionsFactory,
   private val repository: SubscriptionRepository,
+  private val callbackRepository: CallbackRepository,
   private val applicationRepository: ApplicationRepository
 ) {
+  fun createSubscription(request: CreateSubscriptionRequest): Mono<Subscription> {
+    log.info("Subscribing to '{}' using callback: '{}'", request.topic, request.callbackId)
+    return callbackRepository
+      .findById(request.callbackId)
+      .zipWhen { applicationRepository.findByIdVerifyingReadAccess(it.applicationId) }
+      .map { factory.createSubscription(it.t2, it.t1, request)}
+      .flatMap { repository.save(it) }
+      .doOnNext { log.info("Subscribed to '{}' using callback: '{}'", it.topic, it.callback.requestTarget()) }
+  }
+
   fun findSubscriptionsFor(consumerMessage: ConsumerMessage): Flux<Subscription> {
     val topic = consumerMessage.headers.topic
     val authorizedSubscribers = consumerMessage.headers.authorizedSubscribers
@@ -77,6 +89,7 @@ class SubscriptionService(
     return repository
       .unblockSubscription(id)
   }
+/*
 
   fun createSubscriptionFor(applicationId: String, body: CreateSubscriptionRequest): Mono<Subscription> {
     return applicationRepository
@@ -85,6 +98,7 @@ class SubscriptionService(
       .flatMap { repository.save(it) }
       .doOnNext { log.info("Subscription '{}' was created successfully", it.name) }
   }
+*/
 
   fun deleteBlockedMessage(bsm: BlockedSubscriptionMessage): Mono<BlockedSubscriptionMessage> {
     return repository

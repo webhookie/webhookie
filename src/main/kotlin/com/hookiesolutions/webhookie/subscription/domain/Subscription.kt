@@ -8,6 +8,8 @@ import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Compa
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_ENTITY
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_TOPIC
 import org.springframework.data.annotation.TypeAlias
+import org.springframework.data.mongodb.core.index.CompoundIndex
+import org.springframework.data.mongodb.core.index.CompoundIndexes
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.query.Criteria
@@ -21,21 +23,24 @@ import org.springframework.data.mongodb.core.query.Update
  */
 @Document(collection = "subscription")
 @TypeAlias("subscription")
+@CompoundIndexes(
+  CompoundIndex(
+    name = "subscription",
+    def = "{'callback.callbackId' : 1, 'topic': 1}",
+    unique = true
+  )
+)
 data class Subscription(
-  val name: String,
-  val entity: String,
-  val applicationId: String,
   @Indexed
   val topic: String,
+  val application: ApplicationDetails,
   val callback: CallbackDetails,
   val blockedDetails: BlockedDetailsDTO? = null
 ) : AbstractEntity() {
   fun dto(): SubscriptionDTO {
     return SubscriptionDTO(
       id!!,
-      name,
-      entity,
-      applicationId,
+      application,
       topic,
       callback.dto(),
       blockedDetails

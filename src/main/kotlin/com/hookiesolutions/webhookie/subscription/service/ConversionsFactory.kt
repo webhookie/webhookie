@@ -11,8 +11,9 @@ import com.hookiesolutions.webhookie.common.message.subscription.UnsignedSubscri
 import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
 import com.hookiesolutions.webhookie.common.service.IdGenerator
 import com.hookiesolutions.webhookie.subscription.domain.Application
+import com.hookiesolutions.webhookie.subscription.domain.ApplicationDetails
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
-import com.hookiesolutions.webhookie.subscription.domain.CallbackDetails
+import com.hookiesolutions.webhookie.subscription.domain.Callback
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.subscription.service.model.ApplicationRequest
 import com.hookiesolutions.webhookie.subscription.service.model.CreateSubscriptionRequest
@@ -28,23 +29,6 @@ import java.time.Instant
 class ConversionsFactory(
   private val idGenerator: IdGenerator
 ) {
-  fun subscriptionFromCreateSubscriptionRequest(
-    request: CreateSubscriptionRequest,
-    application: Application
-  ): Subscription {
-    return Subscription(
-      request.name,
-      application.entity,
-      application.id!!,
-      request.topic,
-      CallbackDetails(
-        request.httpMethod,
-        request.callbackUrl,
-        request.callbackSecurity
-      )
-    )
-  }
-
   fun createApplicationRequestToApplication(
     request: ApplicationRequest,
     entity: String,
@@ -144,5 +128,13 @@ class ConversionsFactory(
     copy.lastModifiedDate = message.lastModifiedDate
     copy.lastModifiedBy = message.lastModifiedBy
     return copy
+  }
+
+  fun createSubscription(application: Application, callback: Callback, request: CreateSubscriptionRequest): Subscription {
+    return Subscription(
+      request.topic,
+      ApplicationDetails(callback.applicationId, application.entity),
+      callback.details()
+    )
   }
 }

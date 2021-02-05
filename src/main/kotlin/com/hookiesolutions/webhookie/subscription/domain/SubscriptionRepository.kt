@@ -1,5 +1,6 @@
 package com.hookiesolutions.webhookie.subscription.domain
 
+import com.hookiesolutions.webhookie.common.exception.EntityExistsException
 import com.hookiesolutions.webhookie.common.exception.EntityNotFoundException
 import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.byId
 import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
@@ -10,6 +11,7 @@ import com.hookiesolutions.webhookie.subscription.domain.Subscription.Updates.Co
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Updates.Companion.unblockSubscriptionUpdate
 import com.mongodb.client.result.DeleteResult
 import com.mongodb.client.result.UpdateResult
+import org.springframework.dao.DuplicateKeyException
 import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.query.Query.query
@@ -69,7 +71,11 @@ class SubscriptionRepository(
   }
 
   fun save(subscription: Subscription): Mono<Subscription> {
-    return mongoTemplate.save(subscription)
+    return mongoTemplate
+      .save(subscription)
+      .onErrorMap(DuplicateKeyException::class.java) {
+        EntityExistsException(it.localizedMessage)
+      }
   }
 
   fun findSubscriptionById(id: String): Mono<Subscription> {

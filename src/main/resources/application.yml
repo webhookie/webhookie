@@ -50,6 +50,8 @@ spring:
           issuer-uri: ${WH_IAM_ISSUER_URI}
           jwk-set-uri: ${WH_IAM_JWK_SET_URI}
           jws-algorithm: ${WH_IAM_JWS_ALG}
+  jackson:
+    default-property-inclusion: non_null
 management:
   endpoints:
     web:

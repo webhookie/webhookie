@@ -1,8 +1,5 @@
 package com.hookiesolutions.webhookie.subscription.service.model
 
-import com.hookiesolutions.webhookie.common.validation.Url
-import com.hookiesolutions.webhookie.subscription.domain.CallbackSecurity
-import org.springframework.http.HttpMethod
 import javax.validation.constraints.NotBlank
 
 /**
@@ -12,11 +9,7 @@ import javax.validation.constraints.NotBlank
  */
 data class CreateSubscriptionRequest(
   @field:NotBlank
-  val name: String,
-  @field:NotBlank
   val topic: String,
-  @field:Url(message = "Invalid callbackUrl!")
-  val callbackUrl: String,
-  val httpMethod: HttpMethod,
-  val callbackSecurity: CallbackSecurity?
+  @field:NotBlank
+  val callbackId: String
 )
