@@ -1,5 +1,6 @@
 package com.hookiesolutions.webhookie.subscription.service.model
 
+import com.hookiesolutions.webhookie.common.validation.ObjectId
 import javax.validation.constraints.NotBlank
 
 /**
@@ -11,5 +12,6 @@ data class CreateSubscriptionRequest(
   @field:NotBlank
   val topic: String,
   @field:NotBlank
+  @field:ObjectId
   val callbackId: String
 )
