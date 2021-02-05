@@ -33,12 +33,6 @@ import reactor.kotlin.core.publisher.toMono
 class ApplicationRepository(
   private val mongoTemplate: ReactiveMongoTemplate,
 ) {
-  fun findApplicationById(id: String): Mono<Application> {
-    return mongoTemplate
-      .findById(id, Application::class.java)
-      .switchIfEmpty(EntityNotFoundException("Application not found by id: '$id'").toMono())
-  }
-
   fun save(application: Application): Mono<Application> {
     return mongoTemplate
       .save(application)
