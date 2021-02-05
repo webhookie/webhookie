@@ -1,13 +1,16 @@
 package com.hookiesolutions.webhookie.subscription.domain
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
 import com.hookiesolutions.webhookie.subscription.domain.Callback.Keys.Companion.KEY_APPLICATION_ID
+import org.springframework.data.annotation.Transient
 import org.springframework.data.annotation.TypeAlias
 import org.springframework.data.mongodb.core.index.CompoundIndex
 import org.springframework.data.mongodb.core.index.CompoundIndexes
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Criteria.where
+import org.springframework.http.HttpMethod
 
 /**
  *
@@ -19,7 +22,7 @@ import org.springframework.data.mongodb.core.query.Criteria.where
 @CompoundIndexes(
   CompoundIndex(
     name = "request_target",
-    def = "{'details.httpMethod' : 1, 'details.url': 1}",
+    def = "{'httpMethod' : 1, 'url': 1}",
     unique = true
   ),
   CompoundIndex(
@@ -31,8 +34,16 @@ import org.springframework.data.mongodb.core.query.Criteria.where
 data class Callback(
   val name: String,
   val applicationId: String,
-  val details: CallbackDetails,
+  val httpMethod: HttpMethod,
+  val url: String,
+  val security: CallbackSecurity? = null,
 ): AbstractEntity() {
+  fun requestTarget(): String {
+    return "${httpMethod.name} $url"
+  }
+
+  fun details() = CallbackDetails(httpMethod, url, security)
+
   class Queries {
     companion object {
       fun applicationIdIs(id: String): Criteria {

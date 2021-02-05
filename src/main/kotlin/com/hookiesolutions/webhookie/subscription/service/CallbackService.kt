@@ -30,7 +30,7 @@ class CallbackService(
     log.info("adding Callback: '{}' to application: '{}'", request.requestTarget(), applicationId)
     val callback = request.callback(applicationId)
     return repository.save(callback)
-      .doOnNext { log.info("Callback '{}' was created successfully", it.details.requestTarget()) }
+      .doOnNext { log.info("Callback '{}' was created successfully", it.requestTarget()) }
   }
 
   @PreAuthorize("hasAuthority('${ROLE_CONSUMER}')")
