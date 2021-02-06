@@ -1,6 +1,5 @@
 package com.hookiesolutions.webhookie.admin.domain
 
-import com.hookiesolutions.webhookie.common.model.AbstractEntity
 import org.springframework.data.annotation.TypeAlias
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
@@ -19,4 +18,4 @@ data class ProviderGroup(
   @Indexed(unique = true)
   override val iamGroupName: String,
   override val enabled: Boolean = true
-) : AccessGroup, AbstractEntity()
+) : AccessGroup()

@@ -1,18 +1,13 @@
 package com.hookiesolutions.webhookie.admin.domain
 
 import com.hookiesolutions.webhookie.common.annotation.Open
-import com.hookiesolutions.webhookie.common.exception.EntityExistsException
-import com.hookiesolutions.webhookie.common.exception.EntityNotFoundException
 import com.hookiesolutions.webhookie.common.message.entity.EntityUpdatedMessage
-import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.byId
-import com.mongodb.client.result.DeleteResult
-import org.springframework.dao.DuplicateKeyException
-import org.springframework.data.mongodb.core.FindAndReplaceOptions
+import com.hookiesolutions.webhookie.common.model.DeletableEntity
+import com.hookiesolutions.webhookie.common.model.UpdatableEntity
+import com.hookiesolutions.webhookie.common.repository.GenericRepository
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
-import org.springframework.data.mongodb.core.query.Query.query
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import reactor.kotlin.core.publisher.toMono
 
 /**
  *
@@ -21,39 +16,19 @@ import reactor.kotlin.core.publisher.toMono
  */
 @Open
 abstract class AccessGroupRepository<T: AccessGroup>(
-  val mongoTemplate: ReactiveMongoTemplate,
-  val clazz: Class<T>
-) {
-  fun save(group: T): Mono<T> {
-    return mongoTemplate.save(group)
-      .onErrorMap(DuplicateKeyException::class.java) {
-        EntityExistsException(it.localizedMessage)
-      }
-  }
-
+  private val mongoTemplate: ReactiveMongoTemplate,
+  private val clazz: Class<T>
+): GenericRepository<T>(mongoTemplate, clazz) {
   fun findAll(): Flux<T> {
     return mongoTemplate.findAll(clazz)
   }
 
-  fun findById(id: String): Mono<T> {
-    return mongoTemplate.findById(id, clazz)
-      .switchIfEmpty(EntityNotFoundException("${clazz.simpleName} '$id' cannot be found").toMono())
-  }
-
-  fun delete(group: T): Mono<DeleteResult> {
-    return mongoTemplate.remove(group)
+  fun delete(group: T): Mono<String> {
+    return super.delete(DeletableEntity.deletable(group))
   }
 
   fun update(group: T, newGroup: T): Mono<EntityUpdatedMessage<T>> {
-    return mongoTemplate
-      .update(clazz)
-      .matching(query(byId(group.id)))
-      .replaceWith(newGroup)
-      .withOptions(FindAndReplaceOptions.options().returnNew())
-      .findAndReplace()
-      .onErrorMap(DuplicateKeyException::class.java) {
-        EntityExistsException(it.localizedMessage)
-      }
+    return super.update(UpdatableEntity.updatable(newGroup), group.id!!)
       .map { EntityUpdatedMessage(clazz.simpleName, group, it) }
   }
 }

@@ -10,5 +10,5 @@ import org.springframework.stereotype.Repository
  */
 @Repository
 class ProviderGroupRepository(
-  override val mongoTemplate: ReactiveMongoTemplate,
+  mongoTemplate: ReactiveMongoTemplate,
 ) : AccessGroupRepository<ProviderGroup>(mongoTemplate, ProviderGroup::class.java)

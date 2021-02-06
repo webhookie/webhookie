@@ -66,7 +66,6 @@ class WebhookGroupService(
     return repository.findByIdVerifyingWriteAccess(id)
       .map { deletable(it) }
       .flatMap { repository.delete(it) }
-      .map { id }
   }
 
   @PreAuthorize("hasAuthority('${ROLE_PROVIDER}')")

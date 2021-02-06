@@ -1,9 +1,9 @@
 package com.hookiesolutions.webhookie.subscription.domain
 
-import com.hookiesolutions.webhookie.common.exception.EntityExistsException
 import com.hookiesolutions.webhookie.common.exception.EntityNotFoundException
 import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.byId
 import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
+import com.hookiesolutions.webhookie.common.repository.GenericRepository
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage.Queries.Companion.bySubscriptionId
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Companion.isAuthorized
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Companion.topicIs
@@ -11,7 +11,6 @@ import com.hookiesolutions.webhookie.subscription.domain.Subscription.Updates.Co
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Updates.Companion.unblockSubscriptionUpdate
 import com.mongodb.client.result.DeleteResult
 import com.mongodb.client.result.UpdateResult
-import org.springframework.dao.DuplicateKeyException
 import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.query.Query.query
@@ -29,7 +28,7 @@ import reactor.kotlin.core.publisher.toMono
 @Repository
 class SubscriptionRepository(
   private val mongoTemplate: ReactiveMongoTemplate
-) {
+): GenericRepository<Subscription>(mongoTemplate, Subscription::class.java) {
   fun findAuthorizedTopicSubscriptions(topic: String, authorizedSubscribers: Set<String>): Flux<Subscription> {
     var criteria = topicIs(topic)
     if(authorizedSubscribers.isNotEmpty()) {
@@ -68,14 +67,6 @@ class SubscriptionRepository(
         FindAndModifyOptions.options().returnNew(true),
         Subscription::class.java
       )
-  }
-
-  fun save(subscription: Subscription): Mono<Subscription> {
-    return mongoTemplate
-      .save(subscription)
-      .onErrorMap(DuplicateKeyException::class.java) {
-        EntityExistsException(it.localizedMessage)
-      }
   }
 
   fun findSubscriptionById(id: String): Mono<Subscription> {

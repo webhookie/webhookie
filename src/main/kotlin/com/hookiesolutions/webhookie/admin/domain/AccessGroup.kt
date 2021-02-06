@@ -1,12 +1,10 @@
 package com.hookiesolutions.webhookie.admin.domain
 
-import com.hookiesolutions.webhookie.admin.domain.AccessGroup.Keys.Companion.KEY_DESCRIPTION
 import com.hookiesolutions.webhookie.admin.domain.AccessGroup.Keys.Companion.KEY_ENABLED
 import com.hookiesolutions.webhookie.admin.domain.AccessGroup.Keys.Companion.KEY_IAM_GROUP_NAME
-import com.hookiesolutions.webhookie.admin.domain.AccessGroup.Keys.Companion.KEY_NAME
+import com.hookiesolutions.webhookie.common.model.AbstractEntity
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Criteria.where
-import org.springframework.data.mongodb.core.query.Update
 import org.springframework.data.mongodb.core.query.inValues
 
 
@@ -15,23 +13,11 @@ import org.springframework.data.mongodb.core.query.inValues
  * @author Arthur Kazemi<bidadh@gmail.com>
  * @since 13/1/21 14:05
  */
-interface AccessGroup {
-  var id: String?
-  val name: String
-  val description: String
-  val iamGroupName: String
-  val enabled: Boolean
-
-  class Updates {
-    companion object {
-      fun updateGroupDetails(newGroup: AccessGroup): Update {
-        return Update()
-          .set(KEY_NAME, newGroup.name)
-          .set(KEY_DESCRIPTION, newGroup.description)
-          .set(KEY_IAM_GROUP_NAME, newGroup.iamGroupName)
-      }
-    }
-  }
+abstract class AccessGroup: AbstractEntity() {
+  abstract val name: String
+  abstract val description: String
+  abstract val iamGroupName: String
+  abstract val enabled: Boolean
 
   class Queries {
     companion object {
@@ -51,8 +37,6 @@ interface AccessGroup {
 
   class Keys {
     companion object {
-      const val KEY_NAME = "name"
-      const val KEY_DESCRIPTION = "description"
       const val KEY_IAM_GROUP_NAME = "iamGroupName"
       const val KEY_ENABLED = "enabled"
     }
