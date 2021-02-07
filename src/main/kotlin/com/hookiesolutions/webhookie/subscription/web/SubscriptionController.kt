@@ -16,6 +16,7 @@ import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -56,11 +57,17 @@ class SubscriptionController(
     "/{id}",
     produces = [MediaType.APPLICATION_JSON_VALUE]
   )
-  fun getSubscription(
-    @PathVariable id: String
-  ): Mono<SubscriptionDTO> {
+  fun getSubscription(@PathVariable id: String): Mono<SubscriptionDTO> {
     return service.subscriptionById(id)
       .map { it.dto()}
+  }
+
+  @DeleteMapping(
+    "/{id}",
+    produces = [MediaType.TEXT_PLAIN_VALUE]
+  )
+  fun deleteSubscription(@PathVariable id: String): Mono<String> {
+    return service.deleteSubscription(id)
   }
 
   @PatchMapping(

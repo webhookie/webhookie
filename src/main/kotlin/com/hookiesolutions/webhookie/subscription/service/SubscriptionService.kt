@@ -4,6 +4,7 @@ import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.R
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherErrorMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
+import com.hookiesolutions.webhookie.common.model.DeletableEntity.Companion.deletable
 import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
 import com.hookiesolutions.webhookie.common.service.IdGenerator
 import com.hookiesolutions.webhookie.common.service.TimeMachine
@@ -51,6 +52,14 @@ class SubscriptionService(
   fun subscriptionById(id: String): Mono<Subscription> {
     log.info("Fetching Subscription by id: '{}'", id)
     return repository.findByIdVerifyingReadAccess(id)
+  }
+
+  @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")
+  fun deleteSubscription(id: String): Mono<String> {
+    log.info("Deleting Subscription by id: '{}'", id)
+    return repository.findByIdVerifyingWriteAccess(id)
+      .map { deletable(it) }
+      .flatMap { repository.delete(it) }
   }
 
   fun findSubscriptionsFor(consumerMessage: ConsumerMessage): Flux<Subscription> {
