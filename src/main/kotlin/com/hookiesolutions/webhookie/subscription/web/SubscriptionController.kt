@@ -16,6 +16,7 @@ import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -38,7 +39,7 @@ class SubscriptionController(
   private val timeMachine: TimeMachine,
   private val mongoTemplate: ReactiveMongoTemplate,
   private val log: Logger,
-  private val subscriptionService: SubscriptionService,
+  private val service: SubscriptionService,
 ) {
   @PostMapping(
     "",
@@ -47,8 +48,19 @@ class SubscriptionController(
   )
   @ResponseStatus(HttpStatus.CREATED)
   fun createSubscription(@RequestBody @Valid request: CreateSubscriptionRequest): Mono<SubscriptionDTO> {
-    return subscriptionService.createSubscription(request)
+    return service.createSubscription(request)
       .map { it.dto() }
+  }
+
+  @GetMapping(
+    "/{id}",
+    produces = [MediaType.APPLICATION_JSON_VALUE]
+  )
+  fun getSubscription(
+    @PathVariable id: String
+  ): Mono<SubscriptionDTO> {
+    return service.subscriptionById(id)
+      .map { it.dto()}
   }
 
   @PatchMapping(
@@ -57,7 +69,7 @@ class SubscriptionController(
   )
   fun unblockSubscription(@PathVariable id: String): Mono<String> {
     log.info("Unblocking subscription: '{}'", id)
-    return subscriptionService.unblockSubscriptionBy(id)
+    return service.unblockSubscriptionBy(id)
       .map { it.id!! }
   }
 

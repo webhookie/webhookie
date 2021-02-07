@@ -10,7 +10,6 @@ import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect
 import org.aspectj.lang.annotation.Pointcut
 import org.aspectj.lang.reflect.MethodSignature
-import org.slf4j.Logger
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -24,8 +23,7 @@ import reactor.core.publisher.Mono
 @Component
 class ApplicationSecurityAspect(
   private val securityService: ApplicationSecurityService,
-  private val applicationRepository: ApplicationRepository,
-  private val log: Logger,
+  private val applicationRepository: ApplicationRepository
 ) {
   @Pointcut("@annotation(com.hookiesolutions.webhookie.subscription.service.security.annotation.VerifyApplicationReadAccess)")
   fun annotatedVerifyApplicationReadAccess() {
@@ -44,15 +42,7 @@ class ApplicationSecurityAspect(
     @Suppress("UNCHECKED_CAST")
     val mono: Mono<Application> = pjp.proceed() as Mono<Application>
 
-    return securityService
-      .verifyReadAccess {
-        mono
-          .doOnNext {
-            if (log.isDebugEnabled) {
-              log.debug("Verifying Application '{}' Read Access...", it.name)
-            }
-          }
-      }
+    return securityService.verifyReadAccess(mono)
   }
 
   @Around("annotatedVerifyApplicationWriteAccess() && returnsMonoApplication()")
@@ -60,15 +50,7 @@ class ApplicationSecurityAspect(
     @Suppress("UNCHECKED_CAST")
     val mono: Mono<Application> = pjp.proceed() as Mono<Application>
 
-    return securityService
-      .verifyWriteAccess {
-        mono
-          .doOnNext {
-            if (log.isDebugEnabled) {
-              log.debug("Verifying Application '{}' Write Access...", it.name)
-            }
-          }
-      }
+    return securityService.verifyWriteAccess(mono)
   }
 
   @Pointcut("@annotation(com.hookiesolutions.webhookie.subscription.service.security.annotation.VerifyApplicationAccessById)")

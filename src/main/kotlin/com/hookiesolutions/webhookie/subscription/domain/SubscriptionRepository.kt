@@ -1,6 +1,5 @@
 package com.hookiesolutions.webhookie.subscription.domain
 
-import com.hookiesolutions.webhookie.common.exception.EntityNotFoundException
 import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.byId
 import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
 import com.hookiesolutions.webhookie.common.repository.GenericRepository
@@ -9,6 +8,8 @@ import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Co
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Companion.topicIs
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Updates.Companion.blockSubscriptionUpdate
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Updates.Companion.unblockSubscriptionUpdate
+import com.hookiesolutions.webhookie.subscription.service.security.annotation.VerifySubscriptionReadAccess
+import com.hookiesolutions.webhookie.subscription.service.security.annotation.VerifySubscriptionWriteAccess
 import com.mongodb.client.result.DeleteResult
 import com.mongodb.client.result.UpdateResult
 import org.springframework.data.mongodb.core.FindAndModifyOptions
@@ -17,8 +18,6 @@ import org.springframework.data.mongodb.core.query.Query.query
 import org.springframework.stereotype.Repository
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import reactor.kotlin.core.publisher.switchIfEmpty
-import reactor.kotlin.core.publisher.toMono
 
 /**
  *
@@ -29,6 +28,16 @@ import reactor.kotlin.core.publisher.toMono
 class SubscriptionRepository(
   private val mongoTemplate: ReactiveMongoTemplate
 ): GenericRepository<Subscription>(mongoTemplate, Subscription::class.java) {
+  @VerifySubscriptionReadAccess
+  fun findByIdVerifyingReadAccess(id: String): Mono<Subscription> {
+    return findById(id)
+  }
+
+  @VerifySubscriptionWriteAccess
+  fun findByIdVerifyingWriteAccess(id: String): Mono<Subscription> {
+    return findById(id)
+  }
+
   fun findAuthorizedTopicSubscriptions(topic: String, authorizedSubscribers: Set<String>): Flux<Subscription> {
     var criteria = topicIs(topic)
     if(authorizedSubscribers.isNotEmpty()) {
@@ -67,11 +76,6 @@ class SubscriptionRepository(
         FindAndModifyOptions.options().returnNew(true),
         Subscription::class.java
       )
-  }
-
-  fun findSubscriptionById(id: String): Mono<Subscription> {
-    return mongoTemplate.findById(id, Subscription::class.java)
-      .switchIfEmpty { EntityNotFoundException("Subscription could not be found: $id").toMono() }
   }
 
   fun deleteBlockedSubscriptionMessage(message: BlockedSubscriptionMessage): Mono<DeleteResult> {

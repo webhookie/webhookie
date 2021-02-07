@@ -1,5 +1,6 @@
 package com.hookiesolutions.webhookie.subscription.service
 
+import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_CONSUMER
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherErrorMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
@@ -13,6 +14,7 @@ import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.subscription.domain.SubscriptionRepository
 import com.hookiesolutions.webhookie.subscription.service.model.CreateSubscriptionRequest
 import org.slf4j.Logger
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -34,6 +36,7 @@ class SubscriptionService(
   private val callbackRepository: CallbackRepository,
   private val applicationRepository: ApplicationRepository
 ) {
+  @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")
   fun createSubscription(request: CreateSubscriptionRequest): Mono<Subscription> {
     log.info("Subscribing to '{}' using callback: '{}'", request.topic, request.callbackId)
     return callbackRepository
@@ -42,6 +45,12 @@ class SubscriptionService(
       .map { factory.createSubscription(it.t2, it.t1, request)}
       .flatMap { repository.save(it) }
       .doOnNext { log.info("Subscribed to '{}' using callback: '{}'", it.topic, it.callback.requestTarget()) }
+  }
+
+  @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")
+  fun subscriptionById(id: String): Mono<Subscription> {
+    log.info("Fetching Subscription by id: '{}'", id)
+    return repository.findByIdVerifyingReadAccess(id)
   }
 
   fun findSubscriptionsFor(consumerMessage: ConsumerMessage): Flux<Subscription> {
@@ -89,16 +98,6 @@ class SubscriptionService(
     return repository
       .unblockSubscription(id)
   }
-/*
-
-  fun createSubscriptionFor(applicationId: String, body: CreateSubscriptionRequest): Mono<Subscription> {
-    return applicationRepository
-      .findApplicationById(applicationId)
-      .map { factory.subscriptionFromCreateSubscriptionRequest(body, it) }
-      .flatMap { repository.save(it) }
-      .doOnNext { log.info("Subscription '{}' was created successfully", it.name) }
-  }
-*/
 
   fun deleteBlockedMessage(bsm: BlockedSubscriptionMessage): Mono<BlockedSubscriptionMessage> {
     return repository
@@ -108,14 +107,14 @@ class SubscriptionService(
 
   fun signSubscriptionMessage(subscriptionMessage: SignableSubscriptionMessage): Mono<SignableSubscriptionMessage> {
     return repository
-      .findSubscriptionById(subscriptionMessage.subscription.id)
+      .findById(subscriptionMessage.subscription.id)
       .flatMap { signor.sign(it, subscriptionMessage.originalMessage, idGenerator.generate()) }
       .map { factory.createSignedSubscriptionMessage(subscriptionMessage, it) }
   }
 
   fun enrichBlockedSubscriptionMessageReloadingSubscription(message: BlockedSubscriptionMessage): Mono<BlockedSubscriptionMessage> {
     return repository
-      .findSubscriptionById(message.subscription.id)
+      .findById(message.subscription.id)
       .map { factory.updateBlockedSubscriptionMessageWithSubscription(message, it) }
   }
 }
