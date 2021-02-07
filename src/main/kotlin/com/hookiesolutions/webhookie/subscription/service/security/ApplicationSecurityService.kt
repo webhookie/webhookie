@@ -60,7 +60,7 @@ class ApplicationSecurityService(
 
   fun verifySubscriptionReadAccess(subscriptionMono: Mono<Subscription>): Mono<Subscription> {
     val applicationMono = subscriptionMono
-        .doOnNext { log.debug("Verifying Subscription READ access: '{}', application: '{}'", it.id, it.application.applicationId) }
+        .doOnNext { log.debug("Verifying Subscription READ access: '{}', application: '{}'", it.id, it.application.name) }
         .zipWhen { applicationRepository.findById(it.application.applicationId) }
         .map { it.t2 }
 
@@ -70,7 +70,7 @@ class ApplicationSecurityService(
 
   fun verifySubscriptionWriteAccess(subscriptionMono: Mono<Subscription>): Mono<Subscription> {
     val applicationMono = subscriptionMono
-        .doOnNext { log.debug("Verifying Subscription WRITE access: '{}', application: '{}'", it.id, it.application.applicationId) }
+        .doOnNext { log.debug("Verifying Subscription WRITE access: '{}', application: '{}'", it.id, it.application.name) }
         .zipWhen { applicationRepository.findById(it.application.applicationId) }
         .map { it.t2 }
 

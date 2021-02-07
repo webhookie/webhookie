@@ -42,7 +42,7 @@ class SubscriptionService(
     log.info("Subscribing to '{}' using callback: '{}'", request.topic, request.callbackId)
     return callbackRepository
       .findById(request.callbackId)
-      .zipWhen { applicationRepository.findByIdVerifyingReadAccess(it.applicationId) }
+      .zipWhen { applicationRepository.findByIdVerifyingWriteAccess(it.applicationId) }
       .map { factory.createSubscription(it.t2, it.t1, request)}
       .flatMap { repository.save(it) }
       .doOnNext { log.info("Subscribed to '{}' using callback: '{}'", it.topic, it.callback.requestTarget()) }

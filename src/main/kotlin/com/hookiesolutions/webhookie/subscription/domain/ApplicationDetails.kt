@@ -10,5 +10,6 @@ import com.fasterxml.jackson.annotation.JsonProperty
 data class ApplicationDetails(
   @JsonProperty("id")
   val applicationId: String,
+  val name: String,
   val entity: String
 )

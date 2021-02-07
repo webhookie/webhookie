@@ -133,7 +133,7 @@ class ConversionsFactory(
   fun createSubscription(application: Application, callback: Callback, request: SubscriptionRequest): Subscription {
     return Subscription(
       request.topic,
-      ApplicationDetails(callback.applicationId, application.entity),
+      ApplicationDetails(callback.applicationId, application.name, application.entity),
       callback.details()
     )
   }
