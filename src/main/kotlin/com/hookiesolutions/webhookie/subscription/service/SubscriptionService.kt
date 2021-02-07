@@ -13,7 +13,7 @@ import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMess
 import com.hookiesolutions.webhookie.subscription.domain.CallbackRepository
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.subscription.domain.SubscriptionRepository
-import com.hookiesolutions.webhookie.subscription.service.model.CreateSubscriptionRequest
+import com.hookiesolutions.webhookie.subscription.service.model.SubscriptionRequest
 import org.slf4j.Logger
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
@@ -38,7 +38,7 @@ class SubscriptionService(
   private val applicationRepository: ApplicationRepository
 ) {
   @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")
-  fun createSubscription(request: CreateSubscriptionRequest): Mono<Subscription> {
+  fun createSubscription(request: SubscriptionRequest): Mono<Subscription> {
     log.info("Subscribing to '{}' using callback: '{}'", request.topic, request.callbackId)
     return callbackRepository
       .findById(request.callbackId)
