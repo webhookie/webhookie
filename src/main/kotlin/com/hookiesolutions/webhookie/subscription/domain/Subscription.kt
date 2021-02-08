@@ -7,6 +7,7 @@ import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_BLOCK_DETAILS
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_ENTITY
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_TOPIC
+import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.SUBSCRIPTION_COLLECTION_NAME
 import org.springframework.data.annotation.TypeAlias
 import org.springframework.data.mongodb.core.index.CompoundIndex
 import org.springframework.data.mongodb.core.index.CompoundIndexes
@@ -21,7 +22,7 @@ import org.springframework.data.mongodb.core.query.Update
  * @author Arthur Kazemi<bidadh@gmail.com>
  * @since 3/12/20 17:27
  */
-@Document(collection = "subscription")
+@Document(collection = SUBSCRIPTION_COLLECTION_NAME)
 @TypeAlias("subscription")
 @CompoundIndexes(
   CompoundIndex(
@@ -85,6 +86,8 @@ data class Subscription(
       const val KEY_TOPIC = "topic"
       const val KEY_ENTITY = "entity"
       const val KEY_BLOCK_DETAILS = "blockedDetails"
+      const val KEY_APPLICATION = "application"
+      const val SUBSCRIPTION_COLLECTION_NAME = "subscription"
     }
   }
 }

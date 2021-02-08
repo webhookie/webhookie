@@ -12,4 +12,10 @@ data class ApplicationDetails(
   val applicationId: String,
   val name: String,
   val entity: String
-)
+) {
+  class Keys {
+    companion object {
+      const val KEY_APPLICATION_ID = "applicationId"
+    }
+  }
+}

@@ -1,6 +1,7 @@
 package com.hookiesolutions.webhookie.subscription.domain
 
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
+import com.hookiesolutions.webhookie.subscription.domain.Application.Keys.Companion.APPLICATION_COLLECTION_NAME
 import com.hookiesolutions.webhookie.subscription.domain.Application.Keys.Companion.KEY_CONSUMER_IAM_GROUPS
 import com.hookiesolutions.webhookie.subscription.domain.Application.Keys.Companion.KEY_ENTITY
 import org.springframework.data.annotation.TypeAlias
@@ -15,7 +16,7 @@ import org.springframework.data.mongodb.core.query.Update
  * @author Arthur Kazemi<bidadh@gmail.com>
  * @since 17/12/20 16:26
  */
-@Document(collection = "application")
+@Document(collection = APPLICATION_COLLECTION_NAME)
 @TypeAlias("application")
 data class Application(
   @Indexed(unique = true)
@@ -59,6 +60,7 @@ data class Application(
     companion object {
       const val KEY_ENTITY = "entity"
       const val KEY_CONSUMER_IAM_GROUPS = "consumerIAMGroups"
+      const val APPLICATION_COLLECTION_NAME = "application"
     }
   }
 }
