@@ -16,7 +16,7 @@ import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMess
 import com.hookiesolutions.webhookie.subscription.domain.Callback
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.subscription.service.model.ApplicationRequest
-import com.hookiesolutions.webhookie.subscription.service.model.SubscriptionRequest
+import com.hookiesolutions.webhookie.subscription.service.model.CreateSubscriptionRequest
 import org.springframework.stereotype.Service
 import java.time.Instant
 
@@ -130,7 +130,7 @@ class ConversionsFactory(
     return copy
   }
 
-  fun createSubscription(application: Application, callback: Callback, request: SubscriptionRequest): Subscription {
+  fun createSubscription(application: Application, callback: Callback, request: CreateSubscriptionRequest): Subscription {
     return Subscription(
       request.topic,
       ApplicationDetails(callback.applicationId, application.name, application.entity),

@@ -8,7 +8,7 @@ import com.hookiesolutions.webhookie.common.service.TimeMachine
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Updates.Companion.blockSubscriptionUpdate
 import com.hookiesolutions.webhookie.subscription.service.SubscriptionService
-import com.hookiesolutions.webhookie.subscription.service.model.SubscriptionRequest
+import com.hookiesolutions.webhookie.subscription.service.model.CreateSubscriptionRequest
 import com.hookiesolutions.webhookie.subscription.web.SubscriptionAPIDocs.Companion.REQUEST_MAPPING_SUBSCRIPTIONS
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.slf4j.Logger
@@ -49,7 +49,7 @@ class SubscriptionController(
     produces = [MediaType.APPLICATION_JSON_VALUE],
   )
   @ResponseStatus(HttpStatus.CREATED)
-  fun createSubscription(@RequestBody @Valid request: SubscriptionRequest): Mono<SubscriptionDTO> {
+  fun createSubscription(@RequestBody @Valid request: CreateSubscriptionRequest): Mono<SubscriptionDTO> {
     return service.createSubscription(request)
       .map { it.dto() }
   }
