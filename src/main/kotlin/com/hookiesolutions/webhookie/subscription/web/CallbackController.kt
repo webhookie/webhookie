@@ -1,7 +1,7 @@
 package com.hookiesolutions.webhookie.subscription.web
 
 import com.hookiesolutions.webhookie.common.config.web.OpenAPIConfig.Companion.OAUTH2_SCHEME
-import com.hookiesolutions.webhookie.subscription.domain.Callback
+import com.hookiesolutions.webhookie.common.model.dto.CallbackDTO
 import com.hookiesolutions.webhookie.subscription.service.CallbackService
 import com.hookiesolutions.webhookie.subscription.service.model.CallbackRequest
 import com.hookiesolutions.webhookie.subscription.web.SubscriptionAPIDocs.Companion.REQUEST_MAPPING_APPLICATIONS
@@ -42,8 +42,9 @@ class CallbackController(
   fun createCallback(
     @Valid @RequestBody body: CallbackRequest,
     @PathVariable applicationId: String
-  ): Mono<Callback> {
+  ): Mono<CallbackDTO> {
     return service.createCallback(applicationId, body)
+      .map { it.dto() }
   }
 
   @GetMapping(
@@ -51,8 +52,9 @@ class CallbackController(
   )
   fun getApplicationCallbacks(
     @PathVariable applicationId: String
-  ): Flux<Callback> {
+  ): Flux<CallbackDTO> {
     return service.applicationCallbacks(applicationId)
+      .map { it.dto() }
   }
 
   @GetMapping(
@@ -62,8 +64,9 @@ class CallbackController(
   fun getApplicationCallback(
     @PathVariable applicationId: String,
     @PathVariable id: String
-  ): Mono<Callback> {
+  ): Mono<CallbackDTO> {
     return service.applicationCallbackById(applicationId, id)
+      .map { it.dto() }
   }
 
   @DeleteMapping(
@@ -86,7 +89,8 @@ class CallbackController(
     @Valid @RequestBody body: CallbackRequest,
     @PathVariable applicationId: String,
     @PathVariable id: String
-  ): Mono<Callback> {
+  ): Mono<CallbackDTO> {
     return service.updateCallback(applicationId, id, body)
+      .map { it.dto() }
   }
 }

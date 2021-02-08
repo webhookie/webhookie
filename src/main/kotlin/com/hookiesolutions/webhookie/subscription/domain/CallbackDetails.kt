@@ -7,6 +7,7 @@ import org.springframework.http.HttpMethod
 data class CallbackDetails(
   @JsonProperty("id")
   val callbackId: String,
+  val name: String,
   val httpMethod: HttpMethod,
   val url: String,
   val security: CallbackSecurity? = null,
@@ -16,6 +17,6 @@ data class CallbackDetails(
   }
 
   fun dto(): CallbackDTO {
-    return CallbackDTO(callbackId, httpMethod, url, security != null)
+    return CallbackDTO(callbackId, name, httpMethod, url, security?.dto())
   }
 }

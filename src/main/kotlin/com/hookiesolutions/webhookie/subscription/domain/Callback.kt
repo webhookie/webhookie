@@ -2,6 +2,7 @@ package com.hookiesolutions.webhookie.subscription.domain
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
+import com.hookiesolutions.webhookie.common.model.dto.CallbackDTO
 import com.hookiesolutions.webhookie.subscription.domain.Callback.Keys.Companion.KEY_APPLICATION_ID
 import org.springframework.data.annotation.TypeAlias
 import org.springframework.data.mongodb.core.index.CompoundIndex
@@ -42,7 +43,9 @@ data class Callback(
     return "${httpMethod.name} $url"
   }
 
-  fun details() = CallbackDetails(id!!, httpMethod, url, security)
+  fun details() = CallbackDetails(id!!, name, httpMethod, url, security)
+
+  fun dto() = CallbackDTO(id!!, name, httpMethod, url, security?.dto())
 
   class Queries {
     companion object {

@@ -1,7 +1,7 @@
 package com.hookiesolutions.webhookie.subscription.domain
 
 import com.bol.secure.Encrypted
-import com.fasterxml.jackson.annotation.JsonIgnore
+import com.hookiesolutions.webhookie.common.model.dto.CallbackSecurityDTO
 
 /**
  *
@@ -11,9 +11,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 data class CallbackSecurity(
   val method: String = "HMAC",
   @Encrypted
-  @JsonIgnore
   val secret: Secret
-)
+) {
+  fun dto(): CallbackSecurityDTO {
+    return CallbackSecurityDTO(method, secret.keyId)
+  }
+}
 
 data class Secret(
   val keyId: String,
