@@ -22,6 +22,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.toMono
 
 
 /**
@@ -76,14 +77,21 @@ class SubscriptionService(
   @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")
   fun updateSubscription(id: String, request: UpdateSubscriptionRequest): Mono<Subscription> {
     log.info("Updating Subscription '{}' using callback: '{}'", id, request.callbackId)
-    return callbackRepository
-      .findById(request.callbackId)
-      .zipWhen { applicationRepository.findById(it.applicationId) }
-      .zipWith(repository.findByIdVerifyingWriteAccess(id))
-      .map { factory.modifySubscription(it.t1.t2, it.t1.t1, it.t2, request)}
-      .map { updatable(it) }
-      .flatMap { repository.update(it, id) }
-      .doOnNext { log.info("Subscription '{}' was modified to callback: '{}'", it.topic, it.callback.requestTarget()) }
+    return repository
+      .findByIdVerifyingWriteAccess(id)
+      .flatMap { subscription ->
+        return@flatMap if(subscription.callback.callbackId == request.callbackId) {
+          subscription.toMono()
+        } else {
+          callbackRepository
+            .findById(request.callbackId)
+            .zipWhen { applicationRepository.findById(it.applicationId) }
+            .map { factory.modifySubscription(it.t2, it.t1, subscription, request)}
+            .map { updatable(it) }
+            .flatMap { repository.update(it, id) }
+            .doOnNext { log.info("Subscription '{}' was modified to callback: '{}'", it.id, it.callback.requestTarget()) }
+        }
+      }
   }
 
   fun findSubscriptionsFor(consumerMessage: ConsumerMessage): Flux<Subscription> {
