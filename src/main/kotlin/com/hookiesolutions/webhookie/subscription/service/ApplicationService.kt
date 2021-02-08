@@ -43,10 +43,9 @@ class ApplicationService(
 
   @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")
   fun userApplications(): Flux<Application> {
-    return securityHandler.entity()
-      .zipWith(securityHandler.groups())
+    return securityHandler.data()
       .doOnNext { log.info("Fetching all applications for entity: '{}'", it) }
-      .flatMapMany { repository.userApplications(it.t1, it.t2) }
+      .flatMapMany { repository.userApplications(it.entity, it.groups) }
   }
 
   @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")

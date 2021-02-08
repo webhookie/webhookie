@@ -1,5 +1,6 @@
 package com.hookiesolutions.webhookie.security.service
 
+import com.hookiesolutions.webhookie.security.TokenData
 import com.hookiesolutions.webhookie.security.jwt.WebhookieJwtAuthenticationToken
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.core.Authentication
@@ -22,6 +23,12 @@ class SecurityHandler {
       .map(SecurityContext::getAuthentication)
       .filter(Authentication::isAuthenticated)
       .cast(WebhookieJwtAuthenticationToken::class.java)
+  }
+
+  fun data(): Mono<TokenData> {
+    return token()
+      .switchIfEmpty { AccessDeniedException("Token is not provided").toMono() }
+      .map { TokenData(it.entity, it.groups) }
   }
 
   fun groups(): Mono<List<String>> {
