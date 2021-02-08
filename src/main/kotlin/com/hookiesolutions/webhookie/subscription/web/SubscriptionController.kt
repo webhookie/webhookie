@@ -9,6 +9,7 @@ import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Updates.Companion.blockSubscriptionUpdate
 import com.hookiesolutions.webhookie.subscription.service.SubscriptionService
 import com.hookiesolutions.webhookie.subscription.service.model.CreateSubscriptionRequest
+import com.hookiesolutions.webhookie.subscription.service.model.UpdateSubscriptionRequest
 import com.hookiesolutions.webhookie.subscription.web.SubscriptionAPIDocs.Companion.REQUEST_MAPPING_SUBSCRIPTIONS
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.slf4j.Logger
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
@@ -77,6 +79,19 @@ class SubscriptionController(
   )
   fun deleteSubscription(@PathVariable id: String): Mono<String> {
     return service.deleteSubscription(id)
+  }
+
+  @PutMapping(
+    "/{id}",
+    consumes = [MediaType.APPLICATION_JSON_VALUE],
+    produces = [MediaType.APPLICATION_JSON_VALUE]
+  )
+  fun updateSubscription(
+    @PathVariable id: String,
+    @RequestBody @Valid request: UpdateSubscriptionRequest
+  ): Mono<SubscriptionDTO> {
+    return service.updateSubscription(id, request)
+      .map { it.dto()}
   }
 
   @PatchMapping(

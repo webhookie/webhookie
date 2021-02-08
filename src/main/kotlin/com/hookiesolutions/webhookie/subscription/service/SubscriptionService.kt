@@ -5,6 +5,7 @@ import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherErrorMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
 import com.hookiesolutions.webhookie.common.model.DeletableEntity.Companion.deletable
+import com.hookiesolutions.webhookie.common.model.UpdatableEntity.Companion.updatable
 import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
 import com.hookiesolutions.webhookie.common.service.IdGenerator
 import com.hookiesolutions.webhookie.common.service.TimeMachine
@@ -15,6 +16,7 @@ import com.hookiesolutions.webhookie.subscription.domain.CallbackRepository
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.subscription.domain.SubscriptionRepository
 import com.hookiesolutions.webhookie.subscription.service.model.CreateSubscriptionRequest
+import com.hookiesolutions.webhookie.subscription.service.model.UpdateSubscriptionRequest
 import org.slf4j.Logger
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
@@ -69,6 +71,19 @@ class SubscriptionService(
     return securityHandler.data()
       .doOnNext { log.info("Fetching all subscriptions for token: '{}'", it) }
       .flatMapMany { repository.findAllUserSubscriptions(it.entity, it.groups) }
+  }
+
+  @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")
+  fun updateSubscription(id: String, request: UpdateSubscriptionRequest): Mono<Subscription> {
+    log.info("Updating Subscription '{}' using callback: '{}'", id, request.callbackId)
+    return callbackRepository
+      .findById(request.callbackId)
+      .zipWhen { applicationRepository.findById(it.applicationId) }
+      .zipWith(repository.findByIdVerifyingWriteAccess(id))
+      .map { factory.modifySubscription(it.t1.t2, it.t1.t1, it.t2, request)}
+      .map { updatable(it) }
+      .flatMap { repository.update(it, id) }
+      .doOnNext { log.info("Subscription '{}' was modified to callback: '{}'", it.topic, it.callback.requestTarget()) }
   }
 
   fun findSubscriptionsFor(consumerMessage: ConsumerMessage): Flux<Subscription> {
