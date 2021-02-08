@@ -3,7 +3,13 @@ package com.hookiesolutions.webhookie.subscription.domain
 import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.byId
 import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
 import com.hookiesolutions.webhookie.common.repository.GenericRepository
+import com.hookiesolutions.webhookie.subscription.domain.Application.Keys.Companion.APPLICATION_COLLECTION_NAME
+import com.hookiesolutions.webhookie.subscription.domain.Application.Queries.Companion.applicationConsumerGroupsIn
+import com.hookiesolutions.webhookie.subscription.domain.Application.Queries.Companion.applicationsByEntity
+import com.hookiesolutions.webhookie.subscription.domain.ApplicationDetails.Keys.Companion.KEY_APPLICATION_ID
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage.Queries.Companion.bySubscriptionId
+import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_APPLICATION
+import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.SUBSCRIPTION_COLLECTION_NAME
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Companion.isAuthorized
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Companion.topicIs
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Updates.Companion.blockSubscriptionUpdate
@@ -14,10 +20,15 @@ import com.mongodb.client.result.DeleteResult
 import com.mongodb.client.result.UpdateResult
 import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
+import org.springframework.data.mongodb.core.aggregation.Aggregation
+import org.springframework.data.mongodb.core.aggregation.ConvertOperators
+import org.springframework.data.mongodb.core.aggregation.Fields.UNDERSCORE_ID_REF
+import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query.query
 import org.springframework.stereotype.Repository
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+
 
 /**
  *
@@ -26,8 +37,8 @@ import reactor.core.publisher.Mono
  */
 @Repository
 class SubscriptionRepository(
-  private val mongoTemplate: ReactiveMongoTemplate
-): GenericRepository<Subscription>(mongoTemplate, Subscription::class.java) {
+  private val mongoTemplate: ReactiveMongoTemplate,
+) : GenericRepository<Subscription>(mongoTemplate, Subscription::class.java) {
   @VerifySubscriptionReadAccess
   fun findByIdVerifyingReadAccess(id: String): Mono<Subscription> {
     return findById(id)
@@ -38,9 +49,32 @@ class SubscriptionRepository(
     return findById(id)
   }
 
+  fun findAllUserSubscriptions(entity: String, groups: List<String>): Flux<Subscription> {
+    val criteria = Criteria()
+      .andOperator(
+        applicationsByEntity(entity),
+        applicationConsumerGroupsIn(groups)
+      )
+    val `as` = "subscriptions"
+    val subscriptionsKey = "${'$'}subscriptions"
+    val localField = "aId"
+    val foreignField = "$KEY_APPLICATION.$KEY_APPLICATION_ID"
+    val agg: Aggregation = Aggregation.newAggregation(
+      Aggregation.match(criteria),
+      Aggregation
+        .addFields()
+        .addFieldWithValue(localField, ConvertOperators.ToString.toString(UNDERSCORE_ID_REF))
+        .build(),
+      Aggregation.lookup(SUBSCRIPTION_COLLECTION_NAME, localField, foreignField, `as`),
+      Aggregation.unwind(subscriptionsKey),
+      Aggregation.replaceRoot(subscriptionsKey)
+    )
+    return mongoTemplate.aggregate(agg, APPLICATION_COLLECTION_NAME, Subscription::class.java)
+  }
+
   fun findAuthorizedTopicSubscriptions(topic: String, authorizedSubscribers: Set<String>): Flux<Subscription> {
     var criteria = topicIs(topic)
-    if(authorizedSubscribers.isNotEmpty()) {
+    if (authorizedSubscribers.isNotEmpty()) {
       criteria = criteria.andOperator(isAuthorized(authorizedSubscribers))
     }
 

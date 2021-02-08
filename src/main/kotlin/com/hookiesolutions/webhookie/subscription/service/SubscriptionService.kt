@@ -8,6 +8,7 @@ import com.hookiesolutions.webhookie.common.model.DeletableEntity.Companion.dele
 import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
 import com.hookiesolutions.webhookie.common.service.IdGenerator
 import com.hookiesolutions.webhookie.common.service.TimeMachine
+import com.hookiesolutions.webhookie.security.service.SecurityHandler
 import com.hookiesolutions.webhookie.subscription.domain.ApplicationRepository
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
 import com.hookiesolutions.webhookie.subscription.domain.CallbackRepository
@@ -29,6 +30,7 @@ import reactor.core.publisher.Mono
 @Service
 class SubscriptionService(
   private val log: Logger,
+  private val securityHandler: SecurityHandler,
   private val timeMachine: TimeMachine,
   private val signor: SubscriptionSignor,
   private val idGenerator: IdGenerator,
@@ -60,6 +62,13 @@ class SubscriptionService(
     return repository.findByIdVerifyingWriteAccess(id)
       .map { deletable(it) }
       .flatMap { repository.delete(it) }
+  }
+
+  @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")
+  fun userSubscriptions(): Flux<Subscription> {
+    return securityHandler.data()
+      .doOnNext { log.info("Fetching all subscriptions for token: '{}'", it) }
+      .flatMapMany { repository.findAllUserSubscriptions(it.entity, it.groups) }
   }
 
   fun findSubscriptionsFor(consumerMessage: ConsumerMessage): Flux<Subscription> {

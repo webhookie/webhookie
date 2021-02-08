@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import javax.validation.Valid
 
@@ -50,6 +51,14 @@ class SubscriptionController(
   @ResponseStatus(HttpStatus.CREATED)
   fun createSubscription(@RequestBody @Valid request: SubscriptionRequest): Mono<SubscriptionDTO> {
     return service.createSubscription(request)
+      .map { it.dto() }
+  }
+
+  @GetMapping(
+    produces = [MediaType.APPLICATION_JSON_VALUE]
+  )
+  fun userSubscriptions(): Flux<SubscriptionDTO> {
+    return service.userSubscriptions()
       .map { it.dto() }
   }
 
