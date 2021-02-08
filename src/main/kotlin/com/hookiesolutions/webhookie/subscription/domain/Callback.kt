@@ -1,5 +1,6 @@
 package com.hookiesolutions.webhookie.subscription.domain
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
 import com.hookiesolutions.webhookie.subscription.domain.Callback.Keys.Companion.KEY_APPLICATION_ID
 import org.springframework.data.annotation.TypeAlias
@@ -29,6 +30,7 @@ import org.springframework.http.HttpMethod
     unique = true
   )
 )
+@JsonInclude(JsonInclude.Include.NON_NULL)
 data class Callback(
   val name: String,
   val applicationId: String,

@@ -1,6 +1,7 @@
 package com.hookiesolutions.webhookie.subscription.domain
 
 import com.bol.secure.Encrypted
+import com.fasterxml.jackson.annotation.JsonIgnore
 
 /**
  *
@@ -10,6 +11,7 @@ import com.bol.secure.Encrypted
 data class CallbackSecurity(
   val method: String = "HMAC",
   @Encrypted
+  @JsonIgnore
   val secret: Secret
 )
 

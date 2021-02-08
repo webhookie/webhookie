@@ -17,7 +17,7 @@ data class CallbackRequest(
   val httpMethod: HttpMethod,
   @field:Url
   val url: String,
-  val callbackSecurity: CallbackSecurity?
+  val security: CallbackSecurity?
 ) {
   fun requestTarget(): String {
     return "${httpMethod.name} $url"
@@ -29,13 +29,13 @@ data class CallbackRequest(
       applicationId,
       httpMethod,
       url,
-      callbackSecurity
+      security
     )
   }
 
   //TODO: refactor this and use mongodb update instead
   fun copy(entity: Callback, applicationId: String): Callback {
-    val result = Callback(name, applicationId, httpMethod, url, callbackSecurity)
+    val result = Callback(name, applicationId, httpMethod, url, security)
     result.version = entity.version
     result.id = entity.id
     result.createdDate = entity.createdDate
