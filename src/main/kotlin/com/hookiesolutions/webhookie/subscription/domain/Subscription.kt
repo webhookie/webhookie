@@ -4,7 +4,9 @@ import com.hookiesolutions.webhookie.common.model.AbstractDocument.Keys.Companio
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
 import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
+import com.hookiesolutions.webhookie.subscription.domain.CallbackDetails.Keys.Companion.KEY_CALLBACK_ID
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_BLOCK_DETAILS
+import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_CALLBACK
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_ENTITY
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_TOPIC
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.SUBSCRIPTION_COLLECTION_NAME
@@ -62,11 +64,22 @@ data class Subscription(
         return where(KEY_ENTITY)
           .`in`(entities)
       }
+
+      fun callbackIdIs(id: String): Criteria {
+        return where("$KEY_CALLBACK.$KEY_CALLBACK_ID").`is`(id)
+      }
     }
   }
 
   class Updates {
     companion object {
+      fun updateCallback(details: Any): Update {
+        val update = Update()
+          .set(KEY_CALLBACK, details)
+        update.inc(KEY_VERSION)
+        return update
+      }
+
       fun unblockSubscriptionUpdate(): Update {
         return Update()
           .unset(KEY_BLOCK_DETAILS)
@@ -87,6 +100,7 @@ data class Subscription(
       const val KEY_ENTITY = "entity"
       const val KEY_BLOCK_DETAILS = "blockedDetails"
       const val KEY_APPLICATION = "application"
+      const val KEY_CALLBACK = "callback"
       const val SUBSCRIPTION_COLLECTION_NAME = "subscription"
     }
   }

@@ -21,5 +21,14 @@ data class CallbackSecurity(
 data class Secret(
   val keyId: String,
   val secret: String
-)
+) {
+  fun json(): String {
+    return """
+      {
+        keyId: '$keyId',
+        secret: '$secret'
+      }
+    """.trimIndent()
+  }
+}
 

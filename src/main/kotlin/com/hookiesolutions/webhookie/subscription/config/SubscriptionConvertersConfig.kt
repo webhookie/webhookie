@@ -1,7 +1,7 @@
 package com.hookiesolutions.webhookie.subscription.config
 
 import com.bol.config.EncryptAutoConfiguration
-import com.hookiesolutions.webhookie.subscription.service.BinaryToSecretReader
+import com.hookiesolutions.webhookie.subscription.service.CallbackSecretConverter
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
@@ -17,8 +17,8 @@ import org.springframework.data.mongodb.core.convert.MongoCustomConversions
 class SubscriptionConvertersConfig {
   @Bean
   fun mongoCustomConversions(
-    binaryToSecretReader: BinaryToSecretReader
+    callbackSecretConverter: CallbackSecretConverter
   ): MongoCustomConversions {
-    return MongoCustomConversions.create { it.registerConverter(binaryToSecretReader) }
+    return MongoCustomConversions.create { it.registerConverter(callbackSecretConverter) }
   }
 }

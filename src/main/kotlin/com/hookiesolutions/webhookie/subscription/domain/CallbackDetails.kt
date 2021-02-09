@@ -19,4 +19,11 @@ data class CallbackDetails(
   fun dto(): CallbackDTO {
     return CallbackDTO(callbackId, name, httpMethod, url, security?.dto())
   }
+
+  class Keys {
+    companion object {
+      const val KEY_CALLBACK_ID = "callbackId"
+    }
+  }
+
 }

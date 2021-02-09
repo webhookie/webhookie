@@ -5,12 +5,14 @@ import com.hookiesolutions.webhookie.common.model.DeletableEntity.Companion.dele
 import com.hookiesolutions.webhookie.common.model.UpdatableEntity.Companion.updatable
 import com.hookiesolutions.webhookie.subscription.domain.Callback
 import com.hookiesolutions.webhookie.subscription.domain.CallbackRepository
+import com.hookiesolutions.webhookie.subscription.domain.SubscriptionRepository
 import com.hookiesolutions.webhookie.subscription.service.model.CallbackRequest
 import com.hookiesolutions.webhookie.subscription.service.security.annotation.ApplicationAccessType
 import com.hookiesolutions.webhookie.subscription.service.security.annotation.VerifyApplicationAccessById
 import org.slf4j.Logger
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
@@ -22,7 +24,9 @@ import reactor.core.publisher.Mono
 @Service
 class CallbackService(
   private val repository: CallbackRepository,
-  private val log: Logger
+  private val converter: CallbackSecretConverter,
+  private val subscriptionRepository: SubscriptionRepository,
+  private val log: Logger,
 ) {
   @PreAuthorize("hasAuthority('${ROLE_CONSUMER}')")
   @VerifyApplicationAccessById(access = ApplicationAccessType.WRITE)
@@ -58,11 +62,19 @@ class CallbackService(
 
   @PreAuthorize("hasAuthority('${ROLE_CONSUMER}')")
   @VerifyApplicationAccessById(access = ApplicationAccessType.WRITE)
+  @Transactional
   fun updateCallback(applicationId: String, id: String, body: CallbackRequest): Mono<Callback> {
     log.info("updating Callback: '{}', '{}'", body.requestTarget(), id)
+
     return repository.findById(id)
-      .map { body.copy(it, applicationId) }
-      .map { updatable(it) }
+      .map { updatable(body.copy(it, applicationId)) }
       .flatMap { repository.update(it, id) }
+      .zipWhen { callback ->
+        //TODO: refactor
+        val details = converter.convert(callback)
+
+        subscriptionRepository.updateCallbackSubscriptions(id, details)
+      }
+      .map { it.t1 }
   }
 }
