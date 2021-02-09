@@ -2,6 +2,10 @@ package com.hookiesolutions.webhookie.subscription.domain
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.hookiesolutions.webhookie.common.model.dto.CallbackDTO
+import com.hookiesolutions.webhookie.subscription.domain.CallbackDetails.Keys.Companion.KEY_CALLBACK_ID
+import com.hookiesolutions.webhookie.subscription.domain.CallbackDetails.Keys.Companion.KEY_METHOD
+import com.hookiesolutions.webhookie.subscription.domain.CallbackDetails.Keys.Companion.KEY_NAME
+import com.hookiesolutions.webhookie.subscription.domain.CallbackDetails.Keys.Companion.KEY_URL
 import org.springframework.http.HttpMethod
 
 data class CallbackDetails(
@@ -20,9 +24,24 @@ data class CallbackDetails(
     return CallbackDTO(callbackId, name, httpMethod, url, security?.dto())
   }
 
+  fun json(): String {
+    return """
+      {
+            $KEY_CALLBACK_ID: '$callbackId',
+            $KEY_NAME: '$name',
+            $KEY_METHOD: '$httpMethod',
+            $KEY_URL: '$url',
+            
+      }
+    """.trimIndent()
+  }
+
   class Keys {
     companion object {
       const val KEY_CALLBACK_ID = "callbackId"
+      const val KEY_NAME = "name"
+      const val KEY_METHOD = "httpMethod"
+      const val KEY_URL = "url"
     }
   }
 

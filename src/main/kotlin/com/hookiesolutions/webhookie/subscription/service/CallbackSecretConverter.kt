@@ -66,10 +66,7 @@ class CallbackSecretConverter(
     return if(callback.security == null) {
       callback.details()
     } else {
-      val dbObject = BasicDBObject("callbackId", callback.id!!)
-      dbObject["name"] = callback.name
-      dbObject["httpMethod"] = callback.httpMethod
-      dbObject["url"] = callback.url
+      val dbObject = Document.parse(callback.details().json())
       dbObject["security"] = convert(callback.security)
 
       return dbObject
