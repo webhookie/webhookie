@@ -26,6 +26,10 @@ data class Application(
   val entity: String,
   val consumerIAMGroups: Set<String>
 ): AbstractEntity() {
+  fun details(): ApplicationDetails {
+    return ApplicationDetails(id!!, name, entity)
+  }
+
   class Queries {
     companion object {
       fun applicationConsumerGroupsIn(groups: Collection<String>): Criteria {

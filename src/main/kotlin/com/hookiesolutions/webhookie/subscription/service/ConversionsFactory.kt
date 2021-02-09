@@ -11,7 +11,6 @@ import com.hookiesolutions.webhookie.common.message.subscription.UnsignedSubscri
 import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
 import com.hookiesolutions.webhookie.common.service.IdGenerator
 import com.hookiesolutions.webhookie.subscription.domain.Application
-import com.hookiesolutions.webhookie.subscription.domain.ApplicationDetails
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
 import com.hookiesolutions.webhookie.subscription.domain.Callback
 import com.hookiesolutions.webhookie.subscription.domain.CallbackDetails
@@ -135,7 +134,7 @@ class ConversionsFactory(
   fun createSubscription(application: Application, callback: Callback, request: CreateSubscriptionRequest): Subscription {
     return Subscription(
       request.topic,
-      ApplicationDetails(callback.applicationId, application.name, application.entity),
+      application.details(),
       callback.details()
     )
   }
@@ -147,7 +146,7 @@ class ConversionsFactory(
     request: UpdateSubscriptionRequest
   ): Subscription {
     val copy = subscription.copy(
-      application = ApplicationDetails(callback.applicationId, application.name, application.entity),
+      application = application.details(),
       callback = CallbackDetails(callback.id!!, callback.name, callback.httpMethod, callback.url, callback.security)
     )
     copy.id = subscription.id

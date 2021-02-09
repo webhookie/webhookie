@@ -11,6 +11,7 @@ import com.hookiesolutions.webhookie.common.service.AdminServiceDelegate
 import com.hookiesolutions.webhookie.security.service.SecurityHandler
 import com.hookiesolutions.webhookie.subscription.domain.Application
 import com.hookiesolutions.webhookie.subscription.domain.ApplicationRepository
+import com.hookiesolutions.webhookie.subscription.domain.SubscriptionRepository
 import com.hookiesolutions.webhookie.subscription.service.model.ApplicationRequest
 import org.slf4j.Logger
 import org.springframework.integration.annotation.ServiceActivator
@@ -30,6 +31,7 @@ class ApplicationService(
   private val factory: ConversionsFactory,
   private val adminServiceDelegate: AdminServiceDelegate,
   private val securityHandler: SecurityHandler,
+  private val subscriptionRepository: SubscriptionRepository,
   private val repository: ApplicationRepository,
 ) {
   @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")
@@ -68,6 +70,12 @@ class ApplicationService(
       .map { it.t2.copy(name = request.name, description = request.description, consumerIAMGroups = it.t1) }
       .map { updatable(it) }
       .flatMap { repository.update(it, id) }
+      .zipWhen {
+        log.info("Updating all Application '{}' Subscriptions", it.name)
+        subscriptionRepository.updateApplicationSubscriptions(id, it.details())
+      }
+      .doOnNext { log.info("Application '{}' was updated successfully", it.t1.name) }
+      .map { it.t1 }
   }
 
   @ServiceActivator(inputChannel = ADMIN_CONSUMER_GROUP_DELETED_CHANNEL_NAME)

@@ -4,7 +4,9 @@ import com.hookiesolutions.webhookie.common.model.AbstractDocument.Keys.Companio
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
 import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
+import com.hookiesolutions.webhookie.subscription.domain.ApplicationDetails.Keys.Companion.KEY_APPLICATION_ID
 import com.hookiesolutions.webhookie.subscription.domain.CallbackDetails.Keys.Companion.KEY_CALLBACK_ID
+import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_APPLICATION
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_BLOCK_DETAILS
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_CALLBACK
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_ENTITY
@@ -68,6 +70,10 @@ data class Subscription(
       fun callbackIdIs(id: String): Criteria {
         return where("$KEY_CALLBACK.$KEY_CALLBACK_ID").`is`(id)
       }
+
+      fun applicationIdIs(id: String): Criteria {
+        return where("$KEY_APPLICATION.$KEY_APPLICATION_ID").`is`(id)
+      }
     }
   }
 
@@ -76,6 +82,13 @@ data class Subscription(
       fun updateCallback(details: Any): Update {
         val update = Update()
           .set(KEY_CALLBACK, details)
+        update.inc(KEY_VERSION)
+        return update
+      }
+
+      fun updateApplication(details: ApplicationDetails): Update {
+        val update = Update()
+          .set(KEY_APPLICATION, details)
         update.inc(KEY_VERSION)
         return update
       }

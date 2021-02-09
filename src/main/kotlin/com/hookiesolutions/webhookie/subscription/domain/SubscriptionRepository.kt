@@ -10,11 +10,13 @@ import com.hookiesolutions.webhookie.subscription.domain.ApplicationDetails.Keys
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage.Queries.Companion.bySubscriptionId
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_APPLICATION
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.SUBSCRIPTION_COLLECTION_NAME
+import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Companion.applicationIdIs
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Companion.callbackIdIs
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Companion.isAuthorized
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Companion.topicIs
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Updates.Companion.blockSubscriptionUpdate
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Updates.Companion.unblockSubscriptionUpdate
+import com.hookiesolutions.webhookie.subscription.domain.Subscription.Updates.Companion.updateApplication
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Updates.Companion.updateCallback
 import com.hookiesolutions.webhookie.subscription.service.security.annotation.VerifySubscriptionReadAccess
 import com.hookiesolutions.webhookie.subscription.service.security.annotation.VerifySubscriptionWriteAccess
@@ -122,6 +124,14 @@ class SubscriptionRepository(
     return mongoTemplate.updateMulti(
       query(callbackIdIs(id)),
       updateCallback(details),
+      Subscription::class.java
+    )
+  }
+
+  fun updateApplicationSubscriptions(id: String, details: ApplicationDetails): Mono<UpdateResult> {
+    return mongoTemplate.updateMulti(
+      query(applicationIdIs(id)),
+      updateApplication(details),
       Subscription::class.java
     )
   }

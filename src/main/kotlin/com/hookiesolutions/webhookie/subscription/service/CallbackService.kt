@@ -71,10 +71,12 @@ class CallbackService(
       .flatMap { repository.update(it, id) }
       .zipWhen { callback ->
         //TODO: refactor
+        log.info("Updating all Callback '{}' Subscriptions", callback.name)
         val details = converter.convert(callback)
 
         subscriptionRepository.updateCallbackSubscriptions(id, details)
       }
+      .doOnNext { log.info("Callback '{}' was updated successfully", it.t1.requestTarget()) }
       .map { it.t1 }
   }
 }
