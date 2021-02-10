@@ -59,8 +59,8 @@ class SubscriptionController(
   @GetMapping(
     produces = [MediaType.APPLICATION_JSON_VALUE]
   )
-  fun userSubscriptions(): Flux<SubscriptionDTO> {
-    return service.userSubscriptions()
+  fun consumerSubscriptions(): Flux<SubscriptionDTO> {
+    return service.consumerSubscriptions()
       .map { it.dto() }
   }
 

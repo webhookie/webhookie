@@ -68,10 +68,10 @@ class SubscriptionService(
   }
 
   @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")
-  fun userSubscriptions(): Flux<Subscription> {
+  fun consumerSubscriptions(): Flux<Subscription> {
     return securityHandler.data()
       .doOnNext { log.info("Fetching all subscriptions for token: '{}'", it) }
-      .flatMapMany { repository.findAllUserSubscriptions(it.entity, it.groups) }
+      .flatMapMany { repository.findAllConsumerSubscriptions(it.entity, it.groups) }
   }
 
   @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")

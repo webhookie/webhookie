@@ -52,7 +52,7 @@ class SubscriptionRepository(
     return findById(id)
   }
 
-  fun findAllUserSubscriptions(entity: String, groups: List<String>): Flux<Subscription> {
+  fun findAllConsumerSubscriptions(entity: String, groups: List<String>): Flux<Subscription> {
     val criteria = Criteria()
       .andOperator(
         applicationsByEntity(entity),
