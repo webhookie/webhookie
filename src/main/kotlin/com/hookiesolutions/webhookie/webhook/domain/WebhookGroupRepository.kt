@@ -84,17 +84,20 @@ class WebhookGroupRepository(
     val asField = "subscriptions"
     val subscriptionsKey = "${'$'}$asField"
     val topicsKey = "${'$'}$KEY_TOPICS"
-    val agg: Aggregation = Aggregation.newAggregation(
+    val topicsAggregation = arrayOf(
       Aggregation.match(criteria),
       Aggregation.project(KEY_TOPICS),
       Aggregation.unwind(topicsKey),
       Aggregation.replaceRoot(topicsKey),
+    )
+    val aggregation: Aggregation = Aggregation.newAggregation(
+      *topicsAggregation,
       Aggregation.lookup(SUBSCRIPTION_COLLECTION_NAME, KEY_TOPIC_NAME, KEY_TOPIC, asField),
       Aggregation.unwind(subscriptionsKey),
       Aggregation.replaceRoot(subscriptionsKey)
     )
     return mongoTemplate.aggregate(
-      agg,
+      aggregation,
       WebhookGroup::class.java,
       Subscription::class.java
     )
