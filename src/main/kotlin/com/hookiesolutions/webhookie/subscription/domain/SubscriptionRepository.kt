@@ -3,7 +3,6 @@ package com.hookiesolutions.webhookie.subscription.domain
 import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.byId
 import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
 import com.hookiesolutions.webhookie.common.repository.GenericRepository
-import com.hookiesolutions.webhookie.subscription.domain.Application.Keys.Companion.APPLICATION_COLLECTION_NAME
 import com.hookiesolutions.webhookie.subscription.domain.Application.Queries.Companion.applicationConsumerGroupsIn
 import com.hookiesolutions.webhookie.subscription.domain.Application.Queries.Companion.applicationsByEntity
 import com.hookiesolutions.webhookie.subscription.domain.ApplicationDetails.Keys.Companion.KEY_APPLICATION_ID
@@ -73,7 +72,7 @@ class SubscriptionRepository(
       Aggregation.unwind(subscriptionsKey),
       Aggregation.replaceRoot(subscriptionsKey)
     )
-    return mongoTemplate.aggregate(agg, APPLICATION_COLLECTION_NAME, Subscription::class.java)
+    return mongoTemplate.aggregate(agg, Application::class.java, Subscription::class.java)
   }
 
   fun findAuthorizedTopicSubscriptions(topic: String, authorizedSubscribers: Set<String>): Flux<Subscription> {
