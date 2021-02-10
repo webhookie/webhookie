@@ -3,7 +3,9 @@ package com.hookiesolutions.webhookie.webhook.domain
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.KEY_CONSUMER_ACCESS
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.KEY_CONSUMER_IAM_GROUPS
+import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.KEY_PROVIDER_ACCESS
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.KEY_PROVIDER_IAM_GROUPS
+import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.WEBHOOK_GROUP_COLLECTION_NAME
 import org.springframework.data.annotation.TypeAlias
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
@@ -15,7 +17,7 @@ import org.springframework.data.mongodb.core.query.Criteria.where
  * @author Arthur Kazemi<bidadh@gmail.com>
  * @since 19/1/21 16:08
  */
-@Document(collection = "webhook_group")
+@Document(collection = WEBHOOK_GROUP_COLLECTION_NAME)
 @TypeAlias("webhookGroup")
 data class WebhookGroup(
   val title: String,
@@ -36,12 +38,16 @@ data class WebhookGroup(
         return where(KEY_CONSUMER_IAM_GROUPS).`in`(groups)
       }
 
-      private fun providerGroupsIn(groups: Collection<String>): Criteria {
+      fun providerGroupsIn(groups: Collection<String>): Criteria {
         return where(KEY_PROVIDER_IAM_GROUPS).`in`(groups)
       }
 
       private fun publicForConsumers(): Criteria {
         return where(KEY_CONSUMER_ACCESS).`is`(ConsumerAccess.PUBLIC)
+      }
+
+      fun accessibleForAllProviders(): Criteria {
+        return where(KEY_PROVIDER_ACCESS).`is`(ProviderAccess.ALL)
       }
 
       fun accessibleForGroups(groups: Collection<String>): Criteria {
@@ -61,6 +67,9 @@ data class WebhookGroup(
       const val KEY_PROVIDER_IAM_GROUPS = "providerIAMGroups"
       const val KEY_CONSUMER_ACCESS = "consumerAccess"
       const val KEY_NUMBER_OF_TOPICS = "numberOfTopics"
+      const val KEY_PROVIDER_ACCESS = "providerAccess"
+      const val KEY_TOPICS = "topics"
+      const val WEBHOOK_GROUP_COLLECTION_NAME = "webhook_group"
     }
   }
 }

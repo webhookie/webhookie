@@ -2,6 +2,7 @@ package com.hookiesolutions.webhookie.webhook.web
 
 import com.fasterxml.jackson.annotation.JsonView
 import com.hookiesolutions.webhookie.common.config.web.OpenAPIConfig.Companion.OAUTH2_SCHEME
+import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
 import com.hookiesolutions.webhookie.webhook.config.WebhookGroupAPIDocs.Companion.REQUEST_MAPPING_WEBHOOK_GROUPS
 import com.hookiesolutions.webhookie.webhook.service.WebhookGroupService
 import com.hookiesolutions.webhookie.webhook.service.model.WebhookGroupRequest
@@ -95,4 +96,14 @@ class WebhookGroupController(
     return service.updateWebhookGroup(id, request)
       .map { WebhookGroupResponse(it) }
   }
+
+  @GetMapping(
+    "/subscriptions",
+    produces = [MediaType.APPLICATION_JSON_VALUE]
+  )
+  fun mySubscriptions(): Flux<SubscriptionDTO> {
+    return service.mySubscriptions()
+      .map { it.dto() }
+  }
+
 }

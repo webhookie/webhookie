@@ -6,4 +6,10 @@ data class Topic(
   @Indexed(unique = true)
   val name: String,
   val description: String?
-)
+) {
+  class Keys {
+    companion object {
+      const val KEY_TOPIC_NAME = "name"
+    }
+  }
+}
