@@ -1,5 +1,6 @@
 package com.hookiesolutions.webhookie.subscription.utils
 
+import com.hookiesolutions.webhookie.subscription.domain.CallbackDetails
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
@@ -17,8 +18,12 @@ class CryptoUtils {
     const val ALG = "HmacSHA256"
 
     fun hmac(secret: String, subscription: Subscription, time: String, traceId: String, spanId: String): Mono<String> {
+      return hmac(secret, subscription.callback, time, traceId, spanId)
+    }
+
+    fun hmac(secret: String, callback: CallbackDetails, time: String, traceId: String, spanId: String): Mono<String> {
       val signatureValue =
-        "(request-target): ${subscription.requestTarget()}" +
+        "(request-target): ${callback.requestTarget()}" +
             " date: $time" +
             " x-trace-id: $traceId" +
             " x-span-id: $spanId"

@@ -24,14 +24,14 @@ class SubscriptionSignor(
     return Mono.justOrEmpty(subscription.callback.security)
       .zipWhen { CryptoUtils.hmac(it.secret.secret, subscription, time, consumerMessage.headers.traceId, spanId) }
       .map {
-        SubscriptionSignature(
-          it.t1.secret.keyId,
-          ALG,
-          consumerMessage.headers.traceId,
-          spanId,
-          time,
-          it.t2
-        )
+        SubscriptionSignature.Builder()
+          .keyId(it.t1.secret.keyId)
+          .algorithm(ALG)
+          .traceId(consumerMessage.headers.traceId)
+          .spanId(spanId)
+          .date(time)
+          .signature(it.t2)
+          .build()
       }
   }
 }
