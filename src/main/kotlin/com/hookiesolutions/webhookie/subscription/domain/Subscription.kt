@@ -52,14 +52,14 @@ data class Subscription(
     )
   }
 
-  fun requestTarget(): String {
-    return callback.requestTarget()
-  }
-
   class Queries {
     companion object {
       fun topicIs(topic: String): Criteria {
         return where(KEY_TOPIC).`is`(topic)
+      }
+
+      fun topicIsIn(topics: Collection<String>): Criteria {
+        return where(KEY_TOPIC).`in`(topics)
       }
 
       fun isAuthorized(entities: Set<String>): Criteria {

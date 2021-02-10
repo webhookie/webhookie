@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Flux
@@ -59,8 +60,21 @@ class SubscriptionController(
   @GetMapping(
     produces = [MediaType.APPLICATION_JSON_VALUE]
   )
-  fun consumerSubscriptions(): Flux<SubscriptionDTO> {
-    return service.consumerSubscriptions()
+  fun subscriptions(
+    @RequestParam(required = true, defaultValue = PARAM_CONSUMER) role: String
+  ): Flux<SubscriptionDTO> {
+    val subscriptionFlux = when (role) {
+      PARAM_CONSUMER -> {
+        service.consumerSubscriptions()
+      }
+      PARAM_PROVIDER -> {
+        service.providerSubscriptions()
+      }
+      else -> {
+        Flux.error(IllegalArgumentException("role can be '$PARAM_CONSUMER' or '$PARAM_PROVIDER'"))
+      }
+    }
+    return subscriptionFlux
       .map { it.dto() }
   }
 
@@ -121,5 +135,10 @@ class SubscriptionController(
         log.info("Subscription({}) was blocked because '{}'", id, details.reason)
       }
       .map { details.reason }
+  }
+
+  companion object {
+    const val PARAM_CONSUMER = "consumer"
+    const val PARAM_PROVIDER = "provider"
   }
 }

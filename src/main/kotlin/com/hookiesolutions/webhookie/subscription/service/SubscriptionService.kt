@@ -1,6 +1,7 @@
 package com.hookiesolutions.webhookie.subscription.service
 
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_CONSUMER
+import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_PROVIDER
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherErrorMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
@@ -17,6 +18,7 @@ import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.subscription.domain.SubscriptionRepository
 import com.hookiesolutions.webhookie.subscription.service.model.CreateSubscriptionRequest
 import com.hookiesolutions.webhookie.subscription.service.model.UpdateSubscriptionRequest
+import com.hookiesolutions.webhookie.webhook.service.WebhookGroupServiceDelegate
 import org.slf4j.Logger
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
@@ -40,7 +42,8 @@ class SubscriptionService(
   private val factory: ConversionsFactory,
   private val repository: SubscriptionRepository,
   private val callbackRepository: CallbackRepository,
-  private val applicationRepository: ApplicationRepository
+  private val applicationRepository: ApplicationRepository,
+  private val webhookServiceDelegate: WebhookGroupServiceDelegate
 ) {
   @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")
   fun createSubscription(request: CreateSubscriptionRequest): Mono<Subscription> {
@@ -72,6 +75,15 @@ class SubscriptionService(
     return securityHandler.data()
       .doOnNext { log.info("Fetching all subscriptions for token: '{}'", it) }
       .flatMapMany { repository.findAllConsumerSubscriptions(it.entity, it.groups) }
+  }
+
+  @PreAuthorize("hasAuthority('$ROLE_PROVIDER')")
+  fun providerSubscriptions(): Flux<Subscription> {
+    log.info("Fetching provider topics...")
+    return webhookServiceDelegate.providerTopics()
+      .collectList()
+      .doOnNext { log.info("Fetching topic subscriptions for topics: '{}'", it) }
+      .flatMapMany { repository.topicSubscriptions(it) }
   }
 
   @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")

@@ -13,6 +13,7 @@ import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Co
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Companion.callbackIdIs
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Companion.isAuthorized
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Companion.topicIs
+import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Companion.topicIsIn
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Updates.Companion.blockSubscriptionUpdate
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Updates.Companion.unblockSubscriptionUpdate
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Updates.Companion.updateApplication
@@ -73,6 +74,14 @@ class SubscriptionRepository(
       Aggregation.replaceRoot(subscriptionsKey)
     )
     return mongoTemplate.aggregate(aggregation, Application::class.java, Subscription::class.java)
+  }
+
+  fun topicSubscriptions(topics: List<String>): Flux<Subscription> {
+    return mongoTemplate
+      .find(
+        query(topicIsIn(topics)),
+        Subscription::class.java
+      )
   }
 
   fun findAuthorizedTopicSubscriptions(topic: String, authorizedSubscribers: Set<String>): Flux<Subscription> {
