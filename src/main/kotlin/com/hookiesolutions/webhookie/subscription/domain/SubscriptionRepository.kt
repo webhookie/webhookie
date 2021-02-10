@@ -62,7 +62,7 @@ class SubscriptionRepository(
     val subscriptionsKey = "${'$'}subscriptions"
     val localField = "aId"
     val foreignField = "$KEY_APPLICATION.$KEY_APPLICATION_ID"
-    val agg: Aggregation = Aggregation.newAggregation(
+    val aggregation: Aggregation = Aggregation.newAggregation(
       Aggregation.match(criteria),
       Aggregation
         .addFields()
@@ -72,7 +72,7 @@ class SubscriptionRepository(
       Aggregation.unwind(subscriptionsKey),
       Aggregation.replaceRoot(subscriptionsKey)
     )
-    return mongoTemplate.aggregate(agg, Application::class.java, Subscription::class.java)
+    return mongoTemplate.aggregate(aggregation, Application::class.java, Subscription::class.java)
   }
 
   fun findAuthorizedTopicSubscriptions(topic: String, authorizedSubscribers: Set<String>): Flux<Subscription> {
