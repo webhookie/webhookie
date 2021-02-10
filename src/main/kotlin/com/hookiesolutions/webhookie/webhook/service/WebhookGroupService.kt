@@ -11,6 +11,7 @@ import com.hookiesolutions.webhookie.common.model.DeletableEntity.Companion.dele
 import com.hookiesolutions.webhookie.common.model.UpdatableEntity.Companion.updatable
 import com.hookiesolutions.webhookie.common.service.AdminServiceDelegate
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
+import com.hookiesolutions.webhookie.webhook.domain.Topic
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.KEY_CONSUMER_IAM_GROUPS
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.KEY_PROVIDER_IAM_GROUPS
@@ -81,6 +82,12 @@ class WebhookGroupService(
   fun mySubscriptions(): Flux<Subscription> {
     return securityService.tokenGroups()
       .flatMapMany { repository.mySubscriptionsAsProvider(it) }
+  }
+
+  @PreAuthorize("hasAuthority('${ROLE_PROVIDER}')")
+  fun myTopics(): Flux<Topic> {
+    return securityService.tokenGroups()
+      .flatMapMany { repository.myTopicsAsProvider(it) }
   }
 
   @ServiceActivator(inputChannel = ADMIN_CONSUMER_GROUP_DELETED_CHANNEL_NAME)

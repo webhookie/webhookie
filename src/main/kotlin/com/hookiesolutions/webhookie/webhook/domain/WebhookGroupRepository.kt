@@ -7,9 +7,8 @@ import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Compa
 import com.hookiesolutions.webhookie.webhook.domain.Topic.Keys.Companion.KEY_TOPIC_NAME
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.KEY_NUMBER_OF_TOPICS
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.KEY_TOPICS
-import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Queries.Companion.accessibleForAllProviders
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Queries.Companion.accessibleForGroups
-import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Queries.Companion.providerGroupsIn
+import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Queries.Companion.accessibleForProvider
 import com.hookiesolutions.webhookie.webhook.service.security.annotation.VerifyWebhookGroupReadAccess
 import com.hookiesolutions.webhookie.webhook.service.security.annotation.VerifyWebhookGroupWriteAccess
 import com.mongodb.client.result.UpdateResult
@@ -17,7 +16,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.aggregation.Aggregation
-import org.springframework.data.mongodb.core.query.Criteria
+import org.springframework.data.mongodb.core.aggregation.AggregationOperation
 import org.springframework.data.mongodb.core.query.Criteria.where
 import org.springframework.data.mongodb.core.query.Query.query
 import org.springframework.data.mongodb.core.query.Update
@@ -76,22 +75,10 @@ class WebhookGroupRepository(
   }
 
   fun mySubscriptionsAsProvider(tokenGroups: List<String>): Flux<Subscription> {
-    val criteria = Criteria()
-      .orOperator(
-        accessibleForAllProviders(),
-        providerGroupsIn(tokenGroups)
-      )
     val asField = "subscriptions"
     val subscriptionsKey = "${'$'}$asField"
-    val topicsKey = "${'$'}$KEY_TOPICS"
-    val topicsAggregation = arrayOf(
-      Aggregation.match(criteria),
-      Aggregation.project(KEY_TOPICS),
-      Aggregation.unwind(topicsKey),
-      Aggregation.replaceRoot(topicsKey),
-    )
     val aggregation: Aggregation = Aggregation.newAggregation(
-      *topicsAggregation,
+      *providerTopicsAggregation(tokenGroups),
       Aggregation.lookup(SUBSCRIPTION_COLLECTION_NAME, KEY_TOPIC_NAME, KEY_TOPIC, asField),
       Aggregation.unwind(subscriptionsKey),
       Aggregation.replaceRoot(subscriptionsKey)
@@ -102,6 +89,28 @@ class WebhookGroupRepository(
       Subscription::class.java
     )
   }
+
+  fun myTopicsAsProvider(tokenGroups: List<String>): Flux<Topic> {
+    val aggregation: Aggregation = Aggregation.newAggregation(
+      *providerTopicsAggregation(tokenGroups)
+    )
+    return mongoTemplate.aggregate(
+      aggregation,
+      WebhookGroup::class.java,
+      Topic::class.java
+    )
+  }
+
+  private fun providerTopicsAggregation(tokenGroups: List<String>): Array<AggregationOperation> {
+    val topicsKey = "${'$'}$KEY_TOPICS"
+    return arrayOf(
+      Aggregation.match(accessibleForProvider(tokenGroups)),
+      Aggregation.project(KEY_TOPICS),
+      Aggregation.unwind(topicsKey),
+      Aggregation.replaceRoot(topicsKey),
+    )
+  }
+
 
   companion object {
     private val DEFAULT_SORT = Sort.by(KEY_NUMBER_OF_TOPICS).descending()

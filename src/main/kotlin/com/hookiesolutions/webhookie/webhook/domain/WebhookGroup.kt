@@ -38,7 +38,7 @@ data class WebhookGroup(
         return where(KEY_CONSUMER_IAM_GROUPS).`in`(groups)
       }
 
-      fun providerGroupsIn(groups: Collection<String>): Criteria {
+      private fun providerGroupsIn(groups: Collection<String>): Criteria {
         return where(KEY_PROVIDER_IAM_GROUPS).`in`(groups)
       }
 
@@ -46,8 +46,16 @@ data class WebhookGroup(
         return where(KEY_CONSUMER_ACCESS).`is`(ConsumerAccess.PUBLIC)
       }
 
-      fun accessibleForAllProviders(): Criteria {
+      private fun accessibleForAllProviders(): Criteria {
         return where(KEY_PROVIDER_ACCESS).`is`(ProviderAccess.ALL)
+      }
+
+      fun accessibleForProvider(groups: Collection<String>): Criteria {
+        return Criteria()
+          .orOperator(
+            accessibleForAllProviders(),
+            providerGroupsIn(groups)
+          )
       }
 
       fun accessibleForGroups(groups: Collection<String>): Criteria {

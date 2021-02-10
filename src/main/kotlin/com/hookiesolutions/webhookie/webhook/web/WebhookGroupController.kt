@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView
 import com.hookiesolutions.webhookie.common.config.web.OpenAPIConfig.Companion.OAUTH2_SCHEME
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
 import com.hookiesolutions.webhookie.webhook.config.WebhookGroupAPIDocs.Companion.REQUEST_MAPPING_WEBHOOK_GROUPS
+import com.hookiesolutions.webhookie.webhook.domain.Topic
 import com.hookiesolutions.webhookie.webhook.service.WebhookGroupService
 import com.hookiesolutions.webhookie.webhook.service.model.WebhookGroupRequest
 import com.hookiesolutions.webhookie.webhook.web.response.WebhookGroupResponse
@@ -106,4 +107,11 @@ class WebhookGroupController(
       .map { it.dto() }
   }
 
+  @GetMapping(
+    "/topics",
+    produces = [MediaType.APPLICATION_JSON_VALUE]
+  )
+  fun myTopics(): Flux<Topic> {
+    return service.myTopics()
+  }
 }
