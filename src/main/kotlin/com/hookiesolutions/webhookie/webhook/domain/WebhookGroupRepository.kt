@@ -1,10 +1,6 @@
 package com.hookiesolutions.webhookie.webhook.domain
 
 import com.hookiesolutions.webhookie.common.repository.GenericRepository
-import com.hookiesolutions.webhookie.subscription.domain.Subscription
-import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_TOPIC
-import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.SUBSCRIPTION_COLLECTION_NAME
-import com.hookiesolutions.webhookie.webhook.domain.Topic.Keys.Companion.KEY_TOPIC_NAME
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.KEY_NUMBER_OF_TOPICS
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.KEY_TOPICS
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Queries.Companion.accessibleForGroups
@@ -16,7 +12,6 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.aggregation.Aggregation
-import org.springframework.data.mongodb.core.aggregation.AggregationOperation
 import org.springframework.data.mongodb.core.query.Criteria.where
 import org.springframework.data.mongodb.core.query.Query.query
 import org.springframework.data.mongodb.core.query.Update
@@ -74,25 +69,13 @@ class WebhookGroupRepository(
       )
   }
 
-  fun mySubscriptionsAsProvider(tokenGroups: List<String>): Flux<Subscription> {
-    val asField = "subscriptions"
-    val subscriptionsKey = "${'$'}$asField"
-    val aggregation: Aggregation = Aggregation.newAggregation(
-      *providerTopicsAggregation(tokenGroups),
-      Aggregation.lookup(SUBSCRIPTION_COLLECTION_NAME, KEY_TOPIC_NAME, KEY_TOPIC, asField),
-      Aggregation.unwind(subscriptionsKey),
-      Aggregation.replaceRoot(subscriptionsKey)
-    )
-    return mongoTemplate.aggregate(
-      aggregation,
-      WebhookGroup::class.java,
-      Subscription::class.java
-    )
-  }
-
   fun myTopicsAsProvider(tokenGroups: List<String>): Flux<Topic> {
+    val topicsKey = "${'$'}$KEY_TOPICS"
     val aggregation: Aggregation = Aggregation.newAggregation(
-      *providerTopicsAggregation(tokenGroups)
+      Aggregation.match(accessibleForProvider(tokenGroups)),
+      Aggregation.project(KEY_TOPICS),
+      Aggregation.unwind(topicsKey),
+      Aggregation.replaceRoot(topicsKey),
     )
     return mongoTemplate.aggregate(
       aggregation,
@@ -100,17 +83,6 @@ class WebhookGroupRepository(
       Topic::class.java
     )
   }
-
-  private fun providerTopicsAggregation(tokenGroups: List<String>): Array<AggregationOperation> {
-    val topicsKey = "${'$'}$KEY_TOPICS"
-    return arrayOf(
-      Aggregation.match(accessibleForProvider(tokenGroups)),
-      Aggregation.project(KEY_TOPICS),
-      Aggregation.unwind(topicsKey),
-      Aggregation.replaceRoot(topicsKey),
-    )
-  }
-
 
   companion object {
     private val DEFAULT_SORT = Sort.by(KEY_NUMBER_OF_TOPICS).descending()

@@ -10,7 +10,6 @@ import com.hookiesolutions.webhookie.common.message.entity.EntityUpdatedMessage
 import com.hookiesolutions.webhookie.common.model.DeletableEntity.Companion.deletable
 import com.hookiesolutions.webhookie.common.model.UpdatableEntity.Companion.updatable
 import com.hookiesolutions.webhookie.common.service.AdminServiceDelegate
-import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.webhook.domain.Topic
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.KEY_CONSUMER_IAM_GROUPS
@@ -76,12 +75,6 @@ class WebhookGroupService(
       .flatMap { verifyRequestGroups(request) }
       .map { updatable(request.toWebhookGroup()) }
       .flatMap { repository.update(it, id) }
-  }
-
-  @PreAuthorize("hasAuthority('${ROLE_PROVIDER}')")
-  fun mySubscriptions(): Flux<Subscription> {
-    return securityService.tokenGroups()
-      .flatMapMany { repository.mySubscriptionsAsProvider(it) }
   }
 
   @PreAuthorize("hasAuthority('${ROLE_PROVIDER}')")
