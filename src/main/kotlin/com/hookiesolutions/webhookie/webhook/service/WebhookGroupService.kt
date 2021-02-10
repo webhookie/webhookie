@@ -80,6 +80,7 @@ class WebhookGroupService(
   @PreAuthorize("hasAuthority('${ROLE_PROVIDER}')")
   fun myTopics(): Flux<Topic> {
     return securityService.tokenGroups()
+      .doOnNext { log.info("Fetching all topics for groups: '{}'", it) }
       .flatMapMany { repository.myTopicsAsProvider(it) }
   }
 
