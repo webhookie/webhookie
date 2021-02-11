@@ -99,6 +99,7 @@ class SubscriptionService(
       .flatMapMany { repository.topicSubscriptions(it) }
   }
 
+  @Suppress("unused")
   @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")
   fun updateSubscription(id: String, request: UpdateSubscriptionRequest): Mono<Subscription> {
     log.info("Updating Subscription '{}' using callback: '{}'", id, request.callbackId)
