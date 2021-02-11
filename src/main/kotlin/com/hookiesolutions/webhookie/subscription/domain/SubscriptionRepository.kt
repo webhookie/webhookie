@@ -15,6 +15,7 @@ import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Co
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Companion.topicIs
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Companion.topicIsIn
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Updates.Companion.blockSubscriptionUpdate
+import com.hookiesolutions.webhookie.subscription.domain.Subscription.Updates.Companion.subscriptionStatusUpdate
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Updates.Companion.unblockSubscriptionUpdate
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Updates.Companion.updateApplication
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Updates.Companion.updateCallback
@@ -140,6 +141,14 @@ class SubscriptionRepository(
     return mongoTemplate.updateMulti(
       query(applicationIdIs(id)),
       updateApplication(details),
+      Subscription::class.java
+    )
+  }
+
+  fun statusUpdate(id: String, statusUpdate: StatusUpdate): Mono<UpdateResult> {
+    return mongoTemplate.updateFirst(
+      query(byId(id)),
+      subscriptionStatusUpdate(statusUpdate),
       Subscription::class.java
     )
   }

@@ -15,10 +15,12 @@ import com.hookiesolutions.webhookie.security.service.SecurityHandler
 import com.hookiesolutions.webhookie.subscription.domain.ApplicationRepository
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
 import com.hookiesolutions.webhookie.subscription.domain.CallbackRepository
+import com.hookiesolutions.webhookie.subscription.domain.StatusUpdate.Companion.validated
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.subscription.domain.SubscriptionRepository
 import com.hookiesolutions.webhookie.subscription.service.model.CreateSubscriptionRequest
 import com.hookiesolutions.webhookie.subscription.service.model.UpdateSubscriptionRequest
+import com.hookiesolutions.webhookie.subscription.service.model.subscription.ValidateSubscriptionRequest
 import com.hookiesolutions.webhookie.webhook.service.WebhookGroupServiceDelegate
 import org.slf4j.Logger
 import org.springframework.security.access.prepost.PreAuthorize
@@ -44,6 +46,8 @@ class SubscriptionService(
   private val repository: SubscriptionRepository,
   private val callbackRepository: CallbackRepository,
   private val applicationRepository: ApplicationRepository,
+  private val stateManager: SubscriptionStateManager,
+  private val subscriptionValidator: SubscriptionValidator,
   private val webhookServiceDelegate: WebhookGroupServiceDelegate
 ) {
   @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")
@@ -118,6 +122,19 @@ class SubscriptionService(
             .doOnNext { log.info("Subscription '{}' was modified to callback: '{}'", it.id, it.callback.requestTarget()) }
         }
       }
+  }
+
+  @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")
+  fun validateSubscription(id: String, request: ValidateSubscriptionRequest): Mono<Boolean> {
+    log.info("Validating Subscription '{}'...", id)
+
+    return repository
+      .findByIdVerifyingWriteAccess(id)
+      .flatMap { stateManager.canBeValidated(it) }
+      .flatMap { subscriptionValidator.validate(it, request) }
+      .flatMap { repository.statusUpdate(id, validated(timeMachine.now())) }
+      .doOnNext { log.info("Subscription '{}' validated successfully", id) }
+      .map { it.modifiedCount > 0 }
   }
 
   fun findSubscriptionsFor(consumerMessage: ConsumerMessage): Flux<Subscription> {

@@ -12,6 +12,7 @@ import com.hookiesolutions.webhookie.subscription.domain.Subscription.Updates.Co
 import com.hookiesolutions.webhookie.subscription.service.SubscriptionService
 import com.hookiesolutions.webhookie.subscription.service.model.CreateSubscriptionRequest
 import com.hookiesolutions.webhookie.subscription.service.model.UpdateSubscriptionRequest
+import com.hookiesolutions.webhookie.subscription.service.model.subscription.ValidateSubscriptionRequest
 import com.hookiesolutions.webhookie.subscription.web.SubscriptionAPIDocs.Companion.REQUEST_MAPPING_SUBSCRIPTIONS
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.slf4j.Logger
@@ -96,6 +97,19 @@ class SubscriptionController(
     @RequestBody @Valid request: UpdateSubscriptionRequest
   ): Mono<SubscriptionDTO> {
     TODO()
+  }
+
+  @PostMapping(
+    "/{id}/validate",
+    consumes = [MediaType.APPLICATION_JSON_VALUE],
+    produces = [MediaType.APPLICATION_JSON_VALUE]
+  )
+  fun validateSubscription(
+    @PathVariable id: String,
+    @RequestBody @Valid request: ValidateSubscriptionRequest
+  ): Mono<String> {
+    return service.validateSubscription(id, request)
+      .map { "Done" }
   }
 
   @PatchMapping(

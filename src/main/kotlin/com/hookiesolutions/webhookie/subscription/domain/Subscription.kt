@@ -10,6 +10,7 @@ import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Compa
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_BLOCK_DETAILS
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_CALLBACK
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_ENTITY
+import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_STATUS_UPDATE
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_TOPIC
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.SUBSCRIPTION_COLLECTION_NAME
 import org.springframework.data.annotation.TypeAlias
@@ -94,6 +95,13 @@ data class Subscription(
         return update
       }
 
+      fun subscriptionStatusUpdate(statusUpdate: StatusUpdate): Update {
+        val update = Update()
+          .set(KEY_STATUS_UPDATE, statusUpdate)
+        update.inc(KEY_VERSION)
+        return update
+      }
+
       fun unblockSubscriptionUpdate(): Update {
         return Update()
           .unset(KEY_BLOCK_DETAILS)
@@ -115,6 +123,7 @@ data class Subscription(
       const val KEY_BLOCK_DETAILS = "blockedDetails"
       const val KEY_APPLICATION = "application"
       const val KEY_CALLBACK = "callback"
+      const val KEY_STATUS_UPDATE = "statusUpdate"
       const val SUBSCRIPTION_COLLECTION_NAME = "subscription"
     }
   }
