@@ -21,6 +21,15 @@ class SubscriptionStateManager {
     } else {
       Mono.error(IllegalArgumentException("'${subscription.statusUpdate.status}' Subscription cannot be validated!"))
     }
+  }
 
+  fun canBeActivated(subscription: Subscription): Mono<Subscription> {
+    val canBeActivated = listOf(SubscriptionStatus.VALIDATED, SubscriptionStatus.DEACTIVATED)
+      .contains(subscription.statusUpdate.status)
+    return if (canBeActivated) {
+      subscription.toMono()
+    } else {
+      Mono.error(IllegalArgumentException("'${subscription.statusUpdate.status}' Subscription cannot be activated!"))
+    }
   }
 }

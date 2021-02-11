@@ -102,13 +102,24 @@ class SubscriptionController(
   @PostMapping(
     "/{id}/validate",
     consumes = [MediaType.APPLICATION_JSON_VALUE],
-    produces = [MediaType.APPLICATION_JSON_VALUE]
+    produces = [MediaType.TEXT_PLAIN_VALUE]
   )
   fun validateSubscription(
     @PathVariable id: String,
     @RequestBody @Valid request: ValidateSubscriptionRequest
   ): Mono<String> {
     return service.validateSubscription(id, request)
+      .map { "Done" }
+  }
+
+  @PostMapping(
+    "/{id}/activate",
+    produces = [MediaType.TEXT_PLAIN_VALUE]
+  )
+  fun activateSubscription(
+    @PathVariable id: String
+  ): Mono<String> {
+    return service.activateSubscription(id)
       .map { "Done" }
   }
 

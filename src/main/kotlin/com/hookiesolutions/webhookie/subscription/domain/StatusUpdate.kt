@@ -38,5 +38,12 @@ data class StatusUpdate(
         .at(at)
         .build()
     }
+
+    fun activated(at: Instant): StatusUpdate {
+      return Builder()
+        .status(SubscriptionStatus.ACTIVATED)
+        .at(at)
+        .build()
+    }
   }
 }

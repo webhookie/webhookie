@@ -8,6 +8,7 @@ package com.hookiesolutions.webhookie.subscription.domain
 enum class SubscriptionStatus {
   SAVED,
   VALIDATED,
+  ACTIVATED,
   DEACTIVATED,
   BLOCKED,
 }

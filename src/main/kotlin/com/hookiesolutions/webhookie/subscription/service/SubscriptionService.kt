@@ -15,6 +15,7 @@ import com.hookiesolutions.webhookie.security.service.SecurityHandler
 import com.hookiesolutions.webhookie.subscription.domain.ApplicationRepository
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
 import com.hookiesolutions.webhookie.subscription.domain.CallbackRepository
+import com.hookiesolutions.webhookie.subscription.domain.StatusUpdate.Companion.activated
 import com.hookiesolutions.webhookie.subscription.domain.StatusUpdate.Companion.validated
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.subscription.domain.SubscriptionRepository
@@ -134,6 +135,18 @@ class SubscriptionService(
       .flatMap { subscriptionValidator.validate(it, request) }
       .flatMap { repository.statusUpdate(id, validated(timeMachine.now())) }
       .doOnNext { log.info("Subscription '{}' validated successfully", id) }
+      .map { it.modifiedCount > 0 }
+  }
+
+  @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")
+  fun activateSubscription(id: String): Mono<Boolean> {
+    log.info("Activating Subscription '{}'...", id)
+
+    return repository
+      .findByIdVerifyingWriteAccess(id)
+      .flatMap { stateManager.canBeActivated(it) }
+      .flatMap { repository.statusUpdate(id, activated(timeMachine.now())) }
+      .doOnNext { log.info("Subscription '{}' activated successfully", id) }
       .map { it.modifiedCount > 0 }
   }
 
