@@ -13,37 +13,49 @@ import reactor.kotlin.core.publisher.toMono
  */
 @Service
 class SubscriptionStateManager {
-  fun canBeValidated(subscription: Subscription): Mono<Subscription> {
-    return verifyAction(
-      subscription,
-      listOf(SubscriptionStatus.SAVED, SubscriptionStatus.BLOCKED, SubscriptionStatus.DEACTIVATED),
-      SubscriptionStatus.VALIDATED
-    )
+  fun canBeValidated(subscription: Subscription): Mono<List<SubscriptionStatus>> {
+    return verifyAction(subscription, SubscriptionStatus.VALIDATED)
   }
 
-  fun canBeActivated(subscription: Subscription): Mono<Subscription> {
-    return verifyAction(
-      subscription,
-      listOf(SubscriptionStatus.VALIDATED, SubscriptionStatus.DEACTIVATED),
-      SubscriptionStatus.ACTIVATED
-    )
+  fun canBeActivated(subscription: Subscription): Mono<List<SubscriptionStatus>> {
+    return verifyAction(subscription, SubscriptionStatus.ACTIVATED)
   }
 
-  fun canBeDeactivated(subscription: Subscription): Mono<Subscription> {
-    return verifyAction(
-      subscription,
-      listOf(SubscriptionStatus.ACTIVATED),
-      SubscriptionStatus.DEACTIVATED
-    )
+  fun canBeDeactivated(subscription: Subscription): Mono<List<SubscriptionStatus>> {
+    return verifyAction(subscription, SubscriptionStatus.DEACTIVATED)
   }
 
-  fun verifyAction(
+  fun canBeSuspended(subscription: Subscription): Mono<List<SubscriptionStatus>> {
+    return verifyAction(subscription, SubscriptionStatus.SUSPENDED)
+  }
+
+  private fun validStatusListForUpdate(toBeStatus: SubscriptionStatus): List<SubscriptionStatus> {
+    return when (toBeStatus) {
+      SubscriptionStatus.VALIDATED -> {
+        listOf(SubscriptionStatus.SAVED, SubscriptionStatus.BLOCKED, SubscriptionStatus.DEACTIVATED)
+      }
+      SubscriptionStatus.ACTIVATED -> {
+        listOf(SubscriptionStatus.VALIDATED, SubscriptionStatus.DEACTIVATED)
+      }
+      SubscriptionStatus.DEACTIVATED -> {
+        listOf(SubscriptionStatus.ACTIVATED)
+      }
+      SubscriptionStatus.SUSPENDED -> {
+        return SubscriptionStatus.values().asList()
+      }
+      else -> {
+        return emptyList()
+      }
+    }
+  }
+
+  private fun verifyAction(
     subscription: Subscription,
-    validStatusList: List<SubscriptionStatus>,
     status: SubscriptionStatus
-  ): Mono<Subscription> {
+  ): Mono<List<SubscriptionStatus>> {
+    val validStatusList = validStatusListForUpdate(status)
     return if (validStatusList.contains(subscription.statusUpdate.status)) {
-      subscription.toMono()
+      validStatusList.toMono()
     } else {
       Mono.error(IllegalArgumentException("'${subscription.statusUpdate.status}' Subscription cannot be ${status.name.toLowerCase()}!"))
     }

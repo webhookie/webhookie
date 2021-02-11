@@ -12,6 +12,7 @@ import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Compa
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Companion.applicationIdIs
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Companion.callbackIdIs
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Companion.isAuthorized
+import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Companion.statusIsIn
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Companion.subscriptionIsActive
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Companion.topicIs
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Companion.topicIsIn
@@ -153,11 +154,15 @@ class SubscriptionRepository(
     )
   }
 
-  fun statusUpdate(id: String, statusUpdate: StatusUpdate): Mono<UpdateResult> {
-    return mongoTemplate.updateFirst(
-      query(byId(id)),
-      subscriptionStatusUpdate(statusUpdate),
-      Subscription::class.java
-    )
+  fun statusUpdate(id: String, statusUpdate: StatusUpdate, validStatusList: List<SubscriptionStatus>): Mono<Subscription> {
+    val criteria = byId(id)
+      .andOperator(statusIsIn(validStatusList))
+    return mongoTemplate
+      .findAndModify(
+        query(criteria),
+        subscriptionStatusUpdate(statusUpdate),
+        FindAndModifyOptions.options().returnNew(true),
+        Subscription::class.java
+      )
   }
 }

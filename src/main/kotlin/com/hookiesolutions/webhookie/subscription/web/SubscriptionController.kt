@@ -110,7 +110,7 @@ class SubscriptionController(
     @RequestBody @Valid request: ValidateSubscriptionRequest
   ): Mono<String> {
     return service.validateSubscription(id, request)
-      .map { "Done" }
+      .map { it.name }
   }
 
   @PostMapping(
@@ -121,7 +121,7 @@ class SubscriptionController(
     @PathVariable id: String
   ): Mono<String> {
     return service.activateSubscription(id)
-      .map { "Done" }
+      .map { it.name }
   }
 
   @PostMapping(
@@ -134,7 +134,7 @@ class SubscriptionController(
     @RequestBody request: ReasonRequest
   ): Mono<String> {
     return service.deactivateSubscription(id, request)
-      .map { "Done" }
+      .map { it.name }
   }
 
   @PostMapping(
@@ -147,7 +147,7 @@ class SubscriptionController(
     @RequestBody request: ReasonRequest
   ): Mono<String> {
     return service.suspendSubscription(id, request)
-      .map { "Done" }
+      .map { it.name }
   }
 
   @PatchMapping(

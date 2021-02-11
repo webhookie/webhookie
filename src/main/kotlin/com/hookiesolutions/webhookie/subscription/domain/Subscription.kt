@@ -74,6 +74,10 @@ data class Subscription(
         return where(KEY_TOPIC).`in`(topics)
       }
 
+      fun statusIsIn(statusUpdateList: List<SubscriptionStatus>): Criteria {
+        return where("$KEY_STATUS_UPDATE.$KEY_STATUS").`in`(statusUpdateList)
+      }
+
       fun isAuthorized(entities: Set<String>): Criteria {
         return where(KEY_ENTITY)
           .`in`(entities)

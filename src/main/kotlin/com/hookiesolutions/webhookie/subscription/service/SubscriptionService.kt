@@ -21,6 +21,7 @@ import com.hookiesolutions.webhookie.subscription.domain.StatusUpdate.Companion.
 import com.hookiesolutions.webhookie.subscription.domain.StatusUpdate.Companion.validated
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.subscription.domain.SubscriptionRepository
+import com.hookiesolutions.webhookie.subscription.domain.SubscriptionStatus
 import com.hookiesolutions.webhookie.subscription.service.factory.ConversionsFactory
 import com.hookiesolutions.webhookie.subscription.service.model.CreateSubscriptionRequest
 import com.hookiesolutions.webhookie.subscription.service.model.UpdateSubscriptionRequest
@@ -130,51 +131,52 @@ class SubscriptionService(
   }
 
   @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")
-  fun validateSubscription(id: String, request: ValidateSubscriptionRequest): Mono<Boolean> {
+  fun validateSubscription(id: String, request: ValidateSubscriptionRequest): Mono<SubscriptionStatus> {
     log.info("Validating Subscription '{}'...", id)
 
     return repository
       .findByIdVerifyingWriteAccess(id)
-      .flatMap { stateManager.canBeValidated(it) }
-      .flatMap { subscriptionValidator.validate(it, request) }
-      .flatMap { repository.statusUpdate(id, validated(timeMachine.now())) }
+      .zipWhen { stateManager.canBeValidated(it) }
+      .zipWhen { subscriptionValidator.validate(it.t1, request) }
+      .flatMap { repository.statusUpdate(id, validated(timeMachine.now()), it.t1.t2) }
       .doOnNext { log.info("Subscription '{}' validated successfully", id) }
-      .map { it.modifiedCount > 0 }
+      .map { it.statusUpdate.status }
   }
 
   @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")
-  fun activateSubscription(id: String): Mono<Boolean> {
+  fun activateSubscription(id: String): Mono<SubscriptionStatus> {
     log.info("Activating Subscription '{}'...", id)
 
     return repository
       .findByIdVerifyingWriteAccess(id)
-      .flatMap { stateManager.canBeActivated(it) }
-      .flatMap { repository.statusUpdate(id, activated(timeMachine.now())) }
+      .zipWhen { stateManager.canBeActivated(it) }
+      .flatMap { repository.statusUpdate(id, activated(timeMachine.now()), it.t2) }
       .doOnNext { log.info("Subscription '{}' activated successfully", id) }
-      .map { it.modifiedCount > 0 }
+      .map { it.statusUpdate.status }
   }
 
   @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")
-  fun deactivateSubscription(id: String, request: ReasonRequest): Mono<Boolean> {
+  fun deactivateSubscription(id: String, request: ReasonRequest): Mono<SubscriptionStatus> {
     log.info("Deactivating Subscription '{}'...", id)
 
     return repository
       .findByIdVerifyingWriteAccess(id)
-      .flatMap { stateManager.canBeDeactivated(it) }
-      .flatMap { repository.statusUpdate(id, deactivated(timeMachine.now(), request.reason)) }
+      .zipWhen { stateManager.canBeDeactivated(it) }
+      .flatMap { repository.statusUpdate(id, deactivated(timeMachine.now(), request.reason), it.t2) }
       .doOnNext { log.info("Subscription '{}' deactivated successfully", id) }
-      .map { it.modifiedCount > 0 }
+      .map { it.statusUpdate.status }
   }
 
   @PreAuthorize("hasAuthority('$ROLE_PROVIDER')")
-  fun suspendSubscription(id: String, request: ReasonRequest): Mono<Boolean> {
+  fun suspendSubscription(id: String, request: ReasonRequest): Mono<SubscriptionStatus> {
     log.info("Suspending Subscription '{}'...", id)
 
     return repository
       .findByIdVerifyingProviderAccess(id)
-      .flatMap { repository.statusUpdate(id, suspended(timeMachine.now(), request.reason)) }
+      .zipWhen { stateManager.canBeSuspended(it) }
+      .flatMap { repository.statusUpdate(id, suspended(timeMachine.now(), request.reason), it.t2) }
       .doOnNext { log.info("Subscription '{}' suspended successfully", id) }
-      .map { it.modifiedCount > 0 }
+      .map { it.statusUpdate.status }
   }
 
   fun findSubscriptionsFor(consumerMessage: ConsumerMessage): Flux<Subscription> {
