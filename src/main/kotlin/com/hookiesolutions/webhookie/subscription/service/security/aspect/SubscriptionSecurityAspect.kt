@@ -27,6 +27,10 @@ class SubscriptionSecurityAspect(
   fun annotatedVerifySubscriptionWriteAccess() {
   }
 
+  @Pointcut("@annotation(com.hookiesolutions.webhookie.subscription.service.security.annotation.VerifySubscriptionProviderAccess)")
+  fun annotatedVerifySubscriptionProviderAccess() {
+  }
+
   @Pointcut("execution(reactor.core.publisher.Mono<com.hookiesolutions.webhookie.subscription.domain.Subscription> *(..))")
   fun returnsMonoSubscription() {
   }
@@ -45,5 +49,13 @@ class SubscriptionSecurityAspect(
     val mono: Mono<Subscription> = pjp.proceed() as Mono<Subscription>
 
     return securityService.verifySubscriptionWriteAccess(mono)
+  }
+
+  @Around("annotatedVerifySubscriptionProviderAccess() && returnsMonoSubscription()")
+  fun checkProviderAccess(pjp: ProceedingJoinPoint): Mono<Subscription> {
+    @Suppress("UNCHECKED_CAST")
+    val mono: Mono<Subscription> = pjp.proceed() as Mono<Subscription>
+
+    return securityService.verifySubscriptionProviderAccess(mono)
   }
 }

@@ -29,7 +29,6 @@ import com.hookiesolutions.webhookie.subscription.service.model.subscription.Val
 import com.hookiesolutions.webhookie.subscription.service.validator.SubscriptionValidator
 import com.hookiesolutions.webhookie.webhook.service.WebhookGroupServiceDelegate
 import org.slf4j.Logger
-import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
@@ -172,22 +171,10 @@ class SubscriptionService(
     log.info("Suspending Subscription '{}'...", id)
 
     return repository
-      .findById(id)
-      .flatMap { checkProviderAccess(it) }
+      .findByIdVerifyingProviderAccess(id)
       .flatMap { repository.statusUpdate(id, suspended(timeMachine.now(), request.reason)) }
       .doOnNext { log.info("Subscription '{}' suspended successfully", id) }
       .map { it.modifiedCount > 0 }
-  }
-
-  fun checkProviderAccess(subscription: Subscription): Mono<Subscription> {
-    return webhookServiceDelegate.providerTopics()
-      .flatMap {
-        return@flatMap if(it.contains(subscription.topic)) {
-          subscription.toMono()
-        } else {
-          Mono.error(AccessDeniedException("Insufficient access rights to suspend subscription to other's topics"))
-        }
-      }
   }
 
   fun findSubscriptionsFor(consumerMessage: ConsumerMessage): Flux<Subscription> {

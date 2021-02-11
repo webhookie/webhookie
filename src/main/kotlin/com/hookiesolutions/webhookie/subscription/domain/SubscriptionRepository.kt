@@ -19,6 +19,7 @@ import com.hookiesolutions.webhookie.subscription.domain.Subscription.Updates.Co
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Updates.Companion.unblockSubscriptionUpdate
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Updates.Companion.updateApplication
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Updates.Companion.updateCallback
+import com.hookiesolutions.webhookie.subscription.service.security.annotation.VerifySubscriptionProviderAccess
 import com.hookiesolutions.webhookie.subscription.service.security.annotation.VerifySubscriptionReadAccess
 import com.hookiesolutions.webhookie.subscription.service.security.annotation.VerifySubscriptionWriteAccess
 import com.mongodb.client.result.DeleteResult
@@ -51,6 +52,11 @@ class SubscriptionRepository(
 
   @VerifySubscriptionWriteAccess
   fun findByIdVerifyingWriteAccess(id: String): Mono<Subscription> {
+    return findById(id)
+  }
+
+  @VerifySubscriptionProviderAccess
+  fun findByIdVerifyingProviderAccess(id: String): Mono<Subscription> {
     return findById(id)
   }
 

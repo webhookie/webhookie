@@ -4,6 +4,7 @@ import com.hookiesolutions.webhookie.security.service.SecurityHandler
 import com.hookiesolutions.webhookie.subscription.domain.Application
 import com.hookiesolutions.webhookie.subscription.domain.ApplicationRepository
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
+import com.hookiesolutions.webhookie.webhook.service.WebhookGroupServiceDelegate
 import org.slf4j.Logger
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Component
@@ -21,6 +22,7 @@ class ApplicationSecurityService(
   private val securityHandler: SecurityHandler,
   private val applicationAccessVoter: ApplicationAccessVoter,
   private val applicationRepository: ApplicationRepository,
+  private val webhookServiceDelegate: WebhookGroupServiceDelegate,
   private val log: Logger
 ) {
   fun verifyAccess(applicationMono: Mono<Application>): Mono<Application> {
@@ -76,5 +78,18 @@ class ApplicationSecurityService(
 
     return verifyWriteAccess(applicationMono)
       .flatMap { subscriptionMono }
+  }
+
+  fun verifySubscriptionProviderAccess(subscriptionMono: Mono<Subscription>): Mono<Subscription> {
+    return Mono.zip(webhookServiceDelegate.providerTopics(), subscriptionMono)
+      .doOnNext { log.debug("Checking Provider Access (topics: '{}') to subscription topic: '{}'", it.t1.size, it.t2.topic) }
+      .flatMap {
+        return@flatMap if(it.t1.contains(it.t2.topic)) {
+          subscriptionMono
+        } else {
+          Mono.error(AccessDeniedException("Insufficient access rights to suspend subscription to '${it.t2.topic}'"))
+        }
+      }
+      .doOnError { log.error(it.localizedMessage) }
   }
 }
