@@ -1,7 +1,7 @@
 package com.hookiesolutions.webhookie.webhook.service
 
 import org.springframework.stereotype.Service
-import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
 
 /**
  *
@@ -12,8 +12,9 @@ import reactor.core.publisher.Flux
 class WebhookGroupServiceDelegate(
   private val webhookGroupService: WebhookGroupService
 ) {
-  fun providerTopics(): Flux<String> {
+  fun providerTopics(): Mono<List<String>> {
     return webhookGroupService.myTopics()
       .map { it.name }
+      .collectList()
   }
 }

@@ -137,6 +137,19 @@ class SubscriptionController(
       .map { "Done" }
   }
 
+  @PostMapping(
+    "/{id}/suspend",
+    consumes = [MediaType.APPLICATION_JSON_VALUE],
+    produces = [MediaType.TEXT_PLAIN_VALUE]
+  )
+  fun suspendSubscription(
+    @PathVariable id: String,
+    @RequestBody request: ReasonRequest
+  ): Mono<String> {
+    return service.suspendSubscription(id, request)
+      .map { "Done" }
+  }
+
   @PatchMapping(
     "$REQUEST_MAPPING_SUBSCRIPTIONS/{id}/unblock",
     produces = [MediaType.TEXT_PLAIN_VALUE]

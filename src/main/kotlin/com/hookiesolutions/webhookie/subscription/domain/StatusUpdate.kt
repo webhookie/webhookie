@@ -53,5 +53,13 @@ data class StatusUpdate(
         .at(at)
         .build()
     }
+
+    fun suspended(at: Instant, reason: String?): StatusUpdate {
+      return Builder()
+        .status(SubscriptionStatus.SUSPENDED)
+        .reason(reason)
+        .at(at)
+        .build()
+    }
   }
 }

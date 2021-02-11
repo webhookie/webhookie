@@ -17,6 +17,7 @@ import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMess
 import com.hookiesolutions.webhookie.subscription.domain.CallbackRepository
 import com.hookiesolutions.webhookie.subscription.domain.StatusUpdate.Companion.activated
 import com.hookiesolutions.webhookie.subscription.domain.StatusUpdate.Companion.deactivated
+import com.hookiesolutions.webhookie.subscription.domain.StatusUpdate.Companion.suspended
 import com.hookiesolutions.webhookie.subscription.domain.StatusUpdate.Companion.validated
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.subscription.domain.SubscriptionRepository
@@ -28,6 +29,7 @@ import com.hookiesolutions.webhookie.subscription.service.model.subscription.Val
 import com.hookiesolutions.webhookie.subscription.service.validator.SubscriptionValidator
 import com.hookiesolutions.webhookie.webhook.service.WebhookGroupServiceDelegate
 import org.slf4j.Logger
+import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
@@ -103,7 +105,6 @@ class SubscriptionService(
   fun providerSubscriptions(): Flux<Subscription> {
     log.info("Fetching provider topics...")
     return webhookServiceDelegate.providerTopics()
-      .collectList()
       .doOnNext { log.info("Fetching topic subscriptions for topics: '{}'", it) }
       .flatMapMany { repository.topicSubscriptions(it) }
   }
@@ -164,6 +165,29 @@ class SubscriptionService(
       .flatMap { repository.statusUpdate(id, deactivated(timeMachine.now(), request.reason)) }
       .doOnNext { log.info("Subscription '{}' deactivated successfully", id) }
       .map { it.modifiedCount > 0 }
+  }
+
+  @PreAuthorize("hasAuthority('$ROLE_PROVIDER')")
+  fun suspendSubscription(id: String, request: ReasonRequest): Mono<Boolean> {
+    log.info("Suspending Subscription '{}'...", id)
+
+    return repository
+      .findById(id)
+      .flatMap { checkProviderAccess(it) }
+      .flatMap { repository.statusUpdate(id, suspended(timeMachine.now(), request.reason)) }
+      .doOnNext { log.info("Subscription '{}' suspended successfully", id) }
+      .map { it.modifiedCount > 0 }
+  }
+
+  fun checkProviderAccess(subscription: Subscription): Mono<Subscription> {
+    return webhookServiceDelegate.providerTopics()
+      .flatMap {
+        return@flatMap if(it.contains(subscription.topic)) {
+          subscription.toMono()
+        } else {
+          Mono.error(AccessDeniedException("Insufficient access rights to suspend subscription to other's topics"))
+        }
+      }
   }
 
   fun findSubscriptionsFor(consumerMessage: ConsumerMessage): Flux<Subscription> {
