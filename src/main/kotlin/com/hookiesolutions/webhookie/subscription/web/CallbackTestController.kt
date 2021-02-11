@@ -34,7 +34,7 @@ import javax.validation.Valid
 @RestController
 @SecurityRequirement(name = OAUTH2_SCHEME)
 @RequestMapping(REQUEST_MAPPING_CALLBACKS)
-class TestController(
+class CallbackTestController(
   private val timeMachine: TimeMachine
 ) {
   @PostMapping(
