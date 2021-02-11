@@ -6,6 +6,7 @@ import com.hookiesolutions.webhookie.common.model.UpdatableEntity.Companion.upda
 import com.hookiesolutions.webhookie.subscription.domain.Callback
 import com.hookiesolutions.webhookie.subscription.domain.CallbackRepository
 import com.hookiesolutions.webhookie.subscription.domain.SubscriptionRepository
+import com.hookiesolutions.webhookie.subscription.service.converter.CallbackSecretConverter
 import com.hookiesolutions.webhookie.subscription.service.model.CallbackRequest
 import com.hookiesolutions.webhookie.subscription.service.security.annotation.ApplicationAccessType
 import com.hookiesolutions.webhookie.subscription.service.security.annotation.VerifyApplicationAccessById

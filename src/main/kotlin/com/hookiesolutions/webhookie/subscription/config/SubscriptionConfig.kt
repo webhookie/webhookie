@@ -14,7 +14,7 @@ import com.hookiesolutions.webhookie.common.message.subscription.UnsignedSubscri
 import com.hookiesolutions.webhookie.common.service.TimeMachine
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
-import com.hookiesolutions.webhookie.subscription.service.ConversionsFactory
+import com.hookiesolutions.webhookie.subscription.service.factory.ConversionsFactory
 import com.hookiesolutions.webhookie.subscription.service.SubscriptionService
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

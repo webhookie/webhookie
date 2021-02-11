@@ -1,4 +1,4 @@
-package com.hookiesolutions.webhookie.subscription.service
+package com.hookiesolutions.webhookie.subscription.service.factory
 
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherErrorMessage

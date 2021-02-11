@@ -1,7 +1,7 @@
 package com.hookiesolutions.webhookie.subscription.config
 
 import com.bol.config.EncryptAutoConfiguration
-import com.hookiesolutions.webhookie.subscription.service.CallbackSecretConverter
+import com.hookiesolutions.webhookie.subscription.service.converter.CallbackSecretConverter
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import

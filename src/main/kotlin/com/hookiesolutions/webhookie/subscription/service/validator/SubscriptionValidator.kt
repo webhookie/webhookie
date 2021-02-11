@@ -1,4 +1,4 @@
-package com.hookiesolutions.webhookie.subscription.service
+package com.hookiesolutions.webhookie.subscription.service.validator
 
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.subscription.service.model.CallbackValidationSampleRequest

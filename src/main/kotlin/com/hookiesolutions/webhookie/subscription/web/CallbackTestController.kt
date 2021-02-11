@@ -1,7 +1,7 @@
 package com.hookiesolutions.webhookie.subscription.web
 
 import com.hookiesolutions.webhookie.common.config.web.OpenAPIConfig.Companion.OAUTH2_SCHEME
-import com.hookiesolutions.webhookie.subscription.service.RequestValidator
+import com.hookiesolutions.webhookie.subscription.service.validator.RequestValidator
 import com.hookiesolutions.webhookie.subscription.service.model.CallbackValidationSampleRequest
 import com.hookiesolutions.webhookie.subscription.web.SubscriptionAPIDocs.Companion.REQUEST_MAPPING_CALLBACKS
 import io.swagger.v3.oas.annotations.security.SecurityRequirement

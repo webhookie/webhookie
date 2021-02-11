@@ -1,4 +1,4 @@
-package com.hookiesolutions.webhookie.subscription.service
+package com.hookiesolutions.webhookie.subscription.service.converter
 
 import com.bol.crypt.CryptVault
 import com.hookiesolutions.webhookie.subscription.domain.Callback
