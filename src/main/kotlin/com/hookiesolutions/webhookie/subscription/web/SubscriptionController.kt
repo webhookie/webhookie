@@ -2,6 +2,8 @@ package com.hookiesolutions.webhookie.subscription.web
 
 import com.hookiesolutions.webhookie.common.config.web.OpenAPIConfig.Companion.OAUTH2_SCHEME
 import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.byId
+import com.hookiesolutions.webhookie.common.model.RoleActor
+import com.hookiesolutions.webhookie.common.model.RoleActor.Companion.PARAM_CONSUMER
 import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
 import com.hookiesolutions.webhookie.common.service.TimeMachine
@@ -61,20 +63,9 @@ class SubscriptionController(
     produces = [MediaType.APPLICATION_JSON_VALUE]
   )
   fun subscriptions(
-    @RequestParam(required = true, defaultValue = PARAM_CONSUMER) role: String
+    @RequestParam(required = true, defaultValue = PARAM_CONSUMER) role: RoleActor
   ): Flux<SubscriptionDTO> {
-    val subscriptionFlux = when (role) {
-      PARAM_CONSUMER -> {
-        service.consumerSubscriptions()
-      }
-      PARAM_PROVIDER -> {
-        service.providerSubscriptions()
-      }
-      else -> {
-        Flux.error(IllegalArgumentException("role can be '$PARAM_CONSUMER' or '$PARAM_PROVIDER'"))
-      }
-    }
-    return subscriptionFlux
+    return service.subscriptions(role)
       .map { it.dto() }
   }
 
@@ -135,10 +126,5 @@ class SubscriptionController(
         log.info("Subscription({}) was blocked because '{}'", id, details.reason)
       }
       .map { details.reason }
-  }
-
-  companion object {
-    const val PARAM_CONSUMER = "consumer"
-    const val PARAM_PROVIDER = "provider"
   }
 }

@@ -6,6 +6,7 @@ import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherErrorMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
 import com.hookiesolutions.webhookie.common.model.DeletableEntity.Companion.deletable
+import com.hookiesolutions.webhookie.common.model.RoleActor
 import com.hookiesolutions.webhookie.common.model.UpdatableEntity.Companion.updatable
 import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
 import com.hookiesolutions.webhookie.common.service.IdGenerator
@@ -68,6 +69,18 @@ class SubscriptionService(
     return repository.findByIdVerifyingWriteAccess(id)
       .map { deletable(it) }
       .flatMap { repository.delete(it) }
+  }
+
+  @PreAuthorize("isAuthenticated()")
+  fun subscriptions(role: RoleActor): Flux<Subscription> {
+    return when (role) {
+      RoleActor.CONSUMER -> {
+        consumerSubscriptions()
+      }
+      RoleActor.PROVIDER -> {
+        providerSubscriptions()
+      }
+    }
   }
 
   @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")
