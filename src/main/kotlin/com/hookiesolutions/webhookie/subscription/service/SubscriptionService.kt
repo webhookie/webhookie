@@ -16,12 +16,14 @@ import com.hookiesolutions.webhookie.subscription.domain.ApplicationRepository
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
 import com.hookiesolutions.webhookie.subscription.domain.CallbackRepository
 import com.hookiesolutions.webhookie.subscription.domain.StatusUpdate.Companion.activated
+import com.hookiesolutions.webhookie.subscription.domain.StatusUpdate.Companion.deactivated
 import com.hookiesolutions.webhookie.subscription.domain.StatusUpdate.Companion.validated
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.subscription.domain.SubscriptionRepository
 import com.hookiesolutions.webhookie.subscription.service.factory.ConversionsFactory
 import com.hookiesolutions.webhookie.subscription.service.model.CreateSubscriptionRequest
 import com.hookiesolutions.webhookie.subscription.service.model.UpdateSubscriptionRequest
+import com.hookiesolutions.webhookie.subscription.service.model.subscription.ReasonRequest
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.ValidateSubscriptionRequest
 import com.hookiesolutions.webhookie.subscription.service.validator.SubscriptionValidator
 import com.hookiesolutions.webhookie.webhook.service.WebhookGroupServiceDelegate
@@ -149,6 +151,18 @@ class SubscriptionService(
       .flatMap { stateManager.canBeActivated(it) }
       .flatMap { repository.statusUpdate(id, activated(timeMachine.now())) }
       .doOnNext { log.info("Subscription '{}' activated successfully", id) }
+      .map { it.modifiedCount > 0 }
+  }
+
+  @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")
+  fun deactivateSubscription(id: String, request: ReasonRequest): Mono<Boolean> {
+    log.info("Deactivating Subscription '{}'...", id)
+
+    return repository
+      .findByIdVerifyingWriteAccess(id)
+      .flatMap { stateManager.canBeDeactivated(it) }
+      .flatMap { repository.statusUpdate(id, deactivated(timeMachine.now(), request.reason)) }
+      .doOnNext { log.info("Subscription '{}' deactivated successfully", id) }
       .map { it.modifiedCount > 0 }
   }
 

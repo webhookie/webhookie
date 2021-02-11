@@ -45,5 +45,13 @@ data class StatusUpdate(
         .at(at)
         .build()
     }
+
+    fun deactivated(at: Instant, reason: String?): StatusUpdate {
+      return Builder()
+        .status(SubscriptionStatus.DEACTIVATED)
+        .reason(reason)
+        .at(at)
+        .build()
+    }
   }
 }
