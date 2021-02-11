@@ -10,10 +10,12 @@ import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionSig
 import com.hookiesolutions.webhookie.common.message.subscription.UnsignedSubscriptionMessage
 import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
 import com.hookiesolutions.webhookie.common.service.IdGenerator
+import com.hookiesolutions.webhookie.common.service.TimeMachine
 import com.hookiesolutions.webhookie.subscription.domain.Application
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
 import com.hookiesolutions.webhookie.subscription.domain.Callback
 import com.hookiesolutions.webhookie.subscription.domain.CallbackDetails
+import com.hookiesolutions.webhookie.subscription.domain.StatusUpdate
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.subscription.service.model.ApplicationRequest
 import com.hookiesolutions.webhookie.subscription.service.model.CreateSubscriptionRequest
@@ -28,7 +30,8 @@ import java.time.Instant
  */
 @Service
 class ConversionsFactory(
-  private val idGenerator: IdGenerator
+  private val idGenerator: IdGenerator,
+  private val timeMachine: TimeMachine
 ) {
   fun createApplicationRequestToApplication(
     request: ApplicationRequest,
@@ -135,7 +138,8 @@ class ConversionsFactory(
     return Subscription(
       request.topic,
       application.details(),
-      callback.details()
+      callback.details(),
+      StatusUpdate.saved(timeMachine.now())
     )
   }
 

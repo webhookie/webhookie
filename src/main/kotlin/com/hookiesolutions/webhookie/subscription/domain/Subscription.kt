@@ -40,6 +40,7 @@ data class Subscription(
   val topic: String,
   val application: ApplicationDetails,
   val callback: CallbackDetails,
+  val statusUpdate: StatusUpdate,
   val blockedDetails: BlockedDetailsDTO? = null
 ) : AbstractEntity() {
   fun dto(): SubscriptionDTO {
