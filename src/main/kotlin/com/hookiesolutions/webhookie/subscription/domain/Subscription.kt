@@ -6,6 +6,7 @@ import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
 import com.hookiesolutions.webhookie.subscription.domain.ApplicationDetails.Keys.Companion.KEY_APPLICATION_ID
 import com.hookiesolutions.webhookie.subscription.domain.CallbackDetails.Keys.Companion.KEY_CALLBACK_ID
+import com.hookiesolutions.webhookie.subscription.domain.StatusUpdate.Keys.Companion.KEY_STATUS
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_APPLICATION
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_BLOCK_DETAILS
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_CALLBACK
@@ -32,8 +33,12 @@ import org.springframework.data.mongodb.core.query.Update
 @CompoundIndexes(
   CompoundIndex(
     name = "subscription",
-    def = "{'callback.callbackId' : 1, 'topic': 1}",
+    def = "{'$KEY_CALLBACK.$KEY_CALLBACK_ID' : 1, $KEY_TOPIC: 1}",
     unique = true
+  ),
+  CompoundIndex(
+    name = "topic_status",
+    def = "{'$KEY_STATUS_UPDATE.$KEY_STATUS' : 1, $KEY_TOPIC: 1}"
   )
 )
 data class Subscription(
@@ -58,6 +63,11 @@ data class Subscription(
     companion object {
       fun topicIs(topic: String): Criteria {
         return where(KEY_TOPIC).`is`(topic)
+      }
+
+      fun subscriptionIsActive(): Criteria {
+        return where("$KEY_STATUS_UPDATE.$KEY_STATUS")
+          .`is`(SubscriptionStatus.ACTIVATED)
       }
 
       fun topicIsIn(topics: Collection<String>): Criteria {

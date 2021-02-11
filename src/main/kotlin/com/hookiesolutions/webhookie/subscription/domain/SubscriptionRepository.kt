@@ -12,6 +12,7 @@ import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Compa
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Companion.applicationIdIs
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Companion.callbackIdIs
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Companion.isAuthorized
+import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Companion.subscriptionIsActive
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Companion.topicIs
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Companion.topicIsIn
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Updates.Companion.blockSubscriptionUpdate
@@ -93,6 +94,7 @@ class SubscriptionRepository(
 
   fun findAuthorizedTopicSubscriptions(topic: String, authorizedSubscribers: Set<String>): Flux<Subscription> {
     var criteria = topicIs(topic)
+      .andOperator(subscriptionIsActive())
     if (authorizedSubscribers.isNotEmpty()) {
       criteria = criteria.andOperator(isAuthorized(authorizedSubscribers))
     }

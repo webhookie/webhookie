@@ -12,6 +12,12 @@ data class StatusUpdate(
   val reason: String?,
   val time: Instant
 ) {
+  class Keys {
+    companion object {
+      const val KEY_STATUS = "status"
+    }
+  }
+
   class Builder {
     private lateinit var status: SubscriptionStatus
     private var reason: String? = null
