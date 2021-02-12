@@ -18,8 +18,8 @@ import com.hookiesolutions.webhookie.subscription.domain.CallbackDetails
 import com.hookiesolutions.webhookie.subscription.domain.StatusUpdate.Companion.saved
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.subscription.service.model.ApplicationRequest
-import com.hookiesolutions.webhookie.subscription.service.model.CreateSubscriptionRequest
-import com.hookiesolutions.webhookie.subscription.service.model.UpdateSubscriptionRequest
+import com.hookiesolutions.webhookie.subscription.service.model.subscription.CreateSubscriptionRequest
+import com.hookiesolutions.webhookie.subscription.service.model.subscription.UpdateSubscriptionRequest
 import org.springframework.stereotype.Service
 import java.time.Instant
 

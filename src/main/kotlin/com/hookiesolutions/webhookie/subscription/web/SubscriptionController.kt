@@ -10,8 +10,8 @@ import com.hookiesolutions.webhookie.common.service.TimeMachine
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Updates.Companion.blockSubscriptionUpdate
 import com.hookiesolutions.webhookie.subscription.service.SubscriptionService
-import com.hookiesolutions.webhookie.subscription.service.model.CreateSubscriptionRequest
-import com.hookiesolutions.webhookie.subscription.service.model.UpdateSubscriptionRequest
+import com.hookiesolutions.webhookie.subscription.service.model.subscription.CreateSubscriptionRequest
+import com.hookiesolutions.webhookie.subscription.service.model.subscription.UpdateSubscriptionRequest
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.ReasonRequest
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.ValidateSubscriptionRequest
 import com.hookiesolutions.webhookie.subscription.web.SubscriptionAPIDocs.Companion.REQUEST_MAPPING_SUBSCRIPTIONS
