@@ -179,6 +179,18 @@ class SubscriptionService(
       .map { it.statusUpdate.status }
   }
 
+  @PreAuthorize("hasAuthority('$ROLE_PROVIDER')")
+  fun unsuspendSubscription(id: String, request: ReasonRequest): Mono<SubscriptionStatus> {
+    log.info("Un-suspending Subscription '{}'...", id)
+
+    return repository
+      .findByIdVerifyingProviderAccess(id)
+      .zipWhen { stateManager.canBeUnsuspended(it) }
+      .flatMap { repository.statusUpdate(id, deactivated(timeMachine.now(), request.reason), it.t2) }
+      .doOnNext { log.info("Subscription '{}' unsuspended successfully", id) }
+      .map { it.statusUpdate.status }
+  }
+
   fun findSubscriptionsFor(consumerMessage: ConsumerMessage): Flux<Subscription> {
     val topic = consumerMessage.headers.topic
     val authorizedSubscribers = consumerMessage.headers.authorizedSubscribers

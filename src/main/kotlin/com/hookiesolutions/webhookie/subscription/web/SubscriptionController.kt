@@ -150,6 +150,19 @@ class SubscriptionController(
       .map { it.name }
   }
 
+  @PostMapping(
+    "/{id}/unsuspend",
+    consumes = [MediaType.APPLICATION_JSON_VALUE],
+    produces = [MediaType.TEXT_PLAIN_VALUE]
+  )
+  fun unsuspendSubscription(
+    @PathVariable id: String,
+    @RequestBody request: ReasonRequest
+  ): Mono<String> {
+    return service.unsuspendSubscription(id, request)
+      .map { it.name }
+  }
+
   @PatchMapping(
     "$REQUEST_MAPPING_SUBSCRIPTIONS/{id}/unblock",
     produces = [MediaType.TEXT_PLAIN_VALUE]
