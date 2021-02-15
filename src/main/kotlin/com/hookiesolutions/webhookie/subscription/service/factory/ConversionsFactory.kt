@@ -14,9 +14,9 @@ import com.hookiesolutions.webhookie.subscription.domain.Application
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
 import com.hookiesolutions.webhookie.subscription.domain.Callback
 import com.hookiesolutions.webhookie.subscription.domain.CallbackDetails
-import com.hookiesolutions.webhookie.subscription.domain.StatusUpdate
-import com.hookiesolutions.webhookie.subscription.domain.StatusUpdate.Companion.blocked
-import com.hookiesolutions.webhookie.subscription.domain.StatusUpdate.Companion.saved
+import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate
+import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Companion.blocked
+import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Companion.saved
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.subscription.service.model.ApplicationRequest
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.CreateSubscriptionRequest

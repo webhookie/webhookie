@@ -4,7 +4,6 @@ import com.hookiesolutions.webhookie.common.config.web.OpenAPIConfig.Companion.O
 import com.hookiesolutions.webhookie.common.model.RoleActor
 import com.hookiesolutions.webhookie.common.model.RoleActor.Companion.PARAM_CONSUMER
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
-import com.hookiesolutions.webhookie.common.service.TimeMachine
 import com.hookiesolutions.webhookie.subscription.service.SubscriptionService
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.CreateSubscriptionRequest
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.ReasonRequest
@@ -39,7 +38,6 @@ import javax.validation.Valid
 @SecurityRequirement(name = OAUTH2_SCHEME)
 @RequestMapping(REQUEST_MAPPING_SUBSCRIPTIONS)
 class SubscriptionController(
-  private val timeMachine: TimeMachine,
   private val log: Logger,
   private val service: SubscriptionService,
 ) {
@@ -156,14 +154,14 @@ class SubscriptionController(
       .map { it.name }
   }
 
-  @PatchMapping(
-    "$/{id}/unblock",
+  @PostMapping(
+    "/{id}/unblock",
     produces = [MediaType.TEXT_PLAIN_VALUE]
   )
   fun unblockSubscription(@PathVariable id: String): Mono<String> {
     log.info("Unblocking subscription: '{}'", id)
     return service.unblockSubscription(id)
-      .map { it.id!! }
+      .map { it.name }
   }
 
   @PatchMapping(

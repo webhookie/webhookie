@@ -1,4 +1,4 @@
-package com.hookiesolutions.webhookie.subscription.domain
+package com.hookiesolutions.webhookie.common.model.dto
 
 import java.time.Instant
 

@@ -14,15 +14,15 @@ import com.hookiesolutions.webhookie.security.service.SecurityHandler
 import com.hookiesolutions.webhookie.subscription.domain.ApplicationRepository
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
 import com.hookiesolutions.webhookie.subscription.domain.CallbackRepository
-import com.hookiesolutions.webhookie.subscription.domain.StatusUpdate
-import com.hookiesolutions.webhookie.subscription.domain.StatusUpdate.Companion.activated
-import com.hookiesolutions.webhookie.subscription.domain.StatusUpdate.Companion.blocked
-import com.hookiesolutions.webhookie.subscription.domain.StatusUpdate.Companion.deactivated
-import com.hookiesolutions.webhookie.subscription.domain.StatusUpdate.Companion.suspended
-import com.hookiesolutions.webhookie.subscription.domain.StatusUpdate.Companion.validated
+import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate
+import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Companion.activated
+import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Companion.blocked
+import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Companion.deactivated
+import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Companion.suspended
+import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Companion.validated
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.subscription.domain.SubscriptionRepository
-import com.hookiesolutions.webhookie.subscription.domain.SubscriptionStatus
+import com.hookiesolutions.webhookie.common.model.dto.SubscriptionStatus
 import com.hookiesolutions.webhookie.subscription.service.factory.ConversionsFactory
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.CreateSubscriptionRequest
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.ReasonRequest
@@ -193,12 +193,13 @@ class SubscriptionService(
   }
 
   @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")
-  fun unblockSubscription(id: String): Mono<Subscription> {
+  fun unblockSubscription(id: String): Mono<SubscriptionStatus> {
     return repository
       .statusUpdate(id, activated(timeMachine.now()), SubscriptionStatus.values().asList())
       .doOnNext {
         log.info("Subscription '{}' was unblocked", id)
       }
+      .map { it.statusUpdate.status }
   }
 
   fun findSubscriptionsFor(consumerMessage: ConsumerMessage): Flux<Subscription> {

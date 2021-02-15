@@ -2,7 +2,7 @@ package com.hookiesolutions.webhookie.common.message.subscription
 
 import com.hookiesolutions.webhookie.common.message.WebhookieHeaders
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
-import com.hookiesolutions.webhookie.subscription.domain.StatusUpdate
+import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate
 
 /**
  *

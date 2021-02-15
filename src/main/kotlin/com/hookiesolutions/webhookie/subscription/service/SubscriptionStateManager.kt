@@ -1,7 +1,7 @@
 package com.hookiesolutions.webhookie.subscription.service
 
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
-import com.hookiesolutions.webhookie.subscription.domain.SubscriptionStatus
+import com.hookiesolutions.webhookie.common.model.dto.SubscriptionStatus
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.SubscriptionStatueAction
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono

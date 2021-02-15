@@ -1,9 +1,6 @@
 package com.hookiesolutions.webhookie.common.model.dto
 
 import com.fasterxml.jackson.annotation.JsonInclude
-import com.hookiesolutions.webhookie.subscription.domain.ApplicationDetails
-import com.hookiesolutions.webhookie.subscription.domain.StatusUpdate
-import com.hookiesolutions.webhookie.subscription.domain.SubscriptionStatus
 
 /**
  *
