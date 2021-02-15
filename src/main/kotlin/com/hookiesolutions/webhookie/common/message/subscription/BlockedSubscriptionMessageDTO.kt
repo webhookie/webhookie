@@ -1,8 +1,8 @@
 package com.hookiesolutions.webhookie.common.message.subscription
 
 import com.hookiesolutions.webhookie.common.message.WebhookieHeaders
-import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
+import com.hookiesolutions.webhookie.subscription.domain.StatusUpdate
 
 /**
  *
@@ -16,7 +16,7 @@ data class BlockedSubscriptionMessageDTO(
   val payload: ByteArray,
   val messageHeaders: Map<String, Any>,
   val subscription: SubscriptionDTO,
-  val blockedDetails: BlockedDetailsDTO
+  val blockedDetails: StatusUpdate
 ) {
   @Suppress("DuplicatedCode")
   override fun equals(other: Any?): Boolean {

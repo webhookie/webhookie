@@ -2,13 +2,11 @@ package com.hookiesolutions.webhookie.subscription.domain
 
 import com.hookiesolutions.webhookie.common.model.AbstractDocument.Keys.Companion.KEY_VERSION
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
-import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
 import com.hookiesolutions.webhookie.subscription.domain.ApplicationDetails.Keys.Companion.KEY_APPLICATION_ID
 import com.hookiesolutions.webhookie.subscription.domain.CallbackDetails.Keys.Companion.KEY_CALLBACK_ID
 import com.hookiesolutions.webhookie.subscription.domain.StatusUpdate.Keys.Companion.KEY_STATUS
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_APPLICATION
-import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_BLOCK_DETAILS
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_CALLBACK
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_ENTITY
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_STATUS_UPDATE
@@ -46,8 +44,7 @@ data class Subscription(
   val topic: String,
   val application: ApplicationDetails,
   val callback: CallbackDetails,
-  val statusUpdate: StatusUpdate,
-  val blockedDetails: BlockedDetailsDTO? = null
+  val statusUpdate: StatusUpdate
 ) : AbstractEntity() {
   fun dto(): SubscriptionDTO {
     return SubscriptionDTO(
@@ -55,7 +52,7 @@ data class Subscription(
       application,
       topic,
       callback.dto(),
-      blockedDetails
+      statusUpdate
     )
   }
 
@@ -115,18 +112,6 @@ data class Subscription(
         update.inc(KEY_VERSION)
         return update
       }
-
-      fun unblockSubscriptionUpdate(): Update {
-        return Update()
-          .unset(KEY_BLOCK_DETAILS)
-          .inc(KEY_VERSION, 1)
-      }
-
-      fun blockSubscriptionUpdate(details: BlockedDetailsDTO): Update {
-        return Update()
-          .set(KEY_BLOCK_DETAILS, details)
-          .inc(KEY_VERSION, 1)
-      }
     }
   }
 
@@ -134,7 +119,6 @@ data class Subscription(
     companion object {
       const val KEY_TOPIC = "topic"
       const val KEY_ENTITY = "entity"
-      const val KEY_BLOCK_DETAILS = "blockedDetails"
       const val KEY_APPLICATION = "application"
       const val KEY_CALLBACK = "callback"
       const val KEY_STATUS_UPDATE = "statusUpdate"

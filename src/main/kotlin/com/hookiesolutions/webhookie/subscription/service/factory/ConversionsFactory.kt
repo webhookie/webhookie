@@ -8,13 +8,14 @@ import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscri
 import com.hookiesolutions.webhookie.common.message.subscription.SignedSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionSignature
 import com.hookiesolutions.webhookie.common.message.subscription.UnsignedSubscriptionMessage
-import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
 import com.hookiesolutions.webhookie.common.service.IdGenerator
 import com.hookiesolutions.webhookie.common.service.TimeMachine
 import com.hookiesolutions.webhookie.subscription.domain.Application
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
 import com.hookiesolutions.webhookie.subscription.domain.Callback
 import com.hookiesolutions.webhookie.subscription.domain.CallbackDetails
+import com.hookiesolutions.webhookie.subscription.domain.StatusUpdate
+import com.hookiesolutions.webhookie.subscription.domain.StatusUpdate.Companion.blocked
 import com.hookiesolutions.webhookie.subscription.domain.StatusUpdate.Companion.saved
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.subscription.service.model.ApplicationRequest
@@ -78,7 +79,7 @@ class ConversionsFactory(
 
   fun createBlockedSubscriptionMessageDTO(
     errorMessage: PublisherErrorMessage,
-    blockedDetailsDTO: BlockedDetailsDTO
+    statusUpdate: StatusUpdate
   ): BlockedSubscriptionMessageDTO {
     val originalMessage = errorMessage.subscriptionMessage.originalMessage
     return BlockedSubscriptionMessageDTO(
@@ -88,7 +89,7 @@ class ConversionsFactory(
       originalMessage.payload,
       originalMessage.messageHeaders,
       errorMessage.subscriptionMessage.subscription,
-      blockedDetailsDTO
+      statusUpdate
     )
   }
 
@@ -105,7 +106,7 @@ class ConversionsFactory(
       originalMessage.payload,
       originalMessage.messageHeaders,
       message.subscription,
-      BlockedDetailsDTO(reason, at)
+      blocked(at, reason)
     )
   }
 

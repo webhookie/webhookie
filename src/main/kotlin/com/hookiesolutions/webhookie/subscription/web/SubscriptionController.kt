@@ -1,24 +1,18 @@
 package com.hookiesolutions.webhookie.subscription.web
 
 import com.hookiesolutions.webhookie.common.config.web.OpenAPIConfig.Companion.OAUTH2_SCHEME
-import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.byId
 import com.hookiesolutions.webhookie.common.model.RoleActor
 import com.hookiesolutions.webhookie.common.model.RoleActor.Companion.PARAM_CONSUMER
-import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
 import com.hookiesolutions.webhookie.common.service.TimeMachine
-import com.hookiesolutions.webhookie.subscription.domain.Subscription
-import com.hookiesolutions.webhookie.subscription.domain.Subscription.Updates.Companion.blockSubscriptionUpdate
 import com.hookiesolutions.webhookie.subscription.service.SubscriptionService
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.CreateSubscriptionRequest
-import com.hookiesolutions.webhookie.subscription.service.model.subscription.UpdateSubscriptionRequest
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.ReasonRequest
+import com.hookiesolutions.webhookie.subscription.service.model.subscription.UpdateSubscriptionRequest
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.ValidateSubscriptionRequest
 import com.hookiesolutions.webhookie.subscription.web.SubscriptionAPIDocs.Companion.REQUEST_MAPPING_SUBSCRIPTIONS
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.slf4j.Logger
-import org.springframework.data.mongodb.core.ReactiveMongoTemplate
-import org.springframework.data.mongodb.core.query.Query
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -46,7 +40,6 @@ import javax.validation.Valid
 @RequestMapping(REQUEST_MAPPING_SUBSCRIPTIONS)
 class SubscriptionController(
   private val timeMachine: TimeMachine,
-  private val mongoTemplate: ReactiveMongoTemplate,
   private val log: Logger,
   private val service: SubscriptionService,
 ) {
@@ -164,31 +157,26 @@ class SubscriptionController(
   }
 
   @PatchMapping(
-    "$REQUEST_MAPPING_SUBSCRIPTIONS/{id}/unblock",
+    "$/{id}/unblock",
     produces = [MediaType.TEXT_PLAIN_VALUE]
   )
   fun unblockSubscription(@PathVariable id: String): Mono<String> {
     log.info("Unblocking subscription: '{}'", id)
-    return service.unblockSubscriptionBy(id)
+    return service.unblockSubscription(id)
       .map { it.id!! }
   }
 
   @PatchMapping(
-    "$REQUEST_MAPPING_SUBSCRIPTIONS/{id}/block",
+    "/{id}/block",
     produces = [MediaType.TEXT_PLAIN_VALUE]
   )
   fun blockSubscription(@PathVariable id: String): Mono<String> {
     log.info("Unblocking subscription: '{}'", id)
-    val details = BlockedDetailsDTO("my Reason", timeMachine.now())
-    return mongoTemplate
-      .updateFirst(
-        Query.query(byId(id)),
-        blockSubscriptionUpdate(details),
-        Subscription::class.java
-      )
+    val reason = "Blocked by user!"
+    return service.blockSubscription(id, reason)
       .doOnNext {
-        log.info("Subscription({}) was blocked because '{}'", id, details.reason)
+        log.info("Subscription({}) was blocked because '{}'", id, reason)
       }
-      .map { details.reason }
+      .map { it.status.name }
   }
 }

@@ -3,7 +3,6 @@ package com.hookiesolutions.webhookie.subscription.domain
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.message.WebhookieHeaders
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
-import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage.Keys.Companion.KEY_SUBSCRIPTION
 import org.bson.types.ObjectId
@@ -30,7 +29,7 @@ data class BlockedSubscriptionMessage(
   val payload: ByteArray,
   val messageHeaders: Map<String, Any>,
   val subscription: SubscriptionDTO,
-  val blockedDetails: BlockedDetailsDTO
+  val blockedDetails: StatusUpdate
 ): AbstractEntity() {
   val originalMessage: ConsumerMessage
     get() = ConsumerMessage(

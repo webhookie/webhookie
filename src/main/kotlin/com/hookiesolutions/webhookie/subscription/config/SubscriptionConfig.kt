@@ -111,7 +111,7 @@ class SubscriptionConfig(
   @Bean
   fun blockSubscription(): GenericTransformer<PublisherErrorMessage, Mono<BlockedSubscriptionMessageDTO>> {
     return GenericTransformer { payload ->
-      subscriptionService.blockSubscriptionFor(payload)
+      subscriptionService.blockSubscription(payload)
         .map { factory.createBlockedSubscriptionMessageDTO(payload, it) }
         .onErrorMap { SubscriptionMessageHandlingException(it.localizedMessage, payload.subscriptionMessage.originalMessage.headers.traceId, payload.subscriptionMessage.spanId) }
     }

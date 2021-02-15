@@ -2,6 +2,8 @@ package com.hookiesolutions.webhookie.common.model.dto
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.hookiesolutions.webhookie.subscription.domain.ApplicationDetails
+import com.hookiesolutions.webhookie.subscription.domain.StatusUpdate
+import com.hookiesolutions.webhookie.subscription.domain.SubscriptionStatus
 
 /**
  *
@@ -14,8 +16,8 @@ data class SubscriptionDTO(
   val application: ApplicationDetails,
   val topic: String,
   val callback: CallbackDTO,
-  val blockedDetails: BlockedDetailsDTO? = null
+  val statusUpdate: StatusUpdate
 ) {
   val isBlocked: Boolean
-    get() = blockedDetails != null
+    get() = statusUpdate.status == SubscriptionStatus.BLOCKED
 }

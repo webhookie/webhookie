@@ -67,5 +67,13 @@ data class StatusUpdate(
         .at(at)
         .build()
     }
+
+    fun blocked(at: Instant, reason: String?): StatusUpdate {
+      return Builder()
+        .status(SubscriptionStatus.BLOCKED)
+        .reason(reason)
+        .at(at)
+        .build()
+    }
   }
 }

@@ -11,8 +11,10 @@ import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscri
 import com.hookiesolutions.webhookie.common.message.subscription.SignedSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.UnsignedSubscriptionMessage
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
+import com.hookiesolutions.webhookie.subscription.domain.StatusUpdate.Keys.Companion.KEY_STATUS
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
-import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_BLOCK_DETAILS
+import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_STATUS_UPDATE
+import com.hookiesolutions.webhookie.subscription.domain.SubscriptionStatus
 import com.mongodb.client.model.changestream.FullDocument
 import com.mongodb.client.model.changestream.OperationType
 import org.slf4j.Logger
@@ -223,11 +225,11 @@ class SubscriptionFlows(
   private fun unblockSubscriptionMongoEvent(
     mongoTemplate: ReactiveMongoTemplate
   ): MongoDbChangeStreamMessageProducerSpec {
+    val key = "updateDescription.updatedFields.${KEY_STATUS_UPDATE}.${KEY_STATUS}"
     val match = Aggregation.match(
       where("operationType")
         .`is`(OperationType.UPDATE.value)
-        .and("updateDescription.removedFields")
-        .regex(KEY_BLOCK_DETAILS)
+        .andOperator(where(key).`is`(SubscriptionStatus.ACTIVATED))
     )
     val changeStreamOptions = ChangeStreamOptions.builder()
       .fullDocumentLookup(FullDocument.UPDATE_LOOKUP)

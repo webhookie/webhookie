@@ -1,7 +1,6 @@
 package com.hookiesolutions.webhookie.subscription.domain
 
 import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.byId
-import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
 import com.hookiesolutions.webhookie.common.repository.GenericRepository
 import com.hookiesolutions.webhookie.subscription.domain.Application.Queries.Companion.applicationConsumerGroupsIn
 import com.hookiesolutions.webhookie.subscription.domain.Application.Queries.Companion.applicationsByEntity
@@ -16,9 +15,7 @@ import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Co
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Companion.subscriptionIsActive
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Companion.topicIs
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Companion.topicIsIn
-import com.hookiesolutions.webhookie.subscription.domain.Subscription.Updates.Companion.blockSubscriptionUpdate
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Updates.Companion.subscriptionStatusUpdate
-import com.hookiesolutions.webhookie.subscription.domain.Subscription.Updates.Companion.unblockSubscriptionUpdate
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Updates.Companion.updateApplication
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Updates.Companion.updateCallback
 import com.hookiesolutions.webhookie.subscription.service.security.annotation.VerifySubscriptionProviderAccess
@@ -108,30 +105,11 @@ class SubscriptionRepository(
     return mongoTemplate.save(message)
   }
 
-  fun blockSubscriptionWithReason(id: String, details: BlockedDetailsDTO): Mono<UpdateResult> {
-    return mongoTemplate
-      .updateFirst(
-        query(byId(id)),
-        blockSubscriptionUpdate(details),
-        Subscription::class.java
-      )
-  }
-
   fun findAllBlockedMessagesForSubscription(id: String): Flux<BlockedSubscriptionMessage> {
     return mongoTemplate.find(
       query(bySubscriptionId(id)),
       BlockedSubscriptionMessage::class.java
     )
-  }
-
-  fun unblockSubscription(id: String): Mono<Subscription> {
-    return mongoTemplate
-      .findAndModify(
-        query(byId(id)),
-        unblockSubscriptionUpdate(),
-        FindAndModifyOptions.options().returnNew(true),
-        Subscription::class.java
-      )
   }
 
   fun deleteBlockedSubscriptionMessage(message: BlockedSubscriptionMessage): Mono<DeleteResult> {

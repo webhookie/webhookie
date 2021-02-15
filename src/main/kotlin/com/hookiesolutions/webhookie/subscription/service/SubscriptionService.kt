@@ -8,14 +8,15 @@ import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscri
 import com.hookiesolutions.webhookie.common.model.DeletableEntity.Companion.deletable
 import com.hookiesolutions.webhookie.common.model.RoleActor
 import com.hookiesolutions.webhookie.common.model.UpdatableEntity.Companion.updatable
-import com.hookiesolutions.webhookie.common.model.dto.BlockedDetailsDTO
 import com.hookiesolutions.webhookie.common.service.IdGenerator
 import com.hookiesolutions.webhookie.common.service.TimeMachine
 import com.hookiesolutions.webhookie.security.service.SecurityHandler
 import com.hookiesolutions.webhookie.subscription.domain.ApplicationRepository
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
 import com.hookiesolutions.webhookie.subscription.domain.CallbackRepository
+import com.hookiesolutions.webhookie.subscription.domain.StatusUpdate
 import com.hookiesolutions.webhookie.subscription.domain.StatusUpdate.Companion.activated
+import com.hookiesolutions.webhookie.subscription.domain.StatusUpdate.Companion.blocked
 import com.hookiesolutions.webhookie.subscription.domain.StatusUpdate.Companion.deactivated
 import com.hookiesolutions.webhookie.subscription.domain.StatusUpdate.Companion.suspended
 import com.hookiesolutions.webhookie.subscription.domain.StatusUpdate.Companion.validated
@@ -24,8 +25,8 @@ import com.hookiesolutions.webhookie.subscription.domain.SubscriptionRepository
 import com.hookiesolutions.webhookie.subscription.domain.SubscriptionStatus
 import com.hookiesolutions.webhookie.subscription.service.factory.ConversionsFactory
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.CreateSubscriptionRequest
-import com.hookiesolutions.webhookie.subscription.service.model.subscription.UpdateSubscriptionRequest
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.ReasonRequest
+import com.hookiesolutions.webhookie.subscription.service.model.subscription.UpdateSubscriptionRequest
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.ValidateSubscriptionRequest
 import com.hookiesolutions.webhookie.subscription.service.validator.SubscriptionValidator
 import com.hookiesolutions.webhookie.webhook.service.WebhookGroupServiceDelegate
@@ -191,6 +192,15 @@ class SubscriptionService(
       .map { it.statusUpdate.status }
   }
 
+  @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")
+  fun unblockSubscription(id: String): Mono<Subscription> {
+    return repository
+      .statusUpdate(id, activated(timeMachine.now()), SubscriptionStatus.values().asList())
+      .doOnNext {
+        log.info("Subscription '{}' was unblocked", id)
+      }
+  }
+
   fun findSubscriptionsFor(consumerMessage: ConsumerMessage): Flux<Subscription> {
     val topic = consumerMessage.headers.topic
     val authorizedSubscribers = consumerMessage.headers.authorizedSubscribers
@@ -207,34 +217,31 @@ class SubscriptionService(
       .saveBlockedSubscriptionMessage(message)
   }
 
-  fun blockSubscriptionFor(message: PublisherErrorMessage): Mono<BlockedDetailsDTO> {
-    val subscription = message.subscriptionMessage.subscription
-    val time = timeMachine.now()
-    val details = BlockedDetailsDTO(message.reason, time)
+  fun blockSubscription(id: String, reason: String): Mono<StatusUpdate> {
+    val blockedStatusUpdate = blocked(timeMachine.now(), reason)
 
     log.info(
-      "updating subscription: '{}' as and the reason is: '{}'",
-      subscription.callback.url,
-      details.reason
+      "blocking subscription: '{}' with reason is: '{}'",
+      id,
+      blockedStatusUpdate.reason
     )
 
     return repository
-      .blockSubscriptionWithReason(subscription.id, details)
+      .statusUpdate(id, blockedStatusUpdate, SubscriptionStatus.values().asList())
       .doOnNext {
-        log.info("Subscription({}) was blocked because '{}'", subscription.id, details.reason)
+        log.info("Subscription({}) was blocked because '{}'", id, blockedStatusUpdate.reason)
       }
-      .map { details }
+      .map { it.statusUpdate }
+  }
+
+  fun blockSubscription(message: PublisherErrorMessage): Mono<StatusUpdate> {
+    return blockSubscription(message.subscriptionMessage.subscription.id, message.reason)
   }
 
   fun findAllBlockedMessagesForSubscription(id: String): Flux<BlockedSubscriptionMessage> {
     log.info("Fetching all blocked messages for subscription: '{}'", id)
     return repository
       .findAllBlockedMessagesForSubscription(id)
-  }
-
-  fun unblockSubscriptionBy(id: String): Mono<Subscription> {
-    return repository
-      .unblockSubscription(id)
   }
 
   fun deleteBlockedMessage(bsm: BlockedSubscriptionMessage): Mono<BlockedSubscriptionMessage> {
