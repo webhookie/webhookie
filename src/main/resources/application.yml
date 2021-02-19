@@ -11,7 +11,7 @@ webhookie:
       multiplier: 2
   security:
     audience: ${WH_SECURITY_AUD:account}
-    login-url: ${WH_SECURITY_LOGIN_URL:http://localhost:8080}
+    client-id: ${WH_SECURITY_CLIENT_ID:webhookie-client}
     groups:
       jwk-json-path: ${WH_SECURITY_GROUPS_JSON_PATH:$.groups}
     oauth2:
@@ -28,7 +28,7 @@ webhookie:
     no-auth:
       pathMatchers:
         OPTIONS: /**
-        GET: /actuator/**, /swagger-ui.html**, /v3/**, /webjars/swagger-ui/**
+        GET: /actuator/**, /swagger-ui.html**, /v3/**, /webjars/swagger-ui/**, /public/**
 mongodb:
   encrypt:
     keys:

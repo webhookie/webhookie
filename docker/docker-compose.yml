@@ -25,7 +25,7 @@ services:
       - WH_IAM_JWK_SET_URI=http://10.0.0.103:8000/auth/realms/webhookie/protocol/openid-connect/certs
       - WH_IAM_JWS_ALG=RS256
       - WH_SECURITY_AUD=account
-      - WH_SECURITY_LOGIN_URL=http://localhost:8080
+      - WH_SECURITY_CLIENT_ID=webhookie-client
       - WH_SECURITY_ROLES_JSON_PATH=$$.realm_access.roles
       - WH_SECURITY_GROUPS_JSON_PATH=$$.groups
       - WH_SECURITY_EMAIL_JSON_PATH=$$.email
@@ -56,7 +56,7 @@ services:
       - WH_IAM_JWK_SET_URI=https://webhookie.au.auth0.com/.well-known/jwks.json
       - WH_IAM_JWS_ALG=RS256
       - WH_SECURITY_AUD=KbsOSWkS6GWvmh20mg24UdnrKwgUMfvK
-      - WH_SECURITY_LOGIN_URL=http://localhost:8080
+      - WH_SECURITY_CLIENT_ID=nvKDmIK9Q5Zw1UKwpON8LE3tg9vZcXb4
       - WH_SECURITY_ROLES_JSON_PATH=$$['https://webhookie.com/roles']
       - WH_SECURITY_GROUPS_JSON_PATH=$$['https://webhookie.com/groups']
       - WH_SECURITY_EMAIL_JSON_PATH=$$.email

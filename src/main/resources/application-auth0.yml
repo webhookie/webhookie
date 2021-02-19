@@ -9,7 +9,7 @@ spring:
 webhookie:
   security:
     audience: KbsOSWkS6GWvmh20mg24UdnrKwgUMfvK
-    login-url: http://localhost:8080
+    client-id: nvKDmIK9Q5Zw1UKwpON8LE3tg9vZcXb4
     oauth2:
       authorization-uri: authorize
       token-uri: oauth/token

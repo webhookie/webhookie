@@ -7,7 +7,7 @@ import org.springframework.boot.context.properties.ConstructorBinding
 @ConfigurationProperties(prefix = "webhookie.security")
 data class WebHookieSecurityProperties(
   val audience: String,
-  val loginUrl: String,
+  val clientId: String,
   val roles: RolesConfig,
   val groups: PathConfig,
   val email: PathConfig,
