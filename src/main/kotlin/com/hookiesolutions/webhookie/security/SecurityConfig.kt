@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler
+import org.springframework.security.config.Customizer
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
 import org.springframework.security.config.web.server.ServerHttpSecurity
@@ -29,6 +30,10 @@ import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder
 import org.springframework.security.web.server.SecurityWebFilterChain
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatchers.pathMatchers
 import javax.annotation.PostConstruct
+import org.springframework.web.cors.CorsConfiguration
+import org.springframework.web.cors.reactive.CorsConfigurationSource
+import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
+
 
 /**
  *
@@ -52,7 +57,7 @@ class SecurityConfig(
   fun handler(
     permissionEvaluator: AllowAllPermissionEvaluator,
     @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-    methodSecurityExpressionHandler: DefaultMethodSecurityExpressionHandler
+    methodSecurityExpressionHandler: DefaultMethodSecurityExpressionHandler,
   ): MethodSecurityExpressionHandler {
     methodSecurityExpressionHandler.setPermissionEvaluator(permissionEvaluator)
     return methodSecurityExpressionHandler
@@ -60,6 +65,7 @@ class SecurityConfig(
 
   @Bean
   internal fun springSecurityFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain {
+    http.cors(Customizer.withDefaults())
     return http {
       csrf { disable() }
 
@@ -74,7 +80,7 @@ class SecurityConfig(
         authorize(pathMatchers("$REQUEST_MAPPING_ADMIN/**"), hasAuthority(ROLE_ADMIN))
         authorize(pathMatchers("$REQUEST_MAPPING_APPLICATIONS/**"), hasAuthority(ROLE_CONSUMER))
         authorize(pathMatchers("$REQUEST_MAPPING_SUBSCRIPTIONS/**"), authenticated)
-        authorize(pathMatchers(HttpMethod.GET,"$REQUEST_MAPPING_WEBHOOK_GROUPS/**"), permitAll)
+        authorize(pathMatchers(HttpMethod.GET, "$REQUEST_MAPPING_WEBHOOK_GROUPS/**"), permitAll)
 
         authorize()
       }
@@ -87,6 +93,17 @@ class SecurityConfig(
         authenticationEntryPoint = DelegateAuthenticationEntryPoint()
       }
     }
+  }
+
+  @Bean
+  fun corsConfigurationSource(securityProperties: WebHookieSecurityProperties): CorsConfigurationSource {
+    val configuration = CorsConfiguration()
+    configuration.allowedOrigins = securityProperties.allowedOrigins
+    configuration.addAllowedMethod(CorsConfiguration.ALL)
+    configuration.addAllowedHeader(CorsConfiguration.ALL)
+    val source = UrlBasedCorsConfigurationSource()
+    source.registerCorsConfiguration("/**", configuration)
+    return source
   }
 
   @PostConstruct

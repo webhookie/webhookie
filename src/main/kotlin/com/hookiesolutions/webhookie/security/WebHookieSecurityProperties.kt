@@ -13,7 +13,8 @@ data class WebHookieSecurityProperties(
   val email: PathConfig,
   val entity: PathConfig,
   val oauth2: OAuth2Properties,
-  val noAuth: NoAuth = NoAuth()
+  val noAuth: NoAuth = NoAuth(),
+  val allowedOrigins: List<String> = emptyList()
 ) {
   data class NoAuth(
     val pathMatchers: Map<String,Array<String>> = mapOf()

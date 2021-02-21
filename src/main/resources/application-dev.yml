@@ -6,3 +6,6 @@ spring:
 logging:
   level:
     com.hookiesolutions.webhookie: DEBUG
+webhookie:
+  security:
+    allowed-origins: http://localhost:4200, http://localhost:4201

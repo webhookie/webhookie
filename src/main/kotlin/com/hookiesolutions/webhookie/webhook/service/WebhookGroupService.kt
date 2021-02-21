@@ -52,6 +52,7 @@ class WebhookGroupService(
   fun findMyWebhookGroups(pageable: Pageable): Flux<WebhookGroup> {
     return securityService.tokenGroups()
       .switchIfEmpty(emptyList<String>().toMono())
+      .doOnNext { log.info("Fetching all webhook groups for auth: '{}'", it) }
       .flatMapMany {
         repository.findMyWebhookGroups(it, pageable)
       }

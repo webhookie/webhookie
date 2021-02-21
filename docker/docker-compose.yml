@@ -55,7 +55,7 @@ services:
       - WH_IAM_ISSUER_URI=https://webhookie.au.auth0.com/
       - WH_IAM_JWK_SET_URI=https://webhookie.au.auth0.com/.well-known/jwks.json
       - WH_IAM_JWS_ALG=RS256
-      - WH_SECURITY_AUD=KbsOSWkS6GWvmh20mg24UdnrKwgUMfvK
+      - WH_SECURITY_AUD=nvKDmIK9Q5Zw1UKwpON8LE3tg9vZcXb4
       - WH_SECURITY_CLIENT_ID=nvKDmIK9Q5Zw1UKwpON8LE3tg9vZcXb4
       - WH_SECURITY_ROLES_JSON_PATH=$$['https://webhookie.com/roles']
       - WH_SECURITY_GROUPS_JSON_PATH=$$['https://webhookie.com/groups']
