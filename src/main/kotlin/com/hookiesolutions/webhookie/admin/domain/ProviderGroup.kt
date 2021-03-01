@@ -15,7 +15,7 @@ import org.springframework.data.mongodb.core.mapping.Document
 data class ProviderGroup(
   override val name: String,
   override val description: String,
-  @Indexed(unique = true)
+  @Indexed(name = "provider_group.iamGroupName", unique = true)
   override val iamGroupName: String,
   override val enabled: Boolean = true
 ) : AccessGroup()

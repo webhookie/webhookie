@@ -29,7 +29,7 @@ data class WebhookGroup(
   val providerIAMGroups: Set<String>,
   val consumerAccess: ConsumerAccess,
   val providerAccess: ProviderAccess,
-  @Indexed
+  @Indexed(name = "webhook_group.numberOfTopics")
   val numberOfTopics: Int = topics.size
 ) : AbstractEntity() {
   class Queries {

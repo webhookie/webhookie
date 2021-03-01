@@ -20,10 +20,10 @@ import org.springframework.data.mongodb.core.query.Update
 @Document(collection = APPLICATION_COLLECTION_NAME)
 @TypeAlias("application")
 data class Application(
-  @Indexed(unique = true)
+  @Indexed(name = "application.name", unique = true)
   val name: String,
   val description: String? = null,
-  @Indexed
+  @Indexed(name = "application.entity")
   val entity: String,
   val consumerIAMGroups: Set<String>
 ): AbstractEntity() {

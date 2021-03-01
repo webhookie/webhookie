@@ -43,7 +43,7 @@ import org.springframework.data.mongodb.core.query.Update
   )
 )
 data class Subscription(
-  @Indexed
+  @Indexed(name = "subscription.topic")
   val topic: String,
   val application: ApplicationDetails,
   val callback: CallbackDetails,
