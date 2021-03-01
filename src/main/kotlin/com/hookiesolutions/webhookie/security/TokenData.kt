@@ -1,5 +1,7 @@
 package com.hookiesolutions.webhookie.security
 
+import org.springframework.security.core.GrantedAuthority
+
 /**
  *
  * @author Arthur Kazemi<bidadh@gmail.com>
@@ -7,5 +9,7 @@ package com.hookiesolutions.webhookie.security
  */
 data class TokenData(
   val entity: String,
-  val groups: List<String>
+  val groups: List<String>,
+  val roles: Collection<GrantedAuthority>,
+  val email: String
 )

@@ -28,7 +28,7 @@ class SecurityHandler {
   fun data(): Mono<TokenData> {
     return token()
       .switchIfEmpty { AccessDeniedException("Token is not provided").toMono() }
-      .map { TokenData(it.entity, it.groups) }
+      .map { TokenData(it.entity, it.groups, it.roles, it.email) }
   }
 
   fun groups(): Mono<List<String>> {

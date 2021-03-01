@@ -21,7 +21,18 @@ class CommonAPIDocs {
       .build()
   }
 
+  @Bean
+  fun commonUserApi(): GroupedOpenApi {
+    val paths = arrayOf("${REQUEST_MAPPING_USER_INFO}/**")
+    return GroupedOpenApi
+      .builder()
+      .group("User")
+      .pathsToMatch(*paths)
+      .build()
+  }
+
   companion object {
     const val REQUEST_MAPPING_PUBLIC = "/public"
+    const val REQUEST_MAPPING_USER_INFO = "/user"
   }
 }

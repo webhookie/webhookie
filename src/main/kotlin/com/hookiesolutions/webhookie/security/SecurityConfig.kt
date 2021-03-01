@@ -3,6 +3,7 @@ package com.hookiesolutions.webhookie.security
 import com.hookiesolutions.webhookie.admin.web.AdminAPIDocs.Companion.REQUEST_MAPPING_ADMIN
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_ADMIN
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_CONSUMER
+import com.hookiesolutions.webhookie.common.web.CommonAPIDocs.Companion.REQUEST_MAPPING_USER_INFO
 import com.hookiesolutions.webhookie.security.customizer.AllowAllPermissionEvaluator
 import com.hookiesolutions.webhookie.security.customizer.DelegateAuthenticationEntryPoint
 import com.hookiesolutions.webhookie.security.jwt.AudienceValidator
@@ -80,6 +81,7 @@ class SecurityConfig(
         authorize(pathMatchers("$REQUEST_MAPPING_ADMIN/**"), hasAuthority(ROLE_ADMIN))
         authorize(pathMatchers("$REQUEST_MAPPING_APPLICATIONS/**"), hasAuthority(ROLE_CONSUMER))
         authorize(pathMatchers("$REQUEST_MAPPING_SUBSCRIPTIONS/**"), authenticated)
+        authorize(pathMatchers("$REQUEST_MAPPING_USER_INFO/**"), authenticated)
         authorize(pathMatchers(HttpMethod.GET, "$REQUEST_MAPPING_WEBHOOK_GROUPS/**"), permitAll)
 
         authorize()
