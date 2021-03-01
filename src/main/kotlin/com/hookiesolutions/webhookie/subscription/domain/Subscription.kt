@@ -65,11 +65,6 @@ data class Subscription(
         return where(KEY_TOPIC).`is`(topic)
       }
 
-      fun subscriptionIsActive(): Criteria {
-        return where("$KEY_STATUS_UPDATE.$KEY_STATUS")
-          .`is`(SubscriptionStatus.ACTIVATED)
-      }
-
       fun topicIsIn(topics: Collection<String>): Criteria {
         return where(KEY_TOPIC).`in`(topics)
       }
