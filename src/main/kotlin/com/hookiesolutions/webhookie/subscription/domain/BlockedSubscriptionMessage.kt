@@ -38,6 +38,12 @@ data class BlockedSubscriptionMessage(
       GenericMessage(payload, messageHeaders)
     )
 
+  val traceId: String
+    get() = originalMessage.traceId
+
+  val spanId: String
+    get() = originalSpanId
+
   class Queries {
     companion object {
       fun bySubscriptionId(id: String): Criteria {

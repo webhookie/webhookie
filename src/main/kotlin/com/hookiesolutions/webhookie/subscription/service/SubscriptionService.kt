@@ -203,8 +203,8 @@ class SubscriptionService(
   }
 
   fun findSubscriptionsFor(consumerMessage: ConsumerMessage): Flux<Subscription> {
-    val topic = consumerMessage.headers.topic
-    val authorizedSubscribers = consumerMessage.headers.authorizedSubscribers
+    val topic = consumerMessage.topic
+    val authorizedSubscribers = consumerMessage.authorizedSubscribers
 
     log.info("Reading '{}' subscribers for authorized subscribers: {}", topic, authorizedSubscribers)
 

@@ -22,12 +22,12 @@ class SubscriptionSignor(
   fun sign(subscription: Subscription, consumerMessage: ConsumerMessage, spanId: String): Mono<SubscriptionSignature> {
     val time = timeMachine.now().toString()
     return Mono.justOrEmpty(subscription.callback.security)
-      .zipWhen { CryptoUtils.hmac(it.secret.secret, subscription, time, consumerMessage.headers.traceId, spanId) }
+      .zipWhen { CryptoUtils.hmac(it.secret.secret, subscription, time, consumerMessage.traceId, spanId) }
       .map {
         SubscriptionSignature.Builder()
           .keyId(it.t1.secret.keyId)
           .algorithm(ALG)
-          .traceId(consumerMessage.headers.traceId)
+          .traceId(consumerMessage.traceId)
           .spanId(spanId)
           .date(time)
           .signature(it.t2)

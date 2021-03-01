@@ -14,4 +14,7 @@ interface GenericSubscriptionMessage {
   fun addMessageHeaders(headers: HttpHeaders) {
     originalMessage.addMessageHeaders(headers)
   }
+
+  val traceId: String
+    get() = originalMessage.traceId
 }

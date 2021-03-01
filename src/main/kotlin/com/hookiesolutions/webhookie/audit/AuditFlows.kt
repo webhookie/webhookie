@@ -42,7 +42,8 @@ class AuditFlows(
     return integrationFlow {
       channel(CONSUMER_CHANNEL_NAME)
       handle { payload: ConsumerMessage, _: MessageHeaders ->
-        log.warn("TOPIC: {}", payload.headers.topic)
+        val h = "$CONSUMER_CHANNEL_NAME, ${payload.traceId}"
+        log.warn("$h - '{}'", payload.topic)
       }
     }
   }
@@ -52,7 +53,8 @@ class AuditFlows(
     return integrationFlow {
       channel(SUBSCRIPTION_CHANNEL_NAME)
       handle { payload: SignableSubscriptionMessage, _: MessageHeaders ->
-        log.info("{}, {}, {}, {}", payload.subscription.callback.url, payload.delay, payload.numberOfRetries, payload.spanId)
+        val h = "$SUBSCRIPTION_CHANNEL_NAME, ${payload.traceId}, ${payload.spanId}"
+        log.warn("$h - {}, {}, {}", payload.subscription.callback.url, payload.delay, payload.numberOfRetries)
       }
     }
   }
@@ -62,7 +64,8 @@ class AuditFlows(
     return integrationFlow {
       channel(SUBSCRIPTION_ERROR_CHANNEL_NAME)
       handle { payload: SubscriptionMessageHandlingException, _: MessageHeaders ->
-        log.info("{}", payload)
+        val h = "$SUBSCRIPTION_ERROR_CHANNEL_NAME, ${payload.traceId}, ${payload.spanId}"
+        log.warn("$h - '{}'", SUBSCRIPTION_ERROR_CHANNEL_NAME, payload)
       }
     }
   }
@@ -72,7 +75,8 @@ class AuditFlows(
     return integrationFlow {
       channel(BLOCKED_SUBSCRIPTION_CHANNEL_NAME)
       handle { payload: BlockedSubscriptionMessageDTO, _: MessageHeaders ->
-        log.info("BLOCKED SUBSCRIPTION {}, {}, {}, {}", payload.subscription.callback.url, payload.subscription.topic, payload.originalSpanId)
+        val h = "$BLOCKED_SUBSCRIPTION_CHANNEL_NAME, ${payload.traceId}, ${payload.spanId}"
+        log.warn("$h - {}, {}, {}", payload.subscription.callback.url, payload.topic)
       }
     }
   }
@@ -82,7 +86,8 @@ class AuditFlows(
     return integrationFlow {
       channel(NO_SUBSCRIPTION_CHANNEL_NAME)
       handle { payload: NoSubscriptionMessage, _: MessageHeaders ->
-        log.warn("No Subscription for: '{}'", payload.originalMessage.headers.topic)
+        val h = "$NO_SUBSCRIPTION_CHANNEL_NAME, ${payload.traceId}"
+        log.warn("$h - '{}'", payload.originalMessage.topic)
       }
     }
   }
@@ -92,7 +97,8 @@ class AuditFlows(
     return integrationFlow {
       channel(PUBLISHER_SUCCESS_CHANNEL)
       handle { payload: PublisherSuccessMessage, _: MessageHeaders ->
-        log.warn("'{}', {}", payload.response.status, payload.subscriptionMessage.subscription.callback.url)
+        val h = "$PUBLISHER_SUCCESS_CHANNEL, ${payload.traceId}, ${payload.spanId}"
+        log.warn("$h - '{}', {}", payload.response.status, payload.url)
       }
     }
   }
@@ -102,7 +108,8 @@ class AuditFlows(
     return integrationFlow {
       channel(PUBLISHER_REQUEST_ERROR_CHANNEL)
       handle { payload: PublisherRequestErrorMessage, _: MessageHeaders ->
-        log.warn("{}, {}", payload.subscriptionMessage.subscription.callback.url, payload.reason)
+        val h = "$PUBLISHER_REQUEST_ERROR_CHANNEL, ${payload.traceId}, ${payload.spanId}"
+        log.warn("$h - {}, {}", payload.url, payload.reason)
       }
     }
   }
@@ -112,7 +119,8 @@ class AuditFlows(
     return integrationFlow {
       channel(PUBLISHER_RESPONSE_ERROR_CHANNEL)
       handle { payload: PublisherResponseErrorMessage, _: MessageHeaders ->
-        log.warn("'{}', {}, {}", payload.response.status, payload.subscriptionMessage.subscription.callback.url, payload.reason)
+        val h = "$PUBLISHER_RESPONSE_ERROR_CHANNEL, ${payload.traceId}, ${payload.spanId}"
+        log.warn("$h - '{}', {}, {}", payload.response.status, payload.url, payload.reason)
       }
     }
   }
@@ -122,7 +130,8 @@ class AuditFlows(
     return integrationFlow {
       channel(PUBLISHER_OTHER_ERROR_CHANNEL)
       handle { payload: PublisherOtherErrorMessage, _: MessageHeaders ->
-        log.warn("{}, {}", payload.subscriptionMessage.subscription.callback.url, payload.reason)
+        val h = "$PUBLISHER_OTHER_ERROR_CHANNEL, ${payload.traceId}, ${payload.spanId}"
+        log.warn("$h - {}, {}", payload.url, payload.reason)
       }
     }
   }
@@ -132,7 +141,8 @@ class AuditFlows(
     return integrationFlow {
       channel(RETRYABLE_PUBLISHER_ERROR_CHANNEL)
       handle { payload: PublisherErrorMessage, _: MessageHeaders ->
-        log.warn("{}, {}", payload.subscriptionMessage.subscription.callback.url, payload.subscriptionMessage.delay.seconds)
+        val h = "$RETRYABLE_PUBLISHER_ERROR_CHANNEL, ${payload.traceId}. ${payload.spanId}"
+        log.warn("$h - {}, {}", payload.url, payload.subscriptionMessage.delay.seconds)
       }
     }
   }
@@ -142,7 +152,8 @@ class AuditFlows(
     return integrationFlow {
       channel(UNSUCCESSFUL_SUBSCRIPTION_CHANNEL_NAME)
       handle { payload: PublisherErrorMessage, _: MessageHeaders ->
-        log.warn("{}, {}", payload.subscriptionMessage.subscription.callback.url, payload.subscriptionMessage.delay.seconds)
+        val h = "$UNSUCCESSFUL_SUBSCRIPTION_CHANNEL_NAME, ${payload.traceId}, ${payload.spanId}"
+        log.warn("$h - {}, {}", payload.url, payload.subscriptionMessage.delay.seconds)
       }
     }
   }

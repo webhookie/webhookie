@@ -38,6 +38,18 @@ data class ConsumerMessage(
       }
   }
 
+  val topic: String
+    get() = headers.topic
+
+  val traceId: String
+    get() = headers.traceId
+
+  val contentType: String
+    get() = headers.contentType
+
+  val authorizedSubscribers: Set<String>
+    get() = headers.authorizedSubscribers
+
   val mediaType: MediaType
     get() = headers.mediaType
 

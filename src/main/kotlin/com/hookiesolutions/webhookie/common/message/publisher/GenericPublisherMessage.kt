@@ -13,6 +13,15 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 interface GenericPublisherMessage {
   val subscriptionMessage: SignableSubscriptionMessage
 
+  val spanId: String
+    get() = subscriptionMessage.spanId
+
+  val traceId: String
+    get() = subscriptionMessage.traceId
+
+  val url: String
+    get() = subscriptionMessage.subscription.callback.url
+
   companion object {
     fun success(subscriptionMessage: SignableSubscriptionMessage, response: ResponseEntity<ByteArray>): GenericPublisherMessage {
       return PublisherSuccessMessage(subscriptionMessage, ServerResponse(response.statusCode, response.body ?: ByteArray(0), response.headers))

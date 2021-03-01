@@ -18,6 +18,15 @@ data class BlockedSubscriptionMessageDTO(
   val subscription: SubscriptionDTO,
   val blockedDetails: StatusUpdate
 ) {
+  val topic: String
+    get() = headers.topic
+
+  val traceId: String
+    get() = headers.traceId
+
+  val spanId: String
+    get() = originalSpanId
+
   @Suppress("DuplicatedCode")
   override fun equals(other: Any?): Boolean {
     if (this === other) return true

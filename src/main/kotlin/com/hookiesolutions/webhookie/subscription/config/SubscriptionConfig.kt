@@ -104,7 +104,7 @@ class SubscriptionConfig(
       subscriptionService.findSubscriptionsFor(cm)
         .map { factory.subscriptionToSubscriptionMessage(it, cm) }
         .switchIfEmpty(NoSubscriptionMessage(cm).toMono())
-        .onErrorMap { SubscriptionMessageHandlingException(it.localizedMessage, cm.headers.traceId) }
+        .onErrorMap { SubscriptionMessageHandlingException(it.localizedMessage, cm.traceId) }
     }
   }
 
@@ -113,7 +113,7 @@ class SubscriptionConfig(
     return GenericTransformer { payload ->
       subscriptionService.blockSubscription(payload)
         .map { factory.createBlockedSubscriptionMessageDTO(payload, it) }
-        .onErrorMap { SubscriptionMessageHandlingException(it.localizedMessage, payload.subscriptionMessage.originalMessage.headers.traceId, payload.subscriptionMessage.spanId) }
+        .onErrorMap { SubscriptionMessageHandlingException(it.localizedMessage, payload.traceId, payload.spanId) }
     }
   }
 
@@ -136,7 +136,7 @@ class SubscriptionConfig(
   fun signSubscriptionMessage(): GenericTransformer<SignableSubscriptionMessage, Mono<SignableSubscriptionMessage>> {
     return GenericTransformer { msg ->
       subscriptionService.signSubscriptionMessage(msg)
-        .onErrorMap { SubscriptionMessageHandlingException(it.localizedMessage, msg.originalMessage.headers.traceId, msg.spanId) }
+        .onErrorMap { SubscriptionMessageHandlingException(it.localizedMessage, msg.traceId, msg.spanId) }
     }
   }
 
@@ -145,7 +145,7 @@ class SubscriptionConfig(
     return GenericTransformer { bsmDTO ->
       val msg = factory.bmsDTOToBlockedSubscriptionMessage(bsmDTO)
       subscriptionService.saveBlockedSubscriptionMessage(msg)
-        .onErrorMap { SubscriptionMessageHandlingException(it.localizedMessage, msg.originalMessage.headers.traceId) }
+        .onErrorMap { SubscriptionMessageHandlingException(it.localizedMessage, msg.traceId) }
     }
   }
 
@@ -153,7 +153,7 @@ class SubscriptionConfig(
   fun deleteBlockedMessage(): GenericTransformer<BlockedSubscriptionMessage, Mono<BlockedSubscriptionMessage>> {
     return GenericTransformer { bsm ->
       subscriptionService.deleteBlockedMessage(bsm)
-        .onErrorMap { SubscriptionMessageHandlingException(it.localizedMessage, bsm.originalMessage.headers.traceId) }
+        .onErrorMap { SubscriptionMessageHandlingException(it.localizedMessage, bsm.traceId) }
     }
   }
 

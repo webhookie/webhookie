@@ -69,7 +69,7 @@ class ConversionsFactory(
   ): BlockedSubscriptionMessage {
     return BlockedSubscriptionMessage(
       dto.headers,
-      dto.originalSpanId,
+      dto.spanId,
       dto.payload,
       dto.messageHeaders,
       dto.subscription,
@@ -85,7 +85,7 @@ class ConversionsFactory(
     return BlockedSubscriptionMessageDTO(
       null,
       originalMessage.headers,
-      errorMessage.subscriptionMessage.spanId,
+      errorMessage.spanId,
       originalMessage.payload,
       originalMessage.messageHeaders,
       errorMessage.subscriptionMessage.subscription,
