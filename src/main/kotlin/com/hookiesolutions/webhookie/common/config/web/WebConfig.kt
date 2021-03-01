@@ -1,5 +1,6 @@
 package com.hookiesolutions.webhookie.common.config.web
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.hookiesolutions.webhookie.common.service.TimeMachine
 import org.slf4j.Logger
 import org.springframework.context.annotation.Bean
@@ -10,6 +11,9 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.web.ReactivePageableHandlerMethodArgumentResolver
 import org.springframework.data.web.ReactiveSortHandlerMethodArgumentResolver
 import org.springframework.http.HttpHeaders
+import org.springframework.http.codec.ServerCodecConfigurer
+import org.springframework.http.codec.json.Jackson2JsonDecoder
+import org.springframework.http.codec.json.Jackson2JsonEncoder
 import org.springframework.web.reactive.config.EnableWebFlux
 import org.springframework.web.reactive.config.WebFluxConfigurer
 import org.springframework.web.reactive.result.method.annotation.ArgumentResolverConfigurer
@@ -26,12 +30,22 @@ import java.time.Instant
  */
 @Configuration
 @EnableWebFlux
-class WebConfig: WebFluxConfigurer {
+class WebConfig(
+  private val objectMapper: ObjectMapper
+): WebFluxConfigurer {
   override fun configureArgumentResolvers(configurer: ArgumentResolverConfigurer) {
     val pageableArgumentResolver =
       ReactivePageableHandlerMethodArgumentResolver(ReactiveSortHandlerMethodArgumentResolver())
     pageableArgumentResolver.setFallbackPageable(Pageable.unpaged())
     configurer.addCustomResolver(pageableArgumentResolver)
+  }
+
+  override fun configureHttpMessageCodecs(configurer: ServerCodecConfigurer) {
+    val cc = configurer
+      .customCodecs()
+
+    cc.register(Jackson2JsonDecoder(objectMapper))
+    cc.register(Jackson2JsonEncoder(objectMapper))
   }
 
   @Bean

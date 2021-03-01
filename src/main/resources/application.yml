@@ -52,6 +52,8 @@ spring:
           jws-algorithm: ${WH_IAM_JWS_ALG}
   jackson:
     default-property-inclusion: non_null
+    serialization:
+      write-dates-as-timestamps: false
 management:
   endpoints:
     web:
