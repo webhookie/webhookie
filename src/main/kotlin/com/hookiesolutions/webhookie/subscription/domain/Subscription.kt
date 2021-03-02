@@ -9,9 +9,9 @@ import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate
 import com.hookiesolutions.webhookie.subscription.domain.CallbackDetails.Keys.Companion.KEY_CALLBACK_ID
 import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Keys.Companion.KEY_STATUS
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionStatus
+import com.hookiesolutions.webhookie.subscription.domain.Application.Keys.Companion.KEY_ENTITY
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_APPLICATION
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_CALLBACK
-import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_ENTITY
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_STATUS_UPDATE
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_TOPIC
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.SUBSCRIPTION_COLLECTION_NAME
@@ -74,7 +74,7 @@ data class Subscription(
       }
 
       fun isAuthorized(entities: Set<String>): Criteria {
-        return where(KEY_ENTITY)
+        return where("$KEY_APPLICATION.$KEY_ENTITY")
           .`in`(entities)
       }
 
@@ -116,7 +116,6 @@ data class Subscription(
   class Keys {
     companion object {
       const val KEY_TOPIC = "topic"
-      const val KEY_ENTITY = "entity"
       const val KEY_APPLICATION = "application"
       const val KEY_CALLBACK = "callback"
       const val KEY_STATUS_UPDATE = "statusUpdate"

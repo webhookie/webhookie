@@ -93,14 +93,16 @@ class SubscriptionRepository(
   }
 
   fun findAuthorizedTopicSubscriptions(topic: String, authorizedSubscribers: Set<String>): Flux<Subscription> {
-    var criteria = topicIs(topic)
-      .andOperator(statusIsIn(listOf(SubscriptionStatus.ACTIVATED, SubscriptionStatus.BLOCKED)))
+    val criteria = mutableListOf(
+      topicIs(topic),
+      statusIsIn(listOf(SubscriptionStatus.ACTIVATED, SubscriptionStatus.BLOCKED))
+    )
     if (authorizedSubscribers.isNotEmpty()) {
-      criteria = criteria.andOperator(isAuthorized(authorizedSubscribers))
+      criteria.add(isAuthorized(authorizedSubscribers))
     }
 
     return mongoTemplate
-      .find(query(criteria), Subscription::class.java)
+      .find(query(Criteria().andOperator(*criteria.toTypedArray())), Subscription::class.java)
   }
 
   fun saveBlockedSubscriptionMessage(message: BlockedSubscriptionMessage): Mono<BlockedSubscriptionMessage> {
