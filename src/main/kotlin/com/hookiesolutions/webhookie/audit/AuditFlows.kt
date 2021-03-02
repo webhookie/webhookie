@@ -1,5 +1,6 @@
 package com.hookiesolutions.webhookie.audit
 
+import com.hookiesolutions.webhookie.audit.service.TrafficService
 import com.hookiesolutions.webhookie.common.Constants.Channels.Consumer.Companion.CONSUMER_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Channels.Publisher.Companion.PUBLISHER_OTHER_ERROR_CHANNEL
 import com.hookiesolutions.webhookie.common.Constants.Channels.Publisher.Companion.PUBLISHER_REQUEST_ERROR_CHANNEL
@@ -11,6 +12,7 @@ import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Comp
 import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.SUBSCRIPTION_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.SUBSCRIPTION_ERROR_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.UNSUCCESSFUL_SUBSCRIPTION_CHANNEL_NAME
+import com.hookiesolutions.webhookie.common.exception.messaging.SubscriptionMessageHandlingException
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherErrorMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherOtherErrorMessage
@@ -20,7 +22,6 @@ import com.hookiesolutions.webhookie.common.message.publisher.PublisherSuccessMe
 import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscriptionMessageDTO
 import com.hookiesolutions.webhookie.common.message.subscription.NoSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
-import com.hookiesolutions.webhookie.common.exception.messaging.SubscriptionMessageHandlingException
 import org.slf4j.Logger
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -35,15 +36,15 @@ import org.springframework.messaging.MessageHeaders
  */
 @Configuration
 class AuditFlows(
-  private val log: Logger
+  private val log: Logger,
+  private val trafficService: TrafficService
 ) {
   @Bean
   fun logConsumerMessage(): IntegrationFlow {
     return integrationFlow {
       channel(CONSUMER_CHANNEL_NAME)
       handle { payload: ConsumerMessage, _: MessageHeaders ->
-        val h = "$CONSUMER_CHANNEL_NAME, ${payload.traceId}"
-        log.warn("$h - '{}'", payload.topic)
+        trafficService.save(payload)
       }
     }
   }

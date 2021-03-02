@@ -59,6 +59,12 @@ data class ConsumerMessage(
     }
   }
 
+  class Keys {
+    companion object {
+      const val KEY_TRACE_ID = "traceId"
+    }
+  }
+
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other !is ConsumerMessage) return false
