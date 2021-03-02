@@ -87,7 +87,7 @@ class ConsumerConfig {
     @Header(WH_HEADER_AUTHORIZED_SUBSCRIBER, required = false, defaultValue = "") authorizedSubscribers: List<String> = emptyList()
   ): Message<*> {
     log.info("{}", message.payload)
-    log.info("{}", message.messageHeaders)
+    log.info("{}", message.headers)
     log.info("{}", topic)
 
     return message

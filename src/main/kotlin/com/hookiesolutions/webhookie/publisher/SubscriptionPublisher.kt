@@ -36,7 +36,7 @@ class SubscriptionPublisher(
         WebClient
           .create(msg.subscription.callback.url)
           .method(msg.subscription.callback.httpMethod)
-          .contentType(msg.originalMessage.mediaType)
+          .contentType(msg.originalMessage.mediaType())
           .body(BodyInserters.fromValue(msg.originalMessage.payload))
           .header(Constants.Queue.Headers.WH_HEADER_SPAN_ID, msg.spanId)
           .headers { msg.addMessageHeaders(it) }

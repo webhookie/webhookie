@@ -1,7 +1,6 @@
 package com.hookiesolutions.webhookie.subscription.domain
 
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
-import com.hookiesolutions.webhookie.common.message.WebhookieHeaders
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
 import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
@@ -14,7 +13,6 @@ import org.springframework.data.mongodb.core.index.CompoundIndexes
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Criteria.where
-import org.springframework.messaging.support.GenericMessage
 
 /**
  *
@@ -25,24 +23,12 @@ import org.springframework.messaging.support.GenericMessage
 @TypeAlias("blocked_subscription_message")
 @CompoundIndexes(CompoundIndex(name = "message_time", def = "{'blockedDetails.time' : 1}"))
 data class BlockedSubscriptionMessage(
-  val headers: WebhookieHeaders,
-  val originalSpanId: String,
-  val payload: ByteArray,
-  val messageHeaders: Map<String, Any>,
+  val spanId: String,
+  val consumerMessage: ConsumerMessage,
   val subscription: SubscriptionDTO,
   val blockedDetails: StatusUpdate
 ): AbstractEntity() {
-  val originalMessage: ConsumerMessage
-    get() = ConsumerMessage(
-      headers,
-      GenericMessage(payload, messageHeaders)
-    )
-
-  val traceId: String
-    get() = originalMessage.traceId
-
-  val spanId: String
-    get() = originalSpanId
+  fun traceId(): String = consumerMessage.traceId
 
   class Queries {
     companion object {
@@ -56,30 +42,5 @@ data class BlockedSubscriptionMessage(
     companion object {
       const val KEY_SUBSCRIPTION = "subscription"
     }
-  }
-
-  @Suppress("DuplicatedCode")
-  override fun equals(other: Any?): Boolean {
-    if (this === other) return true
-    if (other !is BlockedSubscriptionMessage) return false
-
-    if (headers != other.headers) return false
-    if (originalSpanId != other.originalSpanId) return false
-    if (!payload.contentEquals(other.payload)) return false
-    if (messageHeaders != other.messageHeaders) return false
-    if (subscription != other.subscription) return false
-    if (blockedDetails != other.blockedDetails) return false
-
-    return true
-  }
-
-  override fun hashCode(): Int {
-    var result = headers.hashCode()
-    result = 31 * result + originalSpanId.hashCode()
-    result = 31 * result + payload.contentHashCode()
-    result = 31 * result + messageHeaders.hashCode()
-    result = 31 * result + subscription.hashCode()
-    result = 31 * result + blockedDetails.hashCode()
-    return result
   }
 }

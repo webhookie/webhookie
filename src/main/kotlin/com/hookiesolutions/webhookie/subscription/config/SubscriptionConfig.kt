@@ -145,7 +145,7 @@ class SubscriptionConfig(
     return GenericTransformer { bsmDTO ->
       val msg = factory.bmsDTOToBlockedSubscriptionMessage(bsmDTO)
       subscriptionService.saveBlockedSubscriptionMessage(msg)
-        .onErrorMap { SubscriptionMessageHandlingException(it.localizedMessage, msg.traceId) }
+        .onErrorMap { SubscriptionMessageHandlingException(it.localizedMessage, msg.traceId()) }
     }
   }
 
@@ -153,7 +153,7 @@ class SubscriptionConfig(
   fun deleteBlockedMessage(): GenericTransformer<BlockedSubscriptionMessage, Mono<BlockedSubscriptionMessage>> {
     return GenericTransformer { bsm ->
       subscriptionService.deleteBlockedMessage(bsm)
-        .onErrorMap { SubscriptionMessageHandlingException(it.localizedMessage, bsm.traceId) }
+        .onErrorMap { SubscriptionMessageHandlingException(it.localizedMessage, bsm.traceId()) }
     }
   }
 

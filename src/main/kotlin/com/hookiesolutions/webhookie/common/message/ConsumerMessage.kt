@@ -4,10 +4,10 @@ import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.HE
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_AUTHORIZED_SUBSCRIBER
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_TOPIC
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_TRACE_ID
+import org.springframework.data.annotation.Transient
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.messaging.Message
-import org.springframework.messaging.MessageHeaders
 
 /**
  *
@@ -15,43 +15,30 @@ import org.springframework.messaging.MessageHeaders
  * @since 3/12/20 12:31
  */
 data class ConsumerMessage(
-  val headers: WebhookieHeaders,
-  val message: Message<ByteArray>
+  val traceId: String,
+  val topic: String,
+  val contentType: String,
+  val authorizedSubscribers: Set<String>,
+  val payload: ByteArray,
+  val headers: Map<String, Any>,
 ) {
-  val payload: ByteArray
-    get() = message.payload
-
-  @Suppress("unused")
-  val messageHeaders: MessageHeaders
-    get() = message.headers
-
   fun addMessageHeaders(headers: HttpHeaders) {
-    message.headers
+    this.headers
       .forEach {
         val stringValue = it.value as? String
-        @Suppress("UNCHECKED_CAST") val listValue = it.value as? List<String>
         if (stringValue != null) {
           headers.addIfAbsent(it.key, stringValue)
-        } else if(listValue != null) {
-          headers.addAll(it.key, listValue)
+        } else {
+          @Suppress("UNCHECKED_CAST") val listValue = it.value as? List<String>
+          if(listValue != null) {
+            headers.addAll(it.key, listValue)
+          }
         }
       }
   }
 
-  val topic: String
-    get() = headers.topic
-
-  val traceId: String
-    get() = headers.traceId
-
-  val contentType: String
-    get() = headers.contentType
-
-  val authorizedSubscribers: Set<String>
-    get() = headers.authorizedSubscribers
-
-  val mediaType: MediaType
-    get() = headers.mediaType
+  @Transient
+  fun  mediaType(): MediaType = MediaType.parseMediaType(contentType)
 
   companion object {
     fun from(message: Message<ByteArray>): ConsumerMessage {
@@ -60,10 +47,39 @@ data class ConsumerMessage(
       val contentType = message.headers[HEADER_CONTENT_TYPE] as String
       @Suppress("UNCHECKED_CAST")
       val authorizedSubscribers: Collection<String> = message.headers[WH_HEADER_AUTHORIZED_SUBSCRIBER] as? Collection<String> ?: emptySet()
+
       return ConsumerMessage(
-        WebhookieHeaders(topic, traceId, contentType, authorizedSubscribers.toSet()),
-        message
+        traceId,
+        topic,
+        contentType,
+        authorizedSubscribers.toSet(),
+        message.payload,
+        message.headers
       )
     }
+  }
+
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (other !is ConsumerMessage) return false
+
+    if (traceId != other.traceId) return false
+    if (topic != other.topic) return false
+    if (contentType != other.contentType) return false
+    if (authorizedSubscribers != other.authorizedSubscribers) return false
+    if (!payload.contentEquals(other.payload)) return false
+    if (headers != other.headers) return false
+
+    return true
+  }
+
+  override fun hashCode(): Int {
+    var result = traceId.hashCode()
+    result = 31 * result + topic.hashCode()
+    result = 31 * result + contentType.hashCode()
+    result = 31 * result + authorizedSubscribers.hashCode()
+    result = 31 * result + payload.contentHashCode()
+    result = 31 * result + headers.hashCode()
+    return result
   }
 }

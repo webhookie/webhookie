@@ -8,15 +8,15 @@ import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscri
 import com.hookiesolutions.webhookie.common.message.subscription.SignedSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionSignature
 import com.hookiesolutions.webhookie.common.message.subscription.UnsignedSubscriptionMessage
+import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate
+import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Companion.blocked
+import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Companion.saved
 import com.hookiesolutions.webhookie.common.service.IdGenerator
 import com.hookiesolutions.webhookie.common.service.TimeMachine
 import com.hookiesolutions.webhookie.subscription.domain.Application
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
 import com.hookiesolutions.webhookie.subscription.domain.Callback
 import com.hookiesolutions.webhookie.subscription.domain.CallbackDetails
-import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate
-import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Companion.blocked
-import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Companion.saved
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.subscription.service.model.ApplicationRequest
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.CreateSubscriptionRequest
@@ -46,8 +46,8 @@ class ConversionsFactory(
     bsm: BlockedSubscriptionMessage
   ): UnsignedSubscriptionMessage {
     return UnsignedSubscriptionMessage(
-      originalMessage = bsm.originalMessage,
-      spanId = bsm.originalSpanId,
+      originalMessage = bsm.consumerMessage,
+      spanId = bsm.spanId,
       subscription = bsm.subscription
     )
   }
@@ -68,10 +68,8 @@ class ConversionsFactory(
     dto: BlockedSubscriptionMessageDTO
   ): BlockedSubscriptionMessage {
     return BlockedSubscriptionMessage(
-      dto.headers,
       dto.spanId,
-      dto.payload,
-      dto.messageHeaders,
+      dto.consumerMessage,
       dto.subscription,
       dto.blockedDetails
     )
@@ -84,10 +82,8 @@ class ConversionsFactory(
     val originalMessage = errorMessage.subscriptionMessage.originalMessage
     return BlockedSubscriptionMessageDTO(
       null,
-      originalMessage.headers,
       errorMessage.spanId,
-      originalMessage.payload,
-      originalMessage.messageHeaders,
+      originalMessage,
       errorMessage.subscriptionMessage.subscription,
       statusUpdate
     )
@@ -101,10 +97,8 @@ class ConversionsFactory(
     val originalMessage = message.originalMessage
     return BlockedSubscriptionMessageDTO(
       null,
-      originalMessage.headers,
       message.spanId,
-      originalMessage.payload,
-      originalMessage.messageHeaders,
+      originalMessage,
       message.subscription,
       blocked(at, reason)
     )
