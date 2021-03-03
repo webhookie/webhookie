@@ -40,6 +40,7 @@ abstract class AbstractDocument {
   class Keys {
     companion object {
       const val KEY_VERSION = "version"
+      const val KEY_LAST_MODIFIED_DATE = "lastModifiedDate"
     }
   }
 }

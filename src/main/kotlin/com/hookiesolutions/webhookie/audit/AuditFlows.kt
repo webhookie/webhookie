@@ -87,8 +87,7 @@ class AuditFlows(
     return integrationFlow {
       channel(NO_SUBSCRIPTION_CHANNEL_NAME)
       handle { payload: NoSubscriptionMessage, _: MessageHeaders ->
-        val h = "$NO_SUBSCRIPTION_CHANNEL_NAME, ${payload.traceId}"
-        log.warn("$h - '{}'", payload.originalMessage.topic)
+        trafficService.updateWithNoSubscription(payload)
       }
     }
   }

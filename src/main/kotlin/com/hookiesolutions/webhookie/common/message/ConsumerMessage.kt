@@ -62,6 +62,7 @@ data class ConsumerMessage(
   class Keys {
     companion object {
       const val KEY_TRACE_ID = "traceId"
+      const val KEY_TOPIC = "topic"
     }
   }
 
