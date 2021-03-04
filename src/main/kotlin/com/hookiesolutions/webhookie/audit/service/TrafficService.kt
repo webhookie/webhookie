@@ -29,18 +29,18 @@ class TrafficService(
       .time(timeMachine.now())
       .build()
     saveOrFetch(traffic)
-      .subscribe { log.debug("'{}' traffic was saved/fetched", it.traceId()) }
+      .subscribe { log.debug("'{}' traffic was saved/fetched", it.traceId) }
   }
 
   fun updateWithNoSubscription(message: NoSubscriptionMessage) {
     val traceId = message.traceId
     log.info("Updating traffic({}) with No Subscription", traceId)
     repository.updateWithNoSubscription(traceId, TrafficStatus.NO_SUBSCRIPTION, timeMachine.now())
-      .subscribe { log.debug("'{}' traffic was updated to '{}'", it.traceId(), it.statusUpdate) }
+      .subscribe { log.debug("'{}' traffic was updated to '{}'", it.traceId, it.statusUpdate) }
   }
 
   private fun saveOrFetch(traffic: Traffic): Mono<Traffic> {
-    val traceId = traffic.traceId()
+    val traceId = traffic.traceId
     return repository.save(traffic)
       .doOnNext { log.info("'{}' Traffic saved successfully: '{}'", traceId, it.id) }
       .onErrorResume(EntityExistsException::class.java) {

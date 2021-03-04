@@ -1,6 +1,7 @@
 package com.hookiesolutions.webhookie.common.model.dto
 
 import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.annotation.JsonProperty
 import org.springframework.http.HttpMethod
 
 /**
@@ -10,7 +11,8 @@ import org.springframework.http.HttpMethod
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class CallbackDTO(
-  val id: String,
+  @JsonProperty("id")
+  val callbackId: String,
   val name: String,
   val httpMethod: HttpMethod,
   val url: String,

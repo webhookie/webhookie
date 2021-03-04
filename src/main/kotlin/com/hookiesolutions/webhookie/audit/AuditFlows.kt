@@ -1,5 +1,6 @@
 package com.hookiesolutions.webhookie.audit
 
+import com.hookiesolutions.webhookie.audit.service.SpanService
 import com.hookiesolutions.webhookie.audit.service.TrafficService
 import com.hookiesolutions.webhookie.common.Constants.Channels.Consumer.Companion.CONSUMER_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Channels.Publisher.Companion.PUBLISHER_OTHER_ERROR_CHANNEL
@@ -22,6 +23,7 @@ import com.hookiesolutions.webhookie.common.message.publisher.PublisherSuccessMe
 import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscriptionMessageDTO
 import com.hookiesolutions.webhookie.common.message.subscription.NoSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
+import com.hookiesolutions.webhookie.common.service.TimeMachine
 import org.slf4j.Logger
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -37,7 +39,8 @@ import org.springframework.messaging.MessageHeaders
 @Configuration
 class AuditFlows(
   private val log: Logger,
-  private val trafficService: TrafficService
+  private val trafficService: TrafficService,
+  private val spanService: SpanService
 ) {
   @Bean
   fun logConsumerMessage(): IntegrationFlow {
@@ -54,8 +57,7 @@ class AuditFlows(
     return integrationFlow {
       channel(SUBSCRIPTION_CHANNEL_NAME)
       handle { payload: SignableSubscriptionMessage, _: MessageHeaders ->
-        val h = "$SUBSCRIPTION_CHANNEL_NAME, ${payload.traceId}, ${payload.spanId}"
-        log.warn("$h - {}, {}, {}", payload.subscription.callback.url, payload.delay, payload.numberOfRetries)
+        spanService.save(payload)
       }
     }
   }
