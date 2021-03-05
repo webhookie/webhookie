@@ -31,8 +31,7 @@ class SubscriptionPublisher(
     )
 
     return Mono
-      .delay(msg.delay)
-      .flatMap {
+      .defer {
         WebClient
           .create(msg.subscription.callback.url)
           .method(msg.subscription.callback.httpMethod)

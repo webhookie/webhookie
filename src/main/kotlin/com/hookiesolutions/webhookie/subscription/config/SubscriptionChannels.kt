@@ -20,6 +20,11 @@ class SubscriptionChannels {
     .get()
 
   @Bean
+  fun delaySubscriptionChannel(): PublishSubscribeChannel = MessageChannels
+    .publishSubscribe(Executors.newCachedThreadPool())
+    .get()
+
+  @Bean
   fun subscriptionErrorChannel(): PublishSubscribeChannel = MessageChannels
     .publishSubscribe(Executors.newCachedThreadPool())
     .get()

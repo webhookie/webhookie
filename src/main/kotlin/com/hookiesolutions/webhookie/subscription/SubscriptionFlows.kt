@@ -56,7 +56,7 @@ class SubscriptionFlows(
     toBeSignedWorkingSubscription: (GenericSubscriptionMessage) -> Boolean,
     nonSignableWorkingSubscription: (GenericSubscriptionMessage) -> Boolean,
     signSubscriptionMessageChannel: MessageChannel,
-    subscriptionChannel: MessageChannel,
+    delaySubscriptionChannel: MessageChannel,
     globalSubscriptionErrorChannel: MessageChannel,
     noSubscriptionChannel: MessageChannel,
     blockedSubscriptionChannel: MessageChannel
@@ -71,13 +71,33 @@ class SubscriptionFlows(
       split()
       routeToRecipients {
         recipient(signSubscriptionMessageChannel, toBeSignedWorkingSubscription)
-        recipient(subscriptionChannel, nonSignableWorkingSubscription)
+        recipient(delaySubscriptionChannel, nonSignableWorkingSubscription)
         recipient(noSubscriptionChannel, messageHasNoSubscription)
         recipientFlow(subscriptionIsBlocked, {
           transform(toBlockedSubscriptionMessageDTO)
           channel(blockedSubscriptionChannel)
         })
       }
+    }
+  }
+
+  @Bean
+  fun delayMessageFlow(
+    delaySubscriptionChannel: MessageChannel,
+    subscriptionChannel: MessageChannel
+  ): IntegrationFlow {
+    return integrationFlow {
+      channel(delaySubscriptionChannel)
+      delay("delay-message-group") {
+        this.delayFunction<SignableSubscriptionMessage> {
+          val delayInSeconds = it.payload.delay.seconds
+          if(delayInSeconds > 0) {
+            log.warn("Delaying '{}' for '{}', traceId: '{}'", it.payload.spanId, delayInSeconds, it.payload.traceId)
+          }
+          delayInSeconds * 1000
+        }
+      }
+      channel(subscriptionChannel)
     }
   }
 
@@ -123,14 +143,14 @@ class SubscriptionFlows(
   fun retrySubscriptionFlow(
     retrySubscriptionChannel: MessageChannel,
     signSubscriptionMessageChannel: MessageChannel,
-    subscriptionChannel: MessageChannel,
+    delaySubscriptionChannel: MessageChannel,
     toDelayedSignableSubscriptionMessage: GenericTransformer<PublisherErrorMessage, SignableSubscriptionMessage>
   ): IntegrationFlow {
     return integrationFlow {
       channel(retrySubscriptionChannel)
       transform(toDelayedSignableSubscriptionMessage)
       routeToRecipients {
-        recipient<SignableSubscriptionMessage>(subscriptionChannel) { it is UnsignedSubscriptionMessage}
+        recipient<SignableSubscriptionMessage>(delaySubscriptionChannel) { it is UnsignedSubscriptionMessage}
         recipient<SignableSubscriptionMessage>(signSubscriptionMessageChannel) {it is SignedSubscriptionMessage}
       }
     }
@@ -212,13 +232,13 @@ class SubscriptionFlows(
   fun signSubscriptionFlow(
     signSubscriptionMessageChannel: MessageChannel,
     signSubscriptionMessage: GenericTransformer<SignableSubscriptionMessage, Mono<SignableSubscriptionMessage>>,
-    subscriptionChannel: MessageChannel
+    delaySubscriptionChannel: MessageChannel
   ): IntegrationFlow {
     return integrationFlow {
       channel(signSubscriptionMessageChannel)
       transform(signSubscriptionMessage)
       split()
-      channel(subscriptionChannel)
+      channel(delaySubscriptionChannel)
     }
   }
 
