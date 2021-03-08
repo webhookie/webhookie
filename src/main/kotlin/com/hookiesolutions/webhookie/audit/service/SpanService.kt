@@ -2,7 +2,6 @@ package com.hookiesolutions.webhookie.audit.service
 
 import com.hookiesolutions.webhookie.audit.domain.Span
 import com.hookiesolutions.webhookie.audit.domain.SpanRepository
-import com.hookiesolutions.webhookie.audit.domain.SpanRetry
 import com.hookiesolutions.webhookie.audit.domain.SpanStatus
 import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate
 import com.hookiesolutions.webhookie.common.exception.EntityExistsException
@@ -37,12 +36,11 @@ class SpanService(
       .subscribe { log.debug("'{}', '{}' span was saved/fetched", it.spanId, it.traceId) }
   }
 
-  fun addRetry(message: SignableSubscriptionMessage) {
+  fun retrying(message: SignableSubscriptionMessage) {
     log.info("Delaying '{}', '{}' span for '{}' seconds", message.spanId, message.traceId, message.delay.seconds)
     val time = timeMachine.now()
     val statusUpdate = SpanStatusUpdate(SpanStatus.RETRYING, time)
-    val retry = SpanRetry(time, message.numberOfRetries, message.delay.seconds)
-    repository.addStatusUpdate(message.spanId, statusUpdate, retry)
+    repository.addStatusUpdate(message.spanId, statusUpdate)
       .subscribe { log.debug("'{}', '{}' Span was updated to: '{}'", it.spanId, it.traceId, it.lastRetry) }
   }
 

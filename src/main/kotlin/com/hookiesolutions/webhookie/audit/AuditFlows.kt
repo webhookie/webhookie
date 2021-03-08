@@ -67,9 +67,9 @@ class AuditFlows(
   fun logDelayedSubscriptionMessage(): IntegrationFlow {
     return integrationFlow {
       channel(DELAYED_SUBSCRIPTION_CHANNEL_NAME)
-      filter<SignableSubscriptionMessage> { it.numberOfRetries > 0 }
+      filter<SignableSubscriptionMessage> { it.numberOfRetries == 1 }
       handle { payload: SignableSubscriptionMessage, _: MessageHeaders ->
-        spanService.addRetry(payload)
+        spanService.retrying(payload)
       }
     }
   }
