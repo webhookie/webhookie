@@ -73,10 +73,10 @@ class SubscriptionFlows(
         recipient(signSubscriptionMessageChannel, toBeSignedWorkingSubscription)
         recipient(delaySubscriptionChannel, nonSignableWorkingSubscription)
         recipient(noSubscriptionChannel, messageHasNoSubscription)
-        recipientFlow(subscriptionIsBlocked, {
+        recipientFlow(subscriptionIsBlocked) {
           transform(toBlockedSubscriptionMessageDTO)
           channel(blockedSubscriptionChannel)
-        })
+        }
       }
     }
   }
