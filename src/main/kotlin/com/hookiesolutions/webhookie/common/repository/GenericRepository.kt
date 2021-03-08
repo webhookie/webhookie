@@ -1,5 +1,6 @@
 package com.hookiesolutions.webhookie.common.repository
 
+import com.hookiesolutions.webhookie.audit.domain.Span
 import com.hookiesolutions.webhookie.common.annotation.Open
 import com.hookiesolutions.webhookie.common.exception.EntityExistsException
 import com.hookiesolutions.webhookie.common.exception.EntityNotFoundException
@@ -12,6 +13,9 @@ import com.hookiesolutions.webhookie.common.service.security.annotation.VerifyEn
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.data.mongodb.core.FindAndReplaceOptions
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
+import org.springframework.data.mongodb.core.aggregation.AddFieldsOperation
+import org.springframework.data.mongodb.core.aggregation.SetOperation
+import org.springframework.data.mongodb.core.aggregation.UnsetOperation
 import org.springframework.data.mongodb.core.query.Query.query
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
@@ -58,5 +62,29 @@ abstract class GenericRepository<E: AbstractEntity>(
       .onErrorMap(DuplicateKeyException::class.java) {
         EntityExistsException(it.localizedMessage)
       }
+  }
+
+  companion object {
+    fun mongoObjectToArray(key: String, obj: Any): AddFieldsOperation {
+      return AddFieldsOperation
+        .addField(key)
+        .withValueOf(arrayOf(obj))
+        .build()
+    }
+
+    fun mongoField(name: String): String {
+      return "${'$'}$name"
+    }
+
+    fun mongoSet(key: String, value: Any): SetOperation {
+      return SetOperation
+        .set(key)
+        .toValueOf(value)
+    }
+
+    fun mongoUnset(vararg keys: String): UnsetOperation {
+      return UnsetOperation
+        .unset(*keys)
+    }
   }
 }

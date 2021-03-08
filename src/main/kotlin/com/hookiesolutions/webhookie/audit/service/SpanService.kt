@@ -2,6 +2,7 @@ package com.hookiesolutions.webhookie.audit.service
 
 import com.hookiesolutions.webhookie.audit.domain.Span
 import com.hookiesolutions.webhookie.audit.domain.SpanRepository
+import com.hookiesolutions.webhookie.audit.domain.SpanRetry
 import com.hookiesolutions.webhookie.audit.domain.SpanStatus
 import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate
 import com.hookiesolutions.webhookie.common.exception.EntityExistsException
@@ -38,15 +39,17 @@ class SpanService(
 
   fun addRetry(message: SignableSubscriptionMessage) {
     log.info("Delaying '{}', '{}' span for '{}' seconds", message.spanId, message.traceId, message.delay.seconds)
-    val statusUpdate = SpanStatusUpdate(SpanStatus.RETRYING, timeMachine.now())
-    repository.addStatusUpdate(message.traceId, message.spanId, statusUpdate)
-      .subscribe { log.debug("'{}', '{}' Span was updated to: '{}'", it.spanId, it.traceId, it.statusUpdate) }
+    val time = timeMachine.now()
+    val statusUpdate = SpanStatusUpdate(SpanStatus.RETRYING, time)
+    val retry = SpanRetry(time, message.numberOfRetries, message.delay.seconds)
+    repository.addStatusUpdate(message.spanId, statusUpdate, retry)
+      .subscribe { log.debug("'{}', '{}' Span was updated to: '{}'", it.spanId, it.traceId, it.lastRetry) }
   }
 
   fun blockSpan(message: BlockedSubscriptionMessageDTO) {
     log.info("Blocking '{}', '{}' span. reason:", message.spanId, message.traceId, message.blockedDetails.reason)
     val statusUpdate = SpanStatusUpdate(SpanStatus.BLOCKED, timeMachine.now())
-    repository.addStatusUpdate(message.traceId, message.spanId, statusUpdate)
+    repository.addStatusUpdate(message.spanId, statusUpdate)
       .switchIfEmpty {
         val span = Span.Builder()
           .message(message)
@@ -56,7 +59,7 @@ class SpanService(
 
         saveOrFetch(span)
       }
-      .subscribe { log.debug("'{}', '{}' Span was updated to: '{}'", it.spanId, it.traceId, it.statusUpdate) }
+      .subscribe { log.debug("'{}', '{}' Span was updated to: '{}'", it.spanId, it.traceId, it.lastStatus) }
   }
 
   private fun saveOrFetch(span: Span): Mono<Span> {
