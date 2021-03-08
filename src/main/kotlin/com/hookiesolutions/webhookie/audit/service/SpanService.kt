@@ -5,11 +5,13 @@ import com.hookiesolutions.webhookie.audit.domain.SpanRepository
 import com.hookiesolutions.webhookie.audit.domain.SpanStatus
 import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate
 import com.hookiesolutions.webhookie.common.exception.EntityExistsException
+import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscriptionMessageDTO
 import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
 import com.hookiesolutions.webhookie.common.service.TimeMachine
 import org.slf4j.Logger
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.switchIfEmpty
 
 /**
  *
@@ -38,6 +40,22 @@ class SpanService(
     log.info("Delaying '{}', '{}' span for '{}' seconds", message.spanId, message.traceId, message.delay.seconds)
     val statusUpdate = SpanStatusUpdate(SpanStatus.RETRYING, timeMachine.now())
     repository.addStatusUpdate(message.traceId, message.spanId, statusUpdate)
+      .subscribe { log.debug("'{}', '{}' Span was updated to: '{}'", it.spanId, it.traceId, it.statusUpdate) }
+  }
+
+  fun blockSpan(message: BlockedSubscriptionMessageDTO) {
+    log.info("Blocking '{}', '{}' span. reason:", message.spanId, message.traceId, message.blockedDetails.reason)
+    val statusUpdate = SpanStatusUpdate(SpanStatus.BLOCKED, timeMachine.now())
+    repository.addStatusUpdate(message.traceId, message.spanId, statusUpdate)
+      .switchIfEmpty {
+        val span = Span.Builder()
+          .message(message)
+          .status(SpanStatus.BLOCKED)
+          .time(timeMachine.now())
+          .build()
+
+        saveOrFetch(span)
+      }
       .subscribe { log.debug("'{}', '{}' Span was updated to: '{}'", it.spanId, it.traceId, it.statusUpdate) }
   }
 

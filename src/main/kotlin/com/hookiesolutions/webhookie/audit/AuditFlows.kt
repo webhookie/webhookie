@@ -80,7 +80,7 @@ class AuditFlows(
       channel(SUBSCRIPTION_ERROR_CHANNEL_NAME)
       handle { payload: SubscriptionMessageHandlingException, _: MessageHeaders ->
         val h = "$SUBSCRIPTION_ERROR_CHANNEL_NAME, ${payload.traceId}, ${payload.spanId}"
-        log.warn("$h - '{}'", SUBSCRIPTION_ERROR_CHANNEL_NAME, payload)
+        log.debug("$h - '{}'", SUBSCRIPTION_ERROR_CHANNEL_NAME, payload)
       }
     }
   }
@@ -90,8 +90,7 @@ class AuditFlows(
     return integrationFlow {
       channel(BLOCKED_SUBSCRIPTION_CHANNEL_NAME)
       handle { payload: BlockedSubscriptionMessageDTO, _: MessageHeaders ->
-        val h = "$BLOCKED_SUBSCRIPTION_CHANNEL_NAME, ${payload.traceId}, ${payload.spanId}"
-        log.warn("$h - {}, {}, {}", payload.subscription.callback.url, payload.topic)
+        spanService.blockSpan(payload)
       }
     }
   }
@@ -112,7 +111,7 @@ class AuditFlows(
       channel(PUBLISHER_SUCCESS_CHANNEL)
       handle { payload: PublisherSuccessMessage, _: MessageHeaders ->
         val h = "$PUBLISHER_SUCCESS_CHANNEL, ${payload.traceId}, ${payload.spanId}"
-        log.warn("$h - '{}', {}", payload.response.status, payload.url)
+        log.debug("$h - '{}', {}", payload.response.status, payload.url)
       }
     }
   }
@@ -123,7 +122,7 @@ class AuditFlows(
       channel(PUBLISHER_REQUEST_ERROR_CHANNEL)
       handle { payload: PublisherRequestErrorMessage, _: MessageHeaders ->
         val h = "$PUBLISHER_REQUEST_ERROR_CHANNEL, ${payload.traceId}, ${payload.spanId}"
-        log.warn("$h - {}, {}", payload.url, payload.reason)
+        log.debug("$h - {}, {}", payload.url, payload.reason)
       }
     }
   }
@@ -134,7 +133,7 @@ class AuditFlows(
       channel(PUBLISHER_RESPONSE_ERROR_CHANNEL)
       handle { payload: PublisherResponseErrorMessage, _: MessageHeaders ->
         val h = "$PUBLISHER_RESPONSE_ERROR_CHANNEL, ${payload.traceId}, ${payload.spanId}"
-        log.warn("$h - '{}', {}, {}", payload.response.status, payload.url, payload.reason)
+        log.debug("$h - '{}', {}, {}", payload.response.status, payload.url, payload.reason)
       }
     }
   }
@@ -145,7 +144,7 @@ class AuditFlows(
       channel(PUBLISHER_OTHER_ERROR_CHANNEL)
       handle { payload: PublisherOtherErrorMessage, _: MessageHeaders ->
         val h = "$PUBLISHER_OTHER_ERROR_CHANNEL, ${payload.traceId}, ${payload.spanId}"
-        log.warn("$h - {}, {}", payload.url, payload.reason)
+        log.debug("$h - {}, {}", payload.url, payload.reason)
       }
     }
   }
@@ -156,7 +155,7 @@ class AuditFlows(
       channel(RETRYABLE_PUBLISHER_ERROR_CHANNEL)
       handle { payload: PublisherErrorMessage, _: MessageHeaders ->
         val h = "$RETRYABLE_PUBLISHER_ERROR_CHANNEL, ${payload.traceId}. ${payload.spanId}"
-        log.warn("$h - {}, {}", payload.url, payload.subscriptionMessage.delay.seconds)
+        log.debug("$h - {}, {}", payload.url, payload.subscriptionMessage.delay.seconds)
       }
     }
   }

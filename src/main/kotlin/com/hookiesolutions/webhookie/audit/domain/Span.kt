@@ -2,6 +2,7 @@ package com.hookiesolutions.webhookie.audit.domain
 
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SPAN_ID
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.SPAN_COLLECTION_NAME
+import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscriptionMessageDTO
 import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
 import com.hookiesolutions.webhookie.common.model.dto.ApplicationDetails
@@ -62,6 +63,14 @@ data class Span(
       this.application = message.subscription.application
       this.callback = message.subscription.callback
     }
+
+    fun message(message: BlockedSubscriptionMessageDTO) = apply {
+      this.traceId = message.traceId
+      this.spanId = message.spanId
+      this.application = message.subscription.application
+      this.callback = message.subscription.callback
+    }
+
     fun traceId(traceId: String) = apply { this.traceId = traceId }
     fun spanId(spanId: String) = apply { this.spanId = spanId }
     fun time(time: Instant) = apply { this.time = time }
