@@ -10,6 +10,8 @@ import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.aggregation.AggregationOperation
 import org.springframework.data.mongodb.core.aggregation.AggregationUpdate
 import org.springframework.data.mongodb.core.aggregation.ArrayOperators
+import org.springframework.data.mongodb.core.aggregation.ComparisonOperators
+import org.springframework.data.mongodb.core.aggregation.SetOperation
 import org.springframework.data.mongodb.core.query.Query.query
 import org.springframework.stereotype.Repository
 import reactor.core.publisher.Mono
@@ -42,14 +44,28 @@ class SpanRepository(
     updatePipeline.add(mongoSet(KEY_LAST_STATUS, spanStatusUpdate))
 
     if (retry != null) {
+      val retryHistoryField = mongoField(KEY_RETRY_HISTORY)
+      val lteFilter = ArrayOperators.Filter
+        .filter(retryHistoryField)
+        .`as`("r")
+        .by(ComparisonOperators.Lte.valueOf("${'$'}${'$'}r.no").lessThanEqualToValue(retry.no))
+      val gtFilter = ArrayOperators.Filter
+        .filter(retryHistoryField)
+        .`as`("r")
+        .by(ComparisonOperators.Gt.valueOf("${'$'}${'$'}r.no").greaterThanValue(retry.no))
+
       updatePipeline.add(mongoObjectToArray(retryAsArrayKey, retry))
 
       val newRetries = ArrayOperators.ConcatArrays
-        .arrayOf(mongoField(KEY_RETRY_HISTORY))
+        .arrayOf(lteFilter)
         .concat(mongoField(retryAsArrayKey))
+        .concat(gtFilter)
+
 
       updatePipeline.add(mongoSet(KEY_RETRY_HISTORY, newRetries))
-      updatePipeline.add(mongoSet(KEY_LAST_RETRY, retry))
+      val setLastRetry = SetOperation.set(KEY_LAST_RETRY)
+        .toValueOf(ArrayOperators.ArrayElemAt.arrayOf(retryHistoryField).elementAt(-1))
+      updatePipeline.add(setLastRetry)
     }
 
     updatePipeline.add(mongoUnset(retryAsArrayKey, updateAsArrayKey))
