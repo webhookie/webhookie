@@ -8,7 +8,8 @@ import java.time.Instant
  * @since 3/3/21 15:39
  */
 enum class SpanStatus {
-  PROCESSING
+  PROCESSING,
+  RETRYING
 }
 
 data class SpanStatusUpdate(

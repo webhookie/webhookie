@@ -9,6 +9,7 @@ import com.hookiesolutions.webhookie.common.Constants.Channels.Publisher.Compani
 import com.hookiesolutions.webhookie.common.Constants.Channels.Publisher.Companion.PUBLISHER_SUCCESS_CHANNEL
 import com.hookiesolutions.webhookie.common.Constants.Channels.Publisher.Companion.RETRYABLE_PUBLISHER_ERROR_CHANNEL
 import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.BLOCKED_SUBSCRIPTION_CHANNEL_NAME
+import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.DELAYED_SUBSCRIPTION_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.NO_SUBSCRIPTION_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.SUBSCRIPTION_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.SUBSCRIPTION_ERROR_CHANNEL_NAME
@@ -23,7 +24,6 @@ import com.hookiesolutions.webhookie.common.message.publisher.PublisherSuccessMe
 import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscriptionMessageDTO
 import com.hookiesolutions.webhookie.common.message.subscription.NoSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
-import com.hookiesolutions.webhookie.common.service.TimeMachine
 import org.slf4j.Logger
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -56,8 +56,20 @@ class AuditFlows(
   fun logSubscriptionMessage(): IntegrationFlow {
     return integrationFlow {
       channel(SUBSCRIPTION_CHANNEL_NAME)
+      filter<SignableSubscriptionMessage> { it.numberOfRetries == 0 }
       handle { payload: SignableSubscriptionMessage, _: MessageHeaders ->
-        spanService.save(payload)
+        spanService.createSpan(payload)
+      }
+    }
+  }
+
+  @Bean
+  fun logDelayedSubscriptionMessage(): IntegrationFlow {
+    return integrationFlow {
+      channel(DELAYED_SUBSCRIPTION_CHANNEL_NAME)
+      filter<SignableSubscriptionMessage> { it.numberOfRetries > 0 }
+      handle { payload: SignableSubscriptionMessage, _: MessageHeaders ->
+        spanService.addRetry(payload)
       }
     }
   }

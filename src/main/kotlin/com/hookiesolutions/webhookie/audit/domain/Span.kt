@@ -43,6 +43,8 @@ data class Span(
     companion object {
       const val KEY_SPAN_ID = "spanId"
       const val SPAN_COLLECTION_NAME = "span"
+      const val KEY_STATUS_HISTORY = "statusHistory"
+      const val KEY_STATUS_UPDATE = "statusUpdate"
     }
   }
 
