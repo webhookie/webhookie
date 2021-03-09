@@ -1,6 +1,5 @@
 package com.hookiesolutions.webhookie.common.repository
 
-import com.hookiesolutions.webhookie.audit.domain.Span
 import com.hookiesolutions.webhookie.common.annotation.Open
 import com.hookiesolutions.webhookie.common.exception.EntityExistsException
 import com.hookiesolutions.webhookie.common.exception.EntityNotFoundException
@@ -14,6 +13,9 @@ import org.springframework.dao.DuplicateKeyException
 import org.springframework.data.mongodb.core.FindAndReplaceOptions
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.aggregation.AddFieldsOperation
+import org.springframework.data.mongodb.core.aggregation.AggregationExpression
+import org.springframework.data.mongodb.core.aggregation.ArrayOperators
+import org.springframework.data.mongodb.core.aggregation.ComparisonOperators
 import org.springframework.data.mongodb.core.aggregation.SetOperation
 import org.springframework.data.mongodb.core.aggregation.UnsetOperation
 import org.springframework.data.mongodb.core.query.Query.query
@@ -65,7 +67,7 @@ abstract class GenericRepository<E: AbstractEntity>(
   }
 
   companion object {
-    fun mongoObjectToArray(key: String, obj: Any): AddFieldsOperation {
+    fun addMongoObjectToArrayField(key: String, obj: Any): AddFieldsOperation {
       return AddFieldsOperation
         .addField(key)
         .withValueOf(arrayOf(obj))
@@ -76,15 +78,62 @@ abstract class GenericRepository<E: AbstractEntity>(
       return "${'$'}$name"
     }
 
+    fun mongoVariable(vararg names: String): String {
+      val name = names.reduce { acc, s -> "$acc.$s" }
+      return mongoField(mongoField(name))
+    }
+
     fun mongoSet(key: String, value: Any): SetOperation {
       return SetOperation
         .set(key)
         .toValueOf(value)
     }
 
+    fun mongoSetLastElemOfArray(arrayField: String, key: String): SetOperation {
+      return SetOperation.set(key)
+        .toValueOf(ArrayOperators.ArrayElemAt.arrayOf(mongoField(arrayField)).elementAt(-1))
+    }
+
     fun mongoUnset(vararg keys: String): UnsetOperation {
       return UnsetOperation
         .unset(*keys)
+    }
+
+    fun insertIntoArray(arrayField: String, fieldPath: String, tempKey: String, value: Any): AggregationExpression {
+      return ArrayOperators.ConcatArrays
+        .arrayOf(lteFilter(arrayField, fieldPath, value))
+        .concat(mongoField(tempKey))
+        .concat(gtFilter(arrayField, fieldPath, value))
+    }
+
+    fun concatArrays(arrayField: String, tempKey: String): AggregationExpression {
+      return ArrayOperators.ConcatArrays
+        .arrayOf(mongoField(arrayField))
+        .concat(mongoField(tempKey))
+    }
+
+    private fun lteFilter(fieldName: String, fieldPath: String, value: Any): AggregationExpression {
+      val asName = "r"
+      val expr = ComparisonOperators.Lte
+        .valueOf(mongoVariable(asName, fieldPath))
+        .lessThanEqualToValue(value)
+      return filterBy(fieldName, expr)
+    }
+
+    private fun gtFilter(fieldName: String, fieldPath: String, value: Any): AggregationExpression {
+      val asName = "r"
+      val expr = ComparisonOperators.Gt
+        .valueOf(mongoVariable(asName, fieldPath))
+        .greaterThanValue(value)
+      return filterBy(fieldName, expr)
+    }
+
+    private fun filterBy(fieldName: String, expression: AggregationExpression): AggregationExpression {
+      val asName = "r"
+      return ArrayOperators.Filter
+        .filter(mongoField(fieldName))
+        .`as`(asName)
+        .by(expression)
     }
   }
 }

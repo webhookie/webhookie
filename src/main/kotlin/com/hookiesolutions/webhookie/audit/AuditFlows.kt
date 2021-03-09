@@ -64,10 +64,10 @@ class AuditFlows(
   }
 
   @Bean
-  fun logDelayedSubscriptionMessage(): IntegrationFlow {
+  fun retryingSpanFlow(): IntegrationFlow {
     return integrationFlow {
       channel(DELAYED_SUBSCRIPTION_CHANNEL_NAME)
-      filter<SignableSubscriptionMessage> { it.numberOfRetries == 1 }
+      filter<SignableSubscriptionMessage> { it.numberOfRetries > 0 }
       handle { payload: SignableSubscriptionMessage, _: MessageHeaders ->
         spanService.retrying(payload)
       }
@@ -110,6 +110,7 @@ class AuditFlows(
     return integrationFlow {
       channel(PUBLISHER_SUCCESS_CHANNEL)
       handle { payload: PublisherSuccessMessage, _: MessageHeaders ->
+//        spanService.updateWithSuccessResponse(payload)
         val h = "$PUBLISHER_SUCCESS_CHANNEL, ${payload.traceId}, ${payload.spanId}"
         log.debug("$h - '{}', {}", payload.response.status, payload.url)
       }
@@ -132,8 +133,7 @@ class AuditFlows(
     return integrationFlow {
       channel(PUBLISHER_RESPONSE_ERROR_CHANNEL)
       handle { payload: PublisherResponseErrorMessage, _: MessageHeaders ->
-        val h = "$PUBLISHER_RESPONSE_ERROR_CHANNEL, ${payload.traceId}, ${payload.spanId}"
-        log.debug("$h - '{}', {}, {}", payload.response.status, payload.url, payload.reason)
+//        spanService.updateWithServerError(payload)
       }
     }
   }

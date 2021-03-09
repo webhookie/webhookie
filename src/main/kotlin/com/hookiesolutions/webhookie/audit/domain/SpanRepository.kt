@@ -1,17 +1,16 @@
 package com.hookiesolutions.webhookie.audit.domain
 
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_LAST_RETRY
+import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_LAST_STATUS
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_RETRY_HISTORY
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_STATUS_HISTORY
-import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_LAST_STATUS
 import com.hookiesolutions.webhookie.audit.domain.Span.Queries.Companion.bySpanId
+import com.hookiesolutions.webhookie.audit.domain.SpanRetry.Companion.KEY_RETRY_NO
 import com.hookiesolutions.webhookie.common.repository.GenericRepository
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.aggregation.AggregationOperation
 import org.springframework.data.mongodb.core.aggregation.AggregationUpdate
-import org.springframework.data.mongodb.core.aggregation.ArrayOperators
-import org.springframework.data.mongodb.core.aggregation.ComparisonOperators
-import org.springframework.data.mongodb.core.aggregation.SetOperation
+import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query.query
 import org.springframework.stereotype.Repository
 import reactor.core.publisher.Mono
@@ -31,51 +30,45 @@ class SpanRepository(
 
   fun addStatusUpdate(spanId: String, spanStatusUpdate: SpanStatusUpdate, retry: SpanRetry? = null): Mono<Span> {
     val updateAsArrayKey = "updateAsArray"
-    val retryAsArrayKey = "retryAsArray"
 
-    val updatePipeline = mutableListOf<AggregationOperation>()
-
-    updatePipeline.add(mongoObjectToArray(updateAsArrayKey, spanStatusUpdate))
-
-    val newUpdates = ArrayOperators.ConcatArrays
-      .arrayOf(mongoField(KEY_STATUS_HISTORY))
-      .concat(mongoField(updateAsArrayKey))
-    updatePipeline.add(mongoSet(KEY_STATUS_HISTORY, newUpdates))
-    updatePipeline.add(mongoSet(KEY_LAST_STATUS, spanStatusUpdate))
+    val operations: MutableList<AggregationOperation> = mutableListOf(
+      addMongoObjectToArrayField(updateAsArrayKey, spanStatusUpdate),
+      mongoSet(KEY_STATUS_HISTORY, concatArrays(KEY_STATUS_HISTORY, updateAsArrayKey)),
+      mongoSet(KEY_LAST_STATUS, spanStatusUpdate),
+      mongoUnset(updateAsArrayKey)
+    )
 
     if (retry != null) {
-      val retryHistoryField = mongoField(KEY_RETRY_HISTORY)
-      val lteFilter = ArrayOperators.Filter
-        .filter(retryHistoryField)
-        .`as`("r")
-        .by(ComparisonOperators.Lte.valueOf("${'$'}${'$'}r.no").lessThanEqualToValue(retry.no))
-      val gtFilter = ArrayOperators.Filter
-        .filter(retryHistoryField)
-        .`as`("r")
-        .by(ComparisonOperators.Gt.valueOf("${'$'}${'$'}r.no").greaterThanValue(retry.no))
-
-      updatePipeline.add(mongoObjectToArray(retryAsArrayKey, retry))
-
-      val newRetries = ArrayOperators.ConcatArrays
-        .arrayOf(lteFilter)
-        .concat(mongoField(retryAsArrayKey))
-        .concat(gtFilter)
-
-
-      updatePipeline.add(mongoSet(KEY_RETRY_HISTORY, newRetries))
-      val setLastRetry = SetOperation.set(KEY_LAST_RETRY)
-        .toValueOf(ArrayOperators.ArrayElemAt.arrayOf(retryHistoryField).elementAt(-1))
-      updatePipeline.add(setLastRetry)
+      operations.addAll(addRetryOperations(retry))
     }
 
-    updatePipeline.add(mongoUnset(retryAsArrayKey, updateAsArrayKey))
+    return updateSpan(spanId, *operations.toTypedArray())
+  }
 
-    val update = AggregationUpdate.newUpdate(*updatePipeline.toTypedArray())
+  fun addRetry(spanId: String, retry: SpanRetry): Mono<Span> {
+    return updateSpan(spanId, *addRetryOperations(retry))
+  }
 
+  private fun addRetryOperations(retry: SpanRetry): Array<AggregationOperation> {
+    val retryAsArrayKey = "retryAsArray"
+
+    return arrayOf(
+      addMongoObjectToArrayField(retryAsArrayKey, retry),
+      mongoSet(KEY_RETRY_HISTORY, insertIntoArray(KEY_RETRY_HISTORY, KEY_RETRY_NO, retryAsArrayKey, retry.no)),
+      mongoSetLastElemOfArray(KEY_RETRY_HISTORY, KEY_LAST_RETRY),
+      mongoUnset(retryAsArrayKey)
+    )
+  }
+
+  private fun updateSpan(spanId: String, vararg operations: AggregationOperation): Mono<Span> {
+    return updateSpan(bySpanId(spanId), *operations)
+  }
+
+  private fun updateSpan(criteria: Criteria, vararg operations: AggregationOperation): Mono<Span> {
     return mongoTemplate
       .findAndModify(
-        query(bySpanId(spanId)),
-        update,
+        query(criteria),
+        AggregationUpdate.newUpdate(*operations),
         Span::class.java
       )
   }

@@ -1,5 +1,8 @@
 package playground
 
+import com.hookiesolutions.webhookie.common.repository.GenericRepository.Companion.mongoField
+import com.hookiesolutions.webhookie.common.repository.GenericRepository.Companion.mongoVariable
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.data.mongodb.core.aggregation.AddFieldsOperation
 import org.springframework.data.mongodb.core.aggregation.AggregationUpdate
@@ -54,5 +57,17 @@ class MongoPlayground {
 
     println(agg.toString())
     println(1)
+  }
+
+  @Test
+  fun testMongoVariable() {
+    println(mongoVariable("a"))
+    println(mongoVariable("a.b"))
+    println(mongoVariable("a.b", "c"))
+    println(mongoVariable("a.b", "c", "d.e"))
+    println(mongoField("a.b"))
+    assertThat(mongoVariable("a")).isEqualTo("${'$'}${'$'}a")
+    assertThat(mongoVariable("a.b")).isEqualTo("${'$'}${'$'}a.b")
+    assertThat(mongoVariable("a", "b")).isEqualTo("${'$'}${'$'}a.b")
   }
 }
