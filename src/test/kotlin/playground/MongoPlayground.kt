@@ -1,15 +1,20 @@
 package playground
 
+import com.hookiesolutions.webhookie.audit.domain.Span
+import com.hookiesolutions.webhookie.audit.domain.SpanRetry
+import com.hookiesolutions.webhookie.common.repository.GenericRepository
 import com.hookiesolutions.webhookie.common.repository.GenericRepository.Companion.mongoField
 import com.hookiesolutions.webhookie.common.repository.GenericRepository.Companion.mongoVariable
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.data.mongodb.core.aggregation.AddFieldsOperation
+import org.springframework.data.mongodb.core.aggregation.AggregationExpression
 import org.springframework.data.mongodb.core.aggregation.AggregationUpdate
 import org.springframework.data.mongodb.core.aggregation.ArrayOperators
 import org.springframework.data.mongodb.core.aggregation.ComparisonOperators
 import org.springframework.data.mongodb.core.aggregation.SetOperation
 import org.springframework.data.mongodb.core.aggregation.UnsetOperation
+import java.time.Instant
 
 /**
  *
@@ -55,6 +60,30 @@ class MongoPlayground {
       UnsetOperation.unset("uArray")
     )
 
+    println(agg.toString())
+    println(1)
+  }
+
+  @Test
+  fun mongoAgg2() {
+    val key = "tmp"
+
+    val expr: AggregationExpression = GenericRepository.eqFilter(Span.Keys.KEY_RETRY_HISTORY, SpanRetry.KEY_RETRY_NO, 3)
+    val f = AddFieldsOperation
+        .addField(key)
+        .withValue(expr)
+        .build()
+    val operations = arrayOf(
+      f,
+      GenericRepository.mongoSet("$key.${SpanRetry.KEY_RETRY_STATUS_CODE}", 405),
+      GenericRepository.mongoSet(Span.Keys.KEY_RETRY_HISTORY,
+        GenericRepository.insertIntoArray(Span.Keys.KEY_RETRY_HISTORY, SpanRetry.KEY_RETRY_NO, key, 3)),
+      GenericRepository.mongoSet(Span.Keys.KEY_LAST_RESPONSE, SpanRetry(Instant.now(), 3, 10)),
+      GenericRepository.mongoSetLastElemOfArray(Span.Keys.KEY_RETRY_HISTORY, Span.Keys.KEY_LAST_RETRY),
+      GenericRepository.mongoUnset(key)
+    )
+
+    val agg = AggregationUpdate.newUpdate(*operations)
     println(agg.toString())
     println(1)
   }

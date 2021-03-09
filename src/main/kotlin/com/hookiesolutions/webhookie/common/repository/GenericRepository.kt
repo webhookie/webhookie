@@ -74,6 +74,13 @@ abstract class GenericRepository<E: AbstractEntity>(
         .build()
     }
 
+    fun addMongoField(key: String, expr: AggregationExpression): AddFieldsOperation {
+      return AddFieldsOperation
+        .addField(key)
+        .withValue(expr)
+        .build()
+    }
+
     fun mongoField(name: String): String {
       return "${'$'}$name"
     }
@@ -101,7 +108,7 @@ abstract class GenericRepository<E: AbstractEntity>(
 
     fun insertIntoArray(arrayField: String, fieldPath: String, tempKey: String, value: Any): AggregationExpression {
       return ArrayOperators.ConcatArrays
-        .arrayOf(lteFilter(arrayField, fieldPath, value))
+        .arrayOf(ltFilter(arrayField, fieldPath, value))
         .concat(mongoField(tempKey))
         .concat(gtFilter(arrayField, fieldPath, value))
     }
@@ -112,12 +119,12 @@ abstract class GenericRepository<E: AbstractEntity>(
         .concat(mongoField(tempKey))
     }
 
-    private fun lteFilter(fieldName: String, fieldPath: String, value: Any): AggregationExpression {
+    private fun ltFilter(fieldName: String, fieldPath: String, value: Any): AggregationExpression {
       val asName = "r"
-      val expr = ComparisonOperators.Lte
+      val expr = ComparisonOperators.Lt
         .valueOf(mongoVariable(asName, fieldPath))
-        .lessThanEqualToValue(value)
-      return filterBy(fieldName, expr)
+        .lessThanValue(value)
+      return filterBy(fieldName, asName, expr)
     }
 
     private fun gtFilter(fieldName: String, fieldPath: String, value: Any): AggregationExpression {
@@ -125,11 +132,18 @@ abstract class GenericRepository<E: AbstractEntity>(
       val expr = ComparisonOperators.Gt
         .valueOf(mongoVariable(asName, fieldPath))
         .greaterThanValue(value)
-      return filterBy(fieldName, expr)
+      return filterBy(fieldName, asName, expr)
     }
 
-    private fun filterBy(fieldName: String, expression: AggregationExpression): AggregationExpression {
-      val asName = "r"
+    fun eqFilter(fieldName: String, fieldPath: String, value: Any): AggregationExpression {
+      val asName = "rhItem"
+      val expr = ComparisonOperators.Eq
+        .valueOf(mongoVariable(asName, fieldPath))
+        .equalToValue(value)
+      return filterBy(fieldName, asName, expr)
+    }
+
+    private fun filterBy(fieldName: String, asName: String, expression: AggregationExpression): AggregationExpression {
       return ArrayOperators.Filter
         .filter(mongoField(fieldName))
         .`as`(asName)

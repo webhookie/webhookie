@@ -3,9 +3,11 @@ package com.hookiesolutions.webhookie.audit.service
 import com.hookiesolutions.webhookie.audit.domain.Span
 import com.hookiesolutions.webhookie.audit.domain.SpanRepository
 import com.hookiesolutions.webhookie.audit.domain.SpanRetry
+import com.hookiesolutions.webhookie.audit.domain.SpanServerResponse
 import com.hookiesolutions.webhookie.audit.domain.SpanStatus
 import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate
 import com.hookiesolutions.webhookie.common.exception.EntityExistsException
+import com.hookiesolutions.webhookie.common.message.publisher.PublisherResponseErrorMessage
 import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscriptionMessageDTO
 import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
 import com.hookiesolutions.webhookie.common.service.TimeMachine
@@ -78,21 +80,17 @@ class SpanService(
       .subscribe { log.debug("'{}', '{}' Span was updated to: '{}'", it.spanId, it.traceId, it.lastStatus) }
   }
 
-/*
   fun updateWithServerError(message: PublisherResponseErrorMessage) {
-    val time = timeMachine.now()
-    val spanRetry = SpanRetry(
-      time,
-      message.subscriptionMessage.numberOfRetries,
-      message.subscriptionMessage.delay.seconds,
-      message.response.status.value()
-    )
+      log.info("Updating span '{}', '{}' with server error", message.spanId, message.traceId, message.response.status)
+      val time = timeMachine.now()
 
-    val response = SpanServerResponse(time, message.response, message.subscriptionMessage.numberOfRetries)
+      val response = SpanServerResponse(time, message.response, message.subscriptionMessage.numberOfRetries)
 
-    repository.updateWithResponse(message.spanId, spanRetry, response)
-      .subscribe { log.debug("'{}', '{}' Span was updated with server response: '{}'", it.spanId, it.traceId, it.lastResponse?.response?.status) }
+      repository.updateWithResponse(message.spanId, response)
+        .subscribe { log.debug("'{}', '{}' Span was updated with server response: '{}'", it.spanId, it.traceId, it.lastResponse) }
   }
+
+/*
 
   fun updateWithSuccessResponse(message: PublisherSuccessMessage) {
     val time = timeMachine.now()

@@ -133,7 +133,7 @@ class AuditFlows(
     return integrationFlow {
       channel(PUBLISHER_RESPONSE_ERROR_CHANNEL)
       handle { payload: PublisherResponseErrorMessage, _: MessageHeaders ->
-//        spanService.updateWithServerError(payload)
+        spanService.updateWithServerError(payload)
       }
     }
   }

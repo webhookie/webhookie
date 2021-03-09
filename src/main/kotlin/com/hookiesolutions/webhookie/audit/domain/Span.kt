@@ -107,6 +107,7 @@ data class SpanRetry (
 ) {
   companion object {
     const val KEY_RETRY_NO = "no"
+    const val KEY_RETRY_STATUS_CODE = "statusCode"
   }
 }
 
