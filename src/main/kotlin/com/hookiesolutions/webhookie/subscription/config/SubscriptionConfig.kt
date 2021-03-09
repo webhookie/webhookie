@@ -41,7 +41,7 @@ class SubscriptionConfig(
     return GenericSelector {
       it is PublisherRequestErrorMessage || (
         it is PublisherResponseErrorMessage && (
-          it.response.is5xxServerError || it.response.isNotFound
+          it.response.is5xxServerError() || it.response.isNotFound()
         )
       )
     }
