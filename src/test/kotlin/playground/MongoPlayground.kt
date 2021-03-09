@@ -78,8 +78,8 @@ class MongoPlayground {
       GenericRepository.mongoSet("$key.${SpanRetry.KEY_RETRY_STATUS_CODE}", 405),
       GenericRepository.mongoSet(Span.Keys.KEY_RETRY_HISTORY,
         GenericRepository.insertIntoArray(Span.Keys.KEY_RETRY_HISTORY, SpanRetry.KEY_RETRY_NO, key, 3)),
-      GenericRepository.mongoSet(Span.Keys.KEY_LAST_RESPONSE, SpanRetry(Instant.now(), 3, 10)),
-      GenericRepository.mongoSetLastElemOfArray(Span.Keys.KEY_RETRY_HISTORY, Span.Keys.KEY_LAST_RETRY),
+      GenericRepository.mongoSet(Span.Keys.KEY_LATEST_RESPONSE, SpanRetry(Instant.now(), 3, 10)),
+      GenericRepository.mongoSetLastElemOfArray(Span.Keys.KEY_RETRY_HISTORY, Span.Keys.KEY_NEXT_RETRY),
       GenericRepository.mongoUnset(key)
     )
 

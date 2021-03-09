@@ -110,9 +110,7 @@ class AuditFlows(
     return integrationFlow {
       channel(PUBLISHER_SUCCESS_CHANNEL)
       handle { payload: PublisherSuccessMessage, _: MessageHeaders ->
-//        spanService.updateWithSuccessResponse(payload)
-        val h = "$PUBLISHER_SUCCESS_CHANNEL, ${payload.traceId}, ${payload.spanId}"
-        log.debug("$h - '{}', {}", payload.response.status, payload.url)
+        spanService.updateWithSuccessResponse(payload)
       }
     }
   }

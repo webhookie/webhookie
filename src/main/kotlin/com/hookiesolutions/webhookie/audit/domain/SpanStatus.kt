@@ -10,7 +10,8 @@ import java.time.Instant
 enum class SpanStatus {
   PROCESSING,
   RETRYING,
-  BLOCKED
+  BLOCKED,
+  OK
 }
 
 data class SpanStatusUpdate(

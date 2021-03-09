@@ -32,9 +32,9 @@ data class Span(
   val callback: CallbackDTO,
   val lastStatus: SpanStatusUpdate,
   val statusHistory: List<SpanStatusUpdate> = emptyList(),
-  val lastRetry: SpanRetry? = null,
+  val nextRetry: SpanRetry? = null,
   val retryHistory: Set<SpanRetry> = emptySet(),
-  val lastResponse: SpanServerResponse? = null
+  val latestResponse: SpanServerResponse? = null
 ): AbstractEntity() {
   class Queries {
     companion object {
@@ -50,9 +50,9 @@ data class Span(
       const val SPAN_COLLECTION_NAME = "span"
       const val KEY_STATUS_HISTORY = "statusHistory"
       const val KEY_LAST_STATUS = "lastStatus"
-      const val KEY_LAST_RETRY = "lastRetry"
+      const val KEY_NEXT_RETRY = "nextRetry"
       const val KEY_RETRY_HISTORY = "retryHistory"
-      const val KEY_LAST_RESPONSE = "lastResponse"
+      const val KEY_LATEST_RESPONSE = "latestResponse"
     }
   }
 
@@ -102,7 +102,6 @@ data class Span(
 data class SpanRetry (
   val time: Instant,
   val no: Int,
-  val delayInSeconds: Long,
   val statusCode: Int? = null
 ) {
   companion object {

@@ -1,8 +1,8 @@
 package com.hookiesolutions.webhookie.audit.domain
 
-import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_LAST_RESPONSE
-import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_LAST_RETRY
+import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_NEXT_RETRY
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_LAST_STATUS
+import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_LATEST_RESPONSE
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_RETRY_HISTORY
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_STATUS_HISTORY
 import com.hookiesolutions.webhookie.audit.domain.Span.Queries.Companion.bySpanId
@@ -30,7 +30,12 @@ class SpanRepository(
     return mongoTemplate.findOne(query(bySpanId(spanId)), Span::class.java)
   }
 
-  fun addStatusUpdate(spanId: String, spanStatusUpdate: SpanStatusUpdate, retry: SpanRetry? = null): Mono<Span> {
+  fun addStatusUpdate(
+    spanId: String,
+    spanStatusUpdate: SpanStatusUpdate,
+    retry: SpanRetry? = null,
+    response: SpanServerResponse? = null
+  ): Mono<Span> {
     val updateAsArrayKey = "updateAsArray"
 
     val operations: MutableList<AggregationOperation> = mutableListOf(
@@ -44,6 +49,10 @@ class SpanRepository(
       operations.addAll(addRetryOperations(retry))
     }
 
+    if (response != null) {
+      operations.addAll(addResponseOperations(response))
+    }
+
     return updateSpan(spanId, *operations.toTypedArray())
   }
 
@@ -52,18 +61,7 @@ class SpanRepository(
   }
 
   fun updateWithResponse(spanId: String, response: SpanServerResponse): Mono<Span> {
-    val key = "tmpRetry"
-
-    val operations = arrayOf(
-      addMongoField(key, eqFilter(KEY_RETRY_HISTORY, KEY_RETRY_NO, response.retryNo)),
-      mongoSet("$key.$KEY_RETRY_STATUS_CODE", response.response.status.value()),
-      mongoSet(KEY_RETRY_HISTORY, insertIntoArray(KEY_RETRY_HISTORY, KEY_RETRY_NO, key, response.retryNo)),
-      mongoSet(KEY_LAST_RESPONSE, response),
-      mongoSetLastElemOfArray(KEY_RETRY_HISTORY, KEY_LAST_RETRY),
-      mongoUnset(key)
-    )
-
-    return updateSpan(spanId, *operations)
+    return updateSpan(spanId, *addResponseOperations(response))
   }
 
   private fun addRetryOperations(retry: SpanRetry): Array<AggregationOperation> {
@@ -72,8 +70,21 @@ class SpanRepository(
     return arrayOf(
       addMongoObjectToArrayField(retryAsArrayKey, retry),
       mongoSet(KEY_RETRY_HISTORY, insertIntoArray(KEY_RETRY_HISTORY, KEY_RETRY_NO, retryAsArrayKey, retry.no)),
-      mongoSetLastElemOfArray(KEY_RETRY_HISTORY, KEY_LAST_RETRY),
+      mongoSetLastElemOfArray(KEY_RETRY_HISTORY, KEY_NEXT_RETRY),
       mongoUnset(retryAsArrayKey)
+    )
+  }
+
+  private fun addResponseOperations(response: SpanServerResponse): Array<AggregationOperation> {
+    val key = "tmpRetry"
+
+    return arrayOf(
+      addMongoField(key, eqFilter(KEY_RETRY_HISTORY, KEY_RETRY_NO, response.retryNo)),
+      mongoSet("$key.$KEY_RETRY_STATUS_CODE", response.response.status.value()),
+      mongoSet(KEY_RETRY_HISTORY, insertIntoArray(KEY_RETRY_HISTORY, KEY_RETRY_NO, key, response.retryNo)),
+      mongoSet(KEY_LATEST_RESPONSE, response),
+      mongoSetLastElemOfArray(KEY_RETRY_HISTORY, KEY_NEXT_RETRY),
+      mongoUnset(key)
     )
   }
 
