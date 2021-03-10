@@ -2,6 +2,7 @@ package com.hookiesolutions.webhookie.audit.domain
 
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SPAN_ID
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.SPAN_COLLECTION_NAME
+import com.hookiesolutions.webhookie.common.message.publisher.PublisherOtherErrorMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherRequestErrorMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherResponseErrorMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherSuccessMessage
@@ -140,6 +141,13 @@ data class SpanResult (
       this.statusCode = -1
       this.body = message.reason
       this.headers = message.headers
+      this.retryNo = message.subscriptionMessage.numberOfRetries
+    }
+
+    fun message(message: PublisherOtherErrorMessage) = apply {
+      this.statusCode = -1
+      this.body = message.reason
+      this.headers = HttpHeaders()
       this.retryNo = message.subscriptionMessage.numberOfRetries
     }
 

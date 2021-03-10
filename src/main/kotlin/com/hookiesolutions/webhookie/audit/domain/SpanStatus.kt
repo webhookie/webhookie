@@ -11,6 +11,7 @@ enum class SpanStatus {
   PROCESSING,
   RETRYING,
   BLOCKED,
+  NOT_OK,
   OK
 }
 
@@ -20,6 +21,7 @@ data class SpanStatusUpdate(
 ) {
   companion object {
     fun ok(at: Instant): SpanStatusUpdate = SpanStatusUpdate(SpanStatus.OK, at)
+    fun notOk(at: Instant): SpanStatusUpdate = SpanStatusUpdate(SpanStatus.NOT_OK, at)
     fun blocked(at: Instant): SpanStatusUpdate = SpanStatusUpdate(SpanStatus.BLOCKED, at)
     fun retrying(at: Instant): SpanStatusUpdate = SpanStatusUpdate(SpanStatus.RETRYING, at)
   }

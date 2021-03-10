@@ -6,7 +6,9 @@ import com.hookiesolutions.webhookie.audit.domain.SpanRetry
 import com.hookiesolutions.webhookie.audit.domain.SpanResult
 import com.hookiesolutions.webhookie.audit.domain.SpanStatus
 import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate
+import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate.Companion.notOk
 import com.hookiesolutions.webhookie.common.exception.EntityExistsException
+import com.hookiesolutions.webhookie.common.message.publisher.PublisherOtherErrorMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherRequestErrorMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherResponseErrorMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherSuccessMessage
@@ -88,6 +90,19 @@ class SpanService(
       .build()
 
     repository.updateWithResponse(message.spanId, response)
+      .subscribe { log.debug("'{}', '{}' Span was updated with server response: '{}'", it.spanId, it.traceId, it.latestResult?.statusCode) }
+  }
+
+  fun updateWithOtherError(message: PublisherOtherErrorMessage) {
+    log.info("Updating span '{}', '{}' with unknown error", message.spanId, message.traceId, message.reason)
+    val time = timeMachine.now()
+
+    val response = SpanResult.Builder()
+      .time(time)
+      .message(message)
+      .build()
+
+    repository.addStatusUpdate(message.spanId, notOk(time), response = response)
       .subscribe { log.debug("'{}', '{}' Span was updated with server response: '{}'", it.spanId, it.traceId, it.latestResult?.statusCode) }
   }
 
