@@ -1,5 +1,6 @@
 package com.hookiesolutions.webhookie.common.message.publisher
 
+import com.hookiesolutions.webhookie.common.message.WebhookieMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
 import org.springframework.http.ResponseEntity
 import org.springframework.web.reactive.function.client.WebClientRequestException
@@ -10,13 +11,13 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
  * @author Arthur Kazemi<bidadh@gmail.com>
  * @since 8/12/20 23:46
  */
-interface GenericPublisherMessage {
+interface GenericPublisherMessage: WebhookieMessage {
   val subscriptionMessage: SignableSubscriptionMessage
 
   val spanId: String
     get() = subscriptionMessage.spanId
 
-  val traceId: String
+  override val traceId: String
     get() = subscriptionMessage.traceId
 
   val url: String

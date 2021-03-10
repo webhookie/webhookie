@@ -15,13 +15,13 @@ import org.springframework.messaging.Message
  * @since 3/12/20 12:31
  */
 data class ConsumerMessage(
-  val traceId: String,
+  override val traceId: String,
   val topic: String,
   val contentType: String,
   val authorizedSubscribers: Set<String>,
   val payload: ByteArray,
   val headers: Map<String, Any>,
-) {
+): WebhookieMessage {
   fun addMessageHeaders(headers: HttpHeaders) {
     this.headers
       .forEach {
@@ -56,13 +56,6 @@ data class ConsumerMessage(
         message.payload,
         message.headers
       )
-    }
-  }
-
-  class Keys {
-    companion object {
-      const val KEY_TRACE_ID = "traceId"
-      const val KEY_TOPIC = "topic"
     }
   }
 

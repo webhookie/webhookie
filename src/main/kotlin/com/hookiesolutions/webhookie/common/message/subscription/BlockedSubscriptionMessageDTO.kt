@@ -1,6 +1,7 @@
 package com.hookiesolutions.webhookie.common.message.subscription
 
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
+import com.hookiesolutions.webhookie.common.message.WebhookieMessage
 import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
 
@@ -15,10 +16,10 @@ data class BlockedSubscriptionMessageDTO(
   val consumerMessage: ConsumerMessage,
   val subscription: SubscriptionDTO,
   val blockedDetails: StatusUpdate
-) {
+): WebhookieMessage {
   val topic: String
     get() = consumerMessage.topic
 
-  val traceId: String
+  override val traceId: String
     get() = consumerMessage.traceId
 }
