@@ -92,7 +92,7 @@ class SubscriptionFlows(
         this.delayFunction<SignableSubscriptionMessage> {
           val delayInSeconds = it.payload.delay.seconds
           if(delayInSeconds > 0) {
-            log.warn("Delaying '{}' for '{}', traceId: '{}'", it.payload.spanId, delayInSeconds, it.payload.traceId)
+            log.info("Delaying '{}' for '{}', traceId: '{}'", it.payload.spanId, delayInSeconds, it.payload.traceId)
           }
           delayInSeconds * 1000
         }
