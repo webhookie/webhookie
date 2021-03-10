@@ -17,4 +17,10 @@ enum class SpanStatus {
 data class SpanStatusUpdate(
   val status: SpanStatus,
   val time: Instant
-)
+) {
+  companion object {
+    fun ok(at: Instant): SpanStatusUpdate = SpanStatusUpdate(SpanStatus.OK, at)
+    fun blocked(at: Instant): SpanStatusUpdate = SpanStatusUpdate(SpanStatus.BLOCKED, at)
+    fun retrying(at: Instant): SpanStatusUpdate = SpanStatusUpdate(SpanStatus.RETRYING, at)
+  }
+}

@@ -120,8 +120,7 @@ class AuditFlows(
     return integrationFlow {
       channel(PUBLISHER_REQUEST_ERROR_CHANNEL)
       handle { payload: PublisherRequestErrorMessage, _: MessageHeaders ->
-        val h = "$PUBLISHER_REQUEST_ERROR_CHANNEL, ${payload.traceId}, ${payload.spanId}"
-        log.debug("$h - {}, {}", payload.url, payload.reason)
+        spanService.updateWithClientError(payload)
       }
     }
   }

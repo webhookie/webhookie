@@ -3,10 +3,11 @@ package com.hookiesolutions.webhookie.audit.service
 import com.hookiesolutions.webhookie.audit.domain.Span
 import com.hookiesolutions.webhookie.audit.domain.SpanRepository
 import com.hookiesolutions.webhookie.audit.domain.SpanRetry
-import com.hookiesolutions.webhookie.audit.domain.SpanServerResponse
+import com.hookiesolutions.webhookie.audit.domain.SpanResult
 import com.hookiesolutions.webhookie.audit.domain.SpanStatus
 import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate
 import com.hookiesolutions.webhookie.common.exception.EntityExistsException
+import com.hookiesolutions.webhookie.common.message.publisher.PublisherRequestErrorMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherResponseErrorMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherSuccessMessage
 import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscriptionMessageDTO
@@ -48,26 +49,9 @@ class SpanService(
     }
   }
 
-  private fun markAsRetrying(message: SignableSubscriptionMessage) {
-    log.info("Marking  '{}', '{}' as Retrying. ", message.spanId, message.traceId)
-    val time = timeMachine.now().plusSeconds(message.delay.seconds)
-    val retry = SpanRetry(time, message.numberOfRetries)
-    val statusUpdate = SpanStatusUpdate(SpanStatus.RETRYING, time)
-    repository.addStatusUpdate(message.spanId, statusUpdate, retry = retry)
-      .subscribe { log.debug("'{}', '{}' Span was updated to: '{}'", it.spanId, it.traceId, it.lastStatus) }
-  }
-
-  private fun addRetry(message: SignableSubscriptionMessage) {
-    log.info("Delaying '{}', '{}' span for '{}' seconds", message.spanId, message.traceId, message.delay.seconds)
-    val time = timeMachine.now().plusSeconds(message.delay.seconds)
-    val retry = SpanRetry(time, message.numberOfRetries)
-    repository.addRetry(message.spanId, retry)
-      .subscribe { log.debug("'{}', '{}' Span was updated to: '{}'", it.spanId, it.traceId, it.lastStatus) }
-  }
-
   fun blockSpan(message: BlockedSubscriptionMessageDTO) {
     log.info("Blocking '{}', '{}' span. reason:", message.spanId, message.traceId, message.blockedDetails.reason)
-    val statusUpdate = SpanStatusUpdate(SpanStatus.BLOCKED, timeMachine.now())
+    val statusUpdate = SpanStatusUpdate.blocked(timeMachine.now())
     repository.addStatusUpdate(message.spanId, statusUpdate)
       .switchIfEmpty {
         val span = Span.Builder()
@@ -85,22 +69,57 @@ class SpanService(
       log.info("Updating span '{}', '{}' with server error", message.spanId, message.traceId, message.response.status)
       val time = timeMachine.now()
 
-      val response = SpanServerResponse(time, message.response, message.subscriptionMessage.numberOfRetries)
+      val response = SpanResult.Builder()
+        .time(time)
+        .message(message)
+        .build()
 
       repository.updateWithResponse(message.spanId, response)
-        .subscribe { log.debug("'{}', '{}' Span was updated with server response: '{}'", it.spanId, it.traceId, it.latestResponse) }
+        .subscribe { log.debug("'{}', '{}' Span was updated with server response: '{}'", it.spanId, it.traceId, it.latestResult) }
   }
 
+  fun updateWithClientError(message: PublisherRequestErrorMessage) {
+    log.info("Updating span '{}', '{}' with request error", message.spanId, message.traceId, message.reason)
+    val time = timeMachine.now()
+
+    val response = SpanResult.Builder()
+      .time(time)
+      .message(message)
+      .build()
+
+    repository.updateWithResponse(message.spanId, response)
+      .subscribe { log.debug("'{}', '{}' Span was updated with server response: '{}'", it.spanId, it.traceId, it.latestResult?.statusCode) }
+  }
 
   fun updateWithSuccessResponse(message: PublisherSuccessMessage) {
     log.info("Updating span '{}', '{}' with SUCCESS", message.spanId, message.traceId, message.response.status)
     val time = timeMachine.now()
 
-    val statusUpdate = SpanStatusUpdate(SpanStatus.OK, timeMachine.now())
-    val response = SpanServerResponse(time, message.response, message.subscriptionMessage.numberOfRetries)
+    val statusUpdate = SpanStatusUpdate.ok(timeMachine.now())
+    val response = SpanResult.Builder()
+      .time(time)
+      .message(message)
+      .build()
 
     repository.addStatusUpdate(message.spanId, statusUpdate, response = response)
-      .subscribe { log.debug("'{}', '{}' Span was updated with server response: '{}'", it.spanId, it.traceId, it.latestResponse?.response?.status) }
+      .subscribe { log.debug("'{}', '{}' Span was updated with server response: '{}'", it.spanId, it.traceId, it.latestResult?.statusCode) }
+  }
+
+  private fun markAsRetrying(message: SignableSubscriptionMessage) {
+    log.info("Marking  '{}', '{}' as Retrying. ", message.spanId, message.traceId)
+    val time = timeMachine.now().plusSeconds(message.delay.seconds)
+    val retry = SpanRetry(time, message.numberOfRetries)
+    val statusUpdate = SpanStatusUpdate.retrying(time)
+    repository.addStatusUpdate(message.spanId, statusUpdate, retry = retry)
+      .subscribe { log.debug("'{}', '{}' Span was updated to: '{}'", it.spanId, it.traceId, it.lastStatus) }
+  }
+
+  private fun addRetry(message: SignableSubscriptionMessage) {
+    log.info("Delaying '{}', '{}' span for '{}' seconds", message.spanId, message.traceId, message.delay.seconds)
+    val time = timeMachine.now().plusSeconds(message.delay.seconds)
+    val retry = SpanRetry(time, message.numberOfRetries)
+    repository.addRetry(message.spanId, retry)
+      .subscribe { log.debug("'{}', '{}' Span was updated to: '{}'", it.spanId, it.traceId, it.lastStatus) }
   }
 
   private fun saveOrFetch(span: Span): Mono<Span> {

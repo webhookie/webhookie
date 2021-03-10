@@ -2,7 +2,7 @@ package com.hookiesolutions.webhookie.audit.domain
 
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_NEXT_RETRY
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_LAST_STATUS
-import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_LATEST_RESPONSE
+import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_LATEST_RESULT
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_RETRY_HISTORY
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_STATUS_HISTORY
 import com.hookiesolutions.webhookie.audit.domain.Span.Queries.Companion.bySpanId
@@ -34,7 +34,7 @@ class SpanRepository(
     spanId: String,
     spanStatusUpdate: SpanStatusUpdate,
     retry: SpanRetry? = null,
-    response: SpanServerResponse? = null
+    response: SpanResult? = null
   ): Mono<Span> {
     val updateAsArrayKey = "updateAsArray"
 
@@ -60,7 +60,7 @@ class SpanRepository(
     return updateSpan(spanId, *addRetryOperations(retry))
   }
 
-  fun updateWithResponse(spanId: String, response: SpanServerResponse): Mono<Span> {
+  fun updateWithResponse(spanId: String, response: SpanResult): Mono<Span> {
     return updateSpan(spanId, *addResponseOperations(response))
   }
 
@@ -75,14 +75,14 @@ class SpanRepository(
     )
   }
 
-  private fun addResponseOperations(response: SpanServerResponse): Array<AggregationOperation> {
+  private fun addResponseOperations(response: SpanResult): Array<AggregationOperation> {
     val key = "tmpRetry"
 
     return arrayOf(
       addMongoField(key, eqFilter(KEY_RETRY_HISTORY, KEY_RETRY_NO, response.retryNo)),
-      mongoSet("$key.$KEY_RETRY_STATUS_CODE", response.response.status.value()),
+      mongoSet("$key.$KEY_RETRY_STATUS_CODE", response.statusCode),
       mongoSet(KEY_RETRY_HISTORY, insertIntoArray(KEY_RETRY_HISTORY, KEY_RETRY_NO, key, response.retryNo)),
-      mongoSet(KEY_LATEST_RESPONSE, response),
+      mongoSet(KEY_LATEST_RESULT, response),
       mongoSetLastElemOfArray(KEY_RETRY_HISTORY, KEY_NEXT_RETRY),
       mongoUnset(key)
     )
