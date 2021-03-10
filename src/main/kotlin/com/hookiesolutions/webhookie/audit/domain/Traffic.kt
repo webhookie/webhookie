@@ -43,7 +43,7 @@ data class Traffic(
 
   class Updates {
     companion object {
-      fun update(statusUpdate: TrafficStatusUpdate): Update {
+      fun trafficStatusUpdate(statusUpdate: TrafficStatusUpdate): Update {
         return Update()
           .set(KEY_STATUS_UPDATE, statusUpdate)
           .set(KEY_TIME, statusUpdate.time)

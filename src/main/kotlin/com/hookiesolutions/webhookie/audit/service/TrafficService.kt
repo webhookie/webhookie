@@ -3,8 +3,10 @@ package com.hookiesolutions.webhookie.audit.service
 import com.hookiesolutions.webhookie.audit.domain.Traffic
 import com.hookiesolutions.webhookie.audit.domain.TrafficRepository
 import com.hookiesolutions.webhookie.audit.domain.TrafficStatus
+import com.hookiesolutions.webhookie.audit.domain.TrafficStatusUpdate
 import com.hookiesolutions.webhookie.common.exception.EntityExistsException
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
+import com.hookiesolutions.webhookie.common.message.publisher.PublisherErrorMessage
 import com.hookiesolutions.webhookie.common.message.subscription.NoSubscriptionMessage
 import com.hookiesolutions.webhookie.common.service.TimeMachine
 import org.slf4j.Logger
@@ -33,9 +35,17 @@ class TrafficService(
   }
 
   fun updateWithNoSubscription(message: NoSubscriptionMessage) {
-    val traceId = message.traceId
-    log.info("Updating traffic({}) with No Subscription", traceId)
-    repository.updateWithNoSubscription(traceId, TrafficStatus.NO_SUBSCRIPTION, timeMachine.now())
+    updateStatus(message.traceId, TrafficStatus.NO_SUBSCRIPTION)
+  }
+
+  fun updateWithIssues(message: PublisherErrorMessage) {
+    updateStatus(message.traceId, TrafficStatus.ISSUES)
+  }
+
+  private fun updateStatus(traceId: String, status: TrafficStatus) {
+    log.info("Updating traffic({}) with '{}'", traceId, status.name)
+
+    repository.updateWithStatus(traceId, TrafficStatusUpdate(status, timeMachine.now()))
       .subscribe { log.debug("'{}' traffic was updated to '{}'", it.traceId, it.statusUpdate) }
   }
 

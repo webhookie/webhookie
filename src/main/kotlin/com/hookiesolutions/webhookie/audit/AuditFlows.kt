@@ -150,9 +150,9 @@ class AuditFlows(
   fun logRetrySubscriptionMessageMessage(): IntegrationFlow {
     return integrationFlow {
       channel(RETRYABLE_PUBLISHER_ERROR_CHANNEL)
+      filter<PublisherErrorMessage> { it.subscriptionMessage.numberOfRetries == 0 }
       handle { payload: PublisherErrorMessage, _: MessageHeaders ->
-        val h = "$RETRYABLE_PUBLISHER_ERROR_CHANNEL, ${payload.traceId}. ${payload.spanId}"
-        log.debug("$h - {}, {}", payload.url, payload.subscriptionMessage.delay.seconds)
+        trafficService.updateWithIssues(payload)
       }
     }
   }

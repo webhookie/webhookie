@@ -9,7 +9,8 @@ import java.time.Instant
  */
 enum class TrafficStatus {
   PROCESSING,
-  NO_SUBSCRIPTION
+  NO_SUBSCRIPTION,
+  ISSUES
 }
 
 data class TrafficStatusUpdate (
