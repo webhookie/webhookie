@@ -8,21 +8,20 @@ import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscri
 import com.hookiesolutions.webhookie.common.model.DeletableEntity.Companion.deletable
 import com.hookiesolutions.webhookie.common.model.RoleActor
 import com.hookiesolutions.webhookie.common.model.UpdatableEntity.Companion.updatable
-import com.hookiesolutions.webhookie.common.service.IdGenerator
-import com.hookiesolutions.webhookie.common.service.TimeMachine
-import com.hookiesolutions.webhookie.security.service.SecurityHandler
-import com.hookiesolutions.webhookie.subscription.domain.ApplicationRepository
-import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
-import com.hookiesolutions.webhookie.subscription.domain.CallbackRepository
 import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate
 import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Companion.activated
 import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Companion.blocked
 import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Companion.deactivated
 import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Companion.suspended
 import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Companion.validated
+import com.hookiesolutions.webhookie.common.model.dto.SubscriptionStatus
+import com.hookiesolutions.webhookie.common.service.TimeMachine
+import com.hookiesolutions.webhookie.security.service.SecurityHandler
+import com.hookiesolutions.webhookie.subscription.domain.ApplicationRepository
+import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
+import com.hookiesolutions.webhookie.subscription.domain.CallbackRepository
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.subscription.domain.SubscriptionRepository
-import com.hookiesolutions.webhookie.common.model.dto.SubscriptionStatus
 import com.hookiesolutions.webhookie.subscription.service.factory.ConversionsFactory
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.CreateSubscriptionRequest
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.ReasonRequest
@@ -49,7 +48,6 @@ class SubscriptionService(
   private val securityHandler: SecurityHandler,
   private val timeMachine: TimeMachine,
   private val signor: SubscriptionSignor,
-  private val idGenerator: IdGenerator,
   private val factory: ConversionsFactory,
   private val repository: SubscriptionRepository,
   private val callbackRepository: CallbackRepository,
@@ -254,7 +252,7 @@ class SubscriptionService(
   fun signSubscriptionMessage(subscriptionMessage: SignableSubscriptionMessage): Mono<SignableSubscriptionMessage> {
     return repository
       .findById(subscriptionMessage.subscription.id)
-      .flatMap { signor.sign(it, subscriptionMessage.originalMessage, idGenerator.generate()) }
+      .flatMap { signor.sign(it, subscriptionMessage.originalMessage, subscriptionMessage.spanId) }
       .map { factory.createSignedSubscriptionMessage(subscriptionMessage, it) }
   }
 
