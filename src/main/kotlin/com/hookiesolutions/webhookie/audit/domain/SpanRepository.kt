@@ -9,6 +9,7 @@ import com.hookiesolutions.webhookie.audit.domain.Span.Queries.Companion.bySpanI
 import com.hookiesolutions.webhookie.audit.domain.SpanRetry.Companion.KEY_RETRY_NO
 import com.hookiesolutions.webhookie.audit.domain.SpanRetry.Companion.KEY_RETRY_STATUS_CODE
 import com.hookiesolutions.webhookie.common.repository.GenericRepository
+import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.aggregation.AggregationOperation
 import org.springframework.data.mongodb.core.aggregation.AggregationUpdate
@@ -97,6 +98,7 @@ class SpanRepository(
       .findAndModify(
         query(criteria),
         AggregationUpdate.newUpdate(*operations),
+        FindAndModifyOptions.options().returnNew(true),
         Span::class.java
       )
   }
