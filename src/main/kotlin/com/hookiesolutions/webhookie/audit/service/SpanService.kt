@@ -2,8 +2,8 @@ package com.hookiesolutions.webhookie.audit.service
 
 import com.hookiesolutions.webhookie.audit.domain.Span
 import com.hookiesolutions.webhookie.audit.domain.SpanRepository
-import com.hookiesolutions.webhookie.audit.domain.SpanRetry
 import com.hookiesolutions.webhookie.audit.domain.SpanResult
+import com.hookiesolutions.webhookie.audit.domain.SpanRetry
 import com.hookiesolutions.webhookie.audit.domain.SpanStatus
 import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate
 import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate.Companion.notOk
@@ -77,7 +77,7 @@ class SpanService(
         .build()
 
       repository.updateWithResponse(message.spanId, response)
-        .subscribe { log.debug("'{}', '{}' Span was updated with server response: '{}'", it.spanId, it.traceId, it.latestResult) }
+        .subscribe { log.info("'{}', '{}' Span was updated with server response: '{}'", it.spanId, it.traceId, it.latestResult) }
   }
 
   fun updateWithClientError(message: PublisherRequestErrorMessage) {
@@ -90,7 +90,7 @@ class SpanService(
       .build()
 
     repository.updateWithResponse(message.spanId, response)
-      .subscribe { log.debug("'{}', '{}' Span was updated with server response: '{}'", it.spanId, it.traceId, it.latestResult?.statusCode) }
+      .subscribe { log.info("'{}', '{}' Span was updated with client error response: '{}'", it.spanId, it.traceId, it.latestResult?.statusCode) }
   }
 
   fun updateWithOtherError(message: PublisherOtherErrorMessage) {
@@ -103,7 +103,7 @@ class SpanService(
       .build()
 
     repository.addStatusUpdate(message.spanId, notOk(time), response = response)
-      .subscribe { log.debug("'{}', '{}' Span was updated with server response: '{}'", it.spanId, it.traceId, it.latestResult?.statusCode) }
+      .subscribe { log.info("'{}', '{}' Span was updated with other error response: '{}'", it.spanId, it.traceId, it.latestResult?.statusCode) }
   }
 
   fun updateWithSuccessResponse(message: PublisherSuccessMessage) {
