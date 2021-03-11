@@ -1,10 +1,11 @@
 package com.hookiesolutions.webhookie.common.message.subscription
 
+import com.hookiesolutions.webhookie.common.message.WebhookieSpanMessage
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
 import java.time.Duration
 
-interface SignableSubscriptionMessage: GenericSubscriptionMessage {
-  val spanId: String
+interface SignableSubscriptionMessage: GenericSubscriptionMessage, WebhookieSpanMessage {
+  override val spanId: String
   val subscription: SubscriptionDTO
   val delay: Duration
   val numberOfRetries: Int
