@@ -42,6 +42,10 @@ class TrafficService(
     updateStatus(message.traceId, TrafficStatus.ISSUES)
   }
 
+  fun updateWithOK(traceId: String) {
+    updateStatus(traceId, TrafficStatus.OK)
+  }
+
   private fun updateStatus(traceId: String, status: TrafficStatus) {
     log.info("Updating traffic({}) with '{}'", traceId, status.name)
 
