@@ -104,7 +104,7 @@ class AuditFlows(
   }
 
   @Bean
-  fun aggBlockedSubscriptionFlow(): IntegrationFlow {
+  fun passBlockedSubscriptionMessageToTraceAggregatorFlow(): IntegrationFlow {
     return integrationFlow {
       channel(BLOCKED_SUBSCRIPTION_CHANNEL_NAME)
       channel(TRACE_AGGREGATION_CHANNEL_NAME)
@@ -112,7 +112,7 @@ class AuditFlows(
   }
 
   @Bean
-  fun aggSuccessFlow(): IntegrationFlow {
+  fun passSuccessMessageToTraceAggregatorFlow(): IntegrationFlow {
     return integrationFlow {
       channel(PUBLISHER_SUCCESS_CHANNEL)
       channel(TRACE_AGGREGATION_CHANNEL_NAME)
