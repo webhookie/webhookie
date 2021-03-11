@@ -14,8 +14,11 @@ import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Comp
 import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.SUBSCRIPTION_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.SUBSCRIPTION_ERROR_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.UNSUCCESSFUL_SUBSCRIPTION_CHANNEL_NAME
+import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_SEQUENCE_SIZE
+import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_TRACE_ID
 import com.hookiesolutions.webhookie.common.exception.messaging.SubscriptionMessageHandlingException
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
+import com.hookiesolutions.webhookie.common.message.WebhookieMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherErrorMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherOtherErrorMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherRequestErrorMessage
@@ -27,9 +30,14 @@ import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscri
 import org.slf4j.Logger
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.integration.aggregator.CorrelationStrategy
+import org.springframework.integration.aggregator.HeaderAttributeCorrelationStrategy
+import org.springframework.integration.aggregator.MessageGroupProcessor
+import org.springframework.integration.aggregator.ReleaseStrategy
 import org.springframework.integration.dsl.IntegrationFlow
 import org.springframework.integration.dsl.integrationFlow
 import org.springframework.messaging.MessageHeaders
+import org.springframework.messaging.support.MessageBuilder
 
 /**
  *
@@ -91,6 +99,77 @@ class AuditFlows(
       channel(BLOCKED_SUBSCRIPTION_CHANNEL_NAME)
       handle { payload: BlockedSubscriptionMessageDTO, _: MessageHeaders ->
         spanService.blockSpan(payload)
+      }
+    }
+  }
+
+  @Bean
+  fun aggBlockedSubscriptionFlow(): IntegrationFlow {
+    return integrationFlow {
+      channel(BLOCKED_SUBSCRIPTION_CHANNEL_NAME)
+      channel(TRACE_AGGREGATION_CHANNEL_NAME)
+    }
+  }
+
+  @Bean
+  fun aggSuccessFlow(): IntegrationFlow {
+    return integrationFlow {
+      channel(PUBLISHER_SUCCESS_CHANNEL)
+      channel(TRACE_AGGREGATION_CHANNEL_NAME)
+    }
+  }
+
+  @Bean
+  fun traceCorrelationStrategy(): CorrelationStrategy {
+    return HeaderAttributeCorrelationStrategy(WH_HEADER_TRACE_ID)
+  }
+
+  @Bean
+  fun traceReleaseStrategy(): ReleaseStrategy {
+    return ReleaseStrategy {
+      val size = it.one.headers[WH_HEADER_SEQUENCE_SIZE].toString().toInt()
+      it.messages.size == size
+    }
+  }
+
+  @Bean
+  fun traceOutputProcessor(): MessageGroupProcessor {
+    return MessageGroupProcessor { group ->
+      val successSize = group.messages
+        .filter {
+          it.payload is PublisherSuccessMessage
+        }
+        .size
+
+      val one = group.one.payload as WebhookieMessage
+      val payload = if(group.messages.size == successSize) {
+        one.traceId
+      } else {
+        ""
+      }
+      MessageBuilder
+        .withPayload(payload)
+        .copyHeaders(group.one.headers)
+        .build()
+    }
+  }
+
+  @Bean
+  fun traceAggregationFlow(
+    traceCorrelationStrategy: CorrelationStrategy,
+    traceReleaseStrategy: ReleaseStrategy,
+    traceOutputProcessor: MessageGroupProcessor
+  ): IntegrationFlow {
+    return integrationFlow {
+      channel(TRACE_AGGREGATION_CHANNEL_NAME)
+      aggregate {
+        this.correlationStrategy(traceCorrelationStrategy)
+        this.releaseStrategy(traceReleaseStrategy)
+        this.outputProcessor(traceOutputProcessor)
+      }
+      filter<String> { it.isNotEmpty() }
+      handle {
+        trafficService.updateWithOK(it.payload as String)
       }
     }
   }
@@ -165,5 +244,9 @@ class AuditFlows(
         log.warn("$h - {}, {}", payload.url, payload.subscriptionMessage.delay.seconds)
       }
     }
+  }
+
+  companion object {
+    const val TRACE_AGGREGATION_CHANNEL_NAME = "traceAggregationChannel"
   }
 }

@@ -2,19 +2,21 @@ package com.hookiesolutions.webhookie.subscription
 
 import com.hookiesolutions.webhookie.common.Constants.Channels.Consumer.Companion.CONSUMER_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Channels.Publisher.Companion.RETRYABLE_PUBLISHER_ERROR_CHANNEL
+import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_SEQUENCE_SIZE
 import com.hookiesolutions.webhookie.common.exception.messaging.SubscriptionMessageHandlingException
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
+import com.hookiesolutions.webhookie.common.message.WebhookieMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherErrorMessage
 import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscriptionMessageDTO
 import com.hookiesolutions.webhookie.common.message.subscription.GenericSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SignedSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.UnsignedSubscriptionMessage
-import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
 import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Keys.Companion.KEY_STATUS
+import com.hookiesolutions.webhookie.common.model.dto.SubscriptionStatus
+import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_STATUS_UPDATE
-import com.hookiesolutions.webhookie.common.model.dto.SubscriptionStatus
 import com.mongodb.client.model.changestream.FullDocument
 import com.mongodb.client.model.changestream.OperationType
 import org.slf4j.Logger
@@ -68,8 +70,14 @@ class SubscriptionFlows(
         errorChannel(globalSubscriptionErrorChannel)
       }
       transform(toSubscriptionMessageFlux)
+      transform<Flux<GenericSubscriptionMessage>> { it.collectList() }
+      split()
+      enrichHeaders {
+        headerFunction<List<WebhookieMessage>>(WH_HEADER_SEQUENCE_SIZE, { it.payload.size}, true)
+      }
       split()
       routeToRecipients {
+        applySequence(true)
         recipient(signSubscriptionMessageChannel, toBeSignedWorkingSubscription)
         recipient(delaySubscriptionChannel, nonSignableWorkingSubscription)
         recipient(noSubscriptionChannel, messageHasNoSubscription)

@@ -14,6 +14,7 @@ class Constants {
         const val WH_HEADER_SPAN_ID = "wh-span-id"
         const val WH_HEADER_AUTHORIZED_SUBSCRIBER = "wh-authorized-subscriber"
         const val HEADER_CONTENT_TYPE = "content_type"
+        const val WH_HEADER_SEQUENCE_SIZE = "wh-sequence-size"
 
         val WH_REQUIRED_HEADERS = setOf(
           WH_HEADER_TOPIC,
