@@ -13,7 +13,6 @@ import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Comp
 import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.NO_SUBSCRIPTION_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.SUBSCRIPTION_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.SUBSCRIPTION_ERROR_CHANNEL_NAME
-import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.UNSUCCESSFUL_SUBSCRIPTION_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_SEQUENCE_SIZE
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_TRACE_ID
 import com.hookiesolutions.webhookie.common.exception.messaging.SubscriptionMessageHandlingException
@@ -87,8 +86,7 @@ class AuditFlows(
     return integrationFlow {
       channel(SUBSCRIPTION_ERROR_CHANNEL_NAME)
       handle { payload: SubscriptionMessageHandlingException, _: MessageHeaders ->
-        val h = "$SUBSCRIPTION_ERROR_CHANNEL_NAME, ${payload.traceId}, ${payload.spanId}"
-        log.debug("$h - '{}'", SUBSCRIPTION_ERROR_CHANNEL_NAME, payload)
+        log.warn("Error Occurred: '{}' for trace: {}, span: {}", payload.reason, payload.traceId, payload.spanId)
       }
     }
   }
@@ -231,17 +229,6 @@ class AuditFlows(
       filter<PublisherErrorMessage> { it.subscriptionMessage.numberOfRetries == 0 }
       handle { payload: PublisherErrorMessage, _: MessageHeaders ->
         trafficService.updateWithIssues(payload)
-      }
-    }
-  }
-
-  @Bean
-  fun logUnsuccessfulSubscriptionMessageMessage(): IntegrationFlow {
-    return integrationFlow {
-      channel(UNSUCCESSFUL_SUBSCRIPTION_CHANNEL_NAME)
-      handle { payload: PublisherErrorMessage, _: MessageHeaders ->
-        val h = "$UNSUCCESSFUL_SUBSCRIPTION_CHANNEL_NAME, ${payload.traceId}, ${payload.spanId}"
-        log.warn("$h - {}, {}", payload.url, payload.subscriptionMessage.delay.seconds)
       }
     }
   }
