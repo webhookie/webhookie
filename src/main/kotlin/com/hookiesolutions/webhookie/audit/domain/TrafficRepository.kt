@@ -22,7 +22,7 @@ class TrafficRepository(
     return mongoTemplate.findOne(query(byTraceId(traceId)), Traffic::class.java)
   }
 
-  fun updateWithStatus(traceId: String, statusUpdate: TrafficStatusUpdate): Mono<Traffic> {
+  fun addStatus(traceId: String, statusUpdate: TrafficStatusUpdate): Mono<Traffic> {
     return mongoTemplate
       .findAndModify(
         query(byTraceId(traceId)),

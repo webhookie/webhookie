@@ -35,21 +35,21 @@ class TrafficService(
   }
 
   fun updateWithNoSubscription(message: NoSubscriptionMessage) {
-    updateStatus(message.traceId, TrafficStatus.NO_SUBSCRIPTION)
+    addStatus(message.traceId, TrafficStatus.NO_SUBSCRIPTION)
   }
 
   fun updateWithIssues(message: PublisherErrorMessage) {
-    updateStatus(message.traceId, TrafficStatus.ISSUES)
+    addStatus(message.traceId, TrafficStatus.ISSUES)
   }
 
   fun updateWithOK(traceId: String) {
-    updateStatus(traceId, TrafficStatus.OK)
+    addStatus(traceId, TrafficStatus.OK)
   }
 
-  private fun updateStatus(traceId: String, status: TrafficStatus) {
+  private fun addStatus(traceId: String, status: TrafficStatus) {
     log.info("Updating traffic({}) with '{}'", traceId, status.name)
 
-    repository.updateWithStatus(traceId, TrafficStatusUpdate(status, timeMachine.now()))
+    repository.addStatus(traceId, TrafficStatusUpdate(status, timeMachine.now()))
       .subscribe { log.debug("'{}' traffic was updated to '{}'", it.traceId, it.statusUpdate) }
   }
 
