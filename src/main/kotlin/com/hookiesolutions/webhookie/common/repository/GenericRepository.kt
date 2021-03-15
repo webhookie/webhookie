@@ -10,14 +10,18 @@ import com.hookiesolutions.webhookie.common.model.UpdatableEntity
 import com.hookiesolutions.webhookie.common.service.security.annotation.VerifyEntityCanBeDeleted
 import com.hookiesolutions.webhookie.common.service.security.annotation.VerifyEntityCanBeUpdated
 import org.springframework.dao.DuplicateKeyException
+import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.FindAndReplaceOptions
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.aggregation.AddFieldsOperation
 import org.springframework.data.mongodb.core.aggregation.AggregationExpression
+import org.springframework.data.mongodb.core.aggregation.AggregationOperation
+import org.springframework.data.mongodb.core.aggregation.AggregationUpdate
 import org.springframework.data.mongodb.core.aggregation.ArrayOperators
 import org.springframework.data.mongodb.core.aggregation.ComparisonOperators
 import org.springframework.data.mongodb.core.aggregation.SetOperation
 import org.springframework.data.mongodb.core.aggregation.UnsetOperation
+import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query.query
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
@@ -64,6 +68,20 @@ abstract class GenericRepository<E: AbstractEntity>(
       .onErrorMap(DuplicateKeyException::class.java) {
         EntityExistsException(it.localizedMessage)
       }
+  }
+
+  fun <T: AbstractEntity> aggregationUpdate(
+    criteria: Criteria,
+    clazz: Class<T>,
+    vararg operations: AggregationOperation
+  ): Mono<T> {
+    return mongoTemplate
+      .findAndModify(
+        query(criteria),
+        AggregationUpdate.newUpdate(*operations),
+        FindAndModifyOptions.options().returnNew(true),
+        clazz
+      )
   }
 
   companion object {

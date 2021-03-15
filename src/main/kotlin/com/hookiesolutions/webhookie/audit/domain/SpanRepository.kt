@@ -9,11 +9,8 @@ import com.hookiesolutions.webhookie.audit.domain.Span.Queries.Companion.bySpanI
 import com.hookiesolutions.webhookie.audit.domain.SpanRetry.Companion.KEY_RETRY_NO
 import com.hookiesolutions.webhookie.audit.domain.SpanRetry.Companion.KEY_RETRY_STATUS_CODE
 import com.hookiesolutions.webhookie.common.repository.GenericRepository
-import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.aggregation.AggregationOperation
-import org.springframework.data.mongodb.core.aggregation.AggregationUpdate
-import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query.query
 import org.springframework.stereotype.Repository
 import reactor.core.publisher.Mono
@@ -90,16 +87,6 @@ class SpanRepository(
   }
 
   private fun updateSpan(spanId: String, vararg operations: AggregationOperation): Mono<Span> {
-    return updateSpan(bySpanId(spanId), *operations)
-  }
-
-  private fun updateSpan(criteria: Criteria, vararg operations: AggregationOperation): Mono<Span> {
-    return mongoTemplate
-      .findAndModify(
-        query(criteria),
-        AggregationUpdate.newUpdate(*operations),
-        FindAndModifyOptions.options().returnNew(true),
-        Span::class.java
-      )
+    return aggregationUpdate(bySpanId(spanId), Span::class.java, *operations)
   }
 }
