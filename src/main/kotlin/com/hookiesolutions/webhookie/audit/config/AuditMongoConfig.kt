@@ -1,7 +1,7 @@
 package com.hookiesolutions.webhookie.audit.config
 
 import com.hookiesolutions.webhookie.audit.domain.Span
-import com.hookiesolutions.webhookie.audit.domain.Traffic
+import com.hookiesolutions.webhookie.audit.domain.Trace
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -15,5 +15,5 @@ import org.springframework.context.annotation.Configuration
 class AuditMongoConfig {
   @Bean
   fun auditIndexEntities(): List<Class<out AbstractEntity>> =
-    listOf(Traffic::class.java, Span::class.java)
+    listOf(Trace::class.java, Span::class.java)
 }

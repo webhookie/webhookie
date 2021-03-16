@@ -1,7 +1,7 @@
 package com.hookiesolutions.webhookie.audit
 
 import com.hookiesolutions.webhookie.audit.service.SpanService
-import com.hookiesolutions.webhookie.audit.service.TrafficService
+import com.hookiesolutions.webhookie.audit.service.TraceService
 import com.hookiesolutions.webhookie.common.Constants.Channels.Consumer.Companion.CONSUMER_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Channels.Publisher.Companion.PUBLISHER_OTHER_ERROR_CHANNEL
 import com.hookiesolutions.webhookie.common.Constants.Channels.Publisher.Companion.PUBLISHER_REQUEST_ERROR_CHANNEL
@@ -46,7 +46,7 @@ import org.springframework.messaging.support.MessageBuilder
 @Configuration
 class AuditFlows(
   private val log: Logger,
-  private val trafficService: TrafficService,
+  private val traceService: TraceService,
   private val spanService: SpanService
 ) {
   @Bean
@@ -54,7 +54,7 @@ class AuditFlows(
     return integrationFlow {
       channel(CONSUMER_CHANNEL_NAME)
       handle { payload: ConsumerMessage, _: MessageHeaders ->
-        trafficService.save(payload)
+        traceService.save(payload)
       }
     }
   }
@@ -167,7 +167,7 @@ class AuditFlows(
       }
       filter<String> { it.isNotEmpty() }
       handle {
-        trafficService.updateWithOK(it.payload as String)
+        traceService.updateWithOK(it.payload as String)
       }
     }
   }
@@ -177,7 +177,7 @@ class AuditFlows(
     return integrationFlow {
       channel(NO_SUBSCRIPTION_CHANNEL_NAME)
       handle { payload: NoSubscriptionMessage, _: MessageHeaders ->
-        trafficService.updateWithNoSubscription(payload)
+        traceService.updateWithNoSubscription(payload)
       }
     }
   }
@@ -228,7 +228,7 @@ class AuditFlows(
       channel(RETRYABLE_PUBLISHER_ERROR_CHANNEL)
       filter<PublisherErrorMessage> { it.subscriptionMessage.numberOfRetries == 0 }
       handle { payload: PublisherErrorMessage, _: MessageHeaders ->
-        trafficService.updateWithIssues(payload)
+        traceService.updateWithIssues(payload)
       }
     }
   }

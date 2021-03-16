@@ -1,7 +1,7 @@
 package com.hookiesolutions.webhookie.audit.domain
 
-import com.hookiesolutions.webhookie.audit.domain.Traffic.Queries.Companion.byTraceId
-import com.hookiesolutions.webhookie.audit.domain.Traffic.Updates.Companion.trafficStatusUpdate
+import com.hookiesolutions.webhookie.audit.domain.Trace.Queries.Companion.byTraceId
+import com.hookiesolutions.webhookie.audit.domain.Trace.Updates.Companion.trafficStatusUpdate
 import com.hookiesolutions.webhookie.common.repository.GenericRepository
 import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
@@ -15,20 +15,20 @@ import reactor.core.publisher.Mono
  * @since 2/3/21 19:07
  */
 @Repository
-class TrafficRepository(
+class TraceRepository(
   private val mongoTemplate: ReactiveMongoTemplate,
-) : GenericRepository<Traffic>(mongoTemplate, Traffic::class.java) {
-  fun findByTraceId(traceId: String): Mono<Traffic> {
-    return mongoTemplate.findOne(query(byTraceId(traceId)), Traffic::class.java)
+) : GenericRepository<Trace>(mongoTemplate, Trace::class.java) {
+  fun findByTraceId(traceId: String): Mono<Trace> {
+    return mongoTemplate.findOne(query(byTraceId(traceId)), Trace::class.java)
   }
 
-  fun addStatus(traceId: String, statusUpdate: TrafficStatusUpdate): Mono<Traffic> {
+  fun addStatus(traceId: String, statusUpdate: TraceStatusUpdate): Mono<Trace> {
     return mongoTemplate
       .findAndModify(
         query(byTraceId(traceId)),
         trafficStatusUpdate(statusUpdate),
         FindAndModifyOptions.options().returnNew(true),
-        Traffic::class.java
+        Trace::class.java
       )
   }
 }
