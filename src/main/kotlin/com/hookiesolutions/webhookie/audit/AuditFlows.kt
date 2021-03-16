@@ -92,11 +92,21 @@ class AuditFlows(
   }
 
   @Bean
-  fun logBlockedSubscriptionFlow(): IntegrationFlow {
+  fun blockSpanFlow(): IntegrationFlow {
     return integrationFlow {
       channel(BLOCKED_SUBSCRIPTION_CHANNEL_NAME)
       handle { payload: BlockedSubscriptionMessageDTO, _: MessageHeaders ->
         spanService.blockSpan(payload)
+      }
+    }
+  }
+
+  @Bean
+  fun updateTraceWithBlockedSubscriptionMessageFlow(): IntegrationFlow {
+    return integrationFlow {
+      channel(BLOCKED_SUBSCRIPTION_CHANNEL_NAME)
+      handle { payload: BlockedSubscriptionMessageDTO, _: MessageHeaders ->
+        traceService.updateWithIssues(payload)
       }
     }
   }

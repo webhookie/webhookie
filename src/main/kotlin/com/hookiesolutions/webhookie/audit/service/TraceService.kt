@@ -6,7 +6,7 @@ import com.hookiesolutions.webhookie.audit.domain.TraceStatus
 import com.hookiesolutions.webhookie.audit.domain.TraceStatusUpdate
 import com.hookiesolutions.webhookie.common.exception.EntityExistsException
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
-import com.hookiesolutions.webhookie.common.message.publisher.PublisherErrorMessage
+import com.hookiesolutions.webhookie.common.message.WebhookieMessage
 import com.hookiesolutions.webhookie.common.message.subscription.NoSubscriptionMessage
 import com.hookiesolutions.webhookie.common.service.TimeMachine
 import org.slf4j.Logger
@@ -38,7 +38,7 @@ class TraceService(
     addStatus(message.traceId, TraceStatus.NO_SUBSCRIPTION)
   }
 
-  fun updateWithIssues(message: PublisherErrorMessage) {
+  fun updateWithIssues(message: WebhookieMessage) {
     addStatus(message.traceId, TraceStatus.ISSUES)
   }
 
