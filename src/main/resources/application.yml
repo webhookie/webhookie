@@ -7,7 +7,7 @@ webhookie:
   subscription:
     retry:
       max-retry: 3
-      initial-interval: 5
+      initial-interval: 10
       multiplier: 2
   security:
     audience: ${WH_SECURITY_AUD:account}
