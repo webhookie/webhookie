@@ -14,7 +14,7 @@ data class StatusUpdate(
 ) {
   class Keys {
     companion object {
-      const val KEY_STATUS = "statusCode"
+      const val KEY_STATUS = "status"
     }
   }
 

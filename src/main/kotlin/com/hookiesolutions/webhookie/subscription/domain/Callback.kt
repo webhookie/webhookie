@@ -21,12 +21,12 @@ import org.springframework.http.HttpMethod
 @TypeAlias("callback")
 @CompoundIndexes(
   CompoundIndex(
-    name = "request_target",
+    name = "callback_request_target",
     def = "{'httpMethod' : 1, 'url': 1}",
     unique = true
   ),
   CompoundIndex(
-    name = "name_application",
+    name = "callback_name_application",
     def = "{'applicationId' : 1, 'name': 1}",
     unique = true
   )

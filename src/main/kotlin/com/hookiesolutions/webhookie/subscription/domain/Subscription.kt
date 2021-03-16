@@ -33,17 +33,17 @@ import org.springframework.data.mongodb.core.query.Update
 @TypeAlias("subscription")
 @CompoundIndexes(
   CompoundIndex(
-    name = "subscription",
+    name = "subscription_callback_topic",
     def = "{'$KEY_CALLBACK.$KEY_CALLBACK_ID' : 1, $KEY_TOPIC: 1}",
     unique = true
   ),
   CompoundIndex(
-    name = "topic_status",
+    name = "subscription_status_topic",
     def = "{'$KEY_STATUS_UPDATE.$KEY_STATUS' : 1, $KEY_TOPIC: 1}"
   )
 )
 data class Subscription(
-  @Indexed(name = "subscription.topic")
+  @Indexed(name = "subscription_topic")
   val topic: String,
   val application: ApplicationDetails,
   val callback: CallbackDetails,
