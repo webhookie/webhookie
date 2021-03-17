@@ -207,10 +207,10 @@ class SubscriptionFlows(
       transform(toBlockedSubscriptionMessageFlux)
       split()
       enrichHeaders {
-        this.headerFunction<BlockedSubscriptionMessage>(WH_HEADER_TOPIC) { it.payload.consumerMessage.topic}
-        this.headerFunction<BlockedSubscriptionMessage>(WH_HEADER_TRACE_ID) { it.payload.consumerMessage.traceId}
-        this.headerFunction<BlockedSubscriptionMessage>(WH_HEADER_SPAN_ID) { it.payload.spanId}
-        this.headerFunction<BlockedSubscriptionMessage>(HEADER_CONTENT_TYPE) { it.payload.consumerMessage.contentType}
+        this.headerFunction<BlockedSubscriptionMessage>(WH_HEADER_TOPIC) { it.payload.consumerMessage.topic }
+        this.headerFunction<BlockedSubscriptionMessage>(WH_HEADER_TRACE_ID) { it.payload.consumerMessage.traceId }
+        this.headerFunction<BlockedSubscriptionMessage>(WH_HEADER_SPAN_ID) { it.payload.spanId }
+        this.headerFunction<BlockedSubscriptionMessage>(HEADER_CONTENT_TYPE) { it.payload.consumerMessage.contentType }
       }
       channel(resendBlockedMessageChannel)
     }
