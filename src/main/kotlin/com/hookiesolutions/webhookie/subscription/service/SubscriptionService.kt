@@ -30,6 +30,8 @@ import com.hookiesolutions.webhookie.subscription.service.model.subscription.Val
 import com.hookiesolutions.webhookie.subscription.service.validator.SubscriptionValidator
 import com.hookiesolutions.webhookie.webhook.service.WebhookGroupServiceDelegate
 import org.slf4j.Logger
+import org.springframework.messaging.MessageChannel
+import org.springframework.messaging.support.MessageBuilder
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
@@ -54,6 +56,7 @@ class SubscriptionService(
   private val applicationRepository: ApplicationRepository,
   private val stateManager: SubscriptionStateManager,
   private val subscriptionValidator: SubscriptionValidator,
+  private val unblockedSubscriptionChannel: MessageChannel,
   private val webhookServiceDelegate: WebhookGroupServiceDelegate
 ) {
   @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")
@@ -195,7 +198,8 @@ class SubscriptionService(
     return repository
       .statusUpdate(id, activated(timeMachine.now()), SubscriptionStatus.values().asList())
       .doOnNext {
-        log.info("Subscription '{}' was unblocked", id)
+        log.info("Subscription '{}' was unblocked! Re-sending blocked messages...", id)
+        unblockedSubscriptionChannel.send(MessageBuilder.withPayload(it).build())
       }
       .map { it.statusUpdate.status }
   }
@@ -241,6 +245,11 @@ class SubscriptionService(
     log.info("Fetching all blocked messages for subscription: '{}'", id)
     return repository
       .findAllBlockedMessagesForSubscription(id)
+      .switchIfEmpty {
+        log.info("No blocked messages found for subscription: '{}'", id)
+
+        Flux.empty<BlockedSubscriptionMessage>()
+      }
   }
 
   fun deleteBlockedMessage(bsm: BlockedSubscriptionMessage): Mono<BlockedSubscriptionMessage> {

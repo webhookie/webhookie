@@ -60,6 +60,11 @@ class SubscriptionChannels {
     .get()
 
   @Bean
+  fun unblockedSubscriptionChannel(): PublishSubscribeChannel = MessageChannels
+    .publishSubscribe(Executors.newCachedThreadPool())
+    .get()
+
+  @Bean
   fun resendBlockedMessageChannel(): FluxMessageChannel = MessageChannels
     .flux()
     .get()

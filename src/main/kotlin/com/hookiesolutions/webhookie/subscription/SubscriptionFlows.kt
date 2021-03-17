@@ -201,9 +201,11 @@ class SubscriptionFlows(
   fun unblockSubscriptionFlow(
     mongoTemplate: ReactiveMongoTemplate,
     toBlockedSubscriptionMessageFlux: GenericTransformer<Subscription, Flux<BlockedSubscriptionMessage>>,
+    unblockedSubscriptionChannel: MessageChannel,
     resendBlockedMessageChannel: FluxMessageChannel
   ): IntegrationFlow {
-    return integrationFlow(unblockSubscriptionMongoEvent(mongoTemplate)) {
+    return integrationFlow {
+      channel(unblockedSubscriptionChannel)
       transform(toBlockedSubscriptionMessageFlux)
       split()
       enrichHeaders {
@@ -260,6 +262,11 @@ class SubscriptionFlows(
     }
   }
 
+  @Suppress("unused")
+  /**
+   * this is how to use it:
+   *     return integrationFlow(unblockSubscriptionMongoEvent(mongoTemplate)) {
+   */
   private fun unblockSubscriptionMongoEvent(
     mongoTemplate: ReactiveMongoTemplate
   ): MongoDbChangeStreamMessageProducerSpec {
