@@ -2,7 +2,11 @@ package com.hookiesolutions.webhookie.subscription
 
 import com.hookiesolutions.webhookie.common.Constants.Channels.Consumer.Companion.CONSUMER_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Channels.Publisher.Companion.RETRYABLE_PUBLISHER_ERROR_CHANNEL
+import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.HEADER_CONTENT_TYPE
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_SEQUENCE_SIZE
+import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_SPAN_ID
+import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_TOPIC
+import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_TRACE_ID
 import com.hookiesolutions.webhookie.common.exception.messaging.SubscriptionMessageHandlingException
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.message.WebhookieMessage
@@ -202,6 +206,12 @@ class SubscriptionFlows(
     return integrationFlow(unblockSubscriptionMongoEvent(mongoTemplate)) {
       transform(toBlockedSubscriptionMessageFlux)
       split()
+      enrichHeaders {
+        this.headerFunction<BlockedSubscriptionMessage>(WH_HEADER_TOPIC) { it.payload.consumerMessage.topic}
+        this.headerFunction<BlockedSubscriptionMessage>(WH_HEADER_TRACE_ID) { it.payload.consumerMessage.traceId}
+        this.headerFunction<BlockedSubscriptionMessage>(WH_HEADER_SPAN_ID) { it.payload.spanId}
+        this.headerFunction<BlockedSubscriptionMessage>(HEADER_CONTENT_TYPE) { it.payload.consumerMessage.contentType}
+      }
       channel(resendBlockedMessageChannel)
     }
   }
