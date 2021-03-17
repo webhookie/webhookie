@@ -4,10 +4,9 @@ import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
 import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
+import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO.Keys.Companion.KEY_SUBSCRIPTION_ID
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage.Keys.Companion.KEY_SUBSCRIPTION
-import org.bson.types.ObjectId
 import org.springframework.data.annotation.TypeAlias
-import org.springframework.data.mongodb.core.aggregation.Fields.UNDERSCORE_ID
 import org.springframework.data.mongodb.core.index.CompoundIndex
 import org.springframework.data.mongodb.core.index.CompoundIndexes
 import org.springframework.data.mongodb.core.mapping.Document
@@ -33,7 +32,7 @@ data class BlockedSubscriptionMessage(
   class Queries {
     companion object {
       fun bySubscriptionId(id: String): Criteria {
-        return where("$KEY_SUBSCRIPTION.$UNDERSCORE_ID").`is`(ObjectId(id))
+        return where("$KEY_SUBSCRIPTION.$KEY_SUBSCRIPTION_ID").`is`(id)
       }
     }
   }

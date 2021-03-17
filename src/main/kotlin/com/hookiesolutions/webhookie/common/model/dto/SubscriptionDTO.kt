@@ -1,6 +1,7 @@
 package com.hookiesolutions.webhookie.common.model.dto
 
 import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.annotation.JsonProperty
 
 /**
  *
@@ -9,7 +10,8 @@ import com.fasterxml.jackson.annotation.JsonInclude
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class SubscriptionDTO(
-  val id: String,
+  @JsonProperty("id")
+  val subscriptionId: String,
   val application: ApplicationDetails,
   val topic: String,
   val callback: CallbackDTO,
@@ -17,4 +19,10 @@ data class SubscriptionDTO(
 ) {
   val isBlocked: Boolean
     get() = statusUpdate.status == SubscriptionStatus.BLOCKED
+
+  class Keys {
+    companion object {
+      const val KEY_SUBSCRIPTION_ID = "subscriptionId"
+    }
+  }
 }

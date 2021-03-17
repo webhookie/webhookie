@@ -234,7 +234,7 @@ class SubscriptionService(
   }
 
   fun blockSubscription(message: PublisherErrorMessage): Mono<StatusUpdate> {
-    return blockSubscription(message.subscriptionMessage.subscription.id, message.reason)
+    return blockSubscription(message.subscriptionMessage.subscription.subscriptionId, message.reason)
   }
 
   fun findAllBlockedMessagesForSubscription(id: String): Flux<BlockedSubscriptionMessage> {
@@ -251,14 +251,14 @@ class SubscriptionService(
 
   fun signSubscriptionMessage(subscriptionMessage: SignableSubscriptionMessage): Mono<SignableSubscriptionMessage> {
     return repository
-      .findById(subscriptionMessage.subscription.id)
+      .findById(subscriptionMessage.subscription.subscriptionId)
       .flatMap { signor.sign(it, subscriptionMessage.originalMessage, subscriptionMessage.spanId) }
       .map { factory.createSignedSubscriptionMessage(subscriptionMessage, it) }
   }
 
   fun enrichBlockedSubscriptionMessageReloadingSubscription(message: BlockedSubscriptionMessage): Mono<BlockedSubscriptionMessage> {
     return repository
-      .findById(message.subscription.id)
+      .findById(message.subscription.subscriptionId)
       .map { factory.updateBlockedSubscriptionMessageWithSubscription(message, it) }
   }
 }
