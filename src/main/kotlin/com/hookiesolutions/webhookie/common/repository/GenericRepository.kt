@@ -19,6 +19,7 @@ import org.springframework.data.mongodb.core.aggregation.AggregationOperation
 import org.springframework.data.mongodb.core.aggregation.AggregationUpdate
 import org.springframework.data.mongodb.core.aggregation.ArrayOperators
 import org.springframework.data.mongodb.core.aggregation.ComparisonOperators
+import org.springframework.data.mongodb.core.aggregation.ConditionalOperators
 import org.springframework.data.mongodb.core.aggregation.SetOperation
 import org.springframework.data.mongodb.core.aggregation.UnsetOperation
 import org.springframework.data.mongodb.core.query.Criteria
@@ -135,6 +136,21 @@ abstract class GenericRepository<E: AbstractEntity>(
       return ArrayOperators.ConcatArrays
         .arrayOf(mongoField(arrayField))
         .concat(mongoField(tempKey))
+    }
+
+    fun conditionalValue(
+      cond: AggregationExpression,
+      thenValue: AggregationExpression,
+      elseValue: AggregationExpression
+    ): AggregationExpression {
+      return ConditionalOperators.Cond
+        .`when`(cond)
+        .thenValueOf(thenValue)
+        .otherwiseValueOf(elseValue)
+    }
+
+    fun neExpression(key: String, value: String): AggregationExpression {
+      return ComparisonOperators.Ne.valueOf(mongoField(key)).notEqualTo(mongoField(value))
     }
 
     private fun ltFilter(fieldName: String, fieldPath: String, value: Any): AggregationExpression {
