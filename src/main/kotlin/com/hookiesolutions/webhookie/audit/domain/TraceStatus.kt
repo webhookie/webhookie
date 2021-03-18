@@ -17,4 +17,8 @@ enum class TraceStatus {
 data class TraceStatusUpdate (
   val status: TraceStatus,
   val time: Instant
-)
+) {
+  companion object {
+    fun ok(at: Instant) = TraceStatusUpdate(TraceStatus.OK, at)
+  }
+}

@@ -2,6 +2,7 @@ package com.hookiesolutions.webhookie.audit.domain
 
 import com.hookiesolutions.webhookie.audit.domain.Trace.Keys.Companion.KEY_STATUS_HISTORY
 import com.hookiesolutions.webhookie.audit.domain.Trace.Keys.Companion.KEY_STATUS_UPDATE
+import com.hookiesolutions.webhookie.audit.domain.Trace.Keys.Companion.KEY_SUMMARY
 import com.hookiesolutions.webhookie.audit.domain.Trace.Keys.Companion.KEY_TIME
 import com.hookiesolutions.webhookie.audit.domain.Trace.Keys.Companion.KEY_TRACE_ID
 import com.hookiesolutions.webhookie.audit.domain.Trace.Keys.Companion.TRACE_COLLECTION_NAME
@@ -30,7 +31,8 @@ data class Trace(
   val consumerMessage: ConsumerMessage,
   val time: Instant,
   val statusUpdate: TraceStatusUpdate,
-  val statusHistory: List<TraceStatusUpdate> = emptyList()
+  val statusHistory: List<TraceStatusUpdate> = emptyList(),
+  val summary: TraceSummary = TraceSummary.unknown()
 ): AbstractEntity() {
 
   class Queries {
@@ -43,11 +45,17 @@ data class Trace(
 
   class Updates {
     companion object {
-      fun trafficStatusUpdate(statusUpdate: TraceStatusUpdate): Update {
+      fun traceStatusUpdate(statusUpdate: TraceStatusUpdate): Update {
         return Update()
           .set(KEY_STATUS_UPDATE, statusUpdate)
           .set(KEY_TIME, statusUpdate.time)
           .addToSet(KEY_STATUS_HISTORY, statusUpdate)
+      }
+
+      fun updateSummary(summary: TraceSummary, statusUpdate: TraceStatusUpdate): Update {
+        val update = traceStatusUpdate(statusUpdate)
+        return update
+          .set(KEY_SUMMARY, summary)
       }
     }
   }
@@ -58,6 +66,7 @@ data class Trace(
       const val KEY_STATUS_UPDATE = "statusUpdate"
       const val KEY_STATUS_HISTORY = "statusHistory"
       const val KEY_TIME = "time"
+      const val KEY_SUMMARY = "summary"
       const val TRACE_COLLECTION_NAME = "trace"
     }
   }

@@ -4,6 +4,7 @@ import com.hookiesolutions.webhookie.audit.domain.Trace
 import com.hookiesolutions.webhookie.audit.domain.TraceRepository
 import com.hookiesolutions.webhookie.audit.domain.TraceStatus
 import com.hookiesolutions.webhookie.audit.domain.TraceStatusUpdate
+import com.hookiesolutions.webhookie.audit.domain.TraceSummary
 import com.hookiesolutions.webhookie.common.exception.EntityExistsException
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.message.WebhookieMessage
@@ -42,10 +43,6 @@ class TraceService(
     addStatus(message.traceId, TraceStatus.ISSUES)
   }
 
-  fun updateWithOK(traceId: String) {
-    addStatus(traceId, TraceStatus.OK)
-  }
-
   private fun addStatus(traceId: String, status: TraceStatus) {
     log.info("Updating trace({}) with '{}'", traceId, status.name)
 
@@ -61,5 +58,24 @@ class TraceService(
         log.info("'{}' Trace already exists! fetching the existing document...", traceId)
         repository.findByTraceId(traceId)
       }
+  }
+
+  fun updateWithSummary(traceId: String, summary: TraceSummary) {
+    val status = if(summary.isOK()) {
+      TraceStatus.OK
+    } else {
+      TraceStatus.ISSUES
+    }
+    log.info("Updating trace({}) with status: '{}', summary: '{}'", traceId, status, summary)
+
+    repository.updateWithSummary(traceId, summary, TraceStatusUpdate(status, timeMachine.now()))
+      .subscribe { log.debug("'{}' trace was updated with '{}'", it.traceId, it.summary) }
+  }
+
+  fun increaseSuccessResponse(traceId: String) {
+    log.info("Increasing number of success spans for  trace({})", traceId)
+
+    repository.increaseSuccessSpan(traceId, timeMachine.now())
+      .subscribe { log.debug("'{}' trace was updated with '{}', '{}'", it.traceId, it.summary, it.statusUpdate.status) }
   }
 }

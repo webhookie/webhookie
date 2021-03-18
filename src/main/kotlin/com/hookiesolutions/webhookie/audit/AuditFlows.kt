@@ -1,5 +1,6 @@
 package com.hookiesolutions.webhookie.audit
 
+import com.hookiesolutions.webhookie.audit.domain.TraceSummary
 import com.hookiesolutions.webhookie.audit.service.SpanService
 import com.hookiesolutions.webhookie.audit.service.TraceService
 import com.hookiesolutions.webhookie.common.Constants.Channels.Consumer.Companion.CONSUMER_CHANNEL_NAME
@@ -33,10 +34,15 @@ import org.springframework.integration.aggregator.CorrelationStrategy
 import org.springframework.integration.aggregator.HeaderAttributeCorrelationStrategy
 import org.springframework.integration.aggregator.MessageGroupProcessor
 import org.springframework.integration.aggregator.ReleaseStrategy
+import org.springframework.integration.core.MessageSelector
 import org.springframework.integration.dsl.IntegrationFlow
 import org.springframework.integration.dsl.integrationFlow
+import org.springframework.messaging.Message
+import org.springframework.messaging.MessageChannel
 import org.springframework.messaging.MessageHeaders
 import org.springframework.messaging.support.MessageBuilder
+import reactor.util.function.Tuple2
+import reactor.util.function.Tuples
 
 /**
  *
@@ -112,18 +118,44 @@ class AuditFlows(
   }
 
   @Bean
-  fun passBlockedSubscriptionMessageToTraceAggregatorFlow(): IntegrationFlow {
+  fun passBlockedSubscriptionMessageToTraceAggregatorFlow(
+    originalMessageSelector: MessageSelector,
+    traceAggregationChannel: MessageChannel
+  ): IntegrationFlow {
     return integrationFlow {
       channel(BLOCKED_SUBSCRIPTION_CHANNEL_NAME)
-      channel(TRACE_AGGREGATION_CHANNEL_NAME)
+      filter<Message<BlockedSubscriptionMessageDTO>> {
+        originalMessageSelector.accept(it)
+      }
+      channel(traceAggregationChannel)
     }
   }
 
   @Bean
-  fun passSuccessMessageToTraceAggregatorFlow(): IntegrationFlow {
+  fun passSuccessMessageToTraceAggregatorFlow(
+    originalMessageSelector: MessageSelector,
+    unblockedMessageSelector: MessageSelector,
+    traceAggregationChannel: MessageChannel,
+    increaseSuccessChannel: MessageChannel
+  ): IntegrationFlow {
     return integrationFlow {
       channel(PUBLISHER_SUCCESS_CHANNEL)
-      channel(TRACE_AGGREGATION_CHANNEL_NAME)
+      routeToRecipients {
+        recipient<Message<*>>(traceAggregationChannel) { originalMessageSelector.accept(it)}
+        recipient<Message<*>>(increaseSuccessChannel) { unblockedMessageSelector.accept(it)}
+      }
+    }
+  }
+
+  @Bean
+  fun increaseSuccessFlow(
+    increaseSuccessChannel: MessageChannel
+  ): IntegrationFlow {
+    return integrationFlow {
+      channel(increaseSuccessChannel)
+      handle { p: WebhookieMessage, _: MessageHeaders ->
+        traceService.increaseSuccessResponse(p.traceId)
+      }
     }
   }
 
@@ -150,11 +182,9 @@ class AuditFlows(
         .size
 
       val one = group.one.payload as WebhookieMessage
-      val payload = if(group.messages.size == successSize) {
-        one.traceId
-      } else {
-        ""
-      }
+
+      val payload = Tuples.of(one.traceId, TraceSummary(group.messages.size, successSize))
+
       MessageBuilder
         .withPayload(payload)
         .copyHeaders(group.one.headers)
@@ -164,20 +194,22 @@ class AuditFlows(
 
   @Bean
   fun traceAggregationFlow(
+    traceAggregationChannel: MessageChannel,
     traceCorrelationStrategy: CorrelationStrategy,
     traceReleaseStrategy: ReleaseStrategy,
     traceOutputProcessor: MessageGroupProcessor
   ): IntegrationFlow {
     return integrationFlow {
-      channel(TRACE_AGGREGATION_CHANNEL_NAME)
+      channel(traceAggregationChannel)
       aggregate {
         this.correlationStrategy(traceCorrelationStrategy)
         this.releaseStrategy(traceReleaseStrategy)
         this.outputProcessor(traceOutputProcessor)
       }
-      filter<String> { it.isNotEmpty() }
-      handle {
-        traceService.updateWithOK(it.payload as String)
+      handle { p: Tuple2<String, TraceSummary>, _: MessageHeaders ->
+        val traceId = p.t1
+        val summary = p.t2
+        traceService.updateWithSummary(traceId, summary)
       }
     }
   }
@@ -241,9 +273,5 @@ class AuditFlows(
         traceService.updateWithIssues(payload)
       }
     }
-  }
-
-  companion object {
-    const val TRACE_AGGREGATION_CHANNEL_NAME = "traceAggregationChannel"
   }
 }
