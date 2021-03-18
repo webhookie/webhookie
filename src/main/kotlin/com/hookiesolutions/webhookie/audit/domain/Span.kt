@@ -28,6 +28,7 @@ data class Span(
   @Indexed(name = "span_spanId", unique = true)
   val spanId: String,
   val application: ApplicationDetails,
+  val topic: String,
   val callback: CallbackDTO,
   val lastStatus: SpanStatusUpdate,
   val statusHistory: List<SpanStatusUpdate> = emptyList(),
@@ -58,6 +59,7 @@ data class Span(
   class Builder {
     private lateinit var traceId: String
     private lateinit var spanId: String
+    private lateinit var topic: String
     private lateinit var application: ApplicationDetails
     private lateinit var callback: CallbackDTO
     private var status: SpanStatus = SpanStatus.PROCESSING
@@ -81,6 +83,7 @@ data class Span(
     fun spanId(spanId: String) = apply { this.spanId = spanId }
     fun time(time: Instant) = apply { this.time = time }
     fun application(application: ApplicationDetails) = apply { this.application = application }
+    fun topic(topic: String) = apply { this.topic = topic }
     fun callback(callback: CallbackDTO) = apply { this.callback = callback }
     fun status(status: SpanStatus) = apply { this.status = status }
 
@@ -90,6 +93,7 @@ data class Span(
         traceId = traceId,
         spanId = spanId,
         application,
+        topic,
         callback,
         statusUpdate,
         listOf(statusUpdate)
