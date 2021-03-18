@@ -12,6 +12,7 @@ class Constants {
         const val WH_HEADER_TOPIC = "wh-topic"
         const val WH_HEADER_TRACE_ID = "wh-trace-id"
         const val WH_HEADER_SPAN_ID = "wh-span-id"
+        const val WH_HEADER_UNBLOCKED = "wh-unblocked"
         const val WH_HEADER_AUTHORIZED_SUBSCRIBER = "wh-authorized-subscriber"
         const val HEADER_CONTENT_TYPE = "content_type"
         const val WH_HEADER_SEQUENCE_SIZE = "wh-sequence-size"
