@@ -4,12 +4,20 @@ import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_LAST_S
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_LATEST_RESULT
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_NEXT_RETRY
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_RETRY_HISTORY
+import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SPAN_APPLICATION
+import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SPAN_CALLBACK
+import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SPAN_ENTITY
+import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SPAN_ID
+import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SPAN_TOPIC
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_STATUS_HISTORY
+import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_TRACE_ID
 import com.hookiesolutions.webhookie.audit.domain.Span.Queries.Companion.applicationsIn
 import com.hookiesolutions.webhookie.audit.domain.Span.Queries.Companion.bySpanId
 import com.hookiesolutions.webhookie.audit.domain.SpanRetry.Companion.KEY_RETRY_NO
 import com.hookiesolutions.webhookie.audit.domain.SpanRetry.Companion.KEY_RETRY_STATUS_CODE
 import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate.Keys.Companion.KEY_TIME
+import com.hookiesolutions.webhookie.audit.web.model.request.SpanRequest
+import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.regex
 import com.hookiesolutions.webhookie.common.repository.GenericRepository
 import com.hookiesolutions.webhookie.common.repository.GenericRepository.Query.Companion.pageableWith
 import org.springframework.data.domain.PageRequest
@@ -17,6 +25,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.aggregation.AggregationOperation
+import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query.query
 import org.springframework.stereotype.Repository
 import reactor.core.publisher.Flux
@@ -99,12 +108,27 @@ class SpanRepository(
 
   fun userSpans(
     applicationIds: List<String>,
+    request: SpanRequest,
     requestedPageable: Pageable
   ): Flux<Span> {
     val pageable = pageableWith(requestedPageable, SPAN_DEFAULT_SORT, SPAN_DEFAULT_PAGE)
+
+    val requestCriteria = regex(
+      KEY_TRACE_ID to request.traceId,
+      KEY_SPAN_ID to request.spanId,
+      KEY_SPAN_TOPIC to request.topic,
+      KEY_SPAN_APPLICATION to request.application,
+      KEY_SPAN_ENTITY to request.entity,
+      KEY_SPAN_CALLBACK to request.callback
+    )
+
+    val criteria = Criteria()
+      .andOperator(
+        applicationsIn(applicationIds),
+        *requestCriteria
+      )
     return mongoTemplate.find(
-      query(applicationsIn(applicationIds))
-        .with(pageable),
+      query(criteria).with(pageable),
       Span::class.java
     )
   }

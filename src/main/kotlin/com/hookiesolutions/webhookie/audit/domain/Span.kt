@@ -6,10 +6,19 @@ import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.SPAN_COLLE
 import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscriptionMessageDTO
 import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
+import com.hookiesolutions.webhookie.common.model.dto.ApplicationDetails
+import com.hookiesolutions.webhookie.common.model.dto.ApplicationDetails.Keys.Companion.KEY_APPLICATION_ENTITY
 import com.hookiesolutions.webhookie.common.model.dto.ApplicationDetails.Keys.Companion.KEY_APPLICATION_ID
+import com.hookiesolutions.webhookie.common.model.dto.ApplicationDetails.Keys.Companion.KEY_APPLICATION_NAME
+import com.hookiesolutions.webhookie.common.model.dto.CallbackDTO
+import com.hookiesolutions.webhookie.common.model.dto.CallbackDTO.Keys.Companion.KEY_URL
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDetails
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDetails.Keys.Companion.KEY_APPLICATION
+import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDetails.Keys.Companion.KEY_CALLBACK
+import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDetails.Keys.Companion.KEY_TOPIC
+import com.hookiesolutions.webhookie.common.repository.GenericRepository
+import com.hookiesolutions.webhookie.common.repository.GenericRepository.Companion.fieldName
 import org.springframework.data.annotation.TypeAlias
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
@@ -51,6 +60,7 @@ data class Span(
 
   class Keys {
     companion object {
+      const val KEY_TRACE_ID = "traceId"
       const val KEY_SPAN_ID = "spanId"
       const val SPAN_COLLECTION_NAME = "span"
       const val KEY_SUBSCRIPTION = "subscription"
@@ -59,6 +69,11 @@ data class Span(
       const val KEY_NEXT_RETRY = "nextRetry"
       const val KEY_RETRY_HISTORY = "retryHistory"
       const val KEY_LATEST_RESULT = "latestResult"
+
+      val KEY_SPAN_TOPIC = fieldName(KEY_SUBSCRIPTION, KEY_TOPIC)
+      val KEY_SPAN_APPLICATION = fieldName(KEY_SUBSCRIPTION, KEY_APPLICATION, KEY_APPLICATION_NAME)
+      val KEY_SPAN_ENTITY = fieldName(KEY_SUBSCRIPTION, KEY_APPLICATION, KEY_APPLICATION_ENTITY)
+      val KEY_SPAN_CALLBACK = fieldName(KEY_SUBSCRIPTION, KEY_CALLBACK, KEY_URL)
     }
   }
 

@@ -24,4 +24,10 @@ data class CallbackDTO(
 
   val isSignable: Boolean
     get() = security != null
+
+  class Keys {
+    companion object {
+      const val KEY_URL = "url"
+    }
+  }
 }

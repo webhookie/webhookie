@@ -129,8 +129,12 @@ abstract class GenericRepository<E: AbstractEntity>(
       return "${'$'}$name"
     }
 
+    fun fieldName(vararg names: String): String {
+      return names.reduce { acc, s -> "$acc.$s" }
+    }
+
     fun mongoVariable(vararg names: String): String {
-      val name = names.reduce { acc, s -> "$acc.$s" }
+      val name = fieldName(*names)
       return mongoField(mongoField(name))
     }
 

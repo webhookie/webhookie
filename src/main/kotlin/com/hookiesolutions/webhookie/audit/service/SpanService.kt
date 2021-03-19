@@ -7,6 +7,7 @@ import com.hookiesolutions.webhookie.audit.domain.SpanRetry
 import com.hookiesolutions.webhookie.audit.domain.SpanStatus
 import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate
 import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate.Companion.notOk
+import com.hookiesolutions.webhookie.audit.web.model.request.SpanRequest
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_CONSUMER
 import com.hookiesolutions.webhookie.common.exception.EntityExistsException
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherOtherErrorMessage
@@ -153,13 +154,13 @@ class SpanService(
   }
 
   @PreAuthorize("hasAuthority('${ROLE_CONSUMER}')")
-  fun userSpans(pageable: Pageable): Flux<Span> {
+  fun userSpans(pageable: Pageable, request: SpanRequest): Flux<Span> {
     return subscriptionServiceDelegate.userApplications()
       .map { it.applicationId }
       .collectList()
       .flatMapMany {
         log.info("Fetching all spans by applications: '{}'", it)
-        repository.userSpans(it, pageable)
+        repository.userSpans(it, request, pageable)
       }
   }
 }

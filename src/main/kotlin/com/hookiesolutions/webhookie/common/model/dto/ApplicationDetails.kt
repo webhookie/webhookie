@@ -16,6 +16,8 @@ data class ApplicationDetails(
   class Keys {
     companion object {
       const val KEY_APPLICATION_ID = "applicationId"
+      const val KEY_APPLICATION_NAME = "name"
+      const val KEY_APPLICATION_ENTITY = "entity"
     }
   }
 }

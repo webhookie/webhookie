@@ -35,6 +35,17 @@ abstract class AbstractEntity : AbstractDocument() {
 
         return where(key).elemMatch(elemMatchCriteria)
       }
+
+      private fun regex(key: String, value: String): Criteria {
+        return where(key).regex(".*$value.*", "i")
+      }
+
+      fun regex(vararg pairs: Pair<String, String?>): Array<Criteria> {
+        return pairs
+          .filter { it.second != null }
+          .map { regex(it.first, it.second!!) }
+          .toTypedArray()
+      }
     }
   }
 }
