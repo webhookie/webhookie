@@ -7,6 +7,7 @@ import com.hookiesolutions.webhookie.audit.domain.SpanRetry
 import com.hookiesolutions.webhookie.audit.domain.SpanStatus
 import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate
 import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate.Companion.notOk
+import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_CONSUMER
 import com.hookiesolutions.webhookie.common.exception.EntityExistsException
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherOtherErrorMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherRequestErrorMessage
@@ -16,7 +17,9 @@ import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscrip
 import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
 import com.hookiesolutions.webhookie.common.service.TimeMachine
 import org.slf4j.Logger
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.switchIfEmpty
 
@@ -29,6 +32,7 @@ import reactor.kotlin.core.publisher.switchIfEmpty
 class SpanService(
   private val repository: SpanRepository,
   private val timeMachine: TimeMachine,
+  private val subscriptionServiceDelegate: SubscriptionServiceDelegate,
   private val log: Logger
 ) {
   fun createSpan(message: SignableSubscriptionMessage) {
@@ -144,6 +148,17 @@ class SpanService(
       .onErrorResume(EntityExistsException::class.java) {
         log.warn("'{}' Span already exists! fetching the existing document...", spanId)
         repository.findBySpanId(spanId)
+      }
+  }
+
+  @PreAuthorize("hasAuthority('${ROLE_CONSUMER}')")
+  fun userSpans(): Flux<Span> {
+    return subscriptionServiceDelegate.userApplications()
+      .map { it.applicationId }
+      .collectList()
+      .flatMapMany {
+        log.info("Fetching all spans by applications: '{}'", it)
+        repository.userSpans(it)
       }
   }
 }

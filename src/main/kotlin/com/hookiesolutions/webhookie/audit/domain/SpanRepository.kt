@@ -5,6 +5,7 @@ import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_LAST_S
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_LATEST_RESULT
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_RETRY_HISTORY
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_STATUS_HISTORY
+import com.hookiesolutions.webhookie.audit.domain.Span.Queries.Companion.applicationsIn
 import com.hookiesolutions.webhookie.audit.domain.Span.Queries.Companion.bySpanId
 import com.hookiesolutions.webhookie.audit.domain.SpanRetry.Companion.KEY_RETRY_NO
 import com.hookiesolutions.webhookie.audit.domain.SpanRetry.Companion.KEY_RETRY_STATUS_CODE
@@ -13,6 +14,7 @@ import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.aggregation.AggregationOperation
 import org.springframework.data.mongodb.core.query.Query.query
 import org.springframework.stereotype.Repository
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 /**
@@ -88,5 +90,14 @@ class SpanRepository(
 
   private fun updateSpan(spanId: String, vararg operations: AggregationOperation): Mono<Span> {
     return aggregationUpdate(bySpanId(spanId), Span::class.java, *operations)
+  }
+
+  fun userSpans(
+    applicationIds: List<String>
+  ): Flux<Span> {
+    return mongoTemplate.find(
+      query(applicationsIn(applicationIds)),
+      Span::class.java
+    )
   }
 }

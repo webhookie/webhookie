@@ -18,6 +18,10 @@ data class CallbackDTO(
   val url: String,
   val security: CallbackSecurityDTO?
 ) {
+  fun requestTarget(): String {
+    return "${httpMethod.name} $url"
+  }
+
   val isSignable: Boolean
     get() = security != null
 }
