@@ -37,7 +37,6 @@ class SpanService(
       .message(message)
       .status(SpanStatus.PROCESSING)
       .time(timeMachine.now())
-      .topic(message.subscription.topic)
       .build()
 
     saveOrFetch(span)
@@ -61,7 +60,6 @@ class SpanService(
           .message(message)
           .status(SpanStatus.BLOCKED)
           .time(timeMachine.now())
-          .topic(message.subscription.topic)
           .build()
 
         saveOrFetch(span)

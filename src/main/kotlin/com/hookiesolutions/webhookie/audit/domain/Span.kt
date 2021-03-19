@@ -1,12 +1,15 @@
 package com.hookiesolutions.webhookie.audit.domain
 
+import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SUBSCRIPTION
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SPAN_ID
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.SPAN_COLLECTION_NAME
 import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscriptionMessageDTO
 import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
-import com.hookiesolutions.webhookie.common.model.dto.ApplicationDetails
-import com.hookiesolutions.webhookie.common.model.dto.CallbackDTO
+import com.hookiesolutions.webhookie.common.model.dto.ApplicationDetails.Keys.Companion.KEY_APPLICATION_ID
+import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
+import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDetails
+import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDetails.Keys.Companion.KEY_APPLICATION
 import org.springframework.data.annotation.TypeAlias
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
@@ -27,9 +30,7 @@ data class Span(
   val traceId: String,
   @Indexed(name = "span_spanId", unique = true)
   val spanId: String,
-  val application: ApplicationDetails,
-  val topic: String,
-  val callback: CallbackDTO,
+  val subscription: SubscriptionDetails,
   val lastStatus: SpanStatusUpdate,
   val statusHistory: List<SpanStatusUpdate> = emptyList(),
   val nextRetry: SpanRetry? = null,
@@ -41,6 +42,10 @@ data class Span(
       fun bySpanId(spanId: String): Criteria {
         return where(KEY_SPAN_ID).`is`(spanId)
       }
+
+      fun applicationsIn(ids: Collection<String>): Criteria {
+        return where("$KEY_SUBSCRIPTION.$KEY_APPLICATION.$KEY_APPLICATION_ID").`in`(ids)
+      }
     }
   }
 
@@ -48,6 +53,7 @@ data class Span(
     companion object {
       const val KEY_SPAN_ID = "spanId"
       const val SPAN_COLLECTION_NAME = "span"
+      const val KEY_SUBSCRIPTION = "subscription"
       const val KEY_STATUS_HISTORY = "statusHistory"
       const val KEY_LAST_STATUS = "lastStatus"
       const val KEY_NEXT_RETRY = "nextRetry"
@@ -59,32 +65,25 @@ data class Span(
   class Builder {
     private lateinit var traceId: String
     private lateinit var spanId: String
-    private lateinit var topic: String
-    private lateinit var application: ApplicationDetails
-    private lateinit var callback: CallbackDTO
+    private lateinit var subscription: SubscriptionDTO
     private var status: SpanStatus = SpanStatus.PROCESSING
     private lateinit var time: Instant
 
     fun message(message: SignableSubscriptionMessage) = apply {
       this.traceId = message.traceId
       this.spanId = message.spanId
-      this.application = message.subscription.application
-      this.callback = message.subscription.callback
+      this.subscription = message.subscription
     }
 
     fun message(message: BlockedSubscriptionMessageDTO) = apply {
       this.traceId = message.traceId
       this.spanId = message.spanId
-      this.application = message.subscription.application
-      this.callback = message.subscription.callback
+      this.subscription = message.subscription
     }
 
     fun traceId(traceId: String) = apply { this.traceId = traceId }
     fun spanId(spanId: String) = apply { this.spanId = spanId }
     fun time(time: Instant) = apply { this.time = time }
-    fun application(application: ApplicationDetails) = apply { this.application = application }
-    fun topic(topic: String) = apply { this.topic = topic }
-    fun callback(callback: CallbackDTO) = apply { this.callback = callback }
     fun status(status: SpanStatus) = apply { this.status = status }
 
     fun build(): Span {
@@ -92,11 +91,9 @@ data class Span(
       return Span(
         traceId = traceId,
         spanId = spanId,
-        application,
-        topic,
-        callback,
-        statusUpdate,
-        listOf(statusUpdate)
+        subscription = SubscriptionDetails.from(subscription),
+        lastStatus = statusUpdate,
+        statusHistory = listOf(statusUpdate)
       )
     }
   }
