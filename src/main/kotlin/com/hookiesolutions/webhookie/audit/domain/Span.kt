@@ -1,23 +1,22 @@
 package com.hookiesolutions.webhookie.audit.domain
 
-import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SUBSCRIPTION
+import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_LAST_STATUS
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SPAN_ID
+import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SUBSCRIPTION
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.SPAN_COLLECTION_NAME
+import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate.Keys.Companion.KEY_STATUS
 import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscriptionMessageDTO
 import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
-import com.hookiesolutions.webhookie.common.model.dto.ApplicationDetails
 import com.hookiesolutions.webhookie.common.model.dto.ApplicationDetails.Keys.Companion.KEY_APPLICATION_ENTITY
 import com.hookiesolutions.webhookie.common.model.dto.ApplicationDetails.Keys.Companion.KEY_APPLICATION_ID
 import com.hookiesolutions.webhookie.common.model.dto.ApplicationDetails.Keys.Companion.KEY_APPLICATION_NAME
-import com.hookiesolutions.webhookie.common.model.dto.CallbackDTO
 import com.hookiesolutions.webhookie.common.model.dto.CallbackDTO.Keys.Companion.KEY_URL
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDetails
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDetails.Keys.Companion.KEY_APPLICATION
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDetails.Keys.Companion.KEY_CALLBACK
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDetails.Keys.Companion.KEY_TOPIC
-import com.hookiesolutions.webhookie.common.repository.GenericRepository
 import com.hookiesolutions.webhookie.common.repository.GenericRepository.Companion.fieldName
 import org.springframework.data.annotation.TypeAlias
 import org.springframework.data.mongodb.core.index.Indexed
@@ -54,6 +53,10 @@ data class Span(
 
       fun applicationsIn(ids: Collection<String>): Criteria {
         return where("$KEY_SUBSCRIPTION.$KEY_APPLICATION.$KEY_APPLICATION_ID").`in`(ids)
+      }
+
+      fun statusIn(statusList: List<SpanStatus>): Criteria {
+        return where("$KEY_LAST_STATUS.$KEY_STATUS").`in`(statusList)
       }
     }
   }

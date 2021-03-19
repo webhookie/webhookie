@@ -1,5 +1,6 @@
 package com.hookiesolutions.webhookie.audit.web
 
+import com.hookiesolutions.webhookie.audit.domain.SpanStatus
 import com.hookiesolutions.webhookie.audit.service.SpanService
 import com.hookiesolutions.webhookie.audit.web.TrafficAPIDocs.Companion.REQUEST_MAPPING_TRAFFIC
 import com.hookiesolutions.webhookie.audit.web.model.request.SpanRequest
@@ -37,6 +38,7 @@ class TrafficController(
     @RequestParam(required = false) entity: String?,
     @RequestParam(required = false) callback: String?,
     @RequestParam(required = false) topic: String?,
+    @RequestParam(required = false, defaultValue = "") status: List<SpanStatus>,
     pageable: Pageable
   ): Flux<SpanResponse> {
     val request = SpanRequest.Builder()
@@ -46,6 +48,7 @@ class TrafficController(
       .entity(entity)
       .callback(callback)
       .topic(topic)
+      .status(status)
       .build()
     return spanService.userSpans(pageable, request)
       .map { SpanResponse.from(it)}

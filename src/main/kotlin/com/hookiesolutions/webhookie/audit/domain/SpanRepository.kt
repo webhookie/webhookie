@@ -13,6 +13,7 @@ import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_STATUS
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_TRACE_ID
 import com.hookiesolutions.webhookie.audit.domain.Span.Queries.Companion.applicationsIn
 import com.hookiesolutions.webhookie.audit.domain.Span.Queries.Companion.bySpanId
+import com.hookiesolutions.webhookie.audit.domain.Span.Queries.Companion.statusIn
 import com.hookiesolutions.webhookie.audit.domain.SpanRetry.Companion.KEY_RETRY_NO
 import com.hookiesolutions.webhookie.audit.domain.SpanRetry.Companion.KEY_RETRY_STATUS_CODE
 import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate.Keys.Companion.KEY_TIME
@@ -25,7 +26,6 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.aggregation.AggregationOperation
-import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query.query
 import org.springframework.stereotype.Repository
 import reactor.core.publisher.Flux
@@ -122,11 +122,16 @@ class SpanRepository(
       KEY_SPAN_CALLBACK to request.callback
     )
 
-    val criteria = Criteria()
-      .andOperator(
-        applicationsIn(applicationIds),
-        *requestCriteria
-      )
+    var criteria = applicationsIn(applicationIds)
+
+    if(requestCriteria.isNotEmpty()) {
+      criteria = criteria.andOperator(*requestCriteria)
+    }
+
+    if(request.status.isNotEmpty()) {
+      criteria = criteria.andOperator(statusIn(request.status))
+    }
+    
     return mongoTemplate.find(
       query(criteria).with(pageable),
       Span::class.java

@@ -22,6 +22,7 @@ data class SpanStatusUpdate(
   class Keys {
     companion object {
       const val KEY_TIME = "time"
+      const val KEY_STATUS = "status"
     }
   }
 

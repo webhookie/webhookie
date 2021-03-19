@@ -1,5 +1,7 @@
 package com.hookiesolutions.webhookie.audit.web.model.request
 
+import com.hookiesolutions.webhookie.audit.domain.SpanStatus
+
 /**
  *
  * @author Arthur Kazemi<bidadh@gmail.com>
@@ -11,7 +13,8 @@ data class SpanRequest(
   val topic: String? = null,
   val application: String? = null,
   val entity: String? = null,
-  val callback: String? = null
+  val callback: String? = null,
+  val status: List<SpanStatus> = emptyList()
 ) {
   class Builder {
     private var traceId: String? = null
@@ -20,6 +23,7 @@ data class SpanRequest(
     private var application: String? = null
     private var entity: String? = null
     private var callback: String? = null
+    private var status: List<SpanStatus> = emptyList()
 
     fun traceId(traceId: String?) = apply { this.traceId = traceId }
     fun spanId(spanId: String?) = apply { this.spanId = spanId }
@@ -27,6 +31,7 @@ data class SpanRequest(
     fun application(application: String?) = apply { this.application = application }
     fun entity(entity: String?) = apply { this.entity = entity }
     fun callback(callback: String?) = apply { this.callback = callback }
+    fun status(status: List<SpanStatus>) = apply { this.status = status }
 
     fun build(): SpanRequest {
       return SpanRequest(
@@ -35,7 +40,8 @@ data class SpanRequest(
         topic = topic,
         application = application,
         entity = entity,
-        callback = callback
+        callback = callback,
+        status = status
       )
     }
   }
