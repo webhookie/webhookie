@@ -19,6 +19,12 @@ data class SpanStatusUpdate(
   val status: SpanStatus,
   val time: Instant
 ) {
+  class Keys {
+    companion object {
+      const val KEY_TIME = "time"
+    }
+  }
+
   companion object {
     fun ok(at: Instant): SpanStatusUpdate = SpanStatusUpdate(SpanStatus.OK, at)
     fun notOk(at: Instant): SpanStatusUpdate = SpanStatusUpdate(SpanStatus.NOT_OK, at)

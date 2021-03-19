@@ -5,6 +5,7 @@ import com.hookiesolutions.webhookie.audit.web.TrafficAPIDocs.Companion.REQUEST_
 import com.hookiesolutions.webhookie.audit.web.model.response.SpanResponse
 import com.hookiesolutions.webhookie.common.config.web.OpenAPIConfig.Companion.OAUTH2_SCHEME
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
+import org.springframework.data.domain.Pageable
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
@@ -27,8 +28,10 @@ class TrafficController(
     "/span",
     produces = [MediaType.APPLICATION_JSON_VALUE]
   )
-  fun userSpans(): Flux<SpanResponse> {
-    return spanService.userSpans()
+  fun userSpans(
+    pageable: Pageable
+  ): Flux<SpanResponse> {
+    return spanService.userSpans(pageable)
       .map { SpanResponse.from(it)}
   }
 }

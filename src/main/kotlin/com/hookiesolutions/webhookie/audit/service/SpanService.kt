@@ -17,6 +17,7 @@ import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscrip
 import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
 import com.hookiesolutions.webhookie.common.service.TimeMachine
 import org.slf4j.Logger
+import org.springframework.data.domain.Pageable
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
@@ -152,13 +153,13 @@ class SpanService(
   }
 
   @PreAuthorize("hasAuthority('${ROLE_CONSUMER}')")
-  fun userSpans(): Flux<Span> {
+  fun userSpans(pageable: Pageable): Flux<Span> {
     return subscriptionServiceDelegate.userApplications()
       .map { it.applicationId }
       .collectList()
       .flatMapMany {
         log.info("Fetching all spans by applications: '{}'", it)
-        repository.userSpans(it)
+        repository.userSpans(it, pageable)
       }
   }
 }

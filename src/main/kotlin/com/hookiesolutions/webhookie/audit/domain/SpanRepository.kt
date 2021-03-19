@@ -1,15 +1,20 @@
 package com.hookiesolutions.webhookie.audit.domain
 
-import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_NEXT_RETRY
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_LAST_STATUS
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_LATEST_RESULT
+import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_NEXT_RETRY
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_RETRY_HISTORY
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_STATUS_HISTORY
 import com.hookiesolutions.webhookie.audit.domain.Span.Queries.Companion.applicationsIn
 import com.hookiesolutions.webhookie.audit.domain.Span.Queries.Companion.bySpanId
 import com.hookiesolutions.webhookie.audit.domain.SpanRetry.Companion.KEY_RETRY_NO
 import com.hookiesolutions.webhookie.audit.domain.SpanRetry.Companion.KEY_RETRY_STATUS_CODE
+import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate.Keys.Companion.KEY_TIME
 import com.hookiesolutions.webhookie.common.repository.GenericRepository
+import com.hookiesolutions.webhookie.common.repository.GenericRepository.Query.Companion.pageableWith
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.aggregation.AggregationOperation
 import org.springframework.data.mongodb.core.query.Query.query
@@ -93,11 +98,19 @@ class SpanRepository(
   }
 
   fun userSpans(
-    applicationIds: List<String>
+    applicationIds: List<String>,
+    requestedPageable: Pageable
   ): Flux<Span> {
+    val pageable = pageableWith(requestedPageable, SPAN_DEFAULT_SORT, SPAN_DEFAULT_PAGE)
     return mongoTemplate.find(
-      query(applicationsIn(applicationIds)),
+      query(applicationsIn(applicationIds))
+        .with(pageable),
       Span::class.java
     )
+  }
+
+  companion object {
+    val SPAN_DEFAULT_SORT = Sort.by("$KEY_LAST_STATUS.$KEY_TIME").descending()
+    val SPAN_DEFAULT_PAGE = PageRequest.of(0, 20)
   }
 }

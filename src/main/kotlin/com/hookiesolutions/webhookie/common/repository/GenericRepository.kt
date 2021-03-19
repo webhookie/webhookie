@@ -10,6 +10,9 @@ import com.hookiesolutions.webhookie.common.model.UpdatableEntity
 import com.hookiesolutions.webhookie.common.service.security.annotation.VerifyEntityCanBeDeleted
 import com.hookiesolutions.webhookie.common.service.security.annotation.VerifyEntityCanBeUpdated
 import org.springframework.dao.DuplicateKeyException
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.FindAndReplaceOptions
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
@@ -83,6 +86,28 @@ abstract class GenericRepository<E: AbstractEntity>(
         FindAndModifyOptions.options().returnNew(true),
         clazz
       )
+  }
+
+  class Query {
+    companion object {
+      fun pageableWith(requested: Pageable, defaultSort: Sort, defaultPageable: Pageable): Pageable {
+        val page = if(requested.isPaged) {
+          requested.pageNumber
+        } else {
+          defaultPageable.pageNumber
+        }
+
+        val size = if(requested.isPaged) {
+          requested.pageSize
+        } else {
+          defaultPageable.pageSize
+        }
+
+        val sort = requested.getSortOr(defaultSort)
+
+        return PageRequest.of(page, size, sort)
+      }
+    }
   }
 
   companion object {
