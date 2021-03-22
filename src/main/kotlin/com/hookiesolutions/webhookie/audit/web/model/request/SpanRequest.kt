@@ -1,6 +1,7 @@
 package com.hookiesolutions.webhookie.audit.web.model.request
 
 import com.hookiesolutions.webhookie.audit.domain.SpanStatus
+import java.time.Instant
 
 /**
  *
@@ -14,6 +15,8 @@ data class SpanRequest(
   val application: String? = null,
   val entity: String? = null,
   val callback: String? = null,
+  val from: Instant? = null,
+  val to: Instant? = null,
   val status: List<SpanStatus> = emptyList()
 ) {
   class Builder {
@@ -24,6 +27,8 @@ data class SpanRequest(
     private var entity: String? = null
     private var callback: String? = null
     private var status: List<SpanStatus> = emptyList()
+    private var from: Instant? = null
+    private var to: Instant? = null
 
     fun traceId(traceId: String?) = apply { this.traceId = traceId }
     fun spanId(spanId: String?) = apply { this.spanId = spanId }
@@ -32,6 +37,8 @@ data class SpanRequest(
     fun entity(entity: String?) = apply { this.entity = entity }
     fun callback(callback: String?) = apply { this.callback = callback }
     fun status(status: List<SpanStatus>) = apply { this.status = status }
+    fun from(from: Instant?) = apply { this.from = from }
+    fun to(to: Instant?) = apply { this.to = to }
 
     fun build(): SpanRequest {
       return SpanRequest(
@@ -41,6 +48,8 @@ data class SpanRequest(
         application = application,
         entity = entity,
         callback = callback,
+        from = from,
+        to = to,
         status = status
       )
     }

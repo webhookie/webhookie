@@ -13,6 +13,8 @@ import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_STATUS
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_TRACE_ID
 import com.hookiesolutions.webhookie.audit.domain.Span.Queries.Companion.applicationsIn
 import com.hookiesolutions.webhookie.audit.domain.Span.Queries.Companion.bySpanId
+import com.hookiesolutions.webhookie.audit.domain.Span.Queries.Companion.spanIsAfter
+import com.hookiesolutions.webhookie.audit.domain.Span.Queries.Companion.spanIsBefore
 import com.hookiesolutions.webhookie.audit.domain.Span.Queries.Companion.statusIn
 import com.hookiesolutions.webhookie.audit.domain.SpanRetry.Companion.KEY_RETRY_NO
 import com.hookiesolutions.webhookie.audit.domain.SpanRetry.Companion.KEY_RETRY_STATUS_CODE
@@ -30,6 +32,7 @@ import org.springframework.data.mongodb.core.query.Query.query
 import org.springframework.stereotype.Repository
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import java.util.Objects
 
 /**
  *
@@ -131,7 +134,15 @@ class SpanRepository(
     if(request.status.isNotEmpty()) {
       criteria = criteria.andOperator(statusIn(request.status))
     }
-    
+
+    if(Objects.nonNull(request.from)) {
+      criteria = criteria.andOperator(spanIsAfter(request.from!!))
+    }
+
+    if(Objects.nonNull(request.to)) {
+      criteria = criteria.andOperator(spanIsBefore(request.to!!))
+    }
+
     return mongoTemplate.find(
       query(criteria).with(pageable),
       Span::class.java

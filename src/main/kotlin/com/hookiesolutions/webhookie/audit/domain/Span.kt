@@ -5,6 +5,7 @@ import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SPAN_I
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SUBSCRIPTION
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.SPAN_COLLECTION_NAME
 import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate.Keys.Companion.KEY_STATUS
+import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate.Keys.Companion.KEY_TIME
 import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscriptionMessageDTO
 import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
@@ -57,6 +58,14 @@ data class Span(
 
       fun statusIn(statusList: List<SpanStatus>): Criteria {
         return where("$KEY_LAST_STATUS.$KEY_STATUS").`in`(statusList)
+      }
+
+      fun spanIsAfter(from: Instant): Criteria {
+        return where(fieldName(KEY_LAST_STATUS, KEY_TIME)).gte(from)
+      }
+
+      fun spanIsBefore(from: Instant): Criteria {
+        return where(fieldName(KEY_LAST_STATUS, KEY_TIME)).lte(from)
       }
     }
   }

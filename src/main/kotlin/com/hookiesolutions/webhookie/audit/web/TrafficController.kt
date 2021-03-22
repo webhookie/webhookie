@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Flux
+import java.time.Instant
 
 /**
  *
@@ -39,6 +40,8 @@ class TrafficController(
     @RequestParam(required = false) callback: String?,
     @RequestParam(required = false) topic: String?,
     @RequestParam(required = false, defaultValue = "") status: List<SpanStatus>,
+    @RequestParam(required = false) from: Instant?,
+    @RequestParam(required = false) to: Instant?,
     pageable: Pageable
   ): Flux<SpanResponse> {
     val request = SpanRequest.Builder()
@@ -49,6 +52,8 @@ class TrafficController(
       .callback(callback)
       .topic(topic)
       .status(status)
+      .from(from)
+      .to(to)
       .build()
     return spanService.userSpans(pageable, request)
       .map { SpanResponse.from(it)}
