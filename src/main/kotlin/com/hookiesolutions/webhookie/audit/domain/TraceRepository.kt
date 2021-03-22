@@ -1,24 +1,46 @@
 package com.hookiesolutions.webhookie.audit.domain
 
+import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SPAN_TOPIC
+import com.hookiesolutions.webhookie.audit.domain.Span.Queries.Companion.spanTopicIn
 import com.hookiesolutions.webhookie.audit.domain.Trace.Keys.Companion.KEY_STATUS_HISTORY
 import com.hookiesolutions.webhookie.audit.domain.Trace.Keys.Companion.KEY_STATUS_UPDATE
 import com.hookiesolutions.webhookie.audit.domain.Trace.Keys.Companion.KEY_SUMMARY
+import com.hookiesolutions.webhookie.audit.domain.Trace.Keys.Companion.KEY_TIME
+import com.hookiesolutions.webhookie.audit.domain.Trace.Keys.Companion.KEY_TRACE_ID
+import com.hookiesolutions.webhookie.audit.domain.Trace.Keys.Companion.TRACE_COLLECTION_NAME
 import com.hookiesolutions.webhookie.audit.domain.Trace.Queries.Companion.byTraceId
+import com.hookiesolutions.webhookie.audit.domain.Trace.Queries.Companion.statusIn
+import com.hookiesolutions.webhookie.audit.domain.Trace.Queries.Companion.traceUpdatedAfter
+import com.hookiesolutions.webhookie.audit.domain.Trace.Queries.Companion.traceUpdatedBefore
 import com.hookiesolutions.webhookie.audit.domain.Trace.Updates.Companion.traceStatusUpdate
 import com.hookiesolutions.webhookie.audit.domain.Trace.Updates.Companion.updateSummary
 import com.hookiesolutions.webhookie.audit.domain.TraceSummary.Keys.Companion.KEY_NUMBER_OF_SPANS
 import com.hookiesolutions.webhookie.audit.domain.TraceSummary.Keys.Companion.KEY_NUMBER_OF_SUCCESS
+import com.hookiesolutions.webhookie.audit.web.model.request.TraceRequest
+import com.hookiesolutions.webhookie.common.model.AbstractEntity.Keys.Companion.AGGREGATE_ROOT_FIELD
+import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.filters
+import com.hookiesolutions.webhookie.common.model.FieldMatchingStrategy
 import com.hookiesolutions.webhookie.common.repository.GenericRepository
+import com.hookiesolutions.webhookie.common.repository.GenericRepository.Query.Companion.pageableWith
+import org.slf4j.Logger
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.aggregation.AddFieldsOperation
+import org.springframework.data.mongodb.core.aggregation.Aggregation
 import org.springframework.data.mongodb.core.aggregation.AggregationOperation
 import org.springframework.data.mongodb.core.aggregation.ArithmeticOperators
 import org.springframework.data.mongodb.core.aggregation.ArrayOperators
+import org.springframework.data.mongodb.core.aggregation.Fields.UNDERSCORE_ID
+import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query.query
 import org.springframework.stereotype.Repository
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.time.Instant
+import java.util.Objects
 
 /**
  *
@@ -28,6 +50,7 @@ import java.time.Instant
 @Repository
 class TraceRepository(
   private val mongoTemplate: ReactiveMongoTemplate,
+  private val log: Logger
 ) : GenericRepository<Trace>(mongoTemplate, Trace::class.java) {
   fun findByTraceId(traceId: String): Mono<Trace> {
     return mongoTemplate.findOne(query(byTraceId(traceId)), Trace::class.java)
@@ -78,5 +101,71 @@ class TraceRepository(
     )
 
     return aggregationUpdate(byTraceId(traceId), Trace::class.java, *operations)
+  }
+
+  fun userTraces(
+    topics: List<String>,
+    request: TraceRequest,
+    requestedPageable: Pageable
+  ): Flux<Trace> {
+    val pageable = pageableWith(requestedPageable, SPAN_DEFAULT_SORT, SPAN_DEFAULT_PAGE)
+
+    val requestCriteria = filters(
+      KEY_TRACE_ID to (request.traceId to FieldMatchingStrategy.PARTIAL_MATCH),
+      KEY_SPAN_TOPIC to (request.topic to FieldMatchingStrategy.PARTIAL_MATCH),
+      Span.Keys.KEY_SPAN_APPLICATION to (request.application to FieldMatchingStrategy.EXACT_MATCH),
+      Span.Keys.KEY_SPAN_ENTITY to (request.entity to FieldMatchingStrategy.EXACT_MATCH),
+      Span.Keys.KEY_SPAN_CALLBACK to (request.callback to FieldMatchingStrategy.EXACT_MATCH)
+    )
+
+    var spanCriteria = spanTopicIn(topics)
+
+    if(requestCriteria.isNotEmpty()) {
+      spanCriteria = spanCriteria.andOperator(*requestCriteria)
+    }
+
+    var traceCriteria = Criteria()
+
+    if(request.status.isNotEmpty()) {
+      traceCriteria = traceCriteria.andOperator(statusIn(request.status))
+    }
+
+    if(Objects.nonNull(request.from)) {
+      traceCriteria = traceCriteria.andOperator(traceUpdatedAfter(request.from!!))
+    }
+
+    if(Objects.nonNull(request.to)) {
+      traceCriteria = traceCriteria.andOperator(traceUpdatedBefore(request.to!!))
+    }
+
+    val asField = "trace"
+    val distinctTraceAlias = "y"
+    val tracesAggregation = Aggregation.newAggregation(
+      Aggregation.match(spanCriteria),
+      Aggregation.lookup(TRACE_COLLECTION_NAME, Span.Keys.KEY_TRACE_ID, KEY_TRACE_ID, asField),
+      Aggregation.project(asField).andExclude(UNDERSCORE_ID),
+      Aggregation.unwind(mongoField(asField)),
+      Aggregation.replaceRoot(mongoField(asField)),
+      Aggregation.match(traceCriteria),
+      Aggregation.group(UNDERSCORE_ID).first(AGGREGATE_ROOT_FIELD).`as`(distinctTraceAlias),
+      Aggregation.replaceRoot(mongoField(distinctTraceAlias)),
+      Aggregation.sort(pageable.sort),
+      Aggregation.skip((pageable.pageNumber * pageable.pageSize).toLong()),
+      Aggregation.limit(pageable.pageSize.toLong())
+    )
+
+    if(log.isDebugEnabled) {
+      log.debug("Webhook Traffic Aggregation query: '{}'", tracesAggregation)
+    }
+    return mongoTemplate.aggregate(
+      tracesAggregation,
+      Span::class.java,
+      Trace::class.java
+    )
+  }
+
+  companion object {
+    val SPAN_DEFAULT_SORT = Sort.by("$KEY_STATUS_UPDATE.$KEY_TIME").descending()
+    val SPAN_DEFAULT_PAGE = PageRequest.of(0, 20)
   }
 }

@@ -2,6 +2,7 @@ package com.hookiesolutions.webhookie.audit.domain
 
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_LAST_STATUS
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SPAN_ID
+import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SPAN_TOPIC
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SUBSCRIPTION
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.SPAN_COLLECTION_NAME
 import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate.Keys.Companion.KEY_STATUS
@@ -54,6 +55,10 @@ data class Span(
 
       fun applicationsIn(ids: Collection<String>): Criteria {
         return where("$KEY_SUBSCRIPTION.$KEY_APPLICATION.$KEY_APPLICATION_ID").`in`(ids)
+      }
+
+      fun spanTopicIn(topics: List<String>): Criteria {
+        return where(KEY_SPAN_TOPIC).`in`(topics)
       }
 
       fun statusIn(statusList: List<SpanStatus>): Criteria {

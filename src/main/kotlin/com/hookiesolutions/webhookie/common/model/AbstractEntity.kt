@@ -46,6 +46,31 @@ abstract class AbstractEntity : AbstractDocument() {
           .map { regex(it.first, it.second!!) }
           .toTypedArray()
       }
+
+      fun filters(vararg pairs: Pair<String, Pair<String?,FieldMatchingStrategy>>): Array<Criteria> {
+        return pairs
+          .filter { it.second.first != null }
+          .map {
+            return@map if (it.second.second == FieldMatchingStrategy.PARTIAL_MATCH) {
+              regex(it.first, it.second.first!!)
+            } else {
+              where(it.first).`is`(it.second.first!!)
+            }
+          }
+          .toTypedArray()
+      }
+    }
+  }
+
+  class Keys {
+    companion object {
+      val AGGREGATE_ROOT_FIELD = mongoField(mongoField("ROOT"))
+    }
+  }
+
+  companion object {
+    fun mongoField(name: String): String {
+      return "${'$'}$name"
     }
   }
 }

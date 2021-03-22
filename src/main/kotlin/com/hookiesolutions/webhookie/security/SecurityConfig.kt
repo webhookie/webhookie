@@ -1,8 +1,12 @@
 package com.hookiesolutions.webhookie.security
 
 import com.hookiesolutions.webhookie.admin.web.AdminAPIDocs.Companion.REQUEST_MAPPING_ADMIN
+import com.hookiesolutions.webhookie.audit.web.TrafficAPIDocs.Companion.REQUEST_MAPPING_TRAFFIC
+import com.hookiesolutions.webhookie.audit.web.TrafficController.Companion.REQUEST_MAPPING_TRAFFIC_SPAN
+import com.hookiesolutions.webhookie.audit.web.TrafficController.Companion.REQUEST_MAPPING_TRAFFIC_TRACE
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_ADMIN
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_CONSUMER
+import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_PROVIDER
 import com.hookiesolutions.webhookie.common.web.CommonAPIDocs.Companion.REQUEST_MAPPING_USER_INFO
 import com.hookiesolutions.webhookie.security.customizer.AllowAllPermissionEvaluator
 import com.hookiesolutions.webhookie.security.customizer.DelegateAuthenticationEntryPoint
@@ -82,6 +86,8 @@ class SecurityConfig(
         authorize(pathMatchers("$REQUEST_MAPPING_APPLICATIONS/**"), hasAuthority(ROLE_CONSUMER))
         authorize(pathMatchers("$REQUEST_MAPPING_SUBSCRIPTIONS/**"), authenticated)
         authorize(pathMatchers("$REQUEST_MAPPING_USER_INFO/**"), authenticated)
+        authorize(pathMatchers("$REQUEST_MAPPING_TRAFFIC$REQUEST_MAPPING_TRAFFIC_SPAN/**"), hasAnyAuthority(ROLE_CONSUMER, ROLE_ADMIN))
+        authorize(pathMatchers("$REQUEST_MAPPING_TRAFFIC$REQUEST_MAPPING_TRAFFIC_TRACE/**"), hasAnyAuthority(ROLE_PROVIDER, ROLE_ADMIN))
         authorize(pathMatchers(HttpMethod.GET, "$REQUEST_MAPPING_WEBHOOK_GROUPS/**"), permitAll)
 
         authorize()

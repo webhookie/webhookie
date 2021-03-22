@@ -6,8 +6,10 @@ import com.hookiesolutions.webhookie.audit.domain.Trace.Keys.Companion.KEY_SUMMA
 import com.hookiesolutions.webhookie.audit.domain.Trace.Keys.Companion.KEY_TIME
 import com.hookiesolutions.webhookie.audit.domain.Trace.Keys.Companion.KEY_TRACE_ID
 import com.hookiesolutions.webhookie.audit.domain.Trace.Keys.Companion.TRACE_COLLECTION_NAME
+import com.hookiesolutions.webhookie.audit.domain.TraceStatusUpdate.Keys.Companion.KEY_STATUS
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
+import com.hookiesolutions.webhookie.common.repository.GenericRepository.Companion.fieldName
 import org.springframework.data.annotation.TypeAlias
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
@@ -39,6 +41,18 @@ data class Trace(
     companion object {
       fun byTraceId(traceId: String): Criteria {
         return where(KEY_TRACE_ID).`is`(traceId)
+      }
+
+      fun statusIn(statusList: List<TraceStatus>): Criteria {
+        return where(fieldName(KEY_STATUS_UPDATE, KEY_STATUS)).`in`(statusList)
+      }
+
+      fun traceUpdatedAfter(from: Instant): Criteria {
+        return where(KEY_TIME).gte(from)
+      }
+
+      fun traceUpdatedBefore(from: Instant): Criteria {
+        return where(KEY_TIME).lte(from)
       }
     }
   }

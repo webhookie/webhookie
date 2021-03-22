@@ -18,6 +18,12 @@ data class TraceStatusUpdate (
   val status: TraceStatus,
   val time: Instant
 ) {
+  class Keys {
+    companion object {
+      const val KEY_STATUS = "status"
+    }
+  }
+
   companion object {
     fun ok(at: Instant) = TraceStatusUpdate(TraceStatus.OK, at)
   }
