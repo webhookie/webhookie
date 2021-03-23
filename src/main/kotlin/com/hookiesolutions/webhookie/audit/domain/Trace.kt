@@ -4,6 +4,7 @@ import com.hookiesolutions.webhookie.audit.domain.Trace.Keys.Companion.KEY_STATU
 import com.hookiesolutions.webhookie.audit.domain.Trace.Keys.Companion.KEY_STATUS_UPDATE
 import com.hookiesolutions.webhookie.audit.domain.Trace.Keys.Companion.KEY_SUMMARY
 import com.hookiesolutions.webhookie.audit.domain.Trace.Keys.Companion.KEY_TIME
+import com.hookiesolutions.webhookie.audit.domain.Trace.Keys.Companion.KEY_TOPIC
 import com.hookiesolutions.webhookie.audit.domain.Trace.Keys.Companion.KEY_TRACE_ID
 import com.hookiesolutions.webhookie.audit.domain.Trace.Keys.Companion.TRACE_COLLECTION_NAME
 import com.hookiesolutions.webhookie.audit.domain.TraceStatusUpdate.Keys.Companion.KEY_STATUS
@@ -47,6 +48,10 @@ data class Trace(
         return where(fieldName(KEY_STATUS_UPDATE, KEY_STATUS)).`in`(statusList.map { it.name })
       }
 
+      fun traceTopicIn(topics: List<String>): Criteria {
+        return where(KEY_TOPIC).`in`(topics)
+      }
+
       fun traceUpdatedAfter(from: Instant): Criteria {
         return where(KEY_TIME).gte(from)
       }
@@ -78,6 +83,7 @@ data class Trace(
     companion object {
       const val KEY_TRACE_ID = "traceId"
       const val KEY_STATUS_UPDATE = "statusUpdate"
+      const val KEY_TOPIC = "topic"
       const val KEY_STATUS_HISTORY = "statusHistory"
       const val KEY_TIME = "time"
       const val KEY_SUMMARY = "summary"

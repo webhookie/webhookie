@@ -9,6 +9,7 @@ import com.hookiesolutions.webhookie.audit.domain.Trace.Keys.Companion.KEY_TIME
 import com.hookiesolutions.webhookie.audit.domain.Trace.Keys.Companion.KEY_TRACE_ID
 import com.hookiesolutions.webhookie.audit.domain.Trace.Queries.Companion.byTraceId
 import com.hookiesolutions.webhookie.audit.domain.Trace.Queries.Companion.statusIn
+import com.hookiesolutions.webhookie.audit.domain.Trace.Queries.Companion.traceTopicIn
 import com.hookiesolutions.webhookie.audit.domain.Trace.Queries.Companion.traceUpdatedAfter
 import com.hookiesolutions.webhookie.audit.domain.Trace.Queries.Companion.traceUpdatedBefore
 import com.hookiesolutions.webhookie.audit.domain.Trace.Updates.Companion.traceStatusUpdate
@@ -119,13 +120,21 @@ class TraceRepository(
       Span.Keys.KEY_SPAN_CALLBACK to (request.callback to FieldMatchingStrategy.EXACT_MATCH)
     )
 
-    var spanCriteria = spanTopicIn(topics)
+    var spanCriteria = if(topics.isEmpty()) {
+      Criteria()
+    } else {
+      spanTopicIn(topics)
+    }
 
     if(requestCriteria.isNotEmpty()) {
       spanCriteria = spanCriteria.andOperator(*requestCriteria)
     }
 
-    var traceCriteria = Criteria()
+    var traceCriteria = if(topics.isEmpty()) {
+      Criteria()
+    } else {
+      traceTopicIn(topics)
+    }
 
     if(request.status.isNotEmpty()) {
       traceCriteria = traceCriteria.andOperator(statusIn(request.status))
