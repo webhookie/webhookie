@@ -62,7 +62,7 @@ data class Span(
       }
 
       fun statusIn(statusList: List<SpanStatus>): Criteria {
-        return where("$KEY_LAST_STATUS.$KEY_STATUS").`in`(statusList)
+        return where("$KEY_LAST_STATUS.$KEY_STATUS").`in`(statusList.map { it.name })
       }
 
       fun spanIsAfter(from: Instant): Criteria {

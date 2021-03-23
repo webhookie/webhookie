@@ -44,7 +44,7 @@ data class Trace(
       }
 
       fun statusIn(statusList: List<TraceStatus>): Criteria {
-        return where(fieldName(KEY_STATUS_UPDATE, KEY_STATUS)).`in`(statusList)
+        return where(fieldName(KEY_STATUS_UPDATE, KEY_STATUS)).`in`(statusList.map { it.name })
       }
 
       fun traceUpdatedAfter(from: Instant): Criteria {

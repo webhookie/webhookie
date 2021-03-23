@@ -7,7 +7,6 @@ import com.hookiesolutions.webhookie.audit.domain.Trace.Keys.Companion.KEY_STATU
 import com.hookiesolutions.webhookie.audit.domain.Trace.Keys.Companion.KEY_SUMMARY
 import com.hookiesolutions.webhookie.audit.domain.Trace.Keys.Companion.KEY_TIME
 import com.hookiesolutions.webhookie.audit.domain.Trace.Keys.Companion.KEY_TRACE_ID
-import com.hookiesolutions.webhookie.audit.domain.Trace.Keys.Companion.TRACE_COLLECTION_NAME
 import com.hookiesolutions.webhookie.audit.domain.Trace.Queries.Companion.byTraceId
 import com.hookiesolutions.webhookie.audit.domain.Trace.Queries.Companion.statusIn
 import com.hookiesolutions.webhookie.audit.domain.Trace.Queries.Companion.traceUpdatedAfter
@@ -16,13 +15,14 @@ import com.hookiesolutions.webhookie.audit.domain.Trace.Updates.Companion.traceS
 import com.hookiesolutions.webhookie.audit.domain.Trace.Updates.Companion.updateSummary
 import com.hookiesolutions.webhookie.audit.domain.TraceSummary.Keys.Companion.KEY_NUMBER_OF_SPANS
 import com.hookiesolutions.webhookie.audit.domain.TraceSummary.Keys.Companion.KEY_NUMBER_OF_SUCCESS
+import com.hookiesolutions.webhookie.audit.domain.aggregation.TraceAggregationStrategy
 import com.hookiesolutions.webhookie.audit.web.model.request.TraceRequest
-import com.hookiesolutions.webhookie.common.model.AbstractEntity.Keys.Companion.AGGREGATE_ROOT_FIELD
 import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.filters
 import com.hookiesolutions.webhookie.common.model.FieldMatchingStrategy
 import com.hookiesolutions.webhookie.common.repository.GenericRepository
 import com.hookiesolutions.webhookie.common.repository.GenericRepository.Query.Companion.pageableWith
 import org.slf4j.Logger
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
@@ -33,7 +33,6 @@ import org.springframework.data.mongodb.core.aggregation.Aggregation
 import org.springframework.data.mongodb.core.aggregation.AggregationOperation
 import org.springframework.data.mongodb.core.aggregation.ArithmeticOperators
 import org.springframework.data.mongodb.core.aggregation.ArrayOperators
-import org.springframework.data.mongodb.core.aggregation.Fields.UNDERSCORE_ID
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query.query
 import org.springframework.stereotype.Repository
@@ -50,6 +49,8 @@ import java.util.Objects
 @Repository
 class TraceRepository(
   private val mongoTemplate: ReactiveMongoTemplate,
+  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
+  @Qualifier("traceAggregate") private val aggregateStrategy: TraceAggregationStrategy,
   private val log: Logger
 ) : GenericRepository<Trace>(mongoTemplate, Trace::class.java) {
   fun findByTraceId(traceId: String): Mono<Trace> {
@@ -138,28 +139,19 @@ class TraceRepository(
       traceCriteria = traceCriteria.andOperator(traceUpdatedBefore(request.to!!))
     }
 
-    val asField = "trace"
-    val distinctTraceAlias = "y"
-    val tracesAggregation = Aggregation.newAggregation(
-      Aggregation.match(spanCriteria),
-      Aggregation.lookup(TRACE_COLLECTION_NAME, Span.Keys.KEY_TRACE_ID, KEY_TRACE_ID, asField),
-      Aggregation.project(asField).andExclude(UNDERSCORE_ID),
-      Aggregation.unwind(mongoField(asField)),
-      Aggregation.replaceRoot(mongoField(asField)),
-      Aggregation.match(traceCriteria),
-      Aggregation.group(UNDERSCORE_ID).first(AGGREGATE_ROOT_FIELD).`as`(distinctTraceAlias),
-      Aggregation.replaceRoot(mongoField(distinctTraceAlias)),
-      Aggregation.sort(pageable.sort),
-      Aggregation.skip((pageable.pageNumber * pageable.pageSize).toLong()),
-      Aggregation.limit(pageable.pageSize.toLong())
-    )
+    val tracesAggregation = aggregateStrategy.aggregate(spanCriteria, traceCriteria)
+    tracesAggregation.pipeline.add(Aggregation.sort(pageable.sort))
+    tracesAggregation.pipeline.add(Aggregation.skip((pageable.pageNumber * pageable.pageSize).toLong()))
+    tracesAggregation.pipeline.add(Aggregation.limit(pageable.pageSize.toLong()))
+
+    log.info("Webhook Traffic Aggregation query: '{}'", tracesAggregation)
 
     if(log.isDebugEnabled) {
       log.debug("Webhook Traffic Aggregation query: '{}'", tracesAggregation)
     }
     return mongoTemplate.aggregate(
       tracesAggregation,
-      Span::class.java,
+      aggregateStrategy.clazz,
       Trace::class.java
     )
   }
