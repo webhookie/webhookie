@@ -85,10 +85,10 @@ class SecurityConfig(
         authorize(pathMatchers("$REQUEST_MAPPING_ADMIN/**"), hasAuthority(ROLE_ADMIN))
         authorize(pathMatchers("$REQUEST_MAPPING_APPLICATIONS/**"), hasAuthority(ROLE_CONSUMER))
         authorize(pathMatchers("$REQUEST_MAPPING_SUBSCRIPTIONS/**"), authenticated)
-        authorize(pathMatchers("$REQUEST_MAPPING_USER_INFO/**"), authenticated)
-        authorize(pathMatchers("$REQUEST_MAPPING_TRAFFIC$REQUEST_MAPPING_TRAFFIC_SPAN/**"), hasAnyAuthority(ROLE_CONSUMER, ROLE_ADMIN))
-        authorize(pathMatchers("$REQUEST_MAPPING_TRAFFIC$REQUEST_MAPPING_TRAFFIC_TRACE/**"), hasAnyAuthority(ROLE_PROVIDER, ROLE_ADMIN))
-        authorize(pathMatchers(HttpMethod.GET, "$REQUEST_MAPPING_WEBHOOK_GROUPS/**"), permitAll)
+        authorize(pathMatchers(HttpMethod.GET,"$REQUEST_MAPPING_USER_INFO/**"), authenticated)
+        authorize(pathMatchers(HttpMethod.GET,"$REQUEST_MAPPING_TRAFFIC$REQUEST_MAPPING_TRAFFIC_SPAN/**"), hasAnyAuthority(ROLE_CONSUMER, ROLE_ADMIN))
+        authorize(pathMatchers(HttpMethod.GET,"$REQUEST_MAPPING_TRAFFIC$REQUEST_MAPPING_TRAFFIC_TRACE/**"), hasAnyAuthority(ROLE_PROVIDER, ROLE_ADMIN))
+        authorize(pathMatchers(HttpMethod.GET,"$REQUEST_MAPPING_WEBHOOK_GROUPS/**"), permitAll)
 
         authorize()
       }

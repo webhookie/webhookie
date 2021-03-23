@@ -23,11 +23,13 @@ import com.hookiesolutions.webhookie.audit.web.model.request.SpanRequest
 import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.regex
 import com.hookiesolutions.webhookie.common.repository.GenericRepository
 import com.hookiesolutions.webhookie.common.repository.GenericRepository.Query.Companion.pageableWith
+import org.slf4j.Logger
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.aggregation.AggregationOperation
+import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query.query
 import org.springframework.stereotype.Repository
 import reactor.core.publisher.Flux
@@ -42,6 +44,7 @@ import java.util.Objects
 @Repository
 class SpanRepository(
   private val mongoTemplate: ReactiveMongoTemplate,
+  private val log: Logger
 ) : GenericRepository<Span>(mongoTemplate, Span::class.java) {
   fun findBySpanId(spanId: String): Mono<Span> {
     return mongoTemplate.findOne(query(bySpanId(spanId)), Span::class.java)
@@ -125,7 +128,11 @@ class SpanRepository(
       KEY_SPAN_CALLBACK to request.callback
     )
 
-    var criteria = applicationsIn(applicationIds)
+    var criteria = if(applicationIds.isEmpty()) {
+      Criteria()
+    } else {
+      applicationsIn(applicationIds)
+    }
 
     if(requestCriteria.isNotEmpty()) {
       criteria = criteria.andOperator(*requestCriteria)
@@ -143,8 +150,14 @@ class SpanRepository(
       criteria = criteria.andOperator(spanIsBefore(request.to!!))
     }
 
+    val query = query(criteria).with(pageable)
+
+    if(log.isDebugEnabled) {
+      log.debug("Subscription Traffic query: '{}'", query)
+    }
+
     return mongoTemplate.find(
-      query(criteria).with(pageable),
+      query,
       Span::class.java
     )
   }

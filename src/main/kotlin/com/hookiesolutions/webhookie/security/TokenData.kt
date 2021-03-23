@@ -1,5 +1,6 @@
 package com.hookiesolutions.webhookie.security
 
+import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_ADMIN
 import org.springframework.security.core.GrantedAuthority
 
 /**
@@ -12,4 +13,8 @@ data class TokenData(
   val groups: List<String>,
   val roles: Collection<GrantedAuthority>,
   val email: String
-)
+) {
+  fun hasAdminAuthority(): Boolean {
+    return roles.map { it.authority }.contains(ROLE_ADMIN)
+  }
+}
