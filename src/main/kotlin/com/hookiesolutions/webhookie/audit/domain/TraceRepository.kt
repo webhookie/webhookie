@@ -144,11 +144,10 @@ class TraceRepository(
     tracesAggregation.pipeline.add(Aggregation.skip((pageable.pageNumber * pageable.pageSize).toLong()))
     tracesAggregation.pipeline.add(Aggregation.limit(pageable.pageSize.toLong()))
 
-    log.info("Webhook Traffic Aggregation query: '{}'", tracesAggregation)
-
     if(log.isDebugEnabled) {
       log.debug("Webhook Traffic Aggregation query: '{}'", tracesAggregation)
     }
+
     return mongoTemplate.aggregate(
       tracesAggregation,
       aggregateStrategy.clazz,
