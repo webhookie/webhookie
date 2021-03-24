@@ -119,6 +119,8 @@ class SpanRepository(
   ): Flux<Span> {
     val pageable = pageableWith(requestedPageable, SPAN_DEFAULT_SORT, SPAN_DEFAULT_PAGE)
 
+    val queryCriteria = mutableListOf<Criteria>()
+
     val requestCriteria = regex(
       KEY_TRACE_ID to request.traceId,
       KEY_SPAN_ID to request.spanId,
@@ -128,26 +130,32 @@ class SpanRepository(
       KEY_SPAN_CALLBACK to request.callback
     )
 
-    var criteria = if(applicationIds.isEmpty()) {
-      Criteria()
-    } else {
-      applicationsIn(applicationIds)
+
+    if(applicationIds.isNotEmpty()) {
+      queryCriteria.add(applicationsIn(applicationIds))
     }
 
     if(requestCriteria.isNotEmpty()) {
-      criteria = criteria.andOperator(*requestCriteria)
+      queryCriteria.addAll(requestCriteria)
     }
 
     if(request.status.isNotEmpty()) {
-      criteria = criteria.andOperator(statusIn(request.status))
+      queryCriteria.add(statusIn(request.status))
     }
 
     if(Objects.nonNull(request.from)) {
-      criteria = criteria.andOperator(spanIsAfter(request.from!!))
+      queryCriteria.add(spanIsAfter(request.from!!))
     }
 
     if(Objects.nonNull(request.to)) {
-      criteria = criteria.andOperator(spanIsBefore(request.to!!))
+      queryCriteria.add(spanIsBefore(request.to!!))
+    }
+
+
+    val criteria = if(queryCriteria.isNotEmpty()) {
+      Criteria().andOperator(*queryCriteria.toTypedArray())
+    } else {
+      Criteria()
     }
 
     val query = query(criteria).with(pageable)
