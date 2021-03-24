@@ -5,6 +5,7 @@ import com.hookiesolutions.webhookie.common.exception.EntityExistsException
 import com.hookiesolutions.webhookie.common.exception.EntityNotFoundException
 import com.hookiesolutions.webhookie.common.exception.ValidationException
 import org.springframework.dao.DuplicateKeyException
+import org.springframework.data.mapping.context.InvalidPersistentPropertyPath
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.validation.BindException
@@ -99,5 +100,16 @@ class GlobalExceptionHandler {
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   fun handleBindException(ex: BindException): Mono<Any> {
     return mutableMapOf("message" to ex.localizedMessage).toMono()
+  }
+
+  @ExceptionHandler(InvalidPersistentPropertyPath::class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  fun handleInvalidPersistentPropertyPath(ex: InvalidPersistentPropertyPath): Mono<Any> {
+    return mutableMapOf(
+      "message" to ex.localizedMessage,
+      "source" to ex.source,
+      "unresolvableSegment" to ex.unresolvableSegment,
+      "resolvedPath" to ex.resolvedPath,
+    ).toMono()
   }
 }
