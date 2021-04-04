@@ -56,9 +56,11 @@ class SubscriptionController(
     produces = [MediaType.APPLICATION_JSON_VALUE]
   )
   fun subscriptions(
-    @RequestParam(required = true, defaultValue = PARAM_CONSUMER) role: RoleActor
+    @RequestParam(required = true, defaultValue = PARAM_CONSUMER) role: RoleActor,
+    @RequestParam(required = false) topic: String?,
+    @RequestParam(required = false) callbackId: String?
   ): Flux<SubscriptionDTO> {
-    return service.subscriptions(role)
+    return service.subscriptions(role, topic, callbackId)
       .map { it.dto() }
   }
 

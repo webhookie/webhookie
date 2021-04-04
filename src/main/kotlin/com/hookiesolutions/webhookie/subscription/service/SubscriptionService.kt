@@ -85,10 +85,14 @@ class SubscriptionService(
   }
 
   @PreAuthorize("isAuthenticated()")
-  fun subscriptions(role: RoleActor): Flux<Subscription> {
+  fun subscriptions(
+    role: RoleActor,
+    topic: String?,
+    callbackId: String?
+  ): Flux<Subscription> {
     return when (role) {
       RoleActor.CONSUMER -> {
-        consumerSubscriptions()
+        consumerSubscriptions(topic, callbackId)
       }
       RoleActor.PROVIDER -> {
         providerSubscriptions()
@@ -97,10 +101,13 @@ class SubscriptionService(
   }
 
   @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")
-  fun consumerSubscriptions(): Flux<Subscription> {
+  fun consumerSubscriptions(
+    topic: String?,
+    callbackId: String?
+  ): Flux<Subscription> {
     return securityHandler.data()
       .doOnNext { log.info("Fetching all subscriptions for token: '{}'", it) }
-      .flatMapMany { repository.findAllConsumerSubscriptions(it.entity, it.groups) }
+      .flatMapMany { repository.findAllConsumerSubscriptions(it.entity, it.groups, topic, callbackId) }
   }
 
   @PreAuthorize("hasAuthority('$ROLE_PROVIDER')")

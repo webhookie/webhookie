@@ -25,6 +25,7 @@ import com.hookiesolutions.webhookie.subscription.service.security.annotation.Ve
 import com.hookiesolutions.webhookie.subscription.service.security.annotation.VerifySubscriptionWriteAccess
 import com.mongodb.client.result.DeleteResult
 import com.mongodb.client.result.UpdateResult
+import org.slf4j.Logger
 import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.aggregation.Aggregation
@@ -44,6 +45,7 @@ import reactor.core.publisher.Mono
  */
 @Repository
 class SubscriptionRepository(
+  private val log: Logger,
   private val mongoTemplate: ReactiveMongoTemplate,
 ) : GenericRepository<Subscription>(mongoTemplate, Subscription::class.java) {
   @VerifySubscriptionReadAccess
@@ -61,7 +63,12 @@ class SubscriptionRepository(
     return findById(id)
   }
 
-  fun findAllConsumerSubscriptions(entity: String, groups: List<String>): Flux<Subscription> {
+  fun findAllConsumerSubscriptions(
+    entity: String,
+    groups: List<String>,
+    topic: String?,
+    callbackId: String?
+  ): Flux<Subscription> {
     val criteria = Criteria()
       .andOperator(
         applicationsByEntity(entity),
@@ -71,6 +78,7 @@ class SubscriptionRepository(
     val subscriptionsKey = "${'$'}subscriptions"
     val localField = "aId"
     val foreignField = "$KEY_APPLICATION.$KEY_APPLICATION_ID"
+
     val aggregation: Aggregation = Aggregation.newAggregation(
       Aggregation.match(criteria),
       Aggregation
@@ -81,6 +89,22 @@ class SubscriptionRepository(
       Aggregation.unwind(subscriptionsKey),
       Aggregation.replaceRoot(subscriptionsKey)
     )
+
+    val subscriptionCriteriaList = mutableListOf<Criteria>()
+    if(topic != null) {
+      subscriptionCriteriaList.add(topicIs(topic))
+    }
+    if(callbackId != null) {
+      subscriptionCriteriaList.add(callbackIdIs(callbackId))
+    }
+    if(subscriptionCriteriaList.isNotEmpty()) {
+      aggregation.pipeline.add(Aggregation.match(Criteria().andOperator(*subscriptionCriteriaList.toTypedArray())))
+    }
+
+    if(log.isDebugEnabled) {
+      log.debug("Webhook Traffic Aggregation query: '{}'", aggregation)
+    }
+
     return mongoTemplate.aggregate(aggregation, Application::class.java, Subscription::class.java)
   }
 
