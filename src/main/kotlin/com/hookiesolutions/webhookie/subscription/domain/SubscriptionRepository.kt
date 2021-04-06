@@ -115,9 +115,10 @@ class SubscriptionRepository(
   }
 
   fun topicSubscriptions(topics: List<String>, requestedPageable: Pageable): Flux<Subscription> {
+    val pageable = Query.pageableWith(requestedPageable, SUBSCRIPTION_DEFAULT_SORT, SUBSCRIPTION_DEFAULT_PAGE)
     return mongoTemplate
       .find(
-        query(topicIsIn(topics)),
+        query(topicIsIn(topics)).with(pageable),
         Subscription::class.java
       )
   }
