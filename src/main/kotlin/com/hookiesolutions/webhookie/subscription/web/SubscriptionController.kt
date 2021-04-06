@@ -12,6 +12,7 @@ import com.hookiesolutions.webhookie.subscription.service.model.subscription.Val
 import com.hookiesolutions.webhookie.subscription.web.SubscriptionAPIDocs.Companion.REQUEST_MAPPING_SUBSCRIPTIONS
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.slf4j.Logger
+import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -58,9 +59,10 @@ class SubscriptionController(
   fun subscriptions(
     @RequestParam(required = true, defaultValue = PARAM_CONSUMER) role: RoleActor,
     @RequestParam(required = false) topic: String?,
-    @RequestParam(required = false) callbackId: String?
+    @RequestParam(required = false) callbackId: String?,
+    pageable: Pageable
   ): Flux<SubscriptionDTO> {
-    return service.subscriptions(role, topic, callbackId)
+    return service.subscriptions(role, pageable, topic, callbackId)
       .map { it.dto() }
   }
 

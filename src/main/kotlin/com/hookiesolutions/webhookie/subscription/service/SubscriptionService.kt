@@ -30,6 +30,7 @@ import com.hookiesolutions.webhookie.subscription.service.model.subscription.Val
 import com.hookiesolutions.webhookie.subscription.service.validator.SubscriptionValidator
 import com.hookiesolutions.webhookie.webhook.service.WebhookGroupServiceDelegate
 import org.slf4j.Logger
+import org.springframework.data.domain.Pageable
 import org.springframework.messaging.MessageChannel
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.security.access.prepost.PreAuthorize
@@ -87,35 +88,37 @@ class SubscriptionService(
   @PreAuthorize("isAuthenticated()")
   fun subscriptions(
     role: RoleActor,
+    pageable: Pageable,
     topic: String?,
     callbackId: String?
   ): Flux<Subscription> {
     return when (role) {
       RoleActor.CONSUMER -> {
-        consumerSubscriptions(topic, callbackId)
+        consumerSubscriptions(pageable, topic, callbackId)
       }
       RoleActor.PROVIDER -> {
-        providerSubscriptions()
+        providerSubscriptions(pageable)
       }
     }
   }
 
   @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")
   fun consumerSubscriptions(
+    pageable: Pageable,
     topic: String?,
     callbackId: String?
   ): Flux<Subscription> {
     return securityHandler.data()
       .doOnNext { log.info("Fetching all subscriptions for token: '{}'", it) }
-      .flatMapMany { repository.findAllConsumerSubscriptions(it.entity, it.groups, topic, callbackId) }
+      .flatMapMany { repository.findAllConsumerSubscriptions(it.entity, it.groups, pageable, topic, callbackId) }
   }
 
   @PreAuthorize("hasAuthority('$ROLE_PROVIDER')")
-  fun providerSubscriptions(): Flux<Subscription> {
+  fun providerSubscriptions(pageable: Pageable): Flux<Subscription> {
     log.info("Fetching provider topics...")
     return webhookServiceDelegate.providerTopics()
       .doOnNext { log.info("Fetching topic subscriptions for topics: '{}'", it) }
-      .flatMapMany { repository.topicSubscriptions(it) }
+      .flatMapMany { repository.topicSubscriptions(it, pageable) }
   }
 
   @Suppress("unused")

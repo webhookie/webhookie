@@ -26,6 +26,9 @@ import com.hookiesolutions.webhookie.subscription.service.security.annotation.Ve
 import com.mongodb.client.result.DeleteResult
 import com.mongodb.client.result.UpdateResult
 import org.slf4j.Logger
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.aggregation.Aggregation
@@ -66,6 +69,7 @@ class SubscriptionRepository(
   fun findAllConsumerSubscriptions(
     entity: String,
     groups: List<String>,
+    requestedPageable: Pageable,
     topic: String?,
     callbackId: String?
   ): Flux<Subscription> {
@@ -101,6 +105,8 @@ class SubscriptionRepository(
       aggregation.pipeline.add(Aggregation.match(Criteria().andOperator(*subscriptionCriteriaList.toTypedArray())))
     }
 
+    sort(aggregation, requestedPageable, SUBSCRIPTION_DEFAULT_SORT, SUBSCRIPTION_DEFAULT_PAGE)
+
     if(log.isDebugEnabled) {
       log.debug("Webhook Traffic Aggregation query: '{}'", aggregation)
     }
@@ -108,7 +114,7 @@ class SubscriptionRepository(
     return mongoTemplate.aggregate(aggregation, Application::class.java, Subscription::class.java)
   }
 
-  fun topicSubscriptions(topics: List<String>): Flux<Subscription> {
+  fun topicSubscriptions(topics: List<String>, requestedPageable: Pageable): Flux<Subscription> {
     return mongoTemplate
       .find(
         query(topicIsIn(topics)),
@@ -170,5 +176,10 @@ class SubscriptionRepository(
         FindAndModifyOptions.options().returnNew(true),
         Subscription::class.java
       )
+  }
+
+  companion object {
+    val SUBSCRIPTION_DEFAULT_SORT = Sort.by("${Subscription.Keys.KEY_STATUS_UPDATE}.${StatusUpdate.Keys.KEY_TIME}").descending()
+    val SUBSCRIPTION_DEFAULT_PAGE = PageRequest.of(0, 50)
   }
 }

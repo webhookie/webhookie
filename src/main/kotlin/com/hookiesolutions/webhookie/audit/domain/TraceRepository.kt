@@ -21,7 +21,6 @@ import com.hookiesolutions.webhookie.audit.web.model.request.TraceRequest
 import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.filters
 import com.hookiesolutions.webhookie.common.model.FieldMatchingStrategy
 import com.hookiesolutions.webhookie.common.repository.GenericRepository
-import com.hookiesolutions.webhookie.common.repository.GenericRepository.Query.Companion.pageableWith
 import org.slf4j.Logger
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.data.domain.PageRequest
@@ -30,7 +29,6 @@ import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.aggregation.AddFieldsOperation
-import org.springframework.data.mongodb.core.aggregation.Aggregation
 import org.springframework.data.mongodb.core.aggregation.AggregationOperation
 import org.springframework.data.mongodb.core.aggregation.ArithmeticOperators
 import org.springframework.data.mongodb.core.aggregation.ArrayOperators
@@ -40,7 +38,7 @@ import org.springframework.stereotype.Repository
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.time.Instant
-import java.util.Objects
+import java.util.*
 
 /**
  *
@@ -110,8 +108,6 @@ class TraceRepository(
     request: TraceRequest,
     requestedPageable: Pageable
   ): Flux<Trace> {
-    val pageable = pageableWith(requestedPageable, SPAN_DEFAULT_SORT, SPAN_DEFAULT_PAGE)
-
     val requestCriteria = filters(
       KEY_TRACE_ID to (request.traceId to FieldMatchingStrategy.PARTIAL_MATCH),
       KEY_SPAN_TOPIC to (request.topic to FieldMatchingStrategy.PARTIAL_MATCH),
@@ -149,9 +145,7 @@ class TraceRepository(
     }
 
     val tracesAggregation = aggregateStrategy.aggregate(spanCriteria, traceCriteria)
-    tracesAggregation.pipeline.add(Aggregation.sort(pageable.sort))
-    tracesAggregation.pipeline.add(Aggregation.skip((pageable.pageNumber * pageable.pageSize).toLong()))
-    tracesAggregation.pipeline.add(Aggregation.limit(pageable.pageSize.toLong()))
+    sort(tracesAggregation, requestedPageable, SPAN_DEFAULT_SORT, SPAN_DEFAULT_PAGE)
 
     if(log.isDebugEnabled) {
       log.debug("Webhook Traffic Aggregation query: '{}'", tracesAggregation)

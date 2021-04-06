@@ -9,6 +9,7 @@ import com.hookiesolutions.webhookie.common.model.DeletableEntity
 import com.hookiesolutions.webhookie.common.model.UpdatableEntity
 import com.hookiesolutions.webhookie.common.service.security.annotation.VerifyEntityCanBeDeleted
 import com.hookiesolutions.webhookie.common.service.security.annotation.VerifyEntityCanBeUpdated
+import com.hookiesolutions.webhookie.subscription.domain.SubscriptionRepository
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
@@ -16,15 +17,7 @@ import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.FindAndReplaceOptions
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
-import org.springframework.data.mongodb.core.aggregation.AddFieldsOperation
-import org.springframework.data.mongodb.core.aggregation.AggregationExpression
-import org.springframework.data.mongodb.core.aggregation.AggregationOperation
-import org.springframework.data.mongodb.core.aggregation.AggregationUpdate
-import org.springframework.data.mongodb.core.aggregation.ArrayOperators
-import org.springframework.data.mongodb.core.aggregation.ComparisonOperators
-import org.springframework.data.mongodb.core.aggregation.ConditionalOperators
-import org.springframework.data.mongodb.core.aggregation.SetOperation
-import org.springframework.data.mongodb.core.aggregation.UnsetOperation
+import org.springframework.data.mongodb.core.aggregation.*
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query.query
 import reactor.core.publisher.Mono
@@ -86,6 +79,23 @@ abstract class GenericRepository<E: AbstractEntity>(
         FindAndModifyOptions.options().returnNew(true),
         clazz
       )
+  }
+
+  fun sort(
+    aggregation: Aggregation,
+    requestedPageable: Pageable,
+    defaultSort: Sort,
+    defaultPageable: Pageable
+  ) {
+    val pageable =
+      Query.pageableWith(requestedPageable,
+        SubscriptionRepository.SUBSCRIPTION_DEFAULT_SORT,
+        SubscriptionRepository.SUBSCRIPTION_DEFAULT_PAGE
+      )
+
+    aggregation.pipeline.add(Aggregation.sort(pageable.sort))
+    aggregation.pipeline.add(Aggregation.skip((pageable.pageNumber * pageable.pageSize).toLong()))
+    aggregation.pipeline.add(Aggregation.limit(pageable.pageSize.toLong()))
   }
 
   class Query {
