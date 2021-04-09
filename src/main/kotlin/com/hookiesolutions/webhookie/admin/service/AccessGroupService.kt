@@ -7,6 +7,7 @@ import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.R
 import com.hookiesolutions.webhookie.common.annotation.Open
 import com.hookiesolutions.webhookie.common.message.entity.EntityDeletedMessage
 import com.hookiesolutions.webhookie.common.message.entity.EntityUpdatedMessage
+import com.hookiesolutions.webhookie.security.service.SecurityHandler
 import org.slf4j.Logger
 import org.springframework.security.access.prepost.PreAuthorize
 import reactor.core.publisher.Flux
@@ -24,6 +25,7 @@ abstract class AccessGroupService<T : AccessGroup>(
   val repository: AccessGroupRepository<T>,
   val factory: AccessGroupFactory,
   val publisher: EntityEventPublisher,
+  val securityHandler: SecurityHandler,
   val log: Logger,
   val clazz: Class<T>,
 ) {
@@ -39,10 +41,13 @@ abstract class AccessGroupService<T : AccessGroup>(
       }
   }
 
-  @PreAuthorize("hasAuthority('$ROLE_ADMIN')")
+  @PreAuthorize("isAuthenticated()")
   fun allGroups(): Flux<T> {
     log.info("Fetching all '{}' Access Groups...", clazz.simpleName)
     return repository.findAll()
+      .zipWith(securityHandler.groups())
+      .filter { it.t2.contains(it.t1.iamGroupName) }
+      .map { it.t1 }
   }
 
   @PreAuthorize("hasAuthority('$ROLE_ADMIN')")
