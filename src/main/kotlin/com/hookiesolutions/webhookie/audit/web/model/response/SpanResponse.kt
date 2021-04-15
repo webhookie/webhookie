@@ -3,6 +3,7 @@ package com.hookiesolutions.webhookie.audit.web.model.response
 import com.hookiesolutions.webhookie.audit.domain.Span
 import com.hookiesolutions.webhookie.audit.domain.SpanRetry
 import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate
+import com.hookiesolutions.webhookie.common.model.dto.CallbackDTO
 
 /**
  *
@@ -15,7 +16,7 @@ data class SpanResponse(
   val application: String,
   val entity: String,
   val topic: String,
-  val callbackUrl: String,
+  val callback: CallbackDTO,
   val responseCode: Int,
   val responseBody: String,
   val status: SpanStatusUpdate,
@@ -32,7 +33,7 @@ data class SpanResponse(
         span.subscription.application.name,
         span.subscription.application.entity,
         span.subscription.topic,
-        span.subscription.callback.requestTarget(),
+        span.subscription.callback,
         responseCode,
         responseBody,
         span.lastStatus,
