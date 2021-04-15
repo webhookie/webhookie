@@ -13,10 +13,7 @@ import com.hookiesolutions.webhookie.common.config.web.OpenAPIConfig.Companion.O
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.springframework.data.domain.Pageable
 import org.springframework.http.MediaType
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Flux
 import java.time.Instant
 
@@ -91,6 +88,18 @@ class TrafficController(
       .build()
     return traceService.userTraces(pageable, request)
       .map { TraceResponse.from(it)}
+  }
+
+  @GetMapping(
+    "$REQUEST_MAPPING_TRAFFIC_TRACE/{traceId}/spans",
+    produces = [MediaType.APPLICATION_JSON_VALUE]
+  )
+  fun traceSpans(
+    @PathVariable traceId: String,
+    pageable: Pageable
+  ): Flux<SpanResponse> {
+    return spanService.traceSpans(pageable, traceId)
+      .map { SpanResponse.from(it)}
   }
 
   companion object {

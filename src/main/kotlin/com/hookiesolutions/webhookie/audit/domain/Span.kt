@@ -4,6 +4,7 @@ import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_LAST_S
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SPAN_ID
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SPAN_TOPIC
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SUBSCRIPTION
+import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_TRACE_ID
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.SPAN_COLLECTION_NAME
 import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate.Keys.Companion.KEY_STATUS
 import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate.Keys.Companion.KEY_TIME
@@ -51,6 +52,10 @@ data class Span(
     companion object {
       fun bySpanId(spanId: String): Criteria {
         return where(KEY_SPAN_ID).`is`(spanId)
+      }
+
+      fun byTraceId(traceId: String): Criteria {
+        return where(KEY_TRACE_ID).`is`(traceId)
       }
 
       fun applicationsIn(ids: Collection<String>): Criteria {

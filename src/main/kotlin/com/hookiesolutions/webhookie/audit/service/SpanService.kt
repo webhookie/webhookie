@@ -19,6 +19,7 @@ import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscrip
 import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
 import com.hookiesolutions.webhookie.common.service.TimeMachine
 import com.hookiesolutions.webhookie.security.service.SecurityHandler
+import com.hookiesolutions.webhookie.webhook.service.WebhookGroupServiceDelegate
 import org.slf4j.Logger
 import org.springframework.data.domain.Pageable
 import org.springframework.security.access.prepost.PreAuthorize
@@ -37,6 +38,7 @@ import reactor.kotlin.core.publisher.toMono
 class SpanService(
   private val repository: SpanRepository,
   private val timeMachine: TimeMachine,
+  private val webhookServiceDelegate: WebhookGroupServiceDelegate,
   private val subscriptionServiceDelegate: SubscriptionServiceDelegate,
   private val securityHandler: SecurityHandler,
   private val log: Logger
@@ -174,5 +176,10 @@ class SpanService(
         log.info("Fetching all spans by applications: '{}'", it)
         repository.userSpans(it, request, pageable)
       }
+  }
+
+  fun traceSpans(pageable: Pageable, traceId: String): Flux<Span> {
+    return webhookServiceDelegate.providerTopics()
+      .flatMapMany { repository.traceSpans(pageable, traceId, it) }
   }
 }

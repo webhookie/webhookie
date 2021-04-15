@@ -13,8 +13,10 @@ import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_STATUS
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_TRACE_ID
 import com.hookiesolutions.webhookie.audit.domain.Span.Queries.Companion.applicationsIn
 import com.hookiesolutions.webhookie.audit.domain.Span.Queries.Companion.bySpanId
+import com.hookiesolutions.webhookie.audit.domain.Span.Queries.Companion.byTraceId
 import com.hookiesolutions.webhookie.audit.domain.Span.Queries.Companion.spanIsAfter
 import com.hookiesolutions.webhookie.audit.domain.Span.Queries.Companion.spanIsBefore
+import com.hookiesolutions.webhookie.audit.domain.Span.Queries.Companion.spanTopicIn
 import com.hookiesolutions.webhookie.audit.domain.Span.Queries.Companion.statusIn
 import com.hookiesolutions.webhookie.audit.domain.SpanRetry.Companion.KEY_RETRY_NO
 import com.hookiesolutions.webhookie.audit.domain.SpanRetry.Companion.KEY_RETRY_STATUS_CODE
@@ -166,6 +168,14 @@ class SpanRepository(
 
     return mongoTemplate.find(
       query,
+      Span::class.java
+    )
+  }
+
+  fun traceSpans(requestedPageable: Pageable, traceId: String, filterByTopics: List<String>): Flux<Span> {
+    val pageable = pageableWith(requestedPageable, SPAN_DEFAULT_SORT, SPAN_DEFAULT_PAGE)
+    return mongoTemplate.find(
+      query(byTraceId(traceId).andOperator(spanTopicIn(filterByTopics))).with(pageable),
       Span::class.java
     )
   }
