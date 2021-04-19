@@ -125,23 +125,28 @@ class TraceRepository(
     if(requestCriteria.isNotEmpty()) {
       spanCriteria = spanCriteria.andOperator(*requestCriteria)
     }
+    val traceRequestCriteria = mutableListOf<Criteria>()
 
-    var traceCriteria = if(topics.isEmpty()) {
-      Criteria()
-    } else {
-      traceTopicIn(topics)
+    if(topics.isNotEmpty()) {
+      traceRequestCriteria.add(traceTopicIn(topics))
     }
 
     if(request.status.isNotEmpty()) {
-      traceCriteria = traceCriteria.andOperator(statusIn(request.status))
+      traceRequestCriteria.add(statusIn(request.status))
     }
 
     if(Objects.nonNull(request.from)) {
-      traceCriteria = traceCriteria.andOperator(traceUpdatedAfter(request.from!!))
+      traceRequestCriteria.add(traceUpdatedAfter(request.from!!))
     }
 
     if(Objects.nonNull(request.to)) {
-      traceCriteria = traceCriteria.andOperator(traceUpdatedBefore(request.to!!))
+      traceRequestCriteria.add(traceUpdatedBefore(request.to!!))
+    }
+
+    val traceCriteria = if(traceRequestCriteria.isEmpty()) {
+      Criteria()
+    } else {
+      Criteria().andOperator(*traceRequestCriteria.toTypedArray())
     }
 
     val tracesAggregation = aggregateStrategy.aggregate(spanCriteria, traceCriteria)
