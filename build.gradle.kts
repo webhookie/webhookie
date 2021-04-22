@@ -65,7 +65,7 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
 
-	compileOnly("com.github.amlorg:amf-client_2.12:${property("amfVersion")}")
+	implementation("com.github.amlorg:amf-client_2.12:${property("amfVersion")}")
 
 	implementation("com.jayway.jsonpath:json-path:${property("jsonPathVersion")}")
 
