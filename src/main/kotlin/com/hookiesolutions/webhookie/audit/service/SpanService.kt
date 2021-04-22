@@ -1,11 +1,6 @@
 package com.hookiesolutions.webhookie.audit.service
 
-import com.hookiesolutions.webhookie.audit.domain.Span
-import com.hookiesolutions.webhookie.audit.domain.SpanRepository
-import com.hookiesolutions.webhookie.audit.domain.SpanResult
-import com.hookiesolutions.webhookie.audit.domain.SpanRetry
-import com.hookiesolutions.webhookie.audit.domain.SpanStatus
-import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate
+import com.hookiesolutions.webhookie.audit.domain.*
 import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate.Companion.notOk
 import com.hookiesolutions.webhookie.audit.web.model.request.SpanRequest
 import com.hookiesolutions.webhookie.audit.web.model.request.TraceRequest
@@ -163,8 +158,9 @@ class SpanService(
   @PreAuthorize("hasAnyAuthority('$ROLE_CONSUMER', '$ROLE_ADMIN')")
   fun userSpans(pageable: Pageable, request: SpanRequest): Flux<Span> {
     return securityHandler.data()
-      .flatMap { token ->
-        return@flatMap if(token.hasAdminAuthority()) {
+      .map { it.hasAdminAuthority() }
+      .zipWhen { hasAdminAuthority ->
+        return@zipWhen if(hasAdminAuthority) {
           log.info("Fetching all spans form ADMIN")
           emptyList<String>().toMono()
         } else {
@@ -175,7 +171,7 @@ class SpanService(
       }
       .flatMapMany {
         log.info("Fetching all spans by applications: '{}'", it)
-        repository.userSpans(it, request, pageable)
+        repository.userSpans(it.t2, request, it.t1, pageable)
       }
   }
 

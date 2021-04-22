@@ -122,6 +122,7 @@ class SpanRepository(
   fun userSpans(
     applicationIds: List<String>,
     request: SpanRequest,
+    ignoreApplicationsFilter: Boolean,
     requestedPageable: Pageable
   ): Flux<Span> {
     val pageable = pageableWith(requestedPageable, SPAN_DEFAULT_SORT, SPAN_DEFAULT_PAGE)
@@ -137,8 +138,7 @@ class SpanRepository(
       KEY_SPAN_CALLBACK_NAME to request.callback
     )
 
-
-    if(applicationIds.isNotEmpty()) {
+    if(!ignoreApplicationsFilter) {
       queryCriteria.add(applicationsIn(applicationIds))
     }
 
