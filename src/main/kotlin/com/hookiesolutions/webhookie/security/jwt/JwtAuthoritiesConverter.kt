@@ -22,9 +22,11 @@ class JwtAuthoritiesConverter(
     val rolesMono = tokenAttributesExtractor
       .readList(jwt, securityProperties.roles.jwkJsonPath)
       .map { authoritiesMapper.map(it) }
+      .onErrorReturn(emptySet())
 
     val groupsMono = tokenAttributesExtractor
       .readList(jwt, securityProperties.groups.jwkJsonPath)
+      .onErrorReturn(emptyList())
 
     val emailMono: Mono<String> = tokenAttributesExtractor
       .read(jwt, securityProperties.email.jwkJsonPath)
