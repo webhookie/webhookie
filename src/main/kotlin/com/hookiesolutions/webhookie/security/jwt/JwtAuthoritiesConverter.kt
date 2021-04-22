@@ -21,8 +21,8 @@ class JwtAuthoritiesConverter(
   override fun convert(jwt: Jwt): Mono<AbstractAuthenticationToken>? {
     val rolesMono = tokenAttributesExtractor
       .readList(jwt, securityProperties.roles.jwkJsonPath)
+      .onErrorReturn(emptyList())
       .map { authoritiesMapper.map(it) }
-      .onErrorReturn(emptySet())
 
     val groupsMono = tokenAttributesExtractor
       .readList(jwt, securityProperties.groups.jwkJsonPath)

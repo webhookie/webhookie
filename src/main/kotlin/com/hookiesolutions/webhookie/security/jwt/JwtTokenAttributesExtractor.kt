@@ -27,7 +27,7 @@ class JwtTokenAttributesExtractor(
         sink.success(value)
       } catch (ex: Exception) {
         val message = "Unable to extract jwt values for path: '$claimJsonPath'!"
-        log.error(message, ex)
+        log.error(message)
         sink.error(BadJwtException(message, ex))
       }
     }
