@@ -15,6 +15,7 @@ import com.hookiesolutions.webhookie.security.customizer.DelegateAuthenticationE
 import com.hookiesolutions.webhookie.security.jwt.AudienceValidator
 import com.hookiesolutions.webhookie.security.jwt.JwtAuthoritiesConverter
 import com.hookiesolutions.webhookie.subscription.web.SubscriptionAPIDocs.Companion.REQUEST_MAPPING_APPLICATIONS
+import com.hookiesolutions.webhookie.subscription.web.SubscriptionAPIDocs.Companion.REQUEST_MAPPING_PROVIDER
 import com.hookiesolutions.webhookie.subscription.web.SubscriptionAPIDocs.Companion.REQUEST_MAPPING_SUBSCRIPTIONS
 import com.hookiesolutions.webhookie.webhook.config.WebhookGroupAPIDocs.Companion.REQUEST_MAPPING_WEBHOOK_GROUPS
 import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties
@@ -89,6 +90,7 @@ class SecurityConfig(
         authorize(pathMatchers(HttpMethod.GET,"$REQUEST_MAPPING_ADMIN/$REQUEST_MAPPING_CONSUMER_GROUPS"), authenticated)
         authorize(pathMatchers(HttpMethod.GET,"$REQUEST_MAPPING_ADMIN/${REQUEST_MAPPING_PROVIDER_GROUPS}"), authenticated)
         authorize(pathMatchers("$REQUEST_MAPPING_APPLICATIONS/**"), hasAuthority(ROLE_CONSUMER))
+        authorize(pathMatchers("$REQUEST_MAPPING_PROVIDER/**"), hasAuthority(ROLE_PROVIDER))
         authorize(pathMatchers("$REQUEST_MAPPING_SUBSCRIPTIONS/**"), authenticated)
         authorize(pathMatchers(HttpMethod.GET,"$REQUEST_MAPPING_USER_INFO/**"), authenticated)
         authorize(pathMatchers(HttpMethod.GET,"$REQUEST_MAPPING_TRAFFIC$REQUEST_MAPPING_TRAFFIC_SPAN/**"), hasAnyAuthority(ROLE_CONSUMER, ROLE_ADMIN))

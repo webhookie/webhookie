@@ -16,6 +16,7 @@ class SubscriptionAPIDocs {
     val paths = arrayOf(
       "${REQUEST_MAPPING_APPLICATIONS}/**",
       "${REQUEST_MAPPING_SUBSCRIPTIONS}/**",
+      "${REQUEST_MAPPING_PROVIDER}/**",
     )
     return GroupedOpenApi
       .builder()
@@ -26,6 +27,7 @@ class SubscriptionAPIDocs {
 
   companion object {
     const val REQUEST_MAPPING_APPLICATIONS = "/applications"
+    const val REQUEST_MAPPING_PROVIDER = "/provider"
     const val REQUEST_MAPPING_CALLBACKS = "/callbacks"
     const val REQUEST_MAPPING_SUBSCRIPTIONS = "/subscriptions"
   }
