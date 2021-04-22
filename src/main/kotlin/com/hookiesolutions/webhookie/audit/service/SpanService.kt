@@ -8,6 +8,7 @@ import com.hookiesolutions.webhookie.audit.domain.SpanStatus
 import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate
 import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate.Companion.notOk
 import com.hookiesolutions.webhookie.audit.web.model.request.SpanRequest
+import com.hookiesolutions.webhookie.audit.web.model.request.TraceRequest
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_ADMIN
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_CONSUMER
 import com.hookiesolutions.webhookie.common.exception.EntityExistsException
@@ -178,8 +179,8 @@ class SpanService(
       }
   }
 
-  fun traceSpans(pageable: Pageable, traceId: String): Flux<Span> {
+  fun traceSpans(pageable: Pageable, traceId: String, request: TraceRequest): Flux<Span> {
     return webhookServiceDelegate.providerTopics()
-      .flatMapMany { repository.traceSpans(pageable, traceId, it) }
+      .flatMapMany { repository.traceSpans(pageable, traceId, it, request) }
   }
 }

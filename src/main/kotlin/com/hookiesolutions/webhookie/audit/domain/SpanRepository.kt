@@ -4,8 +4,10 @@ import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_LAST_S
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_LATEST_RESULT
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_NEXT_RETRY
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_RETRY_HISTORY
-import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SPAN_APPLICATION
-import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SPAN_CALLBACK
+import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SPAN_APPLICATION_ID
+import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SPAN_APPLICATION_NAME
+import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SPAN_CALLBACK_ID
+import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SPAN_CALLBACK_NAME
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SPAN_ENTITY
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SPAN_ID
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SPAN_TOPIC
@@ -22,7 +24,10 @@ import com.hookiesolutions.webhookie.audit.domain.SpanRetry.Companion.KEY_RETRY_
 import com.hookiesolutions.webhookie.audit.domain.SpanRetry.Companion.KEY_RETRY_STATUS_CODE
 import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate.Keys.Companion.KEY_TIME
 import com.hookiesolutions.webhookie.audit.web.model.request.SpanRequest
+import com.hookiesolutions.webhookie.audit.web.model.request.TraceRequest
+import com.hookiesolutions.webhookie.common.model.AbstractEntity
 import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.regex
+import com.hookiesolutions.webhookie.common.model.FieldMatchingStrategy
 import com.hookiesolutions.webhookie.common.repository.GenericRepository
 import com.hookiesolutions.webhookie.common.repository.GenericRepository.Query.Companion.pageableWith
 import org.slf4j.Logger
@@ -127,9 +132,9 @@ class SpanRepository(
       KEY_TRACE_ID to request.traceId,
       KEY_SPAN_ID to request.spanId,
       KEY_SPAN_TOPIC to request.topic,
-      KEY_SPAN_APPLICATION to request.application,
+      KEY_SPAN_APPLICATION_NAME to request.application,
       KEY_SPAN_ENTITY to request.entity,
-      KEY_SPAN_CALLBACK to request.callback
+      KEY_SPAN_CALLBACK_NAME to request.callback
     )
 
 
@@ -172,10 +177,24 @@ class SpanRepository(
     )
   }
 
-  fun traceSpans(requestedPageable: Pageable, traceId: String, filterByTopics: List<String>): Flux<Span> {
+  fun traceSpans(requestedPageable: Pageable, traceId: String, filterByTopics: List<String>, request: TraceRequest): Flux<Span> {
     val pageable = pageableWith(requestedPageable, SPAN_DEFAULT_SORT, SPAN_DEFAULT_PAGE)
+
+    val requestCriteria = AbstractEntity.Queries.filters(
+      KEY_SPAN_APPLICATION_ID to (request.application to FieldMatchingStrategy.EXACT_MATCH),
+      KEY_SPAN_ENTITY to (request.entity to FieldMatchingStrategy.EXACT_MATCH),
+      KEY_SPAN_CALLBACK_ID to (request.callback to FieldMatchingStrategy.EXACT_MATCH)
+    )
+
+    val criteria = byTraceId(traceId).andOperator(spanTopicIn(filterByTopics), *requestCriteria)
+    val query = query(criteria).with(pageable)
+
+    if(log.isDebugEnabled) {
+      log.debug("Trace spans query: '{}'", query)
+    }
+
     return mongoTemplate.find(
-      query(byTraceId(traceId).andOperator(spanTopicIn(filterByTopics))).with(pageable),
+      query,
       Span::class.java
     )
   }

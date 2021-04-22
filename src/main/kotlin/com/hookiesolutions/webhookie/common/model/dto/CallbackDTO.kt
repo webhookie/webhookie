@@ -24,7 +24,8 @@ data class CallbackDTO(
 
   class Keys {
     companion object {
-      const val KEY_URL = "url"
+      const val KEY_CALLBACK_ID = "callbackId"
+      const val KEY_CALLBACK_NAME = "name"
     }
   }
 }

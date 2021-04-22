@@ -14,7 +14,8 @@ import com.hookiesolutions.webhookie.common.model.AbstractEntity
 import com.hookiesolutions.webhookie.common.model.dto.ApplicationDetails.Keys.Companion.KEY_APPLICATION_ENTITY
 import com.hookiesolutions.webhookie.common.model.dto.ApplicationDetails.Keys.Companion.KEY_APPLICATION_ID
 import com.hookiesolutions.webhookie.common.model.dto.ApplicationDetails.Keys.Companion.KEY_APPLICATION_NAME
-import com.hookiesolutions.webhookie.common.model.dto.CallbackDTO.Keys.Companion.KEY_URL
+import com.hookiesolutions.webhookie.common.model.dto.CallbackDTO.Keys.Companion.KEY_CALLBACK_ID
+import com.hookiesolutions.webhookie.common.model.dto.CallbackDTO.Keys.Companion.KEY_CALLBACK_NAME
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDetails
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDetails.Keys.Companion.KEY_APPLICATION
@@ -93,9 +94,11 @@ data class Span(
       const val KEY_LATEST_RESULT = "latestResult"
 
       val KEY_SPAN_TOPIC = fieldName(KEY_SUBSCRIPTION, KEY_TOPIC)
-      val KEY_SPAN_APPLICATION = fieldName(KEY_SUBSCRIPTION, KEY_APPLICATION, KEY_APPLICATION_NAME)
+      val KEY_SPAN_APPLICATION_ID = fieldName(KEY_SUBSCRIPTION, KEY_APPLICATION, KEY_APPLICATION_ID)
+      val KEY_SPAN_APPLICATION_NAME = fieldName(KEY_SUBSCRIPTION, KEY_APPLICATION, KEY_APPLICATION_NAME)
       val KEY_SPAN_ENTITY = fieldName(KEY_SUBSCRIPTION, KEY_APPLICATION, KEY_APPLICATION_ENTITY)
-      val KEY_SPAN_CALLBACK = fieldName(KEY_SUBSCRIPTION, KEY_CALLBACK, KEY_URL)
+      val KEY_SPAN_CALLBACK_ID = fieldName(KEY_SUBSCRIPTION, KEY_CALLBACK, KEY_CALLBACK_ID)
+      val KEY_SPAN_CALLBACK_NAME = fieldName(KEY_SUBSCRIPTION, KEY_CALLBACK, KEY_CALLBACK_NAME)
     }
   }
 

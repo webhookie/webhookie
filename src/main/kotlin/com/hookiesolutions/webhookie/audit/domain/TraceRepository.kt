@@ -111,9 +111,9 @@ class TraceRepository(
     val requestCriteria = filters(
       KEY_TRACE_ID to (request.traceId to FieldMatchingStrategy.PARTIAL_MATCH),
       KEY_SPAN_TOPIC to (request.topic to FieldMatchingStrategy.PARTIAL_MATCH),
-      Span.Keys.KEY_SPAN_APPLICATION to (request.application to FieldMatchingStrategy.EXACT_MATCH),
+      Span.Keys.KEY_SPAN_APPLICATION_ID to (request.application to FieldMatchingStrategy.EXACT_MATCH),
       Span.Keys.KEY_SPAN_ENTITY to (request.entity to FieldMatchingStrategy.EXACT_MATCH),
-      Span.Keys.KEY_SPAN_CALLBACK to (request.callback to FieldMatchingStrategy.EXACT_MATCH)
+      Span.Keys.KEY_SPAN_CALLBACK_ID to (request.callback to FieldMatchingStrategy.EXACT_MATCH)
     )
 
     var spanCriteria = if(topics.isEmpty()) {

@@ -96,9 +96,17 @@ class TrafficController(
   )
   fun traceSpans(
     @PathVariable traceId: String,
+    @RequestParam(required = false) application: String?,
+    @RequestParam(required = false) entity: String?,
+    @RequestParam(required = false) callback: String?,
     pageable: Pageable
   ): Flux<SpanResponse> {
-    return spanService.traceSpans(pageable, traceId)
+    val request = TraceRequest.Builder()
+      .application(application)
+      .entity(entity)
+      .callback(callback)
+      .build()
+    return spanService.traceSpans(pageable, traceId, request)
       .map { SpanResponse.from(it)}
   }
 
