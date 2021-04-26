@@ -8,6 +8,6 @@ data class WebhookieJwtAuthenticationToken(
   val jwt: Jwt,
   val roles: Collection<GrantedAuthority>,
   val groups: List<String>,
-  val email: String,
+  val subject: String,
   val entity: String
 ): JwtAuthenticationToken(jwt, roles)

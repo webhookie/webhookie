@@ -28,14 +28,14 @@ class JwtAuthoritiesConverter(
       .readList(jwt, securityProperties.groups.jwkJsonPath)
       .onErrorReturn(emptyList())
 
-    val emailMono: Mono<String> = tokenAttributesExtractor
-      .read(jwt, securityProperties.email.jwkJsonPath)
+    val subMono: Mono<String> = tokenAttributesExtractor
+      .read(jwt, "$.sub")
 
     val entityMono: Mono<String> = tokenAttributesExtractor
       .read(jwt, securityProperties.entity.jwkJsonPath)
 
     return Mono
-      .zip(rolesMono, groupsMono, emailMono, entityMono)
+      .zip(rolesMono, groupsMono, subMono, entityMono)
       .map {
         WebhookieJwtAuthenticationToken(jwt, it.t1, it.t2, it.t3, it.t4)
       }

@@ -22,7 +22,7 @@ class SpringSecurityReactiveAuditorAware: ReactiveAuditorAware<String> {
       .filter(Authentication::isAuthenticated)
       .cast(WebhookieJwtAuthenticationToken::class.java)
       .map {
-        it.email
+        it.subject
       }
   }
 }

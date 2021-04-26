@@ -14,8 +14,6 @@ webhookie:
       authorization-uri: authorize
       token-uri: oauth/token
       token-name: id_token
-    email:
-      jwk-json-path: $.email
     entity:
       jwk-json-path: $['https://webhookie.com/entity']
     groups:
