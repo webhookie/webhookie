@@ -26,7 +26,6 @@ import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate.Keys.Companio
 import com.hookiesolutions.webhookie.audit.web.model.request.SpanRequest
 import com.hookiesolutions.webhookie.audit.web.model.request.TraceRequest
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
-import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.regex
 import com.hookiesolutions.webhookie.common.model.FieldMatchingStrategy
 import com.hookiesolutions.webhookie.common.repository.GenericRepository
 import com.hookiesolutions.webhookie.common.repository.GenericRepository.Query.Companion.pageableWith
@@ -129,13 +128,13 @@ class SpanRepository(
 
     val queryCriteria = mutableListOf<Criteria>()
 
-    val requestCriteria = regex(
-      KEY_TRACE_ID to request.traceId,
-      KEY_SPAN_ID to request.spanId,
-      KEY_SPAN_TOPIC to request.topic,
-      KEY_SPAN_APPLICATION_NAME to request.application,
-      KEY_SPAN_ENTITY to request.entity,
-      KEY_SPAN_CALLBACK_NAME to request.callback
+    val requestCriteria = AbstractEntity.Queries.filters(
+      KEY_TRACE_ID to (request.traceId to FieldMatchingStrategy.PARTIAL_MATCH),
+      KEY_SPAN_ID to (request.spanId to FieldMatchingStrategy.PARTIAL_MATCH),
+      KEY_SPAN_TOPIC to (request.topic to FieldMatchingStrategy.EXACT_MATCH),
+      KEY_SPAN_APPLICATION_NAME to (request.application to FieldMatchingStrategy.PARTIAL_MATCH),
+      KEY_SPAN_ENTITY to (request.entity to FieldMatchingStrategy.PARTIAL_MATCH),
+      KEY_SPAN_CALLBACK_NAME to ( request.callback to FieldMatchingStrategy.PARTIAL_MATCH)
     )
 
     if(!ignoreApplicationsFilter) {
