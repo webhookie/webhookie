@@ -41,6 +41,6 @@ class ProviderService(
   }
 
   private fun mySubscriptions(): Flux<Subscription> {
-    return subscriptionService.providerSubscriptions(Pageable.unpaged())
+    return subscriptionService.providerSubscriptions(null, Pageable.unpaged())
   }
 }

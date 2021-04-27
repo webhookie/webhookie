@@ -97,7 +97,7 @@ class SubscriptionService(
         consumerSubscriptions(pageable, topic, callbackId)
       }
       RoleActor.PROVIDER -> {
-        providerSubscriptions(pageable)
+        providerSubscriptions(topic, pageable)
       }
     }
   }
@@ -114,11 +114,14 @@ class SubscriptionService(
   }
 
   @PreAuthorize("hasAuthority('$ROLE_PROVIDER')")
-  fun providerSubscriptions(pageable: Pageable): Flux<Subscription> {
+  fun providerSubscriptions(
+    topic: String?,
+    pageable: Pageable
+  ): Flux<Subscription> {
     log.info("Fetching provider topics...")
     return webhookServiceDelegate.providerTopics()
       .doOnNext { log.info("Fetching topic subscriptions for topics: '{}'", it) }
-      .flatMapMany { repository.topicSubscriptions(it, pageable) }
+      .flatMapMany { repository.topicSubscriptions(topic, it, pageable) }
   }
 
   @Suppress("unused")
