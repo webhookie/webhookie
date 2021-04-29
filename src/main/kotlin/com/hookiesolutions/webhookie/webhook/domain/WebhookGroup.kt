@@ -1,10 +1,14 @@
 package com.hookiesolutions.webhookie.webhook.domain
 
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
+import com.hookiesolutions.webhookie.common.repository.GenericRepository.Companion.fieldName
+import com.hookiesolutions.webhookie.subscription.domain.CallbackDetails.Keys.Companion.KEY_NAME
+import com.hookiesolutions.webhookie.webhook.domain.Topic.Keys.Companion.KEY_TOPIC_NAME
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.KEY_CONSUMER_ACCESS
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.KEY_CONSUMER_IAM_GROUPS
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.KEY_PROVIDER_ACCESS
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.KEY_PROVIDER_IAM_GROUPS
+import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.KEY_WEBHOOK_GROUP_TOPIC
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.WEBHOOK_GROUP_COLLECTION_NAME
 import org.springframework.data.annotation.TypeAlias
 import org.springframework.data.mongodb.core.index.Indexed
@@ -50,6 +54,10 @@ data class WebhookGroup(
         return where(KEY_PROVIDER_ACCESS).`is`(ProviderAccess.ALL)
       }
 
+      fun webhookGroupTopicIs(topic: String): Criteria {
+        return where(KEY_WEBHOOK_GROUP_TOPIC).`is`(topic)
+      }
+
       fun accessibleForProvider(groups: Collection<String>): Criteria {
         return Criteria()
           .orOperator(
@@ -78,6 +86,7 @@ data class WebhookGroup(
       const val KEY_PROVIDER_ACCESS = "providerAccess"
       const val KEY_TOPICS = "topics"
       const val WEBHOOK_GROUP_COLLECTION_NAME = "webhook_group"
+      val KEY_WEBHOOK_GROUP_TOPIC = fieldName(KEY_TOPICS, KEY_TOPIC_NAME)
     }
   }
 }

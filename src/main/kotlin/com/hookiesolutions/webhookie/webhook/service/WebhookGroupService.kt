@@ -63,6 +63,11 @@ class WebhookGroupService(
     return repository.findByIdVerifyingReadAccess(id)
   }
 
+  @PreAuthorize("permitAll()")
+  fun readWebhookGroupByTopic(topic: String): Mono<WebhookGroup> {
+    return repository.findByTopicVerifyingReadAccess(topic)
+  }
+
   @PreAuthorize("hasAuthority('${ROLE_PROVIDER}')")
   fun deleteWebhookGroup(id: String): Mono<String> {
     return repository.findByIdVerifyingWriteAccess(id)

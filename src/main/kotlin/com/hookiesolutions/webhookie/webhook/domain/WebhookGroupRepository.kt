@@ -6,6 +6,7 @@ import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.KEY_TOPICS
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Queries.Companion.accessibleForGroups
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Queries.Companion.accessibleForProvider
+import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Queries.Companion.webhookGroupTopicIs
 import com.hookiesolutions.webhookie.webhook.service.security.annotation.VerifyWebhookGroupReadAccess
 import com.hookiesolutions.webhookie.webhook.service.security.annotation.VerifyWebhookGroupWriteAccess
 import com.mongodb.client.result.UpdateResult
@@ -41,6 +42,15 @@ class WebhookGroupRepository(
   @VerifyWebhookGroupReadAccess
   fun findByIdVerifyingReadAccess(id: String): Mono<WebhookGroup> {
     return findById(id)
+  }
+
+  @VerifyWebhookGroupReadAccess
+  fun findByTopicVerifyingReadAccess(topic: String): Mono<WebhookGroup> {
+    return mongoTemplate
+      .findOne(
+        query(webhookGroupTopicIs(topic)),
+        WebhookGroup::class.java
+      )
   }
 
   @VerifyWebhookGroupWriteAccess
