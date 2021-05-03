@@ -117,10 +117,15 @@ class SubscriptionRepository(
   fun topicSubscriptions(
     topic: String?,
     topics: List<String>,
+    ignoreTopicsFilter: Boolean,
     requestedPageable: Pageable
   ): Flux<Subscription> {
     val pageable = Query.pageableWith(requestedPageable, SUBSCRIPTION_DEFAULT_SORT, SUBSCRIPTION_DEFAULT_PAGE)
-    var criteria = topicIsIn(topics)
+    var criteria = if(ignoreTopicsFilter) {
+      Criteria()
+    } else {
+      topicIsIn(topics)
+    }
     if(topic != null) {
       criteria = criteria.andOperator(topicIs(topic))
     }

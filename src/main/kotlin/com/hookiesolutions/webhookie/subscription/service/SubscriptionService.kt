@@ -1,5 +1,6 @@
 package com.hookiesolutions.webhookie.subscription.service
 
+import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_ADMIN
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_CONSUMER
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_PROVIDER
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
@@ -17,11 +18,7 @@ import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Companion.val
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionStatus
 import com.hookiesolutions.webhookie.common.service.TimeMachine
 import com.hookiesolutions.webhookie.security.service.SecurityHandler
-import com.hookiesolutions.webhookie.subscription.domain.ApplicationRepository
-import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
-import com.hookiesolutions.webhookie.subscription.domain.CallbackRepository
-import com.hookiesolutions.webhookie.subscription.domain.Subscription
-import com.hookiesolutions.webhookie.subscription.domain.SubscriptionRepository
+import com.hookiesolutions.webhookie.subscription.domain.*
 import com.hookiesolutions.webhookie.subscription.service.factory.ConversionsFactory
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.CreateSubscriptionRequest
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.ReasonRequest
@@ -113,15 +110,23 @@ class SubscriptionService(
       .flatMapMany { repository.findAllConsumerSubscriptions(it.entity, it.groups, pageable, topic, callbackId) }
   }
 
-  @PreAuthorize("hasAuthority('$ROLE_PROVIDER')")
+  @PreAuthorize("hasAnyAuthority('$ROLE_PROVIDER', '$ROLE_ADMIN')")
   fun providerSubscriptions(
     topic: String?,
     pageable: Pageable
   ): Flux<Subscription> {
     log.info("Fetching provider topics...")
-    return webhookServiceDelegate.providerTopics()
-      .doOnNext { log.info("Fetching topic subscriptions for topics: '{}'", it) }
-      .flatMapMany { repository.topicSubscriptions(topic, it, pageable) }
+    return securityHandler.data()
+      .map { it.hasAdminAuthority() }
+      .zipWhen {
+        return@zipWhen if (it) {
+          emptyList<String>().toMono()
+        } else {
+          webhookServiceDelegate.providerTopics()
+        }
+      }
+      .doOnNext { log.info("Fetching topic subscriptions for topics: '{}', isAdmin: '{}'", it.t2, it.t1) }
+      .flatMapMany { repository.topicSubscriptions(topic, it.t2, it.t1, pageable) }
   }
 
   @Suppress("unused")
