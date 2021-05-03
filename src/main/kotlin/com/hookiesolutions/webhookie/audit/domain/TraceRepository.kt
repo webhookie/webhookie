@@ -17,6 +17,7 @@ import com.hookiesolutions.webhookie.audit.domain.Trace.Updates.Companion.update
 import com.hookiesolutions.webhookie.audit.domain.TraceSummary.Keys.Companion.KEY_NUMBER_OF_SPANS
 import com.hookiesolutions.webhookie.audit.domain.TraceSummary.Keys.Companion.KEY_NUMBER_OF_SUCCESS
 import com.hookiesolutions.webhookie.audit.domain.aggregation.TraceAggregationStrategy
+import com.hookiesolutions.webhookie.audit.service.security.VerifyTraceReadAccess
 import com.hookiesolutions.webhookie.audit.web.model.request.TraceRequest
 import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.filters
 import com.hookiesolutions.webhookie.common.model.FieldMatchingStrategy
@@ -54,6 +55,11 @@ class TraceRepository(
 ) : GenericRepository<Trace>(mongoTemplate, Trace::class.java) {
   fun findByTraceId(traceId: String): Mono<Trace> {
     return mongoTemplate.findOne(query(byTraceId(traceId)), Trace::class.java)
+  }
+
+  @VerifyTraceReadAccess
+  fun findByTraceIdVerifyingReadAccess(traceId: String): Mono<Trace> {
+    return findByTraceId(traceId)
   }
 
   fun addStatus(traceId: String, statusUpdate: TraceStatusUpdate): Mono<Trace> {

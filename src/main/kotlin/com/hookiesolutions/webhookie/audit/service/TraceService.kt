@@ -105,4 +105,8 @@ class TraceService(
         repository.userTraces(it, request, pageable)
       }
   }
+
+  fun fetchTraceVerifyingReadAccess(traceId: String): Mono<Trace> {
+    return repository.findByTraceIdVerifyingReadAccess(traceId)
+  }
 }

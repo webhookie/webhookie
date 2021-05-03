@@ -175,8 +175,13 @@ class SpanService(
       }
   }
 
+  @PreAuthorize("hasAnyAuthority('$ROLE_CONSUMER', '$ROLE_ADMIN')")
   fun traceSpans(pageable: Pageable, traceId: String, request: TraceRequest): Flux<Span> {
     return webhookServiceDelegate.providerTopics()
       .flatMapMany { repository.traceSpans(pageable, traceId, it, request) }
+  }
+
+  fun fetchSpanVerifyingReadAccess(spanId: String): Mono<Span> {
+    return repository.findBySpanIdVerifyingReadAccess(spanId)
   }
 }

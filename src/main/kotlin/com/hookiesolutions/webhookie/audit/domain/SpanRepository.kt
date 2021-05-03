@@ -23,8 +23,10 @@ import com.hookiesolutions.webhookie.audit.domain.Span.Queries.Companion.statusI
 import com.hookiesolutions.webhookie.audit.domain.SpanRetry.Companion.KEY_RETRY_NO
 import com.hookiesolutions.webhookie.audit.domain.SpanRetry.Companion.KEY_RETRY_STATUS_CODE
 import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate.Keys.Companion.KEY_TIME
+import com.hookiesolutions.webhookie.audit.service.security.VerifySpanReadAccess
 import com.hookiesolutions.webhookie.audit.web.model.request.SpanRequest
 import com.hookiesolutions.webhookie.audit.web.model.request.TraceRequest
+import com.hookiesolutions.webhookie.common.exception.EntityNotFoundException
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
 import com.hookiesolutions.webhookie.common.model.FieldMatchingStrategy
 import com.hookiesolutions.webhookie.common.repository.GenericRepository
@@ -40,6 +42,7 @@ import org.springframework.data.mongodb.core.query.Query.query
 import org.springframework.stereotype.Repository
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.toMono
 import java.util.Objects
 
 /**
@@ -54,6 +57,12 @@ class SpanRepository(
 ) : GenericRepository<Span>(mongoTemplate, Span::class.java) {
   fun findBySpanId(spanId: String): Mono<Span> {
     return mongoTemplate.findOne(query(bySpanId(spanId)), Span::class.java)
+      .switchIfEmpty(EntityNotFoundException("Span not found by id: '$spanId'").toMono())
+  }
+
+  @VerifySpanReadAccess
+  fun findBySpanIdVerifyingReadAccess(spanId: String): Mono<Span> {
+    return findBySpanId(spanId)
   }
 
   fun addStatusUpdate(

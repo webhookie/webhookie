@@ -8,13 +8,18 @@ import com.hookiesolutions.webhookie.audit.web.TrafficAPIDocs.Companion.REQUEST_
 import com.hookiesolutions.webhookie.audit.web.model.request.SpanRequest
 import com.hookiesolutions.webhookie.audit.web.model.request.TraceRequest
 import com.hookiesolutions.webhookie.audit.web.model.response.SpanResponse
+import com.hookiesolutions.webhookie.audit.web.model.response.SpanResponseBody
+import com.hookiesolutions.webhookie.audit.web.model.response.TraceRequestBody
 import com.hookiesolutions.webhookie.audit.web.model.response.TraceResponse
 import com.hookiesolutions.webhookie.common.config.web.OpenAPIConfig.Companion.OAUTH2_SCHEME
+import com.hookiesolutions.webhookie.common.service.TimeMachine
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.springframework.data.domain.Pageable
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.switchIfEmpty
 import java.time.Instant
 
 /**
@@ -28,7 +33,8 @@ import java.time.Instant
 @RequestMapping(REQUEST_MAPPING_TRAFFIC)
 class TrafficController(
   private val spanService: SpanService,
-  private val traceService: TraceService
+  private val traceService: TraceService,
+  private val timeMachine: TimeMachine
 ) {
   @GetMapping(
     REQUEST_MAPPING_TRAFFIC_SPAN,
@@ -108,6 +114,25 @@ class TrafficController(
       .build()
     return spanService.traceSpans(pageable, traceId, request)
       .map { SpanResponse.from(it)}
+  }
+
+  @GetMapping(
+    "$REQUEST_MAPPING_TRAFFIC_SPAN/{spanId}/response",
+    produces = [MediaType.APPLICATION_JSON_VALUE]
+  )
+  fun spanResponse(@PathVariable spanId: String): Mono<SpanResponseBody> {
+    return spanService.fetchSpanVerifyingReadAccess(spanId)
+      .flatMap { SpanResponseBody.from(it) }
+      .switchIfEmpty { SpanResponseBody.notReady(spanId, timeMachine.now()) }
+  }
+
+  @GetMapping(
+    "$REQUEST_MAPPING_TRAFFIC_TRACE/{traceId}/request",
+    produces = [MediaType.APPLICATION_JSON_VALUE]
+  )
+  fun traceRequest(@PathVariable traceId: String): Mono<TraceRequestBody> {
+    return traceService.fetchTraceVerifyingReadAccess(traceId )
+      .map { TraceRequestBody.from(it) }
   }
 
   companion object {
