@@ -1,18 +1,14 @@
 package com.hookiesolutions.webhookie.audit.service
 
-import com.hookiesolutions.webhookie.audit.domain.Trace
-import com.hookiesolutions.webhookie.audit.domain.TraceRepository
-import com.hookiesolutions.webhookie.audit.domain.TraceStatus
-import com.hookiesolutions.webhookie.audit.domain.TraceStatusUpdate
-import com.hookiesolutions.webhookie.audit.domain.TraceSummary
+import com.hookiesolutions.webhookie.audit.domain.*
 import com.hookiesolutions.webhookie.audit.web.model.request.TraceRequest
+import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_ADMIN
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_PROVIDER
 import com.hookiesolutions.webhookie.common.exception.EntityExistsException
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.message.WebhookieMessage
 import com.hookiesolutions.webhookie.common.message.subscription.NoSubscriptionMessage
 import com.hookiesolutions.webhookie.common.service.TimeMachine
-import com.hookiesolutions.webhookie.security.service.SecurityHandler
 import com.hookiesolutions.webhookie.webhook.service.WebhookGroupServiceDelegate
 import org.slf4j.Logger
 import org.springframework.data.domain.Pageable
@@ -20,7 +16,6 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import reactor.kotlin.core.publisher.toMono
 
 /**
  *
@@ -32,7 +27,6 @@ class TraceService(
   private val repository: TraceRepository,
   private val timeMachine: TimeMachine,
   private val webhookServiceDelegate: WebhookGroupServiceDelegate,
-  private val securityHandler: SecurityHandler,
   private val log: Logger,
 ) {
   fun save(message: ConsumerMessage) {
@@ -89,20 +83,12 @@ class TraceService(
       .subscribe { log.debug("'{}' trace was updated with '{}', '{}'", it.traceId, it.summary, it.statusUpdate.status) }
   }
 
-  @PreAuthorize("hasAuthority('$ROLE_PROVIDER')")
+  @PreAuthorize("hasAnyAuthority('$ROLE_PROVIDER', '$ROLE_ADMIN')")
   fun userTraces(pageable: Pageable, request: TraceRequest): Flux<Trace> {
-    return securityHandler.data()
-      .flatMap { token ->
-        return@flatMap if(token.hasAdminAuthority()) {
-          log.info("Fetching all traces form ADMIN")
-          emptyList<String>().toMono()
-        } else {
-          webhookServiceDelegate.providerTopics()
-        }
-      }
+    return webhookServiceDelegate.providerTopicsConsideringAdmin()
       .flatMapMany {
         log.info("Fetching all traces by topics: '{}'", it)
-        repository.userTraces(it, request, pageable)
+        repository.userTraces(it.t2, request, it.t1, pageable)
       }
   }
 

@@ -14,7 +14,6 @@ import com.hookiesolutions.webhookie.common.message.publisher.PublisherSuccessMe
 import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscriptionMessageDTO
 import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
 import com.hookiesolutions.webhookie.common.service.TimeMachine
-import com.hookiesolutions.webhookie.security.service.SecurityHandler
 import com.hookiesolutions.webhookie.webhook.service.WebhookGroupServiceDelegate
 import org.slf4j.Logger
 import org.springframework.data.domain.Pageable
@@ -23,7 +22,6 @@ import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.switchIfEmpty
-import reactor.kotlin.core.publisher.toMono
 
 /**
  *
@@ -33,10 +31,10 @@ import reactor.kotlin.core.publisher.toMono
 @Service
 class SpanService(
   private val repository: SpanRepository,
+  private val traceRepository: TraceRepository,
   private val timeMachine: TimeMachine,
   private val webhookServiceDelegate: WebhookGroupServiceDelegate,
   private val subscriptionServiceDelegate: SubscriptionServiceDelegate,
-  private val securityHandler: SecurityHandler,
   private val log: Logger
 ) {
   fun createSpan(message: SignableSubscriptionMessage) {
@@ -155,30 +153,22 @@ class SpanService(
       }
   }
 
-  @PreAuthorize("hasAnyAuthority('$ROLE_CONSUMER', '$ROLE_ADMIN')")
+  @PreAuthorize("hasAnyAuthority('$ROLE_CONSUMER')")
   fun userSpans(pageable: Pageable, request: SpanRequest): Flux<Span> {
-    return securityHandler.data()
-      .map { it.hasAdminAuthority() }
-      .zipWhen { hasAdminAuthority ->
-        return@zipWhen if(hasAdminAuthority) {
-          log.info("Fetching all spans form ADMIN")
-          emptyList<String>().toMono()
-        } else {
-          subscriptionServiceDelegate.userApplications()
-            .map { it.applicationId }
-            .collectList()
-        }
-      }
+    return subscriptionServiceDelegate.userApplications()
+      .map { it.applicationId }
+      .collectList()
       .flatMapMany {
         log.info("Fetching all spans by applications: '{}'", it)
-        repository.userSpans(it.t2, request, it.t1, pageable)
+        repository.userSpans(it, request, pageable)
       }
   }
 
   @PreAuthorize("hasAnyAuthority('$ROLE_CONSUMER', '$ROLE_ADMIN')")
   fun traceSpans(pageable: Pageable, traceId: String, request: TraceRequest): Flux<Span> {
-    return webhookServiceDelegate.providerTopics()
-      .flatMapMany { repository.traceSpans(pageable, traceId, it, request) }
+    return traceRepository.findByTraceIdVerifyingReadAccess(traceId)
+      .flatMap { webhookServiceDelegate.providerTopicsConsideringAdmin() }
+      .flatMapMany { repository.traceSpans(pageable, traceId, it.t2, it.t1, request) }
   }
 
   fun fetchSpanVerifyingReadAccess(spanId: String): Mono<Span> {

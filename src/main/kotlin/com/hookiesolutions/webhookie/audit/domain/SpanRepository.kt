@@ -130,7 +130,6 @@ class SpanRepository(
   fun userSpans(
     applicationIds: List<String>,
     request: SpanRequest,
-    ignoreApplicationsFilter: Boolean,
     requestedPageable: Pageable
   ): Flux<Span> {
     val pageable = pageableWith(requestedPageable, SPAN_DEFAULT_SORT, SPAN_DEFAULT_PAGE)
@@ -146,9 +145,7 @@ class SpanRepository(
       KEY_SPAN_CALLBACK_NAME to ( request.callback to FieldMatchingStrategy.PARTIAL_MATCH)
     )
 
-    if(!ignoreApplicationsFilter) {
-      queryCriteria.add(applicationsIn(applicationIds))
-    }
+    queryCriteria.add(applicationsIn(applicationIds))
 
     if(requestCriteria.isNotEmpty()) {
       queryCriteria.addAll(requestCriteria)
@@ -185,16 +182,29 @@ class SpanRepository(
     )
   }
 
-  fun traceSpans(requestedPageable: Pageable, traceId: String, filterByTopics: List<String>, request: TraceRequest): Flux<Span> {
+  fun traceSpans(
+    requestedPageable: Pageable,
+    traceId: String,
+    filterByTopics: List<String>,
+    ignoreTopicsFilter: Boolean,
+    request: TraceRequest
+  ): Flux<Span> {
     val pageable = pageableWith(requestedPageable, SPAN_DEFAULT_SORT, SPAN_DEFAULT_PAGE)
 
     val requestCriteria = AbstractEntity.Queries.filters(
       KEY_SPAN_APPLICATION_ID to (request.application to FieldMatchingStrategy.EXACT_MATCH),
       KEY_SPAN_ENTITY to (request.entity to FieldMatchingStrategy.EXACT_MATCH),
       KEY_SPAN_CALLBACK_ID to (request.callback to FieldMatchingStrategy.EXACT_MATCH)
-    )
+    ).toMutableList()
 
-    val criteria = byTraceId(traceId).andOperator(spanTopicIn(filterByTopics), *requestCriteria)
+    if(!ignoreTopicsFilter) {
+      requestCriteria.add(spanTopicIn(filterByTopics))
+    }
+
+    var criteria = byTraceId(traceId)
+    if(requestCriteria.isNotEmpty()) {
+      criteria = criteria.andOperator(*requestCriteria.toTypedArray())
+    }
     val query = query(criteria).with(pageable)
 
     if(log.isDebugEnabled) {

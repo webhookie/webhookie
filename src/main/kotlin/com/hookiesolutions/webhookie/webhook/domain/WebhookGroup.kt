@@ -2,7 +2,6 @@ package com.hookiesolutions.webhookie.webhook.domain
 
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
 import com.hookiesolutions.webhookie.common.repository.GenericRepository.Companion.fieldName
-import com.hookiesolutions.webhookie.subscription.domain.CallbackDetails.Keys.Companion.KEY_NAME
 import com.hookiesolutions.webhookie.webhook.domain.Topic.Keys.Companion.KEY_TOPIC_NAME
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.KEY_CONSUMER_ACCESS
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.KEY_CONSUMER_IAM_GROUPS

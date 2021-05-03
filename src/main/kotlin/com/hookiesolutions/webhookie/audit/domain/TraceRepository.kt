@@ -112,6 +112,7 @@ class TraceRepository(
   fun userTraces(
     topics: List<String>,
     request: TraceRequest,
+    ignoreTopicsFilter: Boolean,
     requestedPageable: Pageable
   ): Flux<Trace> {
     val requestCriteria = filters(
@@ -122,7 +123,7 @@ class TraceRepository(
       Span.Keys.KEY_SPAN_CALLBACK_ID to (request.callback to FieldMatchingStrategy.EXACT_MATCH)
     )
 
-    var spanCriteria = if(topics.isEmpty()) {
+    var spanCriteria = if(ignoreTopicsFilter) {
       Criteria()
     } else {
       spanTopicIn(topics)
@@ -133,7 +134,7 @@ class TraceRepository(
     }
     val traceRequestCriteria = mutableListOf<Criteria>()
 
-    if(topics.isNotEmpty()) {
+    if(!ignoreTopicsFilter) {
       traceRequestCriteria.add(traceTopicIn(topics))
     }
 

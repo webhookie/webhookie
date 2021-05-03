@@ -15,12 +15,11 @@ class SpanProviderAccessVoter(
   private val webhookServiceDelegate: WebhookGroupServiceDelegate,
 ) {
   fun vote(spanMono: Mono<Span>): Mono<Span> {
-    val providerTopics = webhookServiceDelegate.providerTopics()
-      .onErrorReturn(emptyList())
+    val providerTopics = webhookServiceDelegate.providerTopicsConsideringAdmin()
 
     return spanMono
       .zipWith(providerTopics)
-      .filter { it.t2.contains(it.t1.subscription.topic) }
+      .filter { it.t2.t1 || it.t2.t2.contains(it.t1.subscription.topic) }
       .map { it.t1 }
   }
 }

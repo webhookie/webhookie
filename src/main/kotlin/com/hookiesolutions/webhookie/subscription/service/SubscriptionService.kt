@@ -116,15 +116,7 @@ class SubscriptionService(
     pageable: Pageable
   ): Flux<Subscription> {
     log.info("Fetching provider topics...")
-    return securityHandler.data()
-      .map { it.hasAdminAuthority() }
-      .zipWhen {
-        return@zipWhen if (it) {
-          emptyList<String>().toMono()
-        } else {
-          webhookServiceDelegate.providerTopics()
-        }
-      }
+    return webhookServiceDelegate.providerTopicsConsideringAdmin()
       .doOnNext { log.info("Fetching topic subscriptions for topics: '{}', isAdmin: '{}'", it.t2, it.t1) }
       .flatMapMany { repository.topicSubscriptions(topic, it.t2, it.t1, pageable) }
   }

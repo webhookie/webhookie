@@ -15,12 +15,11 @@ class TraceProviderAccessVoter(
   private val webhookServiceDelegate: WebhookGroupServiceDelegate,
 ) {
   fun vote(traceMono: Mono<Trace>): Mono<Trace> {
-    val topicsMono = webhookServiceDelegate.providerTopics()
-      .onErrorReturn(emptyList())
+    val topicsMono = webhookServiceDelegate.providerTopicsConsideringAdmin()
 
     return traceMono
       .zipWith(topicsMono)
-      .filter { it.t2.contains(it.t1.topic) }
+      .filter { it.t2.t1 || it.t2.t2.contains(it.t1.topic) }
       .map { it.t1 }
   }
 }
