@@ -16,3 +16,4 @@ As an example of failing partially open, you could continue to allow access to t
 * [Java Metering Service Integration](https://docs.aws.amazon.com/marketplace/latest/userguide/java-integration-example-meterusage.html)
 * [AWS java Github](https://github.com/aws/aws-sdk-java-v2/#using-the-sdk)
 * [**Creating container products for AWS Marketplace using Amazon EKS and AWS Fargate**](https://aws.amazon.com/blogs/awsmarketplace/creating-container-products-for-aws-marketplace-using-amazon-eks-and-aws-fargate/)
+* [Nginx proxy](https://gist.github.com/soheilhy/8b94347ff8336d971ad0)
