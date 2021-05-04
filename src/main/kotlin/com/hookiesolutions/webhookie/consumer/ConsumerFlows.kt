@@ -3,7 +3,10 @@ package com.hookiesolutions.webhookie.consumer
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.consumer.config.ConsumerProperties
 import org.springframework.amqp.core.AmqpTemplate
+import org.springframework.amqp.rabbit.connection.CachingConnectionFactory
 import org.springframework.amqp.rabbit.connection.ConnectionFactory
+import org.springframework.boot.autoconfigure.amqp.RabbitProperties
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.integration.amqp.dsl.Amqp
@@ -14,6 +17,7 @@ import org.springframework.integration.dsl.integrationFlow
 import org.springframework.messaging.Message
 import org.springframework.messaging.SubscribableChannel
 import org.springframework.retry.support.RetryTemplate
+
 
 /**
  *
@@ -26,13 +30,29 @@ class ConsumerFlows(
   private val consumerChannel: SubscribableChannel,
   private val missingHeadersChannel: SubscribableChannel,
   private val consumerProperties: ConsumerProperties,
-  private val connectionFactory: ConnectionFactory,
-  private val amqpTemplate: AmqpTemplate,
   private val consumerRetryTemplate: RetryTemplate,
   private val missingHeadersSelector: GenericSelector<Message<*>>,
 ) {
   @Bean
-  fun consumerFlow(): IntegrationFlow {
+  @ConditionalOnBean(AmqpTemplate::class)
+  fun connectionFactory(
+    properties: RabbitProperties
+  ): ConnectionFactory {
+    val connectionFactory = com.rabbitmq.client.ConnectionFactory()
+    connectionFactory.connectionTimeout = properties.connectionTimeout.toMillis().toInt()
+    connectionFactory.host = properties.host
+    connectionFactory.port = properties.port
+    return CachingConnectionFactory(
+      connectionFactory
+    )
+  }
+
+  @Bean
+  @ConditionalOnBean(AmqpTemplate::class)
+  fun consumerFlow(
+    connectionFactory: ConnectionFactory,
+    amqpTemplate: AmqpTemplate,
+  ): IntegrationFlow {
     val inboundGateway = Amqp
       .inboundGateway(connectionFactory, amqpTemplate, consumerProperties.queue)
       .retryTemplate(consumerRetryTemplate)
@@ -56,7 +76,10 @@ class ConsumerFlows(
   }
 
   @Bean
-  fun missingHeadersFlow(): IntegrationFlow {
+  @ConditionalOnBean(AmqpTemplate::class)
+  fun missingHeadersFlow(
+    amqpTemplate: AmqpTemplate,
+  ): IntegrationFlow {
     val outboundAdapter = Amqp.outboundAdapter(amqpTemplate)
       .routingKey(consumerProperties.missingHeader.routingKey)
       .exchangeName(consumerProperties.missingHeader.exchange)
