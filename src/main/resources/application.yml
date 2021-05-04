@@ -33,6 +33,8 @@ mongodb:
       - version: 1
         key: hqHKBLV83LpCqzKpf8OvutbCs+O5wX5BPu3btWpEvXA=
 spring:
+  config:
+    import: optional:file:${WH_EXTRA_CONFIG_YML_FILE:config/yml}
   data:
     mongodb:
       uri: ${WH_MONGODB_URI:mongodb://localhost/wh-db}
