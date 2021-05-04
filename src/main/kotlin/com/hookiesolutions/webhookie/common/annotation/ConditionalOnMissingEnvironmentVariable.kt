@@ -16,16 +16,19 @@ import org.springframework.util.StringUtils
 @Retention(AnnotationRetention.RUNTIME)
 @Conditional(ConditionalOnMissingEnvironmentVariable.OnPropertyNotEmptyCondition::class)
 annotation class ConditionalOnMissingEnvironmentVariable(
-  val value: String
+  val value: Array<String>
 ) {
   class OnPropertyNotEmptyCondition: Condition {
     override fun matches(context: ConditionContext, metadata: AnnotatedTypeMetadata): Boolean {
       val attrs = metadata.getAnnotationAttributes(
         ConditionalOnMissingEnvironmentVariable::class.java.name
       )
-      val propertyName = attrs!!["value"] as String
-      val host = System.getenv(propertyName)
-      return !StringUtils.hasLength(host)
+      @Suppress("UNCHECKED_CAST") val envVarNames = attrs!!["value"] as Array<String>
+      val result = envVarNames
+        .map { System.getenv(it) }
+        .any { StringUtils.hasLength(it) }
+
+      return !result
     }
 
   }

@@ -11,6 +11,6 @@ import org.springframework.context.annotation.Configuration
  * @since 4/5/21 13:05
  */
 @Configuration
-@ConditionalOnMissingEnvironmentVariable("WH_AMQP_HOST")
+@ConditionalOnMissingEnvironmentVariable(["WH_AMQP_HOST", "SPRING_RABBITMQ_HOST"])
 @EnableAutoConfiguration(exclude = [RabbitAutoConfiguration::class])
 class ConditionalRabbitAutoConfiguration
