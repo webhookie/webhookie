@@ -19,7 +19,7 @@ class TraceProviderAccessVoter(
 
     return traceMono
       .zipWith(topicsMono)
-      .filter { it.t2.t1 || it.t2.t2.contains(it.t1.topic) }
+      .filter { it.t2.isAdmin || it.t2.topics.contains(it.t1.topic) }
       .map { it.t1 }
   }
 }

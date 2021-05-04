@@ -88,7 +88,7 @@ class TraceService(
     return webhookServiceDelegate.providerTopicsConsideringAdmin()
       .flatMapMany {
         log.info("Fetching all traces by topics: '{}'", it)
-        repository.userTraces(it.t2, request, it.t1, pageable)
+        repository.userTraces(it.topics, request, it.isAdmin, pageable)
       }
   }
 

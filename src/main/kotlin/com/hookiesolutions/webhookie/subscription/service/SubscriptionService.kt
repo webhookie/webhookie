@@ -117,8 +117,8 @@ class SubscriptionService(
   ): Flux<Subscription> {
     log.info("Fetching provider topics...")
     return webhookServiceDelegate.providerTopicsConsideringAdmin()
-      .doOnNext { log.info("Fetching topic subscriptions for topics: '{}', isAdmin: '{}'", it.t2, it.t1) }
-      .flatMapMany { repository.topicSubscriptions(topic, it.t2, it.t1, pageable) }
+      .doOnNext { log.info("Fetching topic subscriptions for topics: '{}', isAdmin: '{}'", it.topics, it.isAdmin) }
+      .flatMapMany { repository.topicSubscriptions(topic, it.topics, it.isAdmin, pageable) }
   }
 
   @Suppress("unused")

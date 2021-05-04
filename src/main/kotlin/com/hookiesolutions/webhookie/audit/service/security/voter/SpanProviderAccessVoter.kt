@@ -19,7 +19,7 @@ class SpanProviderAccessVoter(
 
     return spanMono
       .zipWith(providerTopics)
-      .filter { it.t2.t1 || it.t2.t2.contains(it.t1.subscription.topic) }
+      .filter { it.t2.isAdmin || it.t2.topics.contains(it.t1.subscription.topic) }
       .map { it.t1 }
   }
 }

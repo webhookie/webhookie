@@ -5,8 +5,6 @@ import org.slf4j.Logger
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
-import reactor.util.function.Tuple2
-import reactor.util.function.Tuples
 
 /**
  *
@@ -25,7 +23,8 @@ class WebhookGroupServiceDelegate(
       .collectList()
   }
 
-  fun providerTopicsConsideringAdmin(): Mono<Tuple2<Boolean, List<String>>> {
+  //TODO: refactor
+  fun providerTopicsConsideringAdmin(): Mono<TopicsWithAccess> {
     return securityHandler.data()
       .map { it.hasAdminAuthority() }
       .zipWhen { isAdmin ->
@@ -36,6 +35,17 @@ class WebhookGroupServiceDelegate(
           providerTopics()
         }
       }
-      .onErrorReturn(Tuples.of(false, emptyList()))
+      .map { TopicsWithAccess(it.t2, it.t1) }
+      .onErrorReturn(TopicsWithAccess.NO_ACCESS)
+  }
+}
+
+//TODO: refactor
+data class TopicsWithAccess(
+  val topics: List<String>,
+  val isAdmin: Boolean
+) {
+  companion object {
+    val NO_ACCESS = TopicsWithAccess(emptyList(), false)
   }
 }

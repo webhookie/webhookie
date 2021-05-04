@@ -168,7 +168,7 @@ class SpanService(
   fun traceSpans(pageable: Pageable, traceId: String, request: TraceRequest): Flux<Span> {
     return traceRepository.findByTraceIdVerifyingReadAccess(traceId)
       .flatMap { webhookServiceDelegate.providerTopicsConsideringAdmin() }
-      .flatMapMany { repository.traceSpans(pageable, traceId, it.t2, it.t1, request) }
+      .flatMapMany { repository.traceSpans(pageable, traceId, it.topics, it.isAdmin, request) }
   }
 
   fun fetchSpanVerifyingReadAccess(spanId: String): Mono<Span> {
