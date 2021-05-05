@@ -29,6 +29,7 @@ class PublicController(
     return WebhookieConfig.builder()
       .issuer(oAuth2ResourceServerProperties.jwt.issuerUri)
       .clientId(securityProperties.clientId)
+      .audience(securityProperties.audience)
       .build()
       .toMono()
   }
@@ -40,7 +41,8 @@ data class WebhookieConfig(
 ) {
   data class IAMConfig(
     val issuer: String,
-    val clientId: String
+    val clientId: String,
+    val audience: String
   )
 
   companion object {
@@ -50,12 +52,14 @@ data class WebhookieConfig(
   class Builder {
     private lateinit var issuer: String
     private lateinit var clientId: String
+    private lateinit var audience: String
 
     fun issuer(value: String) = apply { this.issuer = value }
     fun clientId(value: String) = apply { this.clientId = value }
+    fun audience(value: String) = apply { this.audience = value }
 
     fun build() = WebhookieConfig(
-      IAMConfig(issuer, clientId)
+      IAMConfig(issuer, clientId, audience)
     )
   }
 }

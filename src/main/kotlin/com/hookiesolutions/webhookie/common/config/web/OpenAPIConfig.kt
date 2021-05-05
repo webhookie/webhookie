@@ -49,7 +49,7 @@ class OpenAPIConfig {
       .type(SecurityScheme.Type.OAUTH2)
       .flows(
         OAuthFlows()
-          .password(oauthFlow)
+          .authorizationCode(oauthFlow)
       )
       .extensions(mapOf("x-tokenName" to securityProperties.oauth2.tokenName))
   }
@@ -60,7 +60,7 @@ class OpenAPIConfig {
     securityProperties: WebHookieSecurityProperties
   ): OAuthFlow {
     val issuerUri = resourceServerProperties.jwt.issuerUri
-    val authorizationUrl = "$issuerUri${securityProperties.oauth2.authorizationUri}"
+    val authorizationUrl = "$issuerUri${securityProperties.oauth2.authorizationUri}?audience=${securityProperties.audience}"
     val tokenUrl = "$issuerUri${securityProperties.oauth2.tokenUri}"
     return OAuthFlow()
       .authorizationUrl(authorizationUrl)
