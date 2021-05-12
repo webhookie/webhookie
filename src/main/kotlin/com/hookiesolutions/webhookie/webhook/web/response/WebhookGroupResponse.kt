@@ -1,6 +1,8 @@
 package com.hookiesolutions.webhookie.webhook.web.response
 
 import com.fasterxml.jackson.annotation.JsonView
+import com.hookiesolutions.webhookie.webhook.domain.ConsumerAccess
+import com.hookiesolutions.webhookie.webhook.domain.ProviderAccess
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup
 
 /**
@@ -21,8 +23,12 @@ data class WebhookGroupResponse(
   val topics: List<Topic>,
   @JsonView(WebhookGroupViews.Full::class)
   val raw: String,
+  @JsonView(WebhookGroupViews.Summary::class)
+  val consumerAccess: ConsumerAccess,
   @JsonView(WebhookGroupViews.Full::class)
   val consumerGroups: Set<String>,
+  @JsonView(WebhookGroupViews.Summary::class)
+  val providerAccess: ProviderAccess,
   @JsonView(WebhookGroupViews.Full::class)
   val providerGroups: Set<String>
 ) {
@@ -33,7 +39,9 @@ data class WebhookGroupResponse(
     entity.description,
     entity.topics.map { Topic(it.name, it.description) },
     entity.raw,
+    entity.consumerAccess,
     entity.consumerIAMGroups,
+    entity.providerAccess,
     entity.providerIAMGroups
   )
 
