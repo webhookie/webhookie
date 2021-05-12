@@ -35,7 +35,7 @@ repositories {
 extra["springdocVersion"] = "1.5.2"
 extra["jsonPathVersion"] = "2.5.0"
 extra["bolEncryptedVersion"] = "2.6.0"
-extra["amfVersion"] = "4.5.1"
+extra["amfVersion"] = "4.7.2-1"
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
