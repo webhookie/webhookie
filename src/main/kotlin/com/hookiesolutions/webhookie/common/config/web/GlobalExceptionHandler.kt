@@ -61,7 +61,7 @@ class GlobalExceptionHandler {
   fun handleEntityExistsException(ex: EntityExistsException): Mono<Any> {
     return mutableMapOf(
       "message" to "Duplicate Key",
-      "key" to ex.key
+      "key" to ex.key.substringBefore(";").trim()
     )
       .toMono()
   }
