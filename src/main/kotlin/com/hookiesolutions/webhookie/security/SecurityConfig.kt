@@ -85,10 +85,9 @@ class SecurityConfig(
             authorize(pathMatchers(HttpMethod.valueOf(it.key), *it.value), permitAll)
           }
 
+        authorize(pathMatchers(HttpMethod.GET,"$REQUEST_MAPPING_ADMIN$REQUEST_MAPPING_PROVIDER_GROUPS"), authenticated)
+        authorize(pathMatchers(HttpMethod.GET,"$REQUEST_MAPPING_ADMIN$REQUEST_MAPPING_CONSUMER_GROUPS"), authenticated)
         authorize(pathMatchers("$REQUEST_MAPPING_ADMIN/**"), hasAuthority(ROLE_ADMIN))
-        authorize(pathMatchers(HttpMethod.GET,"$REQUEST_MAPPING_ADMIN/$REQUEST_MAPPING_CONSUMER_GROUPS"), authenticated)
-        authorize(pathMatchers(HttpMethod.GET,"$REQUEST_MAPPING_ADMIN/$REQUEST_MAPPING_CONSUMER_GROUPS"), authenticated)
-        authorize(pathMatchers(HttpMethod.GET,"$REQUEST_MAPPING_ADMIN/${REQUEST_MAPPING_PROVIDER_GROUPS}"), authenticated)
         authorize(pathMatchers("$REQUEST_MAPPING_APPLICATIONS/**"), hasAuthority(ROLE_CONSUMER))
         authorize(pathMatchers("$REQUEST_MAPPING_PROVIDER/**"), hasAnyAuthority(ROLE_PROVIDER, ROLE_ADMIN))
         authorize(pathMatchers("$REQUEST_MAPPING_SUBSCRIPTIONS/**"), authenticated)
