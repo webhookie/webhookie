@@ -1,6 +1,5 @@
 package com.hookiesolutions.webhookie.subscription.service.model.subscription
 
-import org.springframework.http.HttpHeaders
 import javax.validation.constraints.NotBlank
 
 /**
@@ -11,5 +10,5 @@ import javax.validation.constraints.NotBlank
 data class ValidateSubscriptionRequest(
   @field:NotBlank
   val payload: String,
-  val headers: HttpHeaders,
+  val headers: Map<String, Any>,
 )

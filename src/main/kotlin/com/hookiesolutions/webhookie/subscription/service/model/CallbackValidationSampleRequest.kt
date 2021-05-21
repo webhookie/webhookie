@@ -14,7 +14,7 @@ data class CallbackValidationSampleRequest(
   val httpMethod: HttpMethod,
   val url: String,
   val payload: String,
-  val headers: HttpHeaders,
+  val headers: Map<String, Any>,
   val secret: Secret? = null,
   val traceId: String? = null,
   val spanId: String? = null
@@ -49,17 +49,27 @@ data class CallbackValidationSampleRequest(
           }
       }
 
-    httpHeaders.addAll(headers)
+    headers.entries
+      .forEach {
+        val value = it.value
+        if(value is String) {
+          httpHeaders.add(it.key, value)
+        }
+        @Suppress("UNCHECKED_CAST") val stringList = value as? List<String>
+        if(stringList != null) {
+          httpHeaders.addAll(it.key, stringList)
+        }
+      }
   }
 
   class Builder {
     private lateinit var callbackDetails: CallbackDetails
     private lateinit var payload: String
-    private lateinit var headers: HttpHeaders
+    private lateinit var headers: Map<String, Any>
 
     fun callbackDetails(callbackDetails: CallbackDetails) = apply { this.callbackDetails = callbackDetails }
     fun payload(payload: String) = apply { this.payload = payload }
-    fun headers(headers: HttpHeaders) = apply { this.headers = headers }
+    fun headers(headers: Map<String, Any>) = apply { this.headers = headers }
 
     fun build(): CallbackValidationSampleRequest = CallbackValidationSampleRequest(
       callbackDetails.httpMethod,
