@@ -4,6 +4,7 @@ import com.hookiesolutions.webhookie.common.exception.EmptyResultException
 import com.hookiesolutions.webhookie.common.exception.EntityExistsException
 import com.hookiesolutions.webhookie.common.exception.EntityNotFoundException
 import com.hookiesolutions.webhookie.common.exception.ValidationException
+import com.hookiesolutions.webhookie.common.service.ReactiveObjectMapper
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.data.mapping.context.InvalidPersistentPropertyPath
 import org.springframework.http.HttpStatus
@@ -25,7 +26,9 @@ import java.io.FileNotFoundException
  * @since 3/12/20 18:03
  */
 @RestControllerAdvice
-class GlobalExceptionHandler {
+class GlobalExceptionHandler(
+  private val om: ReactiveObjectMapper
+) {
   @ExceptionHandler(WebExchangeBindException::class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   fun handleValidationException(ex: WebExchangeBindException): Mono<MutableMap<String, String>> {
@@ -86,8 +89,12 @@ class GlobalExceptionHandler {
 
   @ExceptionHandler(WebClientResponseException::class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
-  fun handleWebClientResponseException(ex: WebClientResponseException): Mono<Any> {
-    return mutableMapOf("message" to ex.localizedMessage).toMono()
+  fun handleWebClientResponseException(ex: WebClientResponseException): Mono<Map<String, Any>> {
+    return try {
+      om.readMap(ex.responseBodyAsString)
+    } catch (e: Exception) {
+      mutableMapOf("message" to e.localizedMessage).toMono()
+    }
   }
 
   @ExceptionHandler(ServerWebInputException::class)

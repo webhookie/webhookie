@@ -6,7 +6,7 @@ package com.hookiesolutions.webhookie.webhook.web.response
  * @since 25/1/21 13:20
  */
 interface WebhookGroupViews {
-  open class Summary {}
+  open class Summary
 
-  open class Full: Summary() {}
+  open class Full: Summary()
 }

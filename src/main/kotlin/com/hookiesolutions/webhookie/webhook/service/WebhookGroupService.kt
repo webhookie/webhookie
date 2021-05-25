@@ -36,12 +36,13 @@ class WebhookGroupService(
   private val repository: WebhookGroupRepository,
   private val securityService: WebhookSecurityService,
   private val adminServiceDelegate: AdminServiceDelegate,
+  private val asyncApiService: AsyncApiService,
   private val log: Logger,
 ) {
   @PreAuthorize("hasAuthority('${ROLE_PROVIDER}')")
   fun createWebhookGroup(request: WebhookGroupRequest): Mono<WebhookGroup> {
     return verifyRequestGroups(request)
-      .map { request.toWebhookGroup() }
+      .flatMap { asyncApiService.parseAsyncApiSpecToWebhookApi(request) }
       .flatMap {
         log.info("Saving WebhookGroup: '{}'", it.title)
         repository.save(it)
@@ -79,7 +80,8 @@ class WebhookGroupService(
   fun updateWebhookGroup(id: String, request: WebhookGroupRequest): Mono<WebhookGroup> {
     return repository.findByIdVerifyingWriteAccess(id)
       .flatMap { verifyRequestGroups(request) }
-      .map { updatable(request.toWebhookGroup()) }
+      .flatMap { asyncApiService.parseAsyncApiSpecToWebhookApi(request) }
+      .map { updatable(it) }
       .flatMap { repository.update(it, id) }
   }
 
@@ -91,12 +93,12 @@ class WebhookGroupService(
   }
 
   @ServiceActivator(inputChannel = ADMIN_CONSUMER_GROUP_DELETED_CHANNEL_NAME)
-  fun removeConsumerGroup(message: EntityDeletedMessage<String>) {
+  fun removeConsumerGroup(@Suppress("SpringJavaInjectionPointsAutowiringInspection") message: EntityDeletedMessage<String>) {
     removeAccessGroup(message, KEY_CONSUMER_IAM_GROUPS)
   }
 
   @ServiceActivator(inputChannel = ADMIN_PROVIDER_GROUP_DELETED_CHANNEL_NAME)
-  fun removeProviderGroup(message: EntityDeletedMessage<String>) {
+  fun removeProviderGroup(@Suppress("SpringJavaInjectionPointsAutowiringInspection") message: EntityDeletedMessage<String>) {
     removeAccessGroup(message, KEY_PROVIDER_IAM_GROUPS)
   }
 
@@ -108,12 +110,12 @@ class WebhookGroupService(
   }
 
   @ServiceActivator(inputChannel = ADMIN_CONSUMER_GROUP_UPDATED_CHANNEL_NAME)
-  fun updateConsumerGroup(message: EntityUpdatedMessage<String>) {
+  fun updateConsumerGroup(@Suppress("SpringJavaInjectionPointsAutowiringInspection") message: EntityUpdatedMessage<String>) {
     updateAccessGroup(message, KEY_CONSUMER_IAM_GROUPS)
   }
 
   @ServiceActivator(inputChannel = ADMIN_PROVIDER_GROUP_UPDATED_CHANNEL_NAME)
-  fun updateProviderGroup(message: EntityUpdatedMessage<String>) {
+  fun updateProviderGroup(@Suppress("SpringJavaInjectionPointsAutowiringInspection") message: EntityUpdatedMessage<String>) {
     updateAccessGroup(message, KEY_PROVIDER_IAM_GROUPS)
   }
 
