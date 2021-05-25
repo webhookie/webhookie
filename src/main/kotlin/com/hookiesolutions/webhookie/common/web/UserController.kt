@@ -1,6 +1,7 @@
 package com.hookiesolutions.webhookie.common.web
 
 import com.hookiesolutions.webhookie.common.config.web.OpenAPIConfig.Companion.OAUTH2_SCHEME
+import com.hookiesolutions.webhookie.common.service.AdminServiceDelegate
 import com.hookiesolutions.webhookie.common.web.CommonAPIDocs.Companion.REQUEST_MAPPING_USER_INFO
 import com.hookiesolutions.webhookie.security.service.SecurityHandler
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
@@ -21,6 +22,7 @@ import reactor.kotlin.core.publisher.toMono
 @SecurityRequirement(name = OAUTH2_SCHEME)
 @RequestMapping(REQUEST_MAPPING_USER_INFO)
 class UserController(
+  private val adminServiceDelegate: AdminServiceDelegate,
   private val securityHandler: SecurityHandler
 ) {
   @GetMapping(
@@ -30,6 +32,7 @@ class UserController(
   fun userInfo(): Mono<UserResponse> {
     return securityHandler.data()
       .switchIfEmpty(AccessDeniedException("Access Denied").toMono())
-      .map { UserResponse.from(it) }
+      .zipWhen { adminServiceDelegate.readAllGroups() }
+      .map { UserResponse.from(it.t1, it.t2.t1, it.t2.t2) }
   }
 }
