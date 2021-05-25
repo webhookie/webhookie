@@ -2,13 +2,15 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
 
 plugins {
-	id("org.springframework.boot") version "2.4.5"
-	id("io.spring.dependency-management") version "1.0.10.RELEASE"
-	kotlin("jvm") version "1.4.21"
-	kotlin("plugin.spring") version "1.4.21"
-	kotlin("plugin.allopen") version "1.4.21"
+	id("org.springframework.boot") version "2.5.0"
+	id("io.spring.dependency-management") version "1.0.11.RELEASE"
+	kotlin("jvm") version "1.5.0"
+	kotlin("plugin.spring") version "1.5.0"
+	kotlin("plugin.allopen") version "1.5.0"
 	kotlin("kapt") version "1.4.21"
 }
+
+kapt.includeCompileClasspath = false
 
 allOpen {
 	annotation("com.hookiesolutions.webhookie.common.annotation.Open")
@@ -27,15 +29,12 @@ configurations {
 
 repositories {
 	maven { url = uri("https://repo.spring.io/milestone") }
-	maven { url = uri("https://repository-master.mulesoft.org/nexus/content/repositories/releases") }
-	maven { url = uri("https://jitpack.io") }
 	mavenCentral()
 }
 
 extra["springdocVersion"] = "1.5.2"
 extra["jsonPathVersion"] = "2.5.0"
 extra["bolEncryptedVersion"] = "2.6.0"
-extra["amfVersion"] = "4.7.2-1"
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
@@ -64,8 +63,6 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
-
-	implementation("com.github.amlorg:amf-client_2.12:${property("amfVersion")}")
 
 	implementation("com.jayway.jsonpath:json-path:${property("jsonPathVersion")}")
 
