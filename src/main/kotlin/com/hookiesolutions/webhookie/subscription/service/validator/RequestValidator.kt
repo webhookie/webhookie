@@ -25,7 +25,7 @@ class RequestValidator(
     return WebClient
       .create(sampleRequest.url)
       .method(sampleRequest.httpMethod)
-      .contentType(MediaType.APPLICATION_JSON)
+      .accept(MediaType.ALL)
       .body(BodyInserters.fromValue(sampleRequest.payload.encodeToByteArray()))
       .headers { sampleRequest.addMessageHeaders(it, timeMachine.now()) }
       .retrieve()
