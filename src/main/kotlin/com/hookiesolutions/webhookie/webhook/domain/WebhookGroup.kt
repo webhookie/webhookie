@@ -3,17 +3,23 @@ package com.hookiesolutions.webhookie.webhook.domain
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
 import com.hookiesolutions.webhookie.common.repository.GenericRepository.Companion.fieldName
 import com.hookiesolutions.webhookie.webhook.domain.Topic.Keys.Companion.KEY_TOPIC_NAME
+import com.hookiesolutions.webhookie.webhook.domain.Webhook.Keys.Companion.KEY_NUMBER_OF_SUBSCRIPTIONS
+import com.hookiesolutions.webhookie.webhook.domain.Webhook.Keys.Companion.KEY_TOPIC
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.KEY_CONSUMER_ACCESS
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.KEY_CONSUMER_IAM_GROUPS
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.KEY_PROVIDER_ACCESS
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.KEY_PROVIDER_IAM_GROUPS
+import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.KEY_WEBHOOKS_No_OS_SUBSCRIPTIONS
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.KEY_WEBHOOK_GROUP_TOPIC
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.WEBHOOK_GROUP_COLLECTION_NAME
+import com.hookiesolutions.webhookie.webhook.service.model.AsyncApiSpec
+import com.hookiesolutions.webhookie.webhook.service.model.WebhookGroupRequest
 import org.springframework.data.annotation.TypeAlias
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Criteria.where
+import org.springframework.data.mongodb.core.query.Update
 
 /**
  *
@@ -26,14 +32,14 @@ data class WebhookGroup(
   val title: String,
   val webhookVersion: String,
   val description: String?,
-  val topics: List<Topic>,
+  val webhooks: List<Webhook>,
   val raw: String,
   val consumerIAMGroups: Set<String>,
   val providerIAMGroups: Set<String>,
   val consumerAccess: ConsumerAccess,
   val providerAccess: ProviderAccess,
-  @Indexed(name = "webhook_group.numberOfTopics")
-  val numberOfTopics: Int = topics.size
+  @Indexed(name = "webhook_group.numberOfWebhooks")
+  val numberOfWebhooks: Int = webhooks.size
 ) : AbstractEntity() {
   class Queries {
     companion object {
@@ -73,6 +79,21 @@ data class WebhookGroup(
             providerGroupsIn(groups),
           )
       }
+
+      fun elemMatchByTopic(topic: String): Criteria {
+        return where(Keys.KEY_WEBHOOKS).elemMatch(
+            where(fieldName(KEY_TOPIC, KEY_TOPIC_NAME)).`is`(topic)
+          )
+      }
+    }
+  }
+
+  class Updates {
+    companion object {
+      fun increaseNumberOfSubscriptions(): Update {
+        return Update()
+          .inc(KEY_WEBHOOKS_No_OS_SUBSCRIPTIONS, 1)
+      }
     }
   }
 
@@ -81,11 +102,49 @@ data class WebhookGroup(
       const val KEY_CONSUMER_IAM_GROUPS = "consumerIAMGroups"
       const val KEY_PROVIDER_IAM_GROUPS = "providerIAMGroups"
       const val KEY_CONSUMER_ACCESS = "consumerAccess"
-      const val KEY_NUMBER_OF_TOPICS = "numberOfTopics"
+      const val KEY_NUMBER_OF_WEBHOOKS = "numberOfWebhooks"
       const val KEY_PROVIDER_ACCESS = "providerAccess"
-      const val KEY_TOPICS = "topics"
+      const val KEY_WEBHOOKS = "webhooks"
       const val WEBHOOK_GROUP_COLLECTION_NAME = "webhook_group"
-      val KEY_WEBHOOK_GROUP_TOPIC = fieldName(KEY_TOPICS, KEY_TOPIC_NAME)
+      val KEY_WEBHOOK_GROUP_TOPIC = fieldName(KEY_WEBHOOKS, KEY_TOPIC, KEY_TOPIC_NAME)
+      val KEY_WEBHOOKS_No_OS_SUBSCRIPTIONS = fieldName(KEY_WEBHOOKS, "$", KEY_NUMBER_OF_SUBSCRIPTIONS)
+    }
+  }
+
+  companion object {
+    fun create(
+      spec: AsyncApiSpec,
+      request: WebhookGroupRequest,
+      webhooks: List<Webhook>? = null
+    ): WebhookGroup {
+      return WebhookGroup(
+        spec.name,
+        spec.version,
+        spec.description,
+        webhooks ?: spec.topics.map { Webhook(it) },
+        request.asyncApiSpec,
+        request.consumerGroups,
+        request.providerGroups,
+        request.consumerAccess,
+        request.providerAccess
+      )
+    }
+
+    fun create(
+      spec: AsyncApiSpec,
+      request: WebhookGroupRequest,
+      webhookApi: WebhookGroup
+    ): WebhookGroup {
+      val webhooks = spec.topics
+        .map { topic ->
+          val numberOfSubscriptions = webhookApi.webhooks
+            .firstOrNull { it.topic.name == topic.name }
+            ?.numberOfSubscriptions ?: 0
+
+          Webhook(topic, numberOfSubscriptions)
+        }
+
+      return create(spec, request, webhooks)
     }
   }
 }

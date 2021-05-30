@@ -20,7 +20,7 @@ data class WebhookGroupResponse(
   @JsonView(WebhookGroupViews.Summary::class)
   val description: String?,
   @JsonView(WebhookGroupViews.Summary::class)
-  val topics: List<Topic>,
+  val webhooks: List<Webhook>,
   @JsonView(WebhookGroupViews.Full::class)
   val raw: String,
   @JsonView(WebhookGroupViews.Summary::class)
@@ -37,12 +37,18 @@ data class WebhookGroupResponse(
     entity.title,
     entity.webhookVersion,
     entity.description,
-    entity.topics.map { Topic(it.name, it.description) },
+    entity.webhooks.map { Webhook(Topic(it.topic.name, it.topic.description), it.numberOfSubscriptions) },
     entity.raw,
     entity.consumerAccess,
     entity.consumerIAMGroups,
     entity.providerAccess,
     entity.providerIAMGroups
+  )
+
+  @JsonView(WebhookGroupViews.Summary::class)
+  data class Webhook(
+    val topic: Topic,
+    val numberOfSubscriptions: Int
   )
 
   @JsonView(WebhookGroupViews.Summary::class)

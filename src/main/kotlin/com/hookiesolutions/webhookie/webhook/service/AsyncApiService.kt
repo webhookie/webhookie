@@ -1,6 +1,5 @@
 package com.hookiesolutions.webhookie.webhook.service
 
-import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup
 import com.hookiesolutions.webhookie.webhook.service.model.AsyncApiSpec
 import com.hookiesolutions.webhookie.webhook.service.model.WebhookGroupRequest
 import org.slf4j.Logger
@@ -20,7 +19,7 @@ class AsyncApiService(
   private val parserWebClient: WebClient,
   private val log: Logger
 ) {
-  fun parseAsyncApiSpecToWebhookApi(request: WebhookGroupRequest): Mono<WebhookGroup> {
+  fun parseAsyncApiSpecToWebhookApi(request: WebhookGroupRequest): Mono<AsyncApiSpec> {
     return parserWebClient
       .post()
       .uri("/parse")
@@ -31,18 +30,5 @@ class AsyncApiService(
       .bodyToMono(AsyncApiSpec::class.java)
       .doOnNext { log.info("AsyncAPI Spec parsed successfully. number of topics: '{}'", it.topics.size) }
       .doOnError { log.error("AsyncAPI Spec parse error '{}'", it.message) }
-      .map {
-        WebhookGroup(
-          it.name,
-          it.version,
-          it.description,
-          it.topics,
-          request.asyncApiSpec,
-          request.consumerGroups,
-          request.providerGroups,
-          request.consumerAccess,
-          request.providerAccess
-        )
-      }
   }
 }

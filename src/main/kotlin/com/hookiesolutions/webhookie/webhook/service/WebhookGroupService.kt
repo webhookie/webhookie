@@ -4,6 +4,7 @@ import com.hookiesolutions.webhookie.common.Constants.Channels.Admin.Companion.A
 import com.hookiesolutions.webhookie.common.Constants.Channels.Admin.Companion.ADMIN_CONSUMER_GROUP_UPDATED_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Channels.Admin.Companion.ADMIN_PROVIDER_GROUP_DELETED_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Channels.Admin.Companion.ADMIN_PROVIDER_GROUP_UPDATED_CHANNEL_NAME
+import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.SUBSCRIPTION_ACTIVATED_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_PROVIDER
 import com.hookiesolutions.webhookie.common.message.entity.EntityDeletedMessage
 import com.hookiesolutions.webhookie.common.message.entity.EntityUpdatedMessage
@@ -20,6 +21,7 @@ import com.hookiesolutions.webhookie.webhook.service.security.WebhookSecuritySer
 import org.slf4j.Logger
 import org.springframework.data.domain.Pageable
 import org.springframework.integration.annotation.ServiceActivator
+import org.springframework.messaging.Message
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
@@ -43,6 +45,7 @@ class WebhookGroupService(
   fun createWebhookGroup(request: WebhookGroupRequest): Mono<WebhookGroup> {
     return verifyRequestGroups(request)
       .flatMap { asyncApiService.parseAsyncApiSpecToWebhookApi(request) }
+      .map { WebhookGroup.create(it, request) }
       .flatMap {
         log.info("Saving WebhookGroup: '{}'", it.title)
         repository.save(it)
@@ -78,9 +81,12 @@ class WebhookGroupService(
 
   @PreAuthorize("hasAuthority('${ROLE_PROVIDER}')")
   fun updateWebhookGroup(id: String, request: WebhookGroupRequest): Mono<WebhookGroup> {
-    return repository.findByIdVerifyingWriteAccess(id)
-      .flatMap { verifyRequestGroups(request) }
+    return verifyRequestGroups(request)
       .flatMap { asyncApiService.parseAsyncApiSpecToWebhookApi(request) }
+      .flatMap { spec ->
+        repository.findByIdVerifyingWriteAccess(id)
+          .map { WebhookGroup.create(spec, request, it) }
+      }
       .map { updatable(it) }
       .flatMap { repository.update(it, id) }
   }
@@ -88,7 +94,7 @@ class WebhookGroupService(
   @PreAuthorize("hasAuthority('${ROLE_PROVIDER}')")
   fun myTopics(): Flux<Topic> {
     return securityService.tokenGroups()
-      .doOnNext { log.info("Fetching all topics for groups: '{}'", it) }
+      .doOnNext { log.info("Fetching all webhooks for groups: '{}'", it) }
       .flatMapMany { repository.myTopicsAsProvider(it) }
   }
 
@@ -123,6 +129,14 @@ class WebhookGroupService(
     repository.updateAccessGroup(message.oldValue, message.newValue, attrName)
       .subscribe {
         log.info("All '{}' {}s updated to '{}'", message.oldValue, message.type, message.newValue)
+      }
+  }
+
+  @ServiceActivator(inputChannel = SUBSCRIPTION_ACTIVATED_CHANNEL_NAME)
+  fun updateWebhookSubscribers(@Suppress("SpringJavaInjectionPointsAutowiringInspection") message: Message<String>) {
+    repository.increaseTopicSubscriptions(message.payload)
+      .subscribe {
+        log.info("Increased number of subscriptions for webhook: '{}'", message.payload)
       }
   }
 

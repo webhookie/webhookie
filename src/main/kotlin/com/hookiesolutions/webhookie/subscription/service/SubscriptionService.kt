@@ -55,6 +55,7 @@ class SubscriptionService(
   private val stateManager: SubscriptionStateManager,
   private val subscriptionValidator: SubscriptionValidator,
   private val unblockedSubscriptionChannel: MessageChannel,
+  private val subscriptionActivatedChannel: MessageChannel,
   private val webhookServiceDelegate: WebhookGroupServiceDelegate
 ) {
   @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")
@@ -164,6 +165,10 @@ class SubscriptionService(
       .zipWhen { stateManager.canBeActivated(it) }
       .flatMap { repository.statusUpdate(id, activated(timeMachine.now()), it.t2) }
       .doOnNext { log.info("Subscription '{}' activated successfully", id) }
+      .doOnNext {
+        log.info("Increasing no of subscriptions for '{}' ...", it.id, it.topic)
+        subscriptionActivatedChannel.send(MessageBuilder.withPayload(it.topic).build())
+      }
       .map { it.statusUpdate.status }
   }
 
