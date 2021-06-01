@@ -1,9 +1,6 @@
 package com.hookiesolutions.webhookie.common.config.web
 
-import com.hookiesolutions.webhookie.common.exception.EmptyResultException
-import com.hookiesolutions.webhookie.common.exception.EntityExistsException
-import com.hookiesolutions.webhookie.common.exception.EntityNotFoundException
-import com.hookiesolutions.webhookie.common.exception.ValidationException
+import com.hookiesolutions.webhookie.common.exception.*
 import com.hookiesolutions.webhookie.common.service.ReactiveObjectMapper
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.data.mapping.context.InvalidPersistentPropertyPath
@@ -117,6 +114,14 @@ class GlobalExceptionHandler(
       "source" to ex.source,
       "unresolvableSegment" to ex.unresolvableSegment,
       "resolvedPath" to ex.resolvedPath,
+    ).toMono()
+  }
+
+  @ExceptionHandler(RemoteServiceException::class)
+  @ResponseStatus(HttpStatus.BAD_GATEWAY)
+  fun handleRemoteServiceException(ex: RemoteServiceException): Mono<Any> {
+    return mutableMapOf(
+      "message" to ex.localizedMessage,
     ).toMono()
   }
 }

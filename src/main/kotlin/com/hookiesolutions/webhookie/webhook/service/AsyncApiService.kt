@@ -1,5 +1,6 @@
 package com.hookiesolutions.webhookie.webhook.service
 
+import com.hookiesolutions.webhookie.common.exception.RemoteServiceException
 import com.hookiesolutions.webhookie.webhook.service.model.AsyncApiSpec
 import com.hookiesolutions.webhookie.webhook.service.model.WebhookGroupRequest
 import org.slf4j.Logger
@@ -7,7 +8,9 @@ import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.WebClientRequestException
 import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.toMono
 
 /**
  *
@@ -29,6 +32,9 @@ class AsyncApiService(
       .retrieve()
       .bodyToMono(AsyncApiSpec::class.java)
       .doOnNext { log.info("AsyncAPI Spec parsed successfully. number of topics: '{}'", it.topics.size) }
-      .doOnError { log.error("AsyncAPI Spec parse error '{}'", it.message) }
+      .doOnError { log.error("AsyncAPI Spec parse error '{}'", it) }
+      .onErrorResume(WebClientRequestException::class.java) {
+        RemoteServiceException(it.localizedMessage).toMono()
+      }
   }
 }
