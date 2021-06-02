@@ -5,6 +5,7 @@ import com.hookiesolutions.webhookie.common.Constants.Channels.Admin.Companion.A
 import com.hookiesolutions.webhookie.common.Constants.Channels.Admin.Companion.ADMIN_PROVIDER_GROUP_DELETED_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Channels.Admin.Companion.ADMIN_PROVIDER_GROUP_UPDATED_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.SUBSCRIPTION_ACTIVATED_CHANNEL_NAME
+import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.SUBSCRIPTION_DEACTIVATED_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_PROVIDER
 import com.hookiesolutions.webhookie.common.message.entity.EntityDeletedMessage
 import com.hookiesolutions.webhookie.common.message.entity.EntityUpdatedMessage
@@ -133,10 +134,18 @@ class WebhookGroupService(
   }
 
   @ServiceActivator(inputChannel = SUBSCRIPTION_ACTIVATED_CHANNEL_NAME)
-  fun updateWebhookSubscribers(@Suppress("SpringJavaInjectionPointsAutowiringInspection") message: Message<String>) {
-    repository.increaseTopicSubscriptions(message.payload)
+  fun increaseWebhookSubscribers(@Suppress("SpringJavaInjectionPointsAutowiringInspection") message: Message<String>) {
+    repository.incTopicSubscriptions(message.payload, 1)
       .subscribe {
         log.info("Increased number of subscriptions for webhook: '{}'", message.payload)
+      }
+  }
+
+  @ServiceActivator(inputChannel = SUBSCRIPTION_DEACTIVATED_CHANNEL_NAME)
+  fun decreaseWebhookSubscribers(@Suppress("SpringJavaInjectionPointsAutowiringInspection") message: Message<String>) {
+    repository.incTopicSubscriptions(message.payload, -1)
+      .subscribe {
+        log.info("Decreased number of subscriptions for webhook: '{}'", message.payload)
       }
   }
 

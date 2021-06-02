@@ -8,7 +8,7 @@ import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Queries.Compani
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Queries.Companion.accessibleForProvider
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Queries.Companion.elemMatchByTopic
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Queries.Companion.webhookGroupTopicIs
-import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Updates.Companion.increaseNumberOfSubscriptions
+import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Updates.Companion.incNumberOfSubscriptions
 import com.hookiesolutions.webhookie.webhook.service.security.annotation.VerifyWebhookGroupReadAccess
 import com.hookiesolutions.webhookie.webhook.service.security.annotation.VerifyWebhookGroupWriteAccess
 import com.mongodb.client.result.UpdateResult
@@ -95,10 +95,10 @@ class WebhookGroupRepository(
       .map { it.topic }
   }
                                 
-  fun increaseTopicSubscriptions(topic: String): Mono<WebhookGroup> {
+  fun incTopicSubscriptions(topic: String, number: Int): Mono<WebhookGroup> {
     return mongoTemplate.update(WebhookGroup::class.java)
       .matching(query(elemMatchByTopic(topic)))
-      .apply(increaseNumberOfSubscriptions())
+      .apply(incNumberOfSubscriptions(number))
       .findAndModify()
   }
 

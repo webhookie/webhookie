@@ -40,6 +40,7 @@ class Constants {
         const val SUBSCRIPTION_ERROR_CHANNEL_NAME = "subscriptionErrorChannel"
         const val BLOCKED_SUBSCRIPTION_CHANNEL_NAME = "blockedSubscriptionChannel"
         const val SUBSCRIPTION_ACTIVATED_CHANNEL_NAME = "subscriptionActivatedChannel"
+        const val SUBSCRIPTION_DEACTIVATED_CHANNEL_NAME = "subscriptionDeactivatedChannel"
         const val NO_SUBSCRIPTION_CHANNEL_NAME = "noSubscriptionChannel"
       }
     }

@@ -35,6 +35,7 @@ import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
+import reactor.util.function.Tuples
 
 
 /**
@@ -56,6 +57,7 @@ class SubscriptionService(
   private val subscriptionValidator: SubscriptionValidator,
   private val unblockedSubscriptionChannel: MessageChannel,
   private val subscriptionActivatedChannel: MessageChannel,
+  private val subscriptionDeactivatedChannel: MessageChannel,
   private val webhookServiceDelegate: WebhookGroupServiceDelegate
 ) {
   @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")
@@ -181,6 +183,10 @@ class SubscriptionService(
       .zipWhen { stateManager.canBeDeactivated(it) }
       .flatMap { repository.statusUpdate(id, deactivated(timeMachine.now(), request.reason), it.t2) }
       .doOnNext { log.info("Subscription '{}' deactivated successfully", id) }
+      .doOnNext {
+        log.info("Decreasing no of subscriptions for '{}' ...", it.id, it.topic)
+        subscriptionDeactivatedChannel.send(MessageBuilder.withPayload(it.topic).build())
+      }
       .map { it.statusUpdate.status }
   }
 
@@ -191,9 +197,21 @@ class SubscriptionService(
     return repository
       .findByIdVerifyingProviderAccess(id)
       .zipWhen { stateManager.canBeSuspended(it) }
-      .flatMap { repository.statusUpdate(id, suspended(timeMachine.now(), request.reason), it.t2) }
+      .flatMap { data ->
+        repository.statusUpdate(id, suspended(timeMachine.now(), request.reason), data.t2)
+          .map { Tuples.of(data.t1, it) }
+      }
       .doOnNext { log.info("Subscription '{}' suspended successfully", id) }
-      .map { it.statusUpdate.status }
+      .doOnNext {
+        val updatedSubscription = it.t2
+        val oldSubscription = it.t1
+        if(oldSubscription.statusUpdate.status != SubscriptionStatus.DEACTIVATED) {
+          val topic = updatedSubscription.topic
+          log.info("Decreasing no of subscriptions for '{}' ...", updatedSubscription.id, topic)
+          subscriptionDeactivatedChannel.send(MessageBuilder.withPayload(topic).build())
+        }
+      }
+      .map { it.t2.statusUpdate.status }
   }
 
   @PreAuthorize("hasAuthority('$ROLE_PROVIDER')")

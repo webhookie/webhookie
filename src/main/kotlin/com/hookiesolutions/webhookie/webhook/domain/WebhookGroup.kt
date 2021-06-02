@@ -90,9 +90,9 @@ data class WebhookGroup(
 
   class Updates {
     companion object {
-      fun increaseNumberOfSubscriptions(): Update {
+      fun incNumberOfSubscriptions(number: Int): Update {
         return Update()
-          .inc(KEY_WEBHOOKS_No_OS_SUBSCRIPTIONS, 1)
+          .inc(KEY_WEBHOOKS_No_OS_SUBSCRIPTIONS, number)
       }
     }
   }
