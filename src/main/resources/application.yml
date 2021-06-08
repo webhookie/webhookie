@@ -6,9 +6,9 @@ webhookie:
       routing-key: ${WH_CONSUMER_MISSING_HEADER_ROUTING_KEY:wh-missing-header}
   subscription:
     retry:
-      max-retry: 3
-      initial-interval: 10
-      multiplier: 2
+      max-retry: ${WH_SUBSCRIPTION_RETRY_MAX:3}
+      initial-interval: ${WH_SUBSCRIPTION_RETRY_INITIAL_INTERVAL:10}
+      multiplier: ${WH_SUBSCRIPTION_RETRY_MULTIPLIER:2}
   security:
     audience: ${WH_SECURITY_AUD:account}
     client-id: ${WH_SECURITY_CLIENT_ID:webhookie-client}
