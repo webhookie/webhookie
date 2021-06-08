@@ -31,7 +31,6 @@ import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.aggregation.AddFieldsOperation
 import org.springframework.data.mongodb.core.aggregation.AggregationOperation
-import org.springframework.data.mongodb.core.aggregation.ArithmeticOperators
 import org.springframework.data.mongodb.core.aggregation.ArrayOperators
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query.query
@@ -94,10 +93,7 @@ class TraceRepository(
 
     val operations = arrayOf<AggregationOperation>(
       addMongoObjectToArrayField(tempKey, TraceStatusUpdate.ok(at)),
-      AddFieldsOperation
-        .addField(successKey)
-        .withValue(ArithmeticOperators.Add.valueOf(mongoField(successKey)).add(1))
-        .build(),
+      mongoIncOperation(successKey),
       AddFieldsOperation
         .addField(KEY_STATUS_HISTORY)
         .withValue(value)

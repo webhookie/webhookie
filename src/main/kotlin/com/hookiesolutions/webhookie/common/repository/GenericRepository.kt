@@ -154,6 +154,13 @@ abstract class GenericRepository<E: AbstractEntity>(
         .toValueOf(value)
     }
 
+    fun mongoIncOperation(key: String, value: Int = 1): AddFieldsOperation {
+      return AddFieldsOperation
+        .addField(key)
+        .withValue(ArithmeticOperators.Add.valueOf(mongoField(key)).add(value))
+        .build()
+    }
+
     fun mongoSetLastElemOfArray(arrayField: String, key: String): SetOperation {
       return SetOperation.set(key)
         .toValueOf(ArrayOperators.ArrayElemAt.arrayOf(mongoField(arrayField)).elementAt(-1))
