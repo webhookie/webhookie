@@ -140,7 +140,7 @@ class SpanService(
   private fun markAsRetrying(message: SignableSubscriptionMessage) {
     log.info("Marking  '{}', '{}' as Retrying. ", message.spanId, message.traceId)
     val time = timeMachine.now().plusSeconds(message.delay.seconds)
-    val retry = SpanRetry(time, message.numberOfRetries)
+    val retry = SpanRetry(time, message.totalNumberOfTries)
     val statusUpdate = SpanStatusUpdate.retrying(time)
     repository.retryStatusUpdate(message.spanId, statusUpdate, retry)
       .subscribe { logSpanStatus(it) }
@@ -149,7 +149,7 @@ class SpanService(
   private fun addRetry(message: SignableSubscriptionMessage) {
     log.info("Delaying '{}', '{}' span for '{}' seconds", message.spanId, message.traceId, message.delay.seconds)
     val time = timeMachine.now().plusSeconds(message.delay.seconds)
-    val retry = SpanRetry(time, message.numberOfRetries)
+    val retry = SpanRetry(time, message.totalNumberOfTries)
     repository.addRetry(message.spanId, retry)
       .subscribe { logSpanStatus(it) }
   }

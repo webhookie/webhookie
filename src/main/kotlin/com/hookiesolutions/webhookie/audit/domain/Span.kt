@@ -135,7 +135,8 @@ data class Span(
         spanId = spanId,
         subscription = SubscriptionDetails.from(subscription),
         lastStatus = statusUpdate,
-        statusHistory = listOf(statusUpdate)
+        statusHistory = listOf(statusUpdate),
+        retryHistory = setOf(SpanRetry(time, 1))
       )
     }
   }

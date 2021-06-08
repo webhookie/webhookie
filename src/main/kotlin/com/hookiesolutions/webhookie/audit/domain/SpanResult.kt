@@ -27,28 +27,28 @@ data class SpanResult (
       this.statusCode = message.response.status.value()
       this.body = message.response.body()
       this.headers = message.response.headers
-      this.retryNo = message.subscriptionMessage.numberOfRetries
+      this.retryNo = message.subscriptionMessage.totalNumberOfTries
     }
 
     fun message(message: PublisherRequestErrorMessage) = apply {
       this.statusCode = -1
       this.body = message.reason
       this.headers = message.headers
-      this.retryNo = message.subscriptionMessage.numberOfRetries
+      this.retryNo = message.subscriptionMessage.totalNumberOfTries
     }
 
     fun message(message: PublisherOtherErrorMessage) = apply {
       this.statusCode = -1
       this.body = message.reason
       this.headers = HttpHeaders()
-      this.retryNo = message.subscriptionMessage.numberOfRetries
+      this.retryNo = message.subscriptionMessage.totalNumberOfTries
     }
 
     fun message(message: PublisherResponseErrorMessage) = apply {
       this.statusCode = message.response.status.value()
       this.body = message.response.body()
       this.headers = message.response.headers
-      this.retryNo = message.subscriptionMessage.numberOfRetries
+      this.retryNo = message.subscriptionMessage.totalNumberOfTries
     }
 
     fun build(): SpanResult {
