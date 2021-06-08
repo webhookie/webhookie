@@ -12,6 +12,7 @@ import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SPAN_E
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SPAN_ID
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SPAN_TOPIC
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_STATUS_HISTORY
+import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_TOTAL_NUMBER_OF_TRIES
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_TRACE_ID
 import com.hookiesolutions.webhookie.audit.domain.Span.Queries.Companion.applicationsIn
 import com.hookiesolutions.webhookie.audit.domain.Span.Queries.Companion.bySpanId
@@ -65,34 +66,47 @@ class SpanRepository(
     return findBySpanId(spanId)
   }
 
-  fun addStatusUpdate(
-    spanId: String,
-    spanStatusUpdate: SpanStatusUpdate,
-    retry: SpanRetry? = null,
-    response: SpanResult? = null
-  ): Mono<Span> {
+  private fun statusUpdateOperations(spanStatusUpdate: SpanStatusUpdate): Array<AggregationOperation> {
     val updateAsArrayKey = "updateAsArray"
 
-    val operations: MutableList<AggregationOperation> = mutableListOf(
+    return arrayOf(
       addMongoObjectToArrayField(updateAsArrayKey, spanStatusUpdate),
       mongoSet(KEY_STATUS_HISTORY, concatArrays(KEY_STATUS_HISTORY, updateAsArrayKey)),
       mongoSet(KEY_LAST_STATUS, spanStatusUpdate),
       mongoUnset(updateAsArrayKey)
     )
+  }
 
-    if (retry != null) {
-      operations.addAll(addRetryOperations(retry))
-    }
+  fun responseStatusUpdate(
+    spanId: String,
+    spanStatusUpdate: SpanStatusUpdate,
+    response: SpanResult
+  ): Mono<Span> {
+    return updateSpan(spanId, *statusUpdateOperations(spanStatusUpdate), *addResponseOperations(response))
+  }
 
-    if (response != null) {
-      operations.addAll(addResponseOperations(response))
-    }
+  fun retryStatusUpdate(
+    spanId: String,
+    spanStatusUpdate: SpanStatusUpdate,
+    retry: SpanRetry
+  ): Mono<Span> {
+    return updateSpan(
+      spanId,
+      *statusUpdateOperations(spanStatusUpdate),
+      *addRetryOperations(retry),
+      mongoIncOperation(KEY_TOTAL_NUMBER_OF_TRIES)
+    )
+  }
 
-    return updateSpan(spanId, *operations.toTypedArray())
+  fun addStatusUpdate(
+    spanId: String,
+    spanStatusUpdate: SpanStatusUpdate
+  ): Mono<Span> {
+    return updateSpan(spanId, *statusUpdateOperations(spanStatusUpdate))
   }
 
   fun addRetry(spanId: String, retry: SpanRetry): Mono<Span> {
-    return updateSpan(spanId, *addRetryOperations(retry))
+    return updateSpan(spanId, *addRetryOperations(retry), mongoIncOperation(KEY_TOTAL_NUMBER_OF_TRIES))
   }
 
   fun updateWithResponse(spanId: String, response: SpanResult): Mono<Span> {

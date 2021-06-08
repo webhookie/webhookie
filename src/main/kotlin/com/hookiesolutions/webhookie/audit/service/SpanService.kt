@@ -4,6 +4,11 @@ import com.hookiesolutions.webhookie.audit.domain.*
 import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate.Companion.notOk
 import com.hookiesolutions.webhookie.audit.web.model.request.SpanRequest
 import com.hookiesolutions.webhookie.audit.web.model.request.TraceRequest
+import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.HEADER_CONTENT_TYPE
+import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_RESENT
+import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_SPAN_ID
+import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_TOPIC
+import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_TRACE_ID
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_ADMIN
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_CONSUMER
 import com.hookiesolutions.webhookie.common.exception.EntityExistsException
@@ -17,6 +22,8 @@ import com.hookiesolutions.webhookie.common.service.TimeMachine
 import com.hookiesolutions.webhookie.webhook.service.WebhookGroupServiceDelegate
 import org.slf4j.Logger
 import org.springframework.data.domain.Pageable
+import org.springframework.messaging.MessageChannel
+import org.springframework.messaging.support.MessageBuilder
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
@@ -50,7 +57,7 @@ class SpanService(
   }
 
   fun retrying(message: SignableSubscriptionMessage) {
-    if(message.numberOfRetries == 1) {
+    if(message.isFirstRetry()) {
       markAsRetrying(message)
     } else {
       addRetry(message)
@@ -70,7 +77,11 @@ class SpanService(
 
         saveOrFetch(span)
       }
-      .subscribe { log.debug("'{}', '{}' Span was updated to: '{}'", it.spanId, it.traceId, it.lastStatus) }
+      .subscribe { logSpanStatus(it) }
+  }
+
+  private fun logSpanStatus(it: Span) {
+    log.debug("'{}', '{}' Span was updated to: '{}'", it.spanId, it.traceId, it.lastStatus)
   }
 
   fun updateWithServerError(message: PublisherResponseErrorMessage) {
@@ -108,7 +119,7 @@ class SpanService(
       .message(message)
       .build()
 
-    repository.addStatusUpdate(message.spanId, notOk(time), response = response)
+    repository.responseStatusUpdate(message.spanId, notOk(time), response)
       .subscribe { log.info("'{}', '{}' Span was updated with other error response: '{}'", it.spanId, it.traceId, it.latestResult?.statusCode) }
   }
 
@@ -122,7 +133,7 @@ class SpanService(
       .message(message)
       .build()
 
-    repository.addStatusUpdate(message.spanId, statusUpdate, response = response)
+    repository.responseStatusUpdate(message.spanId, statusUpdate, response)
       .subscribe { log.debug("'{}', '{}' Span was updated with server response: '{}'", it.spanId, it.traceId, it.latestResult?.statusCode) }
   }
 
@@ -131,8 +142,8 @@ class SpanService(
     val time = timeMachine.now().plusSeconds(message.delay.seconds)
     val retry = SpanRetry(time, message.numberOfRetries)
     val statusUpdate = SpanStatusUpdate.retrying(time)
-    repository.addStatusUpdate(message.spanId, statusUpdate, retry = retry)
-      .subscribe { log.debug("'{}', '{}' Span was updated to: '{}'", it.spanId, it.traceId, it.lastStatus) }
+    repository.retryStatusUpdate(message.spanId, statusUpdate, retry)
+      .subscribe { logSpanStatus(it) }
   }
 
   private fun addRetry(message: SignableSubscriptionMessage) {
@@ -140,7 +151,7 @@ class SpanService(
     val time = timeMachine.now().plusSeconds(message.delay.seconds)
     val retry = SpanRetry(time, message.numberOfRetries)
     repository.addRetry(message.spanId, retry)
-      .subscribe { log.debug("'{}', '{}' Span was updated to: '{}'", it.spanId, it.traceId, it.lastStatus) }
+      .subscribe { logSpanStatus(it) }
   }
 
   private fun saveOrFetch(span: Span): Mono<Span> {

@@ -48,7 +48,8 @@ class ConversionsFactory(
     return UnsignedSubscriptionMessage(
       originalMessage = bsm.consumerMessage,
       spanId = bsm.spanId,
-      subscription = bsm.subscription
+      subscription = bsm.subscription,
+      totalNumberOfTries = bsm.totalNumberOfTries + 1
     )
   }
 
@@ -71,6 +72,7 @@ class ConversionsFactory(
       dto.spanId,
       dto.consumerMessage,
       dto.subscription,
+      dto.totalNumberOfTries,
       dto.blockedDetails
     )
   }
@@ -85,6 +87,7 @@ class ConversionsFactory(
       errorMessage.spanId,
       originalMessage,
       errorMessage.subscriptionMessage.subscription,
+      errorMessage.subscriptionMessage.totalNumberOfTries,
       statusUpdate
     )
   }
@@ -100,6 +103,7 @@ class ConversionsFactory(
       message.spanId,
       originalMessage,
       message.subscription,
+      message.totalNumberOfTries,
       blocked(at, reason)
     )
   }
@@ -113,6 +117,7 @@ class ConversionsFactory(
     subscription = subscriptionMessage.subscription,
     delay = subscriptionMessage.delay,
     numberOfRetries = subscriptionMessage.numberOfRetries,
+    totalNumberOfTries = subscriptionMessage.totalNumberOfTries,
     signature = signature,
   )
 

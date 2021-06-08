@@ -12,11 +12,7 @@ import com.hookiesolutions.webhookie.common.exception.messaging.SubscriptionMess
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.message.WebhookieMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherErrorMessage
-import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscriptionMessageDTO
-import com.hookiesolutions.webhookie.common.message.subscription.GenericSubscriptionMessage
-import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
-import com.hookiesolutions.webhookie.common.message.subscription.SignedSubscriptionMessage
-import com.hookiesolutions.webhookie.common.message.subscription.UnsignedSubscriptionMessage
+import com.hookiesolutions.webhookie.common.message.subscription.*
 import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Keys.Companion.KEY_STATUS
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionStatus
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
@@ -52,6 +48,11 @@ import reactor.core.publisher.Mono
  */
 @Configuration
 class SubscriptionFlows(
+  private val delaySubscriptionChannel: MessageChannel,
+  private val blockedSubscriptionChannel: MessageChannel,
+  private val signSubscriptionMessageChannel: MessageChannel,
+  private val globalSubscriptionErrorChannel: MessageChannel,
+  private val subscriptionChannel: MessageChannel,
   private val log: Logger
 ) {
   @Bean
@@ -62,11 +63,7 @@ class SubscriptionFlows(
     toBlockedSubscriptionMessageDTO: GenericTransformer<UnsignedSubscriptionMessage, BlockedSubscriptionMessageDTO>,
     toBeSignedWorkingSubscription: (GenericSubscriptionMessage) -> Boolean,
     nonSignableWorkingSubscription: (GenericSubscriptionMessage) -> Boolean,
-    signSubscriptionMessageChannel: MessageChannel,
-    delaySubscriptionChannel: MessageChannel,
-    globalSubscriptionErrorChannel: MessageChannel,
     noSubscriptionChannel: MessageChannel,
-    blockedSubscriptionChannel: MessageChannel
   ): IntegrationFlow {
     return integrationFlow {
       channel(CONSUMER_CHANNEL_NAME)
@@ -95,10 +92,7 @@ class SubscriptionFlows(
   }
 
   @Bean
-  fun delayMessageFlow(
-    delaySubscriptionChannel: MessageChannel,
-    subscriptionChannel: MessageChannel
-  ): IntegrationFlow {
+  fun delayMessageFlow(): IntegrationFlow {
     return integrationFlow {
       channel(delaySubscriptionChannel)
       delay("delay-message-group") {
@@ -115,10 +109,7 @@ class SubscriptionFlows(
   }
 
   @Bean
-  fun subscriptionErrorHandler(
-    globalSubscriptionErrorChannel: MessageChannel,
-    subscriptionErrorChannel: MessageChannel
-  ): IntegrationFlow {
+  fun subscriptionErrorHandler(subscriptionErrorChannel: MessageChannel): IntegrationFlow {
     return integrationFlow {
       channel(globalSubscriptionErrorChannel)
       routeToRecipients {
@@ -155,8 +146,6 @@ class SubscriptionFlows(
   @Bean
   fun retrySubscriptionFlow(
     retrySubscriptionChannel: MessageChannel,
-    signSubscriptionMessageChannel: MessageChannel,
-    delaySubscriptionChannel: MessageChannel,
     toDelayedSignableSubscriptionMessage: GenericTransformer<PublisherErrorMessage, SignableSubscriptionMessage>
   ): IntegrationFlow {
     return integrationFlow {
@@ -173,7 +162,6 @@ class SubscriptionFlows(
   fun unsuccessfulSubscriptionFlow(
     blockSubscription: GenericTransformer<PublisherErrorMessage, Mono<BlockedSubscriptionMessageDTO>>,
     unsuccessfulSubscriptionChannel: MessageChannel,
-    blockedSubscriptionChannel: MessageChannel
   ): IntegrationFlow {
     return integrationFlow {
       channel(unsuccessfulSubscriptionChannel)
@@ -185,7 +173,6 @@ class SubscriptionFlows(
 
   @Bean
   fun blockedSubscriptionMessageFlow(
-    blockedSubscriptionChannel: MessageChannel,
     saveBlockedMessage: GenericTransformer<BlockedSubscriptionMessageDTO, Mono<BlockedSubscriptionMessage>>
   ): IntegrationFlow {
     return integrationFlow {
@@ -224,7 +211,6 @@ class SubscriptionFlows(
   fun resendBlockedMessageFlow(
     resendBlockedMessageChannel: FluxMessageChannel,
     signSubscriptionMessageChannel: MessageChannel,
-    subscriptionChannel: MessageChannel,
     toSignableSubscriptionMessageReloadingSubscription: GenericTransformer<BlockedSubscriptionMessage, Mono<SignableSubscriptionMessage>>,
     deleteBlockedMessage: GenericTransformer<BlockedSubscriptionMessage, Mono<BlockedSubscriptionMessage>>
   ): IntegrationFlow {
@@ -254,7 +240,6 @@ class SubscriptionFlows(
   fun signSubscriptionFlow(
     signSubscriptionMessageChannel: MessageChannel,
     signSubscriptionMessage: GenericTransformer<SignableSubscriptionMessage, Mono<SignableSubscriptionMessage>>,
-    delaySubscriptionChannel: MessageChannel
   ): IntegrationFlow {
     return integrationFlow {
       channel(signSubscriptionMessageChannel)
@@ -264,28 +249,27 @@ class SubscriptionFlows(
     }
   }
 
-  @Suppress("unused")
-  /**
-   * this is how to use it:
-   *     return integrationFlow(unblockSubscriptionMongoEvent(mongoTemplate)) {
-   */
-  private fun unblockSubscriptionMongoEvent(
-    mongoTemplate: ReactiveMongoTemplate
-  ): MongoDbChangeStreamMessageProducerSpec {
-    val key = "updateDescription.updatedFields.${KEY_STATUS_UPDATE}.${KEY_STATUS}"
-    val match = Aggregation.match(
-      where("operationType")
-        .`is`(OperationType.UPDATE.value)
-        .andOperator(where(key).`is`(SubscriptionStatus.ACTIVATED))
-    )
-    val changeStreamOptions = ChangeStreamOptions.builder()
-      .fullDocumentLookup(FullDocument.UPDATE_LOOKUP)
-      .filter(Aggregation.newAggregation(match))
-      .build()
-    return MongoDb
-      .changeStreamInboundChannelAdapter(mongoTemplate)
-      .domainType(Subscription::class.java)
-      .options(changeStreamOptions)
-      .extractBody(true)
-  }
+}
+
+/**
+ * this is how to use it:
+ *     return integrationFlow(unblockSubscriptionMongoEvent(mongoTemplate)) {
+ */
+@Suppress("unused")
+private fun SubscriptionFlows.unblockSubscriptionMongoEvent(mongoTemplate: ReactiveMongoTemplate): MongoDbChangeStreamMessageProducerSpec {
+  val key = "updateDescription.updatedFields.${KEY_STATUS_UPDATE}.${KEY_STATUS}"
+  val match = Aggregation.match(
+    where("operationType")
+      .`is`(OperationType.UPDATE.value)
+      .andOperator(where(key).`is`(SubscriptionStatus.ACTIVATED))
+  )
+  val changeStreamOptions = ChangeStreamOptions.builder()
+    .fullDocumentLookup(FullDocument.UPDATE_LOOKUP)
+    .filter(Aggregation.newAggregation(match))
+    .build()
+  return MongoDb
+    .changeStreamInboundChannelAdapter(mongoTemplate)
+    .domainType(Subscription::class.java)
+    .options(changeStreamOptions)
+    .extractBody(true)
 }

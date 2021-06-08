@@ -25,7 +25,6 @@ data class SpanResponse(
   companion object {
     fun from(span: Span): SpanResponse {
       val responseCode = span.latestResult?.statusCode ?: -1
-      val numberOfTries = span.retryHistory.size + 1
       return SpanResponse(
         span.traceId,
         span.spanId,
@@ -35,7 +34,7 @@ data class SpanResponse(
         span.subscription.callback,
         responseCode,
         span.lastStatus,
-        numberOfTries,
+        span.totalNumberOfTries,
         span.nextRetry
       )
     }

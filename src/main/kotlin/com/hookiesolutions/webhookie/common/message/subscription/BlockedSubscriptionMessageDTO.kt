@@ -15,6 +15,7 @@ data class BlockedSubscriptionMessageDTO(
   override val spanId: String,
   val consumerMessage: ConsumerMessage,
   val subscription: SubscriptionDTO,
+  val totalNumberOfTries: Int,
   val blockedDetails: StatusUpdate
 ): WebhookieSpanMessage {
   val topic: String

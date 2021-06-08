@@ -43,6 +43,7 @@ data class Span(
   @Indexed(name = "span_spanId", unique = true)
   val spanId: String,
   val subscription: SubscriptionDetails,
+  val totalNumberOfTries: Int = 1,
   val lastStatus: SpanStatusUpdate,
   val statusHistory: List<SpanStatusUpdate> = emptyList(),
   val nextRetry: SpanRetry? = null,
@@ -92,6 +93,7 @@ data class Span(
       const val KEY_NEXT_RETRY = "nextRetry"
       const val KEY_RETRY_HISTORY = "retryHistory"
       const val KEY_LATEST_RESULT = "latestResult"
+      const val KEY_TOTAL_NUMBER_OF_TRIES = "totalNumberOfTries"
 
       val KEY_SPAN_TOPIC = fieldName(KEY_SUBSCRIPTION, KEY_TOPIC)
       val KEY_SPAN_APPLICATION_ID = fieldName(KEY_SUBSCRIPTION, KEY_APPLICATION, KEY_APPLICATION_ID)

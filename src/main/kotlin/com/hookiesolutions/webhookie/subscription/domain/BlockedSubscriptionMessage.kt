@@ -25,6 +25,7 @@ data class BlockedSubscriptionMessage(
   val spanId: String,
   val consumerMessage: ConsumerMessage,
   val subscription: SubscriptionDTO,
+  val totalNumberOfTries: Int,
   val blockedDetails: StatusUpdate
 ): AbstractEntity() {
   fun traceId(): String = consumerMessage.traceId
