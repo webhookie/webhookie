@@ -6,6 +6,7 @@ import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SPAN_T
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SUBSCRIPTION
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_TRACE_ID
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.SPAN_COLLECTION_NAME
+import com.hookiesolutions.webhookie.audit.domain.SpanRetry.Companion.SENT_BY_WEBHOOKIE
 import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate.Keys.Companion.KEY_STATUS
 import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate.Keys.Companion.KEY_TIME
 import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscriptionMessageDTO
@@ -110,11 +111,15 @@ data class Span(
     private lateinit var subscription: SubscriptionDTO
     private var status: SpanStatus = SpanStatus.PROCESSING
     private lateinit var time: Instant
+    private lateinit var sendBy: String
+    private lateinit var sendReason: SpanSendReason
 
     fun message(message: SignableSubscriptionMessage) = apply {
       this.traceId = message.traceId
       this.spanId = message.spanId
       this.subscription = message.subscription
+      this.sendBy = SENT_BY_WEBHOOKIE
+      this.sendReason = SpanSendReason.SEND
     }
 
     fun message(message: BlockedSubscriptionMessageDTO) = apply {
@@ -136,7 +141,7 @@ data class Span(
         subscription = SubscriptionDetails.from(subscription),
         lastStatus = statusUpdate,
         statusHistory = listOf(statusUpdate),
-        retryHistory = setOf(SpanRetry(time, 1))
+        retryHistory = setOf(SpanRetry(time, 1, sendBy, sendReason))
       )
     }
   }

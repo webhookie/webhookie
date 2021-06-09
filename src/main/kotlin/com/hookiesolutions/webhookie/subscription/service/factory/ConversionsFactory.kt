@@ -49,7 +49,7 @@ class ConversionsFactory(
       originalMessage = bsm.consumerMessage,
       spanId = bsm.spanId,
       subscription = bsm.subscription,
-      totalNumberOfTries = bsm.totalNumberOfTries + 1
+      totalNumberOfTries = bsm.totalNumberOfTries
     )
   }
 

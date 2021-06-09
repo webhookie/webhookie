@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.integration.dsl.IntegrationFlow
 import org.springframework.integration.dsl.integrationFlow
+import org.springframework.messaging.Message
 import org.springframework.messaging.MessageHeaders
 
 /**
@@ -44,7 +45,7 @@ class SpanFlows(
     return integrationFlow {
       channel(DELAYED_SUBSCRIPTION_CHANNEL_NAME)
       filter<SignableSubscriptionMessage> { !it.isNew() }
-      handle { payload: SignableSubscriptionMessage, _: MessageHeaders ->
+      handle { payload: Message<SignableSubscriptionMessage>, _: MessageHeaders ->
         spanService.retrying(payload)
       }
     }

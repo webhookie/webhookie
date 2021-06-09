@@ -1,6 +1,7 @@
 package com.hookiesolutions.webhookie.audit.service
 
 import com.hookiesolutions.webhookie.audit.domain.*
+import com.hookiesolutions.webhookie.audit.domain.SpanRetry.Companion.SENT_BY_WEBHOOKIE
 import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate.Companion.notOk
 import com.hookiesolutions.webhookie.audit.web.model.request.SpanRequest
 import com.hookiesolutions.webhookie.audit.web.model.request.TraceRequest
@@ -22,6 +23,8 @@ import com.hookiesolutions.webhookie.common.service.TimeMachine
 import com.hookiesolutions.webhookie.webhook.service.WebhookGroupServiceDelegate
 import org.slf4j.Logger
 import org.springframework.data.domain.Pageable
+import org.springframework.integration.core.MessageSelector
+import org.springframework.messaging.Message
 import org.springframework.messaging.MessageChannel
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.security.access.prepost.PreAuthorize
@@ -41,6 +44,7 @@ class SpanService(
   private val traceRepository: TraceRepository,
   private val timeMachine: TimeMachine,
   private val webhookServiceDelegate: WebhookGroupServiceDelegate,
+  private val unblockedMessageSelector: MessageSelector,
   private val subscriptionServiceDelegate: SubscriptionServiceDelegate,
   private val log: Logger
 ) {
@@ -56,11 +60,11 @@ class SpanService(
       .subscribe { log.debug("'{}', '{}' span was saved/fetched", it.spanId, it.traceId) }
   }
 
-  fun retrying(message: SignableSubscriptionMessage) {
-    if(message.isFirstRetry()) {
+  fun retrying(message: Message<SignableSubscriptionMessage>) {
+    if(message.payload.isFirstRetry()) {
       markAsRetrying(message)
     } else {
-      addRetry(message)
+      addRetry(message.payload)
     }
   }
 
@@ -137,19 +141,25 @@ class SpanService(
       .subscribe { log.debug("'{}', '{}' Span was updated with server response: '{}'", it.spanId, it.traceId, it.latestResult?.statusCode) }
   }
 
-  private fun markAsRetrying(message: SignableSubscriptionMessage) {
-    log.info("Marking  '{}', '{}' as Retrying. ", message.spanId, message.traceId)
-    val time = timeMachine.now().plusSeconds(message.delay.seconds)
-    val retry = SpanRetry(time, message.totalNumberOfTries)
+  private fun markAsRetrying(message: Message<SignableSubscriptionMessage>) {
+    val payload = message.payload
+    log.info("Marking  '{}', '{}' as Retrying. ", payload.spanId, payload.traceId)
+    val time = timeMachine.now().plusSeconds(payload.delay.seconds)
+    val reason = if(unblockedMessageSelector.accept(message)) {
+      SpanSendReason.UNBLOCK
+    } else {
+      SpanSendReason.RETRY
+    }
+    val retry = SpanRetry(time, payload.totalNumberOfTries, SENT_BY_WEBHOOKIE, reason)
     val statusUpdate = SpanStatusUpdate.retrying(time)
-    repository.retryStatusUpdate(message.spanId, statusUpdate, retry)
+    repository.retryStatusUpdate(payload.spanId, statusUpdate, retry)
       .subscribe { logSpanStatus(it) }
   }
 
   private fun addRetry(message: SignableSubscriptionMessage) {
     log.info("Delaying '{}', '{}' span for '{}' seconds", message.spanId, message.traceId, message.delay.seconds)
     val time = timeMachine.now().plusSeconds(message.delay.seconds)
-    val retry = SpanRetry(time, message.totalNumberOfTries)
+    val retry = SpanRetry(time, message.totalNumberOfTries, SENT_BY_WEBHOOKIE, SpanSendReason.RETRY)
     repository.addRetry(message.spanId, retry)
       .subscribe { logSpanStatus(it) }
   }
