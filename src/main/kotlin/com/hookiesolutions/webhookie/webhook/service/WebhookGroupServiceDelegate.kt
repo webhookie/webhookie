@@ -29,7 +29,7 @@ class WebhookGroupServiceDelegate(
       .map { it.hasAdminAuthority() }
       .zipWhen { isAdmin ->
         return@zipWhen if(isAdmin) {
-          log.info("Fetching all traces form ADMIN")
+          log.info("Fetching all topics form ADMIN")
           emptyList<String>().toMono()
         } else {
           providerTopics()
