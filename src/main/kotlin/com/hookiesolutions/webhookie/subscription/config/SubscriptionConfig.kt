@@ -4,8 +4,6 @@ import com.hookiesolutions.webhookie.common.exception.messaging.SubscriptionMess
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.message.publisher.GenericPublisherMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherErrorMessage
-import com.hookiesolutions.webhookie.common.message.publisher.PublisherRequestErrorMessage
-import com.hookiesolutions.webhookie.common.message.publisher.PublisherResponseErrorMessage
 import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscriptionMessageDTO
 import com.hookiesolutions.webhookie.common.message.subscription.GenericSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.NoSubscriptionMessage
@@ -15,8 +13,8 @@ import com.hookiesolutions.webhookie.common.message.subscription.UnsignedSubscri
 import com.hookiesolutions.webhookie.common.service.TimeMachine
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
-import com.hookiesolutions.webhookie.subscription.service.factory.ConversionsFactory
 import com.hookiesolutions.webhookie.subscription.service.SubscriptionService
+import com.hookiesolutions.webhookie.subscription.service.factory.ConversionsFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.integration.core.GenericSelector
@@ -37,17 +35,6 @@ class SubscriptionConfig(
   private val factory: ConversionsFactory,
   private val subscriptionService: SubscriptionService
 ) {
-  @Bean
-  fun retryableErrorSelector(): GenericSelector<GenericPublisherMessage> {
-    return GenericSelector {
-      it is PublisherRequestErrorMessage || (
-        it is PublisherResponseErrorMessage && (
-          it.response.is5xxServerError() || it.response.isNotFound()
-        )
-      )
-    }
-  }
-
   @Bean
   fun delayCalculator(
     properties: SubscriptionProperties

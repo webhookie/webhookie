@@ -30,6 +30,6 @@ data class SpanStatusUpdate(
     fun ok(at: Instant): SpanStatusUpdate = SpanStatusUpdate(SpanStatus.OK, at)
     fun notOk(at: Instant): SpanStatusUpdate = SpanStatusUpdate(SpanStatus.NOT_OK, at)
     fun blocked(at: Instant): SpanStatusUpdate = SpanStatusUpdate(SpanStatus.BLOCKED, at)
-    fun retrying(at: Instant): SpanStatusUpdate = SpanStatusUpdate(SpanStatus.RETRYING, at)
+    fun retryingSpan(at: Instant): SpanStatusUpdate = SpanStatusUpdate(SpanStatus.RETRYING, at)
   }
 }

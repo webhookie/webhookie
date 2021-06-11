@@ -7,8 +7,10 @@ import com.hookiesolutions.webhookie.audit.domain.SpanRetry
 import com.hookiesolutions.webhookie.audit.domain.SpanRetry.Companion.SENT_BY_WEBHOOKIE
 import com.hookiesolutions.webhookie.audit.domain.SpanSendReason
 import com.hookiesolutions.webhookie.audit.domain.SpanStatus
-import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate
+import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate.Companion.blocked
 import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate.Companion.notOk
+import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate.Companion.ok
+import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate.Companion.retryingSpan
 import com.hookiesolutions.webhookie.audit.domain.TraceRepository
 import com.hookiesolutions.webhookie.audit.web.model.request.SpanRequest
 import com.hookiesolutions.webhookie.audit.web.model.request.TraceRequest
@@ -21,6 +23,7 @@ import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_ADMIN
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_CONSUMER
 import com.hookiesolutions.webhookie.common.exception.EntityExistsException
+import com.hookiesolutions.webhookie.common.message.publisher.GenericPublisherMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherOtherErrorMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherRequestErrorMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherResponseErrorMessage
@@ -33,6 +36,7 @@ import com.hookiesolutions.webhookie.security.service.SecurityHandler
 import com.hookiesolutions.webhookie.webhook.service.WebhookGroupServiceDelegate
 import org.slf4j.Logger
 import org.springframework.data.domain.Pageable
+import org.springframework.integration.core.GenericSelector
 import org.springframework.messaging.Message
 import org.springframework.messaging.MessageChannel
 import org.springframework.messaging.support.MessageBuilder
@@ -58,6 +62,7 @@ class SpanService(
   private val subscriptionServiceDelegate: SubscriptionServiceDelegate,
   private val resendSpanChannel: MessageChannel,
   private val securityHandler: SecurityHandler,
+  private val retryableErrorSelector: GenericSelector<GenericPublisherMessage>,
   private val log: Logger
 ) {
   fun createSpan(message: SignableSubscriptionMessage) {
@@ -82,13 +87,13 @@ class SpanService(
 
   fun blockSpan(message: BlockedSubscriptionMessageDTO) {
     log.info("Blocking '{}', '{}' span. reason:", message.spanId, message.traceId, message.blockedDetails.reason)
-    val statusUpdate = SpanStatusUpdate.blocked(timeMachine.now())
-    repository.addStatusUpdate(message.spanId, statusUpdate)
+    val at = timeMachine.now()
+    repository.addStatusUpdate(message.spanId, blocked(at))
       .switchIfEmpty {
         val span = Span.Builder()
           .message(message)
           .status(SpanStatus.BLOCKED)
-          .time(timeMachine.now())
+          .time(at)
           .build()
 
         saveOrFetch(span)
@@ -101,16 +106,21 @@ class SpanService(
   }
 
   fun updateWithServerError(message: PublisherResponseErrorMessage) {
-      log.info("Updating span '{}', '{}' with server error", message.spanId, message.traceId, message.response.status)
-      val time = timeMachine.now()
+    log.info("Updating span '{}', '{}' with server error", message.spanId, message.traceId, message.response.status)
+    val time = timeMachine.now()
 
-      val response = SpanResult.Builder()
-        .time(time)
-        .message(message)
-        .build()
+    val response = SpanResult.Builder()
+      .time(time)
+      .message(message)
+      .build()
 
+    if(retryableErrorSelector.accept(message)) {
       repository.updateWithResponse(message.spanId, response)
         .subscribe { log.info("'{}', '{}' Span was updated with server response: '{}'", it.spanId, it.traceId, it.latestResult) }
+    } else {
+      repository.responseStatusUpdate(message.spanId, notOk(time), response)
+        .subscribe { log.info("'{}', '{}' Span was updated with other error response: '{}'", it.spanId, it.traceId, it.latestResult?.statusCode) }
+    }
   }
 
   fun updateWithClientError(message: PublisherRequestErrorMessage) {
@@ -143,13 +153,12 @@ class SpanService(
     log.info("Updating span '{}', '{}' with SUCCESS", message.spanId, message.traceId, message.response.status)
     val time = timeMachine.now()
 
-    val statusUpdate = SpanStatusUpdate.ok(timeMachine.now())
     val response = SpanResult.Builder()
       .time(time)
       .message(message)
       .build()
 
-    repository.responseStatusUpdate(message.spanId, statusUpdate, response)
+    repository.responseStatusUpdate(message.spanId, ok(time), response)
       .subscribe { log.debug("'{}', '{}' Span was updated with server response: '{}'", it.spanId, it.traceId, it.latestResult?.statusCode) }
   }
 
@@ -159,9 +168,8 @@ class SpanService(
     val time = timeMachine.now()
       .plusSeconds(payload.delay.seconds)
     val details = factory.calculateSpanSendDetails(message)
-    val statusUpdate = SpanStatusUpdate.retrying(time)
     val retry = SpanRetry(time, payload.totalNumberOfTries, payload.numberOfRetries, details.t2, details.t1)
-    repository.retryStatusUpdate(payload.spanId, statusUpdate, retry)
+    repository.retryStatusUpdate(payload.spanId, retryingSpan(time), retry)
       .subscribe { logSpanStatus(it) }
   }
 
