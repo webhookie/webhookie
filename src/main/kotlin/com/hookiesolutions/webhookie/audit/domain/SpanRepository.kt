@@ -66,6 +66,14 @@ class SpanRepository(
     return findBySpanId(spanId)
   }
 
+  @VerifySpanReadAccess
+  fun spanByIdAndStatus(spanId: String, statusList: List<SpanStatus>): Mono<Span> {
+    return mongoTemplate.findOne(
+      query(Criteria().andOperator(bySpanId(spanId), statusIn(statusList))),
+      Span::class.java
+    )
+  }
+
   private fun statusUpdateOperations(spanStatusUpdate: SpanStatusUpdate): Array<AggregationOperation> {
     val updateAsArrayKey = "updateAsArray"
 

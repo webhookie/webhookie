@@ -113,6 +113,7 @@ data class Span(
     private lateinit var time: Instant
     private lateinit var sendBy: String
     private lateinit var sendReason: SpanSendReason
+    private lateinit var retryNo: Number
 
     fun message(message: SignableSubscriptionMessage) = apply {
       this.traceId = message.traceId
@@ -120,12 +121,16 @@ data class Span(
       this.subscription = message.subscription
       this.sendBy = SENT_BY_WEBHOOKIE
       this.sendReason = SpanSendReason.SEND
+      this.retryNo = message.numberOfRetries
     }
 
     fun message(message: BlockedSubscriptionMessageDTO) = apply {
       this.traceId = message.traceId
       this.spanId = message.spanId
       this.subscription = message.subscription
+      this.sendBy = SENT_BY_WEBHOOKIE
+      this.sendReason = SpanSendReason.SEND
+      this.retryNo = message.numberOfRetries
     }
 
     fun traceId(traceId: String) = apply { this.traceId = traceId }
@@ -141,7 +146,7 @@ data class Span(
         subscription = SubscriptionDetails.from(subscription),
         lastStatus = statusUpdate,
         statusHistory = listOf(statusUpdate),
-        retryHistory = setOf(SpanRetry(time, 1, sendBy, sendReason))
+        retryHistory = setOf(SpanRetry(time, 1, retryNo.toInt(), sendBy, sendReason))
       )
     }
   }

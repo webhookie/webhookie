@@ -22,4 +22,9 @@ class AuditChannels {
   fun increaseSuccessChannel(): MessageChannel = MessageChannels
     .publishSubscribe(Executors.newCachedThreadPool())
     .get()
+
+  @Bean
+  fun resendSpanChannel(): MessageChannel = MessageChannels
+    .publishSubscribe(Executors.newCachedThreadPool())
+    .get()
 }

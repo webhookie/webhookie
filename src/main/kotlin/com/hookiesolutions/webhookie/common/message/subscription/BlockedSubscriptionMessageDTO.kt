@@ -16,6 +16,7 @@ data class BlockedSubscriptionMessageDTO(
   val consumerMessage: ConsumerMessage,
   val subscription: SubscriptionDTO,
   val totalNumberOfTries: Int,
+  val numberOfRetries: Int,
   val blockedDetails: StatusUpdate
 ): WebhookieSpanMessage {
   val topic: String

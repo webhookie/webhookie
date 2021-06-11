@@ -1,11 +1,19 @@
 package com.hookiesolutions.webhookie.audit.service
 
-import com.hookiesolutions.webhookie.audit.domain.*
+import com.hookiesolutions.webhookie.audit.domain.Span
+import com.hookiesolutions.webhookie.audit.domain.SpanRepository
+import com.hookiesolutions.webhookie.audit.domain.SpanResult
+import com.hookiesolutions.webhookie.audit.domain.SpanRetry
 import com.hookiesolutions.webhookie.audit.domain.SpanRetry.Companion.SENT_BY_WEBHOOKIE
+import com.hookiesolutions.webhookie.audit.domain.SpanSendReason
+import com.hookiesolutions.webhookie.audit.domain.SpanStatus
+import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate
 import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate.Companion.notOk
+import com.hookiesolutions.webhookie.audit.domain.TraceRepository
 import com.hookiesolutions.webhookie.audit.web.model.request.SpanRequest
 import com.hookiesolutions.webhookie.audit.web.model.request.TraceRequest
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.HEADER_CONTENT_TYPE
+import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_REQUESTED_BY
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_RESENT
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_SPAN_ID
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_TOPIC
@@ -18,12 +26,13 @@ import com.hookiesolutions.webhookie.common.message.publisher.PublisherRequestEr
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherResponseErrorMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherSuccessMessage
 import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscriptionMessageDTO
+import com.hookiesolutions.webhookie.common.message.subscription.ResendSpanMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
 import com.hookiesolutions.webhookie.common.service.TimeMachine
+import com.hookiesolutions.webhookie.security.service.SecurityHandler
 import com.hookiesolutions.webhookie.webhook.service.WebhookGroupServiceDelegate
 import org.slf4j.Logger
 import org.springframework.data.domain.Pageable
-import org.springframework.integration.core.MessageSelector
 import org.springframework.messaging.Message
 import org.springframework.messaging.MessageChannel
 import org.springframework.messaging.support.MessageBuilder
@@ -32,6 +41,7 @@ import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.switchIfEmpty
+import reactor.kotlin.core.publisher.toMono
 
 /**
  *
@@ -44,8 +54,10 @@ class SpanService(
   private val traceRepository: TraceRepository,
   private val timeMachine: TimeMachine,
   private val webhookServiceDelegate: WebhookGroupServiceDelegate,
-  private val unblockedMessageSelector: MessageSelector,
+  private val factory: TrafficConversionFactory,
   private val subscriptionServiceDelegate: SubscriptionServiceDelegate,
+  private val resendSpanChannel: MessageChannel,
+  private val securityHandler: SecurityHandler,
   private val log: Logger
 ) {
   fun createSpan(message: SignableSubscriptionMessage) {
@@ -61,7 +73,7 @@ class SpanService(
   }
 
   fun retrying(message: Message<SignableSubscriptionMessage>) {
-    if(message.payload.isFirstRetry()) {
+    if(message.payload.isFirstRetryInCycle()) {
       markAsRetrying(message)
     } else {
       addRetry(message.payload)
@@ -144,14 +156,11 @@ class SpanService(
   private fun markAsRetrying(message: Message<SignableSubscriptionMessage>) {
     val payload = message.payload
     log.info("Marking  '{}', '{}' as Retrying. ", payload.spanId, payload.traceId)
-    val time = timeMachine.now().plusSeconds(payload.delay.seconds)
-    val reason = if(unblockedMessageSelector.accept(message)) {
-      SpanSendReason.UNBLOCK
-    } else {
-      SpanSendReason.RETRY
-    }
-    val retry = SpanRetry(time, payload.totalNumberOfTries, SENT_BY_WEBHOOKIE, reason)
+    val time = timeMachine.now()
+      .plusSeconds(payload.delay.seconds)
+    val details = factory.calculateSpanSendDetails(message)
     val statusUpdate = SpanStatusUpdate.retrying(time)
+    val retry = SpanRetry(time, payload.totalNumberOfTries, payload.numberOfRetries, details.t2, details.t1)
     repository.retryStatusUpdate(payload.spanId, statusUpdate, retry)
       .subscribe { logSpanStatus(it) }
   }
@@ -159,7 +168,7 @@ class SpanService(
   private fun addRetry(message: SignableSubscriptionMessage) {
     log.info("Delaying '{}', '{}' span for '{}' seconds", message.spanId, message.traceId, message.delay.seconds)
     val time = timeMachine.now().plusSeconds(message.delay.seconds)
-    val retry = SpanRetry(time, message.totalNumberOfTries, SENT_BY_WEBHOOKIE, SpanSendReason.RETRY)
+    val retry = SpanRetry(time, message.totalNumberOfTries, message.numberOfRetries, SENT_BY_WEBHOOKIE, SpanSendReason.RETRY)
     repository.addRetry(message.spanId, retry)
       .subscribe { logSpanStatus(it) }
   }
@@ -194,5 +203,34 @@ class SpanService(
 
   fun fetchSpanVerifyingReadAccess(spanId: String): Mono<Span> {
     return repository.findBySpanIdVerifyingReadAccess(spanId)
+  }
+
+  fun resend(spanIdFlux: Flux<String>): Mono<List<String>> {
+    return spanIdFlux
+      .flatMap { createResendMessage(it)}
+      .doOnNext { resendSpanChannel.send(it) }
+      .map { it.payload.spanId }
+      .collectList()
+      .switchIfEmpty(emptyList<String>().toMono())
+  }
+
+  private fun createResendMessage(spanId: String): Mono<Message<ResendSpanMessage>> {
+    return repository.spanByIdAndStatus(spanId, listOf(SpanStatus.OK, SpanStatus.NOT_OK))
+      .zipWhen { traceRepository.findByTraceIdVerifyingReadAccess(it.traceId) }
+      .zipWith(securityHandler.data())
+      .map {
+        val payload = ResendSpanMessage.create(it.t1.t1, it.t1.t2, it.t2.email)
+
+        val builder = MessageBuilder.withPayload(payload)
+
+        builder.setHeader(WH_HEADER_TOPIC, payload.consumerMessage.topic)
+        builder.setHeader(WH_HEADER_TRACE_ID, payload.consumerMessage.traceId )
+        builder.setHeader(WH_HEADER_SPAN_ID, payload.spanId )
+        builder.setHeader(WH_HEADER_RESENT, true.toString() )
+        builder.setHeader(WH_HEADER_REQUESTED_BY, payload.requestedBy )
+        builder.setHeader(HEADER_CONTENT_TYPE, payload.consumerMessage.contentType )
+
+        builder.build()
+      }
   }
 }

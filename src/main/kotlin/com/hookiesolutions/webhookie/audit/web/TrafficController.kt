@@ -1,5 +1,6 @@
 package com.hookiesolutions.webhookie.audit.web
 
+import com.hookiesolutions.webhookie.audit.domain.Span
 import com.hookiesolutions.webhookie.audit.domain.SpanStatus
 import com.hookiesolutions.webhookie.audit.domain.TraceStatus
 import com.hookiesolutions.webhookie.audit.service.SpanService
@@ -133,6 +134,24 @@ class TrafficController(
   fun traceRequest(@PathVariable traceId: String): Mono<TraceRequestBody> {
     return traceService.fetchTraceVerifyingReadAccess(traceId )
       .map { TraceRequestBody.from(it) }
+  }
+
+  @GetMapping(
+    "$REQUEST_MAPPING_TRAFFIC_SPAN/{spanId}",
+    produces = [MediaType.APPLICATION_JSON_VALUE]
+  )
+  fun getSpan(@PathVariable spanId: String): Mono<Span> {
+    return spanService.fetchSpanVerifyingReadAccess(spanId)
+  }
+
+  @PostMapping(
+    "$REQUEST_MAPPING_TRAFFIC_SPAN/resend",
+    consumes = [MediaType.APPLICATION_JSON_VALUE],
+    produces = [MediaType.TEXT_PLAIN_VALUE]
+  )
+  fun resendSpan(@RequestBody spanIdFlux: Flux<String>): Mono<String> {
+    return spanService.resend(spanIdFlux)
+      .map { "OK" }
   }
 
   companion object {

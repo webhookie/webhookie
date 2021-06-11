@@ -170,7 +170,7 @@ class TraceFlows(private val traceService: TraceService) {
   fun logRetrySubscriptionMessageMessage(): IntegrationFlow {
     return integrationFlow {
       channel(RETRYABLE_PUBLISHER_ERROR_CHANNEL)
-      filter<PublisherErrorMessage> { it.subscriptionMessage.numberOfRetries == 0 }
+      filter<PublisherErrorMessage> { it.subscriptionMessage.isTry() }
       handle { payload: PublisherErrorMessage, _: MessageHeaders ->
         traceService.updateWithIssues(payload)
       }

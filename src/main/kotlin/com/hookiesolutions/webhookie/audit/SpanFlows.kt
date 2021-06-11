@@ -2,6 +2,7 @@ package com.hookiesolutions.webhookie.audit
 
 import com.hookiesolutions.webhookie.audit.service.SpanService
 import com.hookiesolutions.webhookie.common.Constants
+import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.BLOCKED_SUBSCRIPTION_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.DELAYED_SUBSCRIPTION_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.SUBSCRIPTION_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.exception.messaging.SubscriptionMessageHandlingException
@@ -44,7 +45,7 @@ class SpanFlows(
   fun retryingSpanFlow(): IntegrationFlow {
     return integrationFlow {
       channel(DELAYED_SUBSCRIPTION_CHANNEL_NAME)
-      filter<SignableSubscriptionMessage> { !it.isNew() }
+      filter<SignableSubscriptionMessage> { it.isResend() }
       handle { payload: Message<SignableSubscriptionMessage>, _: MessageHeaders ->
         spanService.retrying(payload)
       }
@@ -54,7 +55,7 @@ class SpanFlows(
   @Bean
   fun blockSpanFlow(): IntegrationFlow {
     return integrationFlow {
-      channel(Constants.Channels.Subscription.BLOCKED_SUBSCRIPTION_CHANNEL_NAME)
+      channel(BLOCKED_SUBSCRIPTION_CHANNEL_NAME)
       handle { payload: BlockedSubscriptionMessageDTO, _: MessageHeaders ->
         spanService.blockSpan(payload)
       }

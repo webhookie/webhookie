@@ -9,6 +9,7 @@ import com.hookiesolutions.webhookie.common.message.publisher.PublisherResponseE
 import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscriptionMessageDTO
 import com.hookiesolutions.webhookie.common.message.subscription.GenericSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.NoSubscriptionMessage
+import com.hookiesolutions.webhookie.common.message.subscription.ResendSpanMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.UnsignedSubscriptionMessage
 import com.hookiesolutions.webhookie.common.service.TimeMachine
@@ -163,6 +164,14 @@ class SubscriptionConfig(
       subscriptionService
         .enrichBlockedSubscriptionMessageReloadingSubscription(bsm)
         .map { factory.blockedSubscriptionMessageToSubscriptionMessage(it) }
+    }
+  }
+
+  @Bean
+  fun toSignableSubscriptionMessageReloadingSubscriptionForResend(): GenericTransformer<ResendSpanMessage, Mono<SignableSubscriptionMessage>> {
+    return GenericTransformer { bsm ->
+      subscriptionService
+        .enrichResendSpanMessageReloadingSubscription(bsm)
     }
   }
 

@@ -5,6 +5,7 @@ import java.time.Instant
 data class SpanRetry (
   val time: Instant,
   val no: Int,
+  val retryNo: Int,
   val sentBy: String,
   val reason: SpanSendReason,
   val statusCode: Int? = null
@@ -20,5 +21,6 @@ data class SpanRetry (
 enum class SpanSendReason {
   SEND,
   RETRY,
+  RESEND,
   UNBLOCK
 }

@@ -1,5 +1,6 @@
 package com.hookiesolutions.webhookie.audit.config
 
+import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_RESENT
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_UNBLOCKED
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -20,10 +21,19 @@ class AuditConfig {
   }
 
   @Bean
+  fun resentMessageSelector(): MessageSelector {
+    return MessageSelector {
+      it.headers.contains(WH_HEADER_RESENT)
+    }
+  }
+
+  @Bean
   fun originalMessageSelector(
+    resentMessageSelector: MessageSelector,
     unblockedMessageSelector: MessageSelector
   ): MessageSelector {
     return MessageSelector {
+      resentMessageSelector.accept(it).not() &&
       unblockedMessageSelector.accept(it).not()
     }
   }

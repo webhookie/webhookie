@@ -221,7 +221,7 @@ class SubscriptionFlows(
           transform(toSignableSubscriptionMessageReloadingSubscription)
           split()
           routeToRecipients {
-            recipient<SignableSubscriptionMessage>(subscriptionChannel) { !it.isSignable }
+            recipient<SignableSubscriptionMessage>(delaySubscriptionChannel) { !it.isSignable }
             recipient<SignableSubscriptionMessage>(signSubscriptionMessageChannel) { it.isSignable }
           }
         }
@@ -232,6 +232,22 @@ class SubscriptionFlows(
             log.info("Blocked Message '{}' was deleted successfully", bsm.id)
           }
         }
+      }
+    }
+  }
+
+  @Bean
+  fun resendSpanMessageFlow(
+    toSignableSubscriptionMessageReloadingSubscriptionForResend: GenericTransformer<ResendSpanMessage, Mono<SignableSubscriptionMessage>>,
+    signSubscriptionMessageChannel: MessageChannel,
+  ): IntegrationFlow {
+    return integrationFlow {
+      channel("resendSpanChannel")
+      transform(toSignableSubscriptionMessageReloadingSubscriptionForResend)
+      split()
+      routeToRecipients {
+        recipient<SignableSubscriptionMessage>(delaySubscriptionChannel) { !it.isSignable }
+        recipient<SignableSubscriptionMessage>(signSubscriptionMessageChannel) { it.isSignable }
       }
     }
   }

@@ -5,6 +5,7 @@ import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.R
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_PROVIDER
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherErrorMessage
+import com.hookiesolutions.webhookie.common.message.subscription.ResendSpanMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
 import com.hookiesolutions.webhookie.common.model.DeletableEntity.Companion.deletable
 import com.hookiesolutions.webhookie.common.model.RoleActor
@@ -18,7 +19,11 @@ import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Companion.val
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionStatus
 import com.hookiesolutions.webhookie.common.service.TimeMachine
 import com.hookiesolutions.webhookie.security.service.SecurityHandler
-import com.hookiesolutions.webhookie.subscription.domain.*
+import com.hookiesolutions.webhookie.subscription.domain.ApplicationRepository
+import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
+import com.hookiesolutions.webhookie.subscription.domain.CallbackRepository
+import com.hookiesolutions.webhookie.subscription.domain.Subscription
+import com.hookiesolutions.webhookie.subscription.domain.SubscriptionRepository
 import com.hookiesolutions.webhookie.subscription.service.factory.ConversionsFactory
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.CreateSubscriptionRequest
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.ReasonRequest
@@ -302,5 +307,11 @@ class SubscriptionService(
     return repository
       .findById(message.subscription.subscriptionId)
       .map { factory.updateBlockedSubscriptionMessageWithSubscription(message, it) }
+  }
+
+  fun enrichResendSpanMessageReloadingSubscription(message: ResendSpanMessage): Mono<SignableSubscriptionMessage> {
+    return repository
+      .findById(message.subscriptionId)
+      .map { factory.createSignableMessage(message, it)}
   }
 }

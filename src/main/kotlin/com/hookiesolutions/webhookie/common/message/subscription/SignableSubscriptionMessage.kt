@@ -24,8 +24,25 @@ interface SignableSubscriptionMessage: GenericSubscriptionMessage, WebhookieSpan
     return totalNumberOfTries == 1
   }
 
+  fun isResend(): Boolean {
+    return totalNumberOfTries > 1
+  }
+
   fun isFirstRetry(): Boolean {
-    return numberOfRetries == 1
+    return totalNumberOfTries == 2
+  }
+
+  fun isFirstRetryInCycle(): Boolean {
+    return (isRetry() && isFirstRetry()) ||
+        (isTry() && isResend())
+  }
+
+  fun isTry(): Boolean {
+    return numberOfRetries == 0
+  }
+
+  fun isRetry(): Boolean {
+    return numberOfRetries > 0
   }
 }
 
