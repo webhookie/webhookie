@@ -45,6 +45,7 @@ import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.switchIfEmpty
+import reactor.kotlin.core.publisher.toFlux
 import reactor.kotlin.core.publisher.toMono
 
 /**
@@ -213,8 +214,8 @@ class SpanService(
     return repository.findBySpanIdVerifyingReadAccess(spanId)
   }
 
-  fun resend(spanIdFlux: Flux<String>): Mono<List<String>> {
-    return spanIdFlux
+  fun resend(spanIds: List<String>): Mono<List<String>> {
+    return spanIds.toFlux()
       .flatMap { createResendMessage(it)}
       .doOnNext { resendSpanChannel.send(it) }
       .map { it.payload.spanId }

@@ -17,7 +17,13 @@ import com.hookiesolutions.webhookie.common.service.TimeMachine
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.springframework.data.domain.Pageable
 import org.springframework.http.MediaType
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.switchIfEmpty
@@ -149,9 +155,9 @@ class TrafficController(
     consumes = [MediaType.APPLICATION_JSON_VALUE],
     produces = [MediaType.TEXT_PLAIN_VALUE]
   )
-  fun resendSpan(@RequestBody spanIdFlux: Flux<String>): Mono<String> {
-    return spanService.resend(spanIdFlux)
-      .map { "OK" }
+  fun resendSpan(@RequestBody spanIds: List<String>): Mono<String> {
+    return spanService.resend(spanIds)
+      .map { it.size.toString() }
   }
 
   companion object {
