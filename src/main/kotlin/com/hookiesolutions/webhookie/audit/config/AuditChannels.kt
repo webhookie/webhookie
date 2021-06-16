@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.integration.dsl.MessageChannels
 import org.springframework.messaging.MessageChannel
+import org.springframework.messaging.SubscribableChannel
 import java.util.concurrent.Executors
 
 /**
@@ -27,4 +28,11 @@ class AuditChannels {
   fun resendSpanChannel(): MessageChannel = MessageChannels
     .publishSubscribe(Executors.newCachedThreadPool())
     .get()
+
+  @Bean
+  fun sseChannel(): SubscribableChannel {
+    return MessageChannels
+      .publishSubscribe(Executors.newCachedThreadPool())
+      .get()
+  }
 }

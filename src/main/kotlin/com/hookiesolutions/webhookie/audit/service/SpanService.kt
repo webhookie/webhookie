@@ -12,6 +12,7 @@ import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate.Companion.not
 import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate.Companion.ok
 import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate.Companion.retryingSpan
 import com.hookiesolutions.webhookie.audit.domain.TraceRepository
+import com.hookiesolutions.webhookie.audit.web.model.SSENotification
 import com.hookiesolutions.webhookie.audit.web.model.request.SpanRequest
 import com.hookiesolutions.webhookie.audit.web.model.request.TraceRequest
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.HEADER_CONTENT_TYPE
@@ -39,6 +40,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.integration.core.GenericSelector
 import org.springframework.messaging.Message
 import org.springframework.messaging.MessageChannel
+import org.springframework.messaging.SubscribableChannel
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
@@ -55,6 +57,7 @@ import reactor.kotlin.core.publisher.toMono
  */
 @Service
 class SpanService(
+  private val sseChannel: SubscribableChannel,
   private val repository: SpanRepository,
   private val traceRepository: TraceRepository,
   private val timeMachine: TimeMachine,
@@ -75,6 +78,7 @@ class SpanService(
       .build()
 
     saveOrFetch(span)
+      .doOnNext { sseChannel.send(SSENotification.SpanNotification.created(it)) }
       .subscribe { log.debug("'{}', '{}' span was saved/fetched", it.spanId, it.traceId) }
   }
 
@@ -99,6 +103,7 @@ class SpanService(
 
         saveOrFetch(span)
       }
+      .doOnNext { sseChannel.send(SSENotification.SpanNotification.blocked(it)) }
       .subscribe { logSpanStatus(it) }
   }
 
@@ -117,9 +122,11 @@ class SpanService(
 
     if(retryableErrorSelector.accept(message)) {
       repository.updateWithResponse(message.spanId, response)
+        .doOnNext { sseChannel.send(SSENotification.SpanNotification.failedWithServerError(it)) }
         .subscribe { log.info("'{}', '{}' Span was updated with server response: '{}'", it.spanId, it.traceId, it.latestResult) }
     } else {
       repository.responseStatusUpdate(message.spanId, notOk(time), response)
+        .doOnNext { sseChannel.send(SSENotification.SpanNotification.failedWithStatusUpdate(it)) }
         .subscribe { log.info("'{}', '{}' Span was updated with other error response: '{}'", it.spanId, it.traceId, it.latestResult?.statusCode) }
     }
   }
@@ -134,6 +141,7 @@ class SpanService(
       .build()
 
     repository.updateWithResponse(message.spanId, response)
+      .doOnNext { sseChannel.send(SSENotification.SpanNotification.failedWithClientError(it)) }
       .subscribe { log.info("'{}', '{}' Span was updated with client error response: '{}'", it.spanId, it.traceId, it.latestResult?.statusCode) }
   }
 
@@ -147,6 +155,7 @@ class SpanService(
       .build()
 
     repository.responseStatusUpdate(message.spanId, notOk(time), response)
+      .doOnNext { sseChannel.send(SSENotification.SpanNotification.failedWithOtherError(it)) }
       .subscribe { log.info("'{}', '{}' Span was updated with other error response: '{}'", it.spanId, it.traceId, it.latestResult?.statusCode) }
   }
 
@@ -160,6 +169,7 @@ class SpanService(
       .build()
 
     repository.responseStatusUpdate(message.spanId, ok(time), response)
+      .doOnNext { sseChannel.send(SSENotification.SpanNotification.success(it)) }
       .subscribe { log.debug("'{}', '{}' Span was updated with server response: '{}'", it.spanId, it.traceId, it.latestResult?.statusCode) }
   }
 
@@ -171,6 +181,7 @@ class SpanService(
     val details = factory.calculateSpanSendDetails(message)
     val retry = SpanRetry(time, payload.totalNumberOfTries, payload.numberOfRetries, details.t2, details.t1)
     repository.retryStatusUpdate(payload.spanId, retryingSpan(time), retry)
+      .doOnNext { sseChannel.send(SSENotification.SpanNotification.markedRetrying(it)) }
       .subscribe { logSpanStatus(it) }
   }
 
@@ -179,6 +190,7 @@ class SpanService(
     val time = timeMachine.now().plusSeconds(message.delay.seconds)
     val retry = SpanRetry(time, message.totalNumberOfTries, message.numberOfRetries, SENT_BY_WEBHOOKIE, SpanSendReason.RETRY)
     repository.addRetry(message.spanId, retry)
+      .doOnNext { sseChannel.send(SSENotification.SpanNotification.isRetrying(it)) }
       .subscribe { logSpanStatus(it) }
   }
 
