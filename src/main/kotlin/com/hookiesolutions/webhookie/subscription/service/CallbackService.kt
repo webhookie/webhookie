@@ -80,4 +80,10 @@ class CallbackService(
       .doOnNext { log.info("Callback '{}' was updated successfully", it.t1.requestTarget()) }
       .map { it.t1 }
   }
+
+  @VerifyApplicationAccessById(access = ApplicationAccessType.READ)
+  fun countActiveSubscriptions(applicationId: String, callbackId: String): Mono<Long> {
+    log.info("reading number of subscriptions for Callback: '{}'", callbackId)
+    return subscriptionRepository.countActiveSubscriptionsByCallbackId(callbackId)
+  }
 }

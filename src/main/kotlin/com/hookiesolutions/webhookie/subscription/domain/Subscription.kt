@@ -73,6 +73,10 @@ data class Subscription(
         return where("$KEY_STATUS_UPDATE.$KEY_STATUS").`in`(statusUpdateList.map { it.name })
       }
 
+      fun subscriptionIsActive(): Criteria {
+        return where("$KEY_STATUS_UPDATE.$KEY_STATUS").`is`(SubscriptionStatus.ACTIVATED)
+      }
+
       fun isAuthorized(entities: Set<String>): Criteria {
         return where("$KEY_APPLICATION.$KEY_ENTITY")
           .`in`(entities)

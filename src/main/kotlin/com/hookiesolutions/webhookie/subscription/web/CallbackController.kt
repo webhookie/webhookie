@@ -6,6 +6,7 @@ import com.hookiesolutions.webhookie.subscription.service.CallbackService
 import com.hookiesolutions.webhookie.subscription.service.model.CallbackRequest
 import com.hookiesolutions.webhookie.subscription.web.SubscriptionAPIDocs.Companion.REQUEST_MAPPING_APPLICATIONS
 import com.hookiesolutions.webhookie.subscription.web.SubscriptionAPIDocs.Companion.REQUEST_MAPPING_CALLBACKS
+import com.hookiesolutions.webhookie.subscription.web.model.response.NoOfActiveCallbackSubscriptionsResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -92,5 +93,17 @@ class CallbackController(
   ): Mono<CallbackDTO> {
     return service.updateCallback(applicationId, id, body)
       .map { it.dto() }
+  }
+
+  @GetMapping(
+    "/{callbackId}/noOfSubscriptions",
+    produces = [MediaType.APPLICATION_JSON_VALUE]
+  )
+  fun noOfCallbackSubscriptions(
+    @PathVariable callbackId: String,
+    @PathVariable applicationId: String
+  ): Mono<NoOfActiveCallbackSubscriptionsResponse> {
+    return service.countActiveSubscriptions(applicationId, callbackId)
+      .map { NoOfActiveCallbackSubscriptionsResponse(it) }
   }
 }

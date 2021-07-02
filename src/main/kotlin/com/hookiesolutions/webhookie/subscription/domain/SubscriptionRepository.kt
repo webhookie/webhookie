@@ -15,6 +15,7 @@ import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Co
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Companion.callbackIdIs
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Companion.isAuthorized
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Companion.statusIsIn
+import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Companion.subscriptionIsActive
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Companion.topicIs
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Companion.topicIsIn
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Updates.Companion.subscriptionStatusUpdate
@@ -190,6 +191,13 @@ class SubscriptionRepository(
         FindAndModifyOptions.options().returnNew(true),
         Subscription::class.java
       )
+  }
+
+  fun countActiveSubscriptionsByCallbackId(callbackId: String): Mono<Long> {
+    return mongoTemplate.count(
+      query(callbackIdIs(callbackId).andOperator(subscriptionIsActive())),
+      Subscription::class.java
+    )
   }
 
   companion object {
