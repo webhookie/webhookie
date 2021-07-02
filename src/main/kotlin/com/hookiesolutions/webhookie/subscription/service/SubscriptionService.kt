@@ -70,7 +70,7 @@ class SubscriptionService(
     log.info("Subscribing to '{}' using callback: '{}'", request.topic, request.callbackId)
     return callbackRepository
       .findById(request.callbackId)
-      .zipWhen { applicationRepository.findByIdVerifyingWriteAccess(it.applicationId) }
+      .zipWhen { applicationRepository.findByIdVerifyingReadAccess(it.applicationId) }
       .map { factory.createSubscription(it.t2, it.t1, request)}
       .flatMap { repository.save(it) }
       .doOnNext { log.info("Subscribed to '{}' using callback: '{}'", it.topic, it.callback.requestTarget()) }
@@ -129,7 +129,6 @@ class SubscriptionService(
       .flatMapMany { repository.topicSubscriptions(topic, it.topics, it.isAdmin, pageable) }
   }
 
-  @Suppress("unused")
   @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")
   fun updateSubscription(id: String, request: UpdateSubscriptionRequest): Mono<Subscription> {
     log.info("Updating Subscription '{}' using callback: '{}'", id, request.callbackId)
@@ -141,7 +140,7 @@ class SubscriptionService(
         } else {
           callbackRepository
             .findById(request.callbackId)
-            .zipWhen { applicationRepository.findById(it.applicationId) }
+            .zipWhen { applicationRepository.findByIdVerifyingReadAccess(it.applicationId) }
             .map { factory.modifySubscription(it.t2, it.t1, subscription, request)}
             .map { updatable(it) }
             .flatMap { repository.update(it, id) }

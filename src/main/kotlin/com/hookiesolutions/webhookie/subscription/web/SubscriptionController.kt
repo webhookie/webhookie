@@ -92,7 +92,8 @@ class SubscriptionController(
     @PathVariable id: String,
     @RequestBody @Valid request: UpdateSubscriptionRequest
   ): Mono<SubscriptionDTO> {
-    TODO()
+    return service.updateSubscription(id, request)
+      .map { it.dto() }
   }
 
   @PostMapping(
