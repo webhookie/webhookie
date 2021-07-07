@@ -1,0 +1,47 @@
+[
+    {
+        "realm": "webhookie",
+        "users": [
+            {
+                "username": "webhookie_admin",
+                "enabled": true,
+                "credentials": [
+                    {
+                        "type": "password",
+                        "secretData": "{\"value\":\"We1pHq+PI0azizlfPTG3fMaUXEEBem/6YuEVSSUhmS0UG9a9qoMPrW5M01+C9uMJ9JX7prys2PIjtpPnAumuqg==\",\"salt\":\"IMfzfhED+nlV1HStyjbYZA==\",\"additionalParameters\":{}}",
+                        "credentialData": "{\"hashIterations\":100000,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+                    }
+                ],
+                "clientRoles": {
+                    "realm-management": [
+                        "realm-admin"
+                    ],
+                    "webhookie_client": [
+                        "WH_ADMIN",
+                        "WH_CONSUMER",
+                        "WH_PROVIDER"
+                    ]
+                }
+            }
+        ]
+    },
+    {
+        "realm": "master",
+        "users": [
+            {
+                "username": "admin",
+                "enabled": true,
+                "credentials": [
+                    {
+                        "type": "password",
+                        "secretData": "{\"value\":\"g4Zh3NSuL4tWRyMa77+w+s4DIeRoHt1XY/vlzvqLH8zoTAaeQTHmMBVS3laKj1H3Tw+e64npzD2hKq/uU0Uo2g==\",\"salt\":\"89dRquJRKJZBaz6DoJJE4A==\",\"additionalParameters\":{}}",
+                        "credentialData": "{\"hashIterations\":100000,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+                    }
+                ],
+                "realmRoles": [
+                    "admin"
+                ]
+            }
+        ]
+    }
+]
