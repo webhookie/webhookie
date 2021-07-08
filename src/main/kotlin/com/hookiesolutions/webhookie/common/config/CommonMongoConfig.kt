@@ -5,6 +5,8 @@ import org.slf4j.Logger
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.event.EventListener
+import org.springframework.core.Ordered
+import org.springframework.core.annotation.Order
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.index.MongoPersistentEntityIndexResolver
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext
@@ -24,6 +26,7 @@ class CommonMongoConfig(
   private val logger: Logger,
   private val indexEntityList: List<List<Class<out AbstractEntity>>>
 ) {
+  @Order(Ordered.HIGHEST_PRECEDENCE)
   @EventListener(ApplicationReadyEvent::class)
   fun initIndicesAfterStartup() {
     val resolver = MongoPersistentEntityIndexResolver(mongoMappingContext)
