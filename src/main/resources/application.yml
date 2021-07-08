@@ -1,5 +1,6 @@
 webhookie:
   consumer:
+    add-default-group: ${WH_CONSUMER_ADD_DEFAULT_GROUP:true}
     queue: ${WH_CONSUMER_QUEUE:wh-customer.event}
     missing-header:
       exchange: ${WH_CONSUMER_MISSING_HEADER_EXCHANGE:wh-customer}

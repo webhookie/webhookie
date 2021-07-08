@@ -12,6 +12,7 @@ import org.springframework.boot.context.properties.ConstructorBinding
 @ConfigurationProperties(prefix = "webhookie.consumer")
 data class ConsumerProperties(
   val queue: String = "wh-customer.event",
+  val addDefaultGroup: Boolean = true,
   val missingHeader: ConsumerErrorExchangeProperties = ConsumerErrorExchangeProperties(
     exchange = "wh-customer",
     routingKey = "wh-missing-header"
