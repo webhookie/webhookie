@@ -34,7 +34,7 @@ class AsyncApiService(
       .doOnNext { log.info("AsyncAPI Spec parsed successfully. number of topics: '{}'", it.topics.size) }
       .doOnError { log.error("AsyncAPI Spec parse error '{}'", it) }
       .onErrorResume(WebClientRequestException::class.java) {
-        RemoteServiceException(it.localizedMessage).toMono()
+        RemoteServiceException("Unable to communicate to the spec parser! Please contact Administrator").toMono()
       }
   }
 }
