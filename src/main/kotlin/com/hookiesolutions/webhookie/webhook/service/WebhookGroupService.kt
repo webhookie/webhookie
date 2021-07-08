@@ -11,7 +11,7 @@ import com.hookiesolutions.webhookie.common.message.entity.EntityDeletedMessage
 import com.hookiesolutions.webhookie.common.message.entity.EntityUpdatedMessage
 import com.hookiesolutions.webhookie.common.model.DeletableEntity.Companion.deletable
 import com.hookiesolutions.webhookie.common.model.UpdatableEntity.Companion.updatable
-import com.hookiesolutions.webhookie.common.service.AdminServiceDelegate
+import com.hookiesolutions.webhookie.common.service.AccessGroupServiceDelegate
 import com.hookiesolutions.webhookie.webhook.domain.Topic
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup
 import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.KEY_CONSUMER_IAM_GROUPS
@@ -38,7 +38,7 @@ import reactor.kotlin.core.publisher.toMono
 class WebhookGroupService(
   private val repository: WebhookGroupRepository,
   private val securityService: WebhookSecurityService,
-  private val adminServiceDelegate: AdminServiceDelegate,
+  private val accessGroupServiceDelegate: AccessGroupServiceDelegate,
   private val asyncApiService: AsyncApiService,
   private val log: Logger,
 ) {
@@ -150,6 +150,6 @@ class WebhookGroupService(
   }
 
   private fun verifyRequestGroups(request: WebhookGroupRequest): Mono<Boolean> {
-    return adminServiceDelegate.verifyGroups(request.consumerGroups, request.providerGroups)
+    return accessGroupServiceDelegate.verifyGroups(request.consumerGroups, request.providerGroups)
   }
 }

@@ -16,7 +16,7 @@ import reactor.util.function.Tuple2
  * @since 21/1/21 14:38
  */
 @Service
-class AdminServiceDelegate(
+class AccessGroupServiceDelegate(
   private val accessGroupVerifier: AccessGroupVerifier,
   private val consumerGroupService: ConsumerGroupService,
   private val provideGroupService: ProviderGroupService,

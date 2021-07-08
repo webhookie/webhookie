@@ -7,7 +7,7 @@ import com.hookiesolutions.webhookie.common.message.entity.EntityDeletedMessage
 import com.hookiesolutions.webhookie.common.message.entity.EntityUpdatedMessage
 import com.hookiesolutions.webhookie.common.model.DeletableEntity.Companion.deletable
 import com.hookiesolutions.webhookie.common.model.UpdatableEntity.Companion.updatable
-import com.hookiesolutions.webhookie.common.service.AdminServiceDelegate
+import com.hookiesolutions.webhookie.common.service.AccessGroupServiceDelegate
 import com.hookiesolutions.webhookie.security.service.SecurityHandler
 import com.hookiesolutions.webhookie.subscription.domain.Application
 import com.hookiesolutions.webhookie.subscription.domain.ApplicationRepository
@@ -30,14 +30,14 @@ import reactor.core.publisher.Mono
 class ApplicationService(
   private val log: Logger,
   private val factory: ConversionsFactory,
-  private val adminServiceDelegate: AdminServiceDelegate,
+  private val accessGroupServiceDelegate: AccessGroupServiceDelegate,
   private val securityHandler: SecurityHandler,
   private val subscriptionRepository: SubscriptionRepository,
   private val repository: ApplicationRepository,
 ) {
   @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")
   fun createApplication(body: ApplicationRequest): Mono<Application> {
-    return adminServiceDelegate.extractMyValidConsumerGroups(body.consumerGroups)
+    return accessGroupServiceDelegate.extractMyValidConsumerGroups(body.consumerGroups)
       .zipWith(securityHandler.entity())
       .map { factory.createApplicationRequestToApplication(body, it.t2, it.t1) }
       .flatMap { repository.save(it) }
@@ -66,7 +66,7 @@ class ApplicationService(
 
   @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")
   fun updateApplication(id: String, request: ApplicationRequest): Mono<Application> {
-    return adminServiceDelegate.extractMyValidConsumerGroups(request.consumerGroups)
+    return accessGroupServiceDelegate.extractMyValidConsumerGroups(request.consumerGroups)
       .zipWhen { repository.findByIdVerifyingWriteAccess(id) }
       .map { it.t2.copy(name = request.name, description = request.description, consumerIAMGroups = it.t1) }
       .map { updatable(it) }
