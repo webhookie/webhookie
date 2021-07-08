@@ -1,9 +1,9 @@
 package com.hookiesolutions.webhookie.security
 
-import com.hookiesolutions.webhookie.admin.web.AdminAPIDocs.Companion.REQUEST_MAPPING_ADMIN
-import com.hookiesolutions.webhookie.admin.web.AdminConsumerGroupController.Companion.REQUEST_MAPPING_CONSUMER_GROUPS
+import com.hookiesolutions.webhookie.admin.web.admin.AdminAPIDocs.Companion.REQUEST_MAPPING_ADMIN
+import com.hookiesolutions.webhookie.admin.web.admin.AdminConsumerGroupController.Companion.REQUEST_MAPPING_CONSUMER_GROUPS
 import com.hookiesolutions.webhookie.admin.web.GroupAPIDocs.Companion.REQUEST_MAPPING_GROUP
-import com.hookiesolutions.webhookie.admin.web.AdminProviderGroupController.Companion.REQUEST_MAPPING_PROVIDER_GROUPS
+import com.hookiesolutions.webhookie.admin.web.admin.AdminProviderGroupController.Companion.REQUEST_MAPPING_PROVIDER_GROUPS
 import com.hookiesolutions.webhookie.audit.web.TrafficAPIDocs.Companion.REQUEST_MAPPING_TRAFFIC
 import com.hookiesolutions.webhookie.audit.web.TrafficController.Companion.REQUEST_MAPPING_TRAFFIC_SPAN
 import com.hookiesolutions.webhookie.audit.web.TrafficController.Companion.REQUEST_MAPPING_TRAFFIC_TRACE
