@@ -27,7 +27,7 @@ webhookie:
     no-auth:
       pathMatchers:
         OPTIONS: /**
-        GET: /actuator/**, /swagger-ui.html**, /v3/**, /webjars/swagger-ui/**, /public/**
+        GET: /manage/health/**, /swagger-ui.html**, /v3/**, /webjars/swagger-ui/**, /public/**
 mongodb:
   encrypt:
     keys:
@@ -60,6 +60,7 @@ management:
     web:
       exposure:
         include: "*"
+      base-path: /manage
   endpoint:
     health:
       show-details: ALWAYS
