@@ -1,7 +1,7 @@
-package com.hookiesolutions.webhookie.admin.web
+package com.hookiesolutions.webhookie.admin.web.admin
 
 import com.hookiesolutions.webhookie.admin.domain.ConsumerGroup
-import com.hookiesolutions.webhookie.admin.service.ConsumerGroupService
+import com.hookiesolutions.webhookie.admin.service.admin.AdminConsumerGroupService
 import com.hookiesolutions.webhookie.admin.service.model.SaveGroupRequest
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -20,9 +20,9 @@ import javax.validation.Valid
  * @since 13/1/21 18:42
  */
 @RestController
-class ConsumerGroupController(
-  override val service: ConsumerGroupService
-): AccessGroupController<ConsumerGroup> {
+class AdminConsumerGroupController(
+  override val service: AdminConsumerGroupService
+): AdminAccessGroupController<ConsumerGroup> {
 
   @PostMapping(
     value = [REQUEST_MAPPING_CONSUMER_GROUPS]

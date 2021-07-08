@@ -7,21 +7,21 @@ import org.springframework.context.annotation.Configuration
 /**
  *
  * @author Arthur Kazemi<bidadh@gmail.com>
- * @since 14/1/21 13:53
+ * @since 8/7/21 11:36
  */
 @Configuration
-class AdminAPIDocs {
+class GroupAPIDocs {
   @Bean
-  fun adminOpenApi(): GroupedOpenApi {
-    val paths = arrayOf("${REQUEST_MAPPING_ADMIN}/**")
+  fun groupOpenApi(): GroupedOpenApi {
+    val paths = arrayOf("${REQUEST_MAPPING_GROUP}/**")
     return GroupedOpenApi
       .builder()
-      .group("Admin")
+      .group("Groups")
       .pathsToMatch(*paths)
       .build()
   }
 
   companion object {
-    const val REQUEST_MAPPING_ADMIN = "/admin"
+    const val REQUEST_MAPPING_GROUP = "/group"
   }
 }

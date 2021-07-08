@@ -1,7 +1,7 @@
-package com.hookiesolutions.webhookie.admin.web
+package com.hookiesolutions.webhookie.admin.web.admin
 
 import com.hookiesolutions.webhookie.admin.domain.ProviderGroup
-import com.hookiesolutions.webhookie.admin.service.ProviderGroupService
+import com.hookiesolutions.webhookie.admin.service.admin.AdminProviderGroupService
 import com.hookiesolutions.webhookie.admin.service.model.SaveGroupRequest
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -15,9 +15,9 @@ import reactor.core.publisher.Mono
 import javax.validation.Valid
 
 @RestController
-class ProviderGroupController(
-  override val service: ProviderGroupService
-): AccessGroupController<ProviderGroup> {
+class AdminProviderGroupController(
+  override val service: AdminProviderGroupService
+): AdminAccessGroupController<ProviderGroup> {
 
   @PostMapping(
     value = [REQUEST_MAPPING_PROVIDER_GROUPS]
