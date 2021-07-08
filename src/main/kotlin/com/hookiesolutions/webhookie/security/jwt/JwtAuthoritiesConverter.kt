@@ -16,6 +16,7 @@ import reactor.core.publisher.Mono
 class JwtAuthoritiesConverter(
   private val securityProperties: WebHookieSecurityProperties,
   private val authoritiesMapper: AuthoritiesMapper,
+  private val tokenGroupReader: TokenGroupReader,
   private val tokenAttributesExtractor: JwtTokenAttributesExtractor
 ) : Converter<Jwt, Mono<AbstractAuthenticationToken>> {
   override fun convert(jwt: Jwt): Mono<AbstractAuthenticationToken>? {
@@ -24,9 +25,7 @@ class JwtAuthoritiesConverter(
       .onErrorReturn(emptyList())
       .map { authoritiesMapper.map(it) }
 
-    val groupsMono = tokenAttributesExtractor
-      .readList(jwt, securityProperties.groups.jwkJsonPath)
-      .onErrorReturn(emptyList())
+    val groupsMono = tokenGroupReader.readGroups(jwt)
 
     val subMono: Mono<String> = tokenAttributesExtractor
       .read(jwt, "$.sub")

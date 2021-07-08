@@ -76,4 +76,8 @@ class Constants {
       }
     }
   }
+
+  companion object {
+    const val DEFAULT_CONSUMER_GROUP = "Default"
+  }
 }
