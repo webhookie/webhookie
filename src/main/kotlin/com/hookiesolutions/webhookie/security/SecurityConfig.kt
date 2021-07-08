@@ -1,8 +1,9 @@
 package com.hookiesolutions.webhookie.security
 
 import com.hookiesolutions.webhookie.admin.web.AdminAPIDocs.Companion.REQUEST_MAPPING_ADMIN
-import com.hookiesolutions.webhookie.admin.web.ConsumerGroupController.Companion.REQUEST_MAPPING_CONSUMER_GROUPS
-import com.hookiesolutions.webhookie.admin.web.ProviderGroupController.Companion.REQUEST_MAPPING_PROVIDER_GROUPS
+import com.hookiesolutions.webhookie.admin.web.AdminConsumerGroupController.Companion.REQUEST_MAPPING_CONSUMER_GROUPS
+import com.hookiesolutions.webhookie.admin.web.GroupAPIDocs.Companion.REQUEST_MAPPING_GROUP
+import com.hookiesolutions.webhookie.admin.web.AdminProviderGroupController.Companion.REQUEST_MAPPING_PROVIDER_GROUPS
 import com.hookiesolutions.webhookie.audit.web.TrafficAPIDocs.Companion.REQUEST_MAPPING_TRAFFIC
 import com.hookiesolutions.webhookie.audit.web.TrafficController.Companion.REQUEST_MAPPING_TRAFFIC_SPAN
 import com.hookiesolutions.webhookie.audit.web.TrafficController.Companion.REQUEST_MAPPING_TRAFFIC_TRACE
@@ -85,8 +86,8 @@ class SecurityConfig(
             authorize(pathMatchers(HttpMethod.valueOf(it.key), *it.value), permitAll)
           }
 
-        authorize(pathMatchers(HttpMethod.GET,"$REQUEST_MAPPING_ADMIN$REQUEST_MAPPING_PROVIDER_GROUPS"), authenticated)
-        authorize(pathMatchers(HttpMethod.GET,"$REQUEST_MAPPING_ADMIN$REQUEST_MAPPING_CONSUMER_GROUPS"), authenticated)
+        authorize(pathMatchers(HttpMethod.GET,"$REQUEST_MAPPING_GROUP$REQUEST_MAPPING_PROVIDER_GROUPS"), authenticated)
+        authorize(pathMatchers(HttpMethod.GET,"$REQUEST_MAPPING_GROUP$REQUEST_MAPPING_CONSUMER_GROUPS"), authenticated)
         authorize(pathMatchers("$REQUEST_MAPPING_ADMIN/**"), hasAuthority(ROLE_ADMIN))
         authorize(pathMatchers("$REQUEST_MAPPING_APPLICATIONS/**"), hasAuthority(ROLE_CONSUMER))
         authorize(pathMatchers("$REQUEST_MAPPING_PROVIDER/**"), hasAnyAuthority(ROLE_PROVIDER, ROLE_ADMIN))
