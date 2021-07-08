@@ -2,6 +2,7 @@ package playground
 
 import com.hookiesolutions.webhookie.audit.domain.Span
 import com.hookiesolutions.webhookie.audit.domain.SpanRetry
+import com.hookiesolutions.webhookie.audit.domain.SpanSendReason
 import com.hookiesolutions.webhookie.common.repository.GenericRepository
 import com.hookiesolutions.webhookie.common.repository.GenericRepository.Companion.mongoField
 import com.hookiesolutions.webhookie.common.repository.GenericRepository.Companion.mongoVariable
@@ -78,7 +79,7 @@ class MongoPlayground {
       GenericRepository.mongoSet("$key.${SpanRetry.KEY_RETRY_STATUS_CODE}", 405),
       GenericRepository.mongoSet(Span.Keys.KEY_RETRY_HISTORY,
         GenericRepository.insertIntoArray(Span.Keys.KEY_RETRY_HISTORY, SpanRetry.KEY_RETRY_NO, key, 3)),
-      GenericRepository.mongoSet(Span.Keys.KEY_LATEST_RESULT, SpanRetry(Instant.now(), 3, 10)),
+      GenericRepository.mongoSet(Span.Keys.KEY_LATEST_RESULT, SpanRetry(Instant.now(), 3, 10, "", SpanSendReason.RETRY)),
       GenericRepository.mongoSetLastElemOfArray(Span.Keys.KEY_RETRY_HISTORY, Span.Keys.KEY_NEXT_RETRY),
       GenericRepository.mongoUnset(key)
     )
