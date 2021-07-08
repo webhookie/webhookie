@@ -29,6 +29,10 @@ abstract class AccessGroup: AbstractEntity() {
           )
       }
 
+      fun iamGroupNameIs(group: String): Criteria {
+        return where(KEY_IAM_GROUP_NAME).`is`(group)
+      }
+
       private fun isEnabled(): Criteria {
         return where(KEY_ENABLED).`is`(true)
       }
