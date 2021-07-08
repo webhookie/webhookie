@@ -1,5 +1,6 @@
 package com.hookiesolutions.webhookie.admin.domain
 
+import com.hookiesolutions.webhookie.common.Constants.Companion.DEFAULT_CONSUMER_GROUP
 import org.springframework.data.annotation.TypeAlias
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
@@ -18,4 +19,8 @@ data class ConsumerGroup(
   @Indexed(name = "consumer_group.iamGroupName", unique = true)
   override val iamGroupName: String,
   override val enabled: Boolean = true
-) : AccessGroup()
+) : AccessGroup() {
+  companion object {
+    val DEFAULT = ConsumerGroup(DEFAULT_CONSUMER_GROUP, DEFAULT_CONSUMER_GROUP, DEFAULT_CONSUMER_GROUP)
+  }
+}
