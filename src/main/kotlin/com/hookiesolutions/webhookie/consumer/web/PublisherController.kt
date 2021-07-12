@@ -59,7 +59,7 @@ class PublisherController(
 
   private fun calculateTraceId(traceId: String): String {
     return if(traceId.trim() == "") {
-      log.debug("wh-traceId header is missing. generating a new id..")
+      log.debug("wh-trace-id header is missing. generating a new id..")
       idGenerator.generate()
     } else {
       traceId
