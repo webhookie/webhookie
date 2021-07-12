@@ -21,7 +21,6 @@ class Constants {
 
         val WH_REQUIRED_HEADERS = setOf(
           WH_HEADER_TOPIC,
-          WH_HEADER_TRACE_ID,
           HEADER_CONTENT_TYPE
         )
       }
