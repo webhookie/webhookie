@@ -32,7 +32,7 @@ class PublisherController(
   private val log: Logger,
   private val internalConsumerChannel: SubscribableChannel
 ) {
-  @PostMapping("/publish", produces = [MediaType.TEXT_PLAIN_VALUE])
+  @PostMapping(REQUEST_MAPPING_CONSUMER_EVENT, produces = [MediaType.TEXT_PLAIN_VALUE])
   fun publishEvent(
     @RequestBody body: ByteArray,
     @RequestHeader(WH_HEADER_TOPIC, required = true) topic: String,
@@ -57,5 +57,6 @@ class PublisherController(
 
   companion object {
     const val REQUEST_MAPPING_CONSUMER = "/consumer"
+    const val REQUEST_MAPPING_CONSUMER_EVENT = "/event"
   }
 }
