@@ -6,9 +6,11 @@ import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_TRACE_ID
 import com.hookiesolutions.webhookie.common.config.web.OpenAPIConfig.Companion.OAUTH2_SCHEME
 import com.hookiesolutions.webhookie.common.service.IdGenerator
+import com.hookiesolutions.webhookie.consumer.service.TrafficServiceDelegate
 import com.hookiesolutions.webhookie.consumer.web.PublisherController.Companion.REQUEST_MAPPING_CONSUMER
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.slf4j.Logger
+import org.springframework.dao.DuplicateKeyException
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.messaging.SubscribableChannel
@@ -32,6 +34,7 @@ import reactor.kotlin.core.publisher.toMono
 class PublisherController(
   private val log: Logger,
   private val idGenerator: IdGenerator,
+  private val trafficService: TrafficServiceDelegate,
   private val internalConsumerChannel: SubscribableChannel
 ) {
   @PostMapping(REQUEST_MAPPING_CONSUMER_EVENT, produces = [MediaType.TEXT_PLAIN_VALUE])
@@ -42,27 +45,37 @@ class PublisherController(
     @RequestHeader(HttpHeaders.CONTENT_TYPE, required = true) contentType: String,
     @RequestHeader(WH_HEADER_AUTHORIZED_SUBSCRIBER, required = false, defaultValue = "") authorizedSubscribers: List<String>
   ): Mono<String> {
-    log.info("Publishing a message to event queue....")
+    return checkOrGenerateTraceId(traceId)
+      .map {
+        log.info("Publishing a message to event queue....")
 
-    val messageBuilder = MessageBuilder
-      .withPayload(body)
-      .setHeader(WH_HEADER_TOPIC, topic)
-      .setHeader(WH_HEADER_TRACE_ID, calculateTraceId(traceId))
-      .setHeader(HEADER_CONTENT_TYPE, contentType)
-    if(authorizedSubscribers.isNotEmpty()) {
-      messageBuilder.setHeader(WH_HEADER_AUTHORIZED_SUBSCRIBER, authorizedSubscribers)
-    }
-    internalConsumerChannel
-      .send(messageBuilder.build())
-    return "OK".toMono()
+        val messageBuilder = MessageBuilder
+          .withPayload(body)
+          .setHeader(WH_HEADER_TOPIC, topic)
+          .setHeader(WH_HEADER_TRACE_ID, it)
+          .setHeader(HEADER_CONTENT_TYPE, contentType)
+        if(authorizedSubscribers.isNotEmpty()) {
+          messageBuilder.setHeader(WH_HEADER_AUTHORIZED_SUBSCRIBER, authorizedSubscribers)
+        }
+        internalConsumerChannel.send(messageBuilder.build())
+      }
+      .doOnNext { log.debug("Message with traceId: '{}' is being processed") }
+      .map { "OK" }
   }
 
-  private fun calculateTraceId(traceId: String): String {
+  private fun checkOrGenerateTraceId(traceId: String): Mono<String> {
     return if(traceId.trim() == "") {
       log.debug("wh-trace-id header is missing. generating a new id..")
-      idGenerator.generate()
+      idGenerator.generate().toMono()
     } else {
-      traceId
+      trafficService.traceIdExists(traceId)
+        .flatMap {
+          if(it) {
+            Mono.error(DuplicateKeyException("TraceId $traceId already exists!"))
+          } else {
+            traceId.toMono()
+          }
+        }
     }
   }
 
