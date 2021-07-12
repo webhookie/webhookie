@@ -5,6 +5,7 @@ import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_TOPIC
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_TRACE_ID
 import com.hookiesolutions.webhookie.common.config.web.OpenAPIConfig.Companion.OAUTH2_SCHEME
+import com.hookiesolutions.webhookie.common.service.IdGenerator
 import com.hookiesolutions.webhookie.consumer.web.PublisherController.Companion.REQUEST_MAPPING_CONSUMER
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.slf4j.Logger
@@ -30,13 +31,14 @@ import reactor.kotlin.core.publisher.toMono
 @RequestMapping(REQUEST_MAPPING_CONSUMER)
 class PublisherController(
   private val log: Logger,
+  private val idGenerator: IdGenerator,
   private val internalConsumerChannel: SubscribableChannel
 ) {
   @PostMapping(REQUEST_MAPPING_CONSUMER_EVENT, produces = [MediaType.TEXT_PLAIN_VALUE])
   fun publishEvent(
     @RequestBody body: ByteArray,
     @RequestHeader(WH_HEADER_TOPIC, required = true) topic: String,
-    @RequestHeader(WH_HEADER_TRACE_ID, required = true) traceId: String,
+    @RequestHeader(WH_HEADER_TRACE_ID, required = false, defaultValue = "") traceId: String,
     @RequestHeader(HttpHeaders.CONTENT_TYPE, required = true) contentType: String,
     @RequestHeader(WH_HEADER_AUTHORIZED_SUBSCRIBER, required = false, defaultValue = "") authorizedSubscribers: List<String>
   ): Mono<String> {
@@ -45,7 +47,7 @@ class PublisherController(
     val messageBuilder = MessageBuilder
       .withPayload(body)
       .setHeader(WH_HEADER_TOPIC, topic)
-      .setHeader(WH_HEADER_TRACE_ID, traceId)
+      .setHeader(WH_HEADER_TRACE_ID, calculateTraceId(traceId))
       .setHeader(HEADER_CONTENT_TYPE, contentType)
     if(authorizedSubscribers.isNotEmpty()) {
       messageBuilder.setHeader(WH_HEADER_AUTHORIZED_SUBSCRIBER, authorizedSubscribers)
@@ -53,6 +55,15 @@ class PublisherController(
     internalConsumerChannel
       .send(messageBuilder.build())
     return "OK".toMono()
+  }
+
+  private fun calculateTraceId(traceId: String): String {
+    return if(traceId.trim() == "") {
+      log.debug("wh-traceId header is missing. generating a new id..")
+      idGenerator.generate()
+    } else {
+      traceId
+    }
   }
 
   companion object {
