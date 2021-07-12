@@ -1,6 +1,7 @@
 package com.hookiesolutions.webhookie.audit.service
 
 import com.hookiesolutions.webhookie.audit.domain.*
+import com.hookiesolutions.webhookie.audit.domain.Trace.Queries.Companion.byTraceId
 import com.hookiesolutions.webhookie.audit.web.model.request.TraceRequest
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_ADMIN
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_PROVIDER
@@ -94,5 +95,9 @@ class TraceService(
 
   fun fetchTraceVerifyingReadAccess(traceId: String): Mono<Trace> {
     return repository.findByTraceIdVerifyingReadAccess(traceId)
+  }
+
+  fun traceIdExists(traceId: String): Mono<Boolean> {
+    return repository.exists(byTraceId(traceId))
   }
 }

@@ -98,6 +98,10 @@ abstract class GenericRepository<E: AbstractEntity>(
     aggregation.pipeline.add(Aggregation.limit(pageable.pageSize.toLong()))
   }
 
+  fun exists(criteria: Criteria): Mono<Boolean> {
+    return mongoTemplate.exists(query(criteria), clazz)
+  }
+
   class Query {
     companion object {
       fun pageableWith(requested: Pageable, defaultSort: Sort, defaultPageable: Pageable): Pageable {
