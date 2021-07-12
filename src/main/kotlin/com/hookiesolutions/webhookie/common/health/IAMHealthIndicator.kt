@@ -3,6 +3,7 @@ package com.hookiesolutions.webhookie.common.health
 import com.hookiesolutions.webhookie.common.exception.RemoteServiceException
 import org.springframework.boot.actuate.health.Health
 import org.springframework.boot.actuate.health.ReactiveHealthIndicator
+import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
@@ -18,6 +19,7 @@ import reactor.kotlin.core.publisher.toMono
 @Component
 class IAMHealthIndicator(
   private val jwtKeySetWebClient: WebClient,
+  private val resourceServerProperties: OAuth2ResourceServerProperties
 ): ReactiveHealthIndicator {
   override fun health(): Mono<Health> {
     return jwtKeySetWebClient
@@ -25,17 +27,27 @@ class IAMHealthIndicator(
       .accept(MediaType.APPLICATION_JSON)
       .retrieve()
       .bodyToMono(Any::class.java)
-      .flatMap { Health.up().build().toMono() }
+      .flatMap { up() }
       .onErrorResume(WebClientRequestException::class.java) {
         RemoteServiceException("Unable to communicate to the spec parser! Please contact Administrator").toMono()
       }
-      .onErrorResume {
-        Health
-          .down()
-          .withDetail("reason", it.localizedMessage)
-          .build()
-          .toMono()
-      }
+      .onErrorResume { down(it) }
+  }
+
+  private fun up(): Mono<Health> {
+    return Health
+      .up()
+      .withDetail("jwt", resourceServerProperties.jwt)
+      .build()
+      .toMono()
+  }
+
+  private fun down(ex: Throwable): Mono<Health> {
+    return         Health
+      .down()
+      .withDetail("reason", ex.localizedMessage)
+      .build()
+      .toMono()
   }
 }
 
