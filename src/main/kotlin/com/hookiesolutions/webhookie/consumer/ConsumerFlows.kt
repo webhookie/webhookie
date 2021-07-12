@@ -14,6 +14,7 @@ import org.springframework.integration.core.GenericSelector
 import org.springframework.integration.dsl.IntegrationFlow
 import org.springframework.integration.dsl.IntegrationFlows
 import org.springframework.integration.dsl.integrationFlow
+import org.springframework.integration.transformer.GenericTransformer
 import org.springframework.messaging.Message
 import org.springframework.messaging.SubscribableChannel
 import org.springframework.retry.support.RetryTemplate
@@ -67,10 +68,10 @@ class ConsumerFlows(
   }
 
   @Bean
-  fun internalConsumerFlow(): IntegrationFlow {
+  fun internalConsumerFlow(toConsumerMessageTransformer: GenericTransformer<Message<ByteArray>, ConsumerMessage>): IntegrationFlow {
     return integrationFlow {
       channel(internalConsumerChannel)
-      transform<Message<ByteArray>> { ConsumerMessage.from(it) }
+      transform<Message<ByteArray>> { toConsumerMessageTransformer.transform(it) }
       channel(consumerChannel)
     }
   }
