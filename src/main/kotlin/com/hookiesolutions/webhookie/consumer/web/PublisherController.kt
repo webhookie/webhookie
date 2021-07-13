@@ -7,7 +7,7 @@ import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH
 import com.hookiesolutions.webhookie.common.config.web.OpenAPIConfig.Companion.OAUTH2_SCHEME
 import com.hookiesolutions.webhookie.common.service.IdGenerator
 import com.hookiesolutions.webhookie.consumer.service.TrafficServiceDelegate
-import com.hookiesolutions.webhookie.consumer.web.PublisherController.Companion.REQUEST_MAPPING_CONSUMER
+import com.hookiesolutions.webhookie.consumer.web.ConsumerAPIDocs.Companion.REQUEST_MAPPING_CONSUMER
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.slf4j.Logger
 import org.springframework.dao.DuplicateKeyException
@@ -80,7 +80,6 @@ class PublisherController(
   }
 
   companion object {
-    const val REQUEST_MAPPING_CONSUMER = "/consumer"
     const val REQUEST_MAPPING_CONSUMER_EVENT = "/event"
   }
 }

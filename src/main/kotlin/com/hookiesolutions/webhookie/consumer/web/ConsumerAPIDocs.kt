@@ -1,6 +1,5 @@
 package com.hookiesolutions.webhookie.consumer.web
 
-import com.hookiesolutions.webhookie.consumer.web.PublisherController.Companion.REQUEST_MAPPING_CONSUMER
 import org.springdoc.core.GroupedOpenApi
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -20,5 +19,9 @@ class ConsumerAPIDocs {
       .group("Consumer")
       .pathsToMatch(*paths)
       .build()
+  }
+
+  companion object {
+    const val REQUEST_MAPPING_CONSUMER = "/consumer"
   }
 }
