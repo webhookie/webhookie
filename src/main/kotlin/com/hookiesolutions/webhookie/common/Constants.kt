@@ -11,6 +11,7 @@ class Constants {
       companion object {
         const val WH_HEADER_TOPIC = "wh-topic"
         const val WH_HEADER_TRACE_ID = "wh-trace-id"
+        const val WH_HEADER_TRACE_ID_MISSING = "wh-trace-id-missing"
         const val WH_HEADER_SPAN_ID = "wh-span-id"
         const val WH_HEADER_UNBLOCKED = "wh-unblocked"
         const val WH_HEADER_RESENT = "wh-resent"
