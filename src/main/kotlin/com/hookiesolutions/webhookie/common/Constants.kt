@@ -23,6 +23,18 @@ class Constants {
           WH_HEADER_TOPIC,
           HEADER_CONTENT_TYPE
         )
+
+        val WH_ALL_HEADERS = setOf(
+          WH_HEADER_TOPIC,
+          WH_HEADER_TRACE_ID,
+          WH_HEADER_SPAN_ID,
+          WH_HEADER_UNBLOCKED,
+          WH_HEADER_RESENT,
+          WH_HEADER_REQUESTED_BY,
+          WH_HEADER_AUTHORIZED_SUBSCRIBER,
+          HEADER_CONTENT_TYPE,
+          WH_HEADER_SEQUENCE_SIZE
+        )
       }
     }
   }
