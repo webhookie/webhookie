@@ -1,6 +1,7 @@
 package com.hookiesolutions.webhookie.consumer.config
 
 import com.hookiesolutions.webhookie.common.Constants
+import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_ALL_HEADERS
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_TRACE_ID
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_REQUIRED_HEADERS
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
@@ -10,6 +11,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.integration.core.GenericSelector
 import org.springframework.integration.transformer.GenericTransformer
 import org.springframework.messaging.Message
+import org.springframework.messaging.MessageHeaders
 import org.springframework.retry.backoff.FixedBackOffPolicy
 import org.springframework.retry.policy.SimpleRetryPolicy
 import org.springframework.retry.support.RetryTemplate
@@ -20,14 +22,27 @@ import org.springframework.retry.support.RetryTemplate
  * @since 3/12/20 03:11
  */
 @Configuration
-class ConsumerConfig {
+class ConsumerConfig(private val idGenerator: IdGenerator) {
   @Bean
-  fun toConsumerMessageTransformer(
-    idGenerator: IdGenerator
-  ): GenericTransformer<Message<ByteArray>, ConsumerMessage> {
+  fun traceIdExtractor(): GenericTransformer<Message<*>, String?> {
+    return GenericTransformer {
+      it.headers[WH_HEADER_TRACE_ID] as String?
+    }
+  }
+
+  @Bean
+  fun toWebhookieHeadersTransformer(): GenericTransformer<Message<ByteArray>, MessageHeaders> {
+    return GenericTransformer { message ->
+      MessageHeaders(message.headers.filter { WH_ALL_HEADERS.contains(it.key) })
+    }
+  }
+
+  @Bean
+  fun toConsumerMessageTransformer(): GenericTransformer<Message<ByteArray>, ConsumerMessage> {
     return GenericTransformer { message ->
       val topic = message.headers[Constants.Queue.Headers.WH_HEADER_TOPIC] as String
       val contentType = message.headers[Constants.Queue.Headers.HEADER_CONTENT_TYPE] as String
+
       @Suppress("UNCHECKED_CAST")
       val authorizedSubscribers: Collection<String> =
         message.headers[Constants.Queue.Headers.WH_HEADER_AUTHORIZED_SUBSCRIBER] as? Collection<String> ?: emptySet()
@@ -42,16 +57,6 @@ class ConsumerConfig {
         message.payload,
         message.headers
       )
-/*
-      return@GenericTransformer if(headerTraceId == null) {
-        cm.toMono()
-      } else {
-        trafficServiceDelegate.traceIdExists(headerTraceId)
-          .filter { !it }
-          .map { cm }
-      }
-*/
-
     }
   }
 
@@ -74,69 +79,4 @@ class ConsumerConfig {
     retryTemplate.setRetryPolicy(retryPolicy)
     return retryTemplate
   }
-
-/*
-  @Bean
-  fun eventPublisherChannelFlow(
-    connectionFactory: ConnectionFactory,
-    amqpTemplate: AmqpTemplate
-  ): IntegrationFlow {
-    val outboundGateway = Amqp.outboundAdapter(amqpTemplate)
-      .routingKey("wh-event")
-      .exchangeName("wh-customer")
-    return IntegrationFlows
-      .from(eventPublisherChannel)
-      .log<Message<*>> { log.info("{}", it) }
-      .handle(outboundGateway)
-      .nullChannel()
-  }
-
-  @Bean
-  fun container(
-    connectionFactory: ConnectionFactory,
-  ): SimpleMessageListenerContainer {
-    val container = SimpleMessageListenerContainer()
-    container.connectionFactory = connectionFactory
-    container.setQueueNames("wh-customer.event")
-    return container
-  }
-
-  @Bean("wh-customer.event.dlq")
-  fun dlq(): Queue {
-    return QueueBuilder.durable("wh-customer.event.dlq")
-      .build()
-  }
-
-  @Bean("DLX.exchange")
-  fun dlqExchange(): DirectExchange {
-    return DirectExchange("DLX", true, false)
-  }
-
-  @Bean("wh-customer.event.dlq.binding")
-  fun dlqBinding(dlqExchange: DirectExchange): Binding {
-    return Binding(dlq().name, Binding.DestinationType.QUEUE, dlqExchange.name, "wh-event", emptyMap())
-  }
-
-  @ServiceActivator(inputChannel = "customerEventInChannel", outputChannel = "subscriptionInChannel")
-  fun eventFlowActivator(
-    message: Message<*>,
-    @Header(WH_HEADER_TOPIC, required = true) topic: String,
-    @Header(WH_HEADER_TRACE_ID, required = true) traceId: String,
-    @Header(HEADER_CONTENT_TYPE, required = true) contentType: String,
-    @Header(WH_HEADER_AUTHORIZED_SUBSCRIBER, required = false, defaultValue = "") authorizedSubscribers: List<String> = emptyList()
-  ): Message<*> {
-    log.info("{}", message.payload)
-    log.info("{}", message.headers)
-    log.info("{}", topic)
-
-    return message
-  }
-
-  @Bean
-  fun customerEventConsumer(): Consumer<Message<Any>> {
-    return Consumer {
-      log.info("{}", it)
-    }
-  }
-*/
 }

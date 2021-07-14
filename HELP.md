@@ -56,3 +56,68 @@ Kotlin:
 
 Auth:
  - [angular-oauth2-oidc](https://manfredsteyer.github.io/angular-oauth2-oidc/docs/additional-documentation/authorization-servers/auth0.html)
+
+```
+  @Bean
+  fun eventPublisherChannelFlow(
+    connectionFactory: ConnectionFactory,
+    amqpTemplate: AmqpTemplate
+  ): IntegrationFlow {
+    val outboundGateway = Amqp.outboundAdapter(amqpTemplate)
+      .routingKey("wh-event")
+      .exchangeName("wh-customer")
+    return IntegrationFlows
+      .from(eventPublisherChannel)
+      .log<Message<*>> { log.info("{}", it) }
+      .handle(outboundGateway)
+      .nullChannel()
+  }
+
+  @Bean
+  fun container(
+    connectionFactory: ConnectionFactory,
+  ): SimpleMessageListenerContainer {
+    val container = SimpleMessageListenerContainer()
+    container.connectionFactory = connectionFactory
+    container.setQueueNames("wh-customer.event")
+    return container
+  }
+
+  @Bean("wh-customer.event.dlq")
+  fun dlq(): Queue {
+    return QueueBuilder.durable("wh-customer.event.dlq")
+      .build()
+  }
+
+  @Bean("DLX.exchange")
+  fun dlqExchange(): DirectExchange {
+    return DirectExchange("DLX", true, false)
+  }
+
+  @Bean("wh-customer.event.dlq.binding")
+  fun dlqBinding(dlqExchange: DirectExchange): Binding {
+    return Binding(dlq().name, Binding.DestinationType.QUEUE, dlqExchange.name, "wh-event", emptyMap())
+  }
+
+  @ServiceActivator(inputChannel = "customerEventInChannel", outputChannel = "subscriptionInChannel")
+  fun eventFlowActivator(
+    message: Message<*>,
+    @Header(WH_HEADER_TOPIC, required = true) topic: String,
+    @Header(WH_HEADER_TRACE_ID, required = true) traceId: String,
+    @Header(HEADER_CONTENT_TYPE, required = true) contentType: String,
+    @Header(WH_HEADER_AUTHORIZED_SUBSCRIBER, required = false, defaultValue = "") authorizedSubscribers: List<String> = emptyList()
+  ): Message<*> {
+    log.info("{}", message.payload)
+    log.info("{}", message.headers)
+    log.info("{}", topic)
+
+    return message
+  }
+
+  @Bean
+  fun customerEventConsumer(): Consumer<Message<Any>> {
+    return Consumer {
+      log.info("{}", it)
+    }
+  }
+```
