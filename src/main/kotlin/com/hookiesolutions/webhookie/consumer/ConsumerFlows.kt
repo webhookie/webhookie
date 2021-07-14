@@ -1,5 +1,6 @@
 package com.hookiesolutions.webhookie.consumer
 
+import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_TRACE_ID
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.consumer.config.ConsumerProperties
 import com.hookiesolutions.webhookie.consumer.service.TrafficServiceDelegate
@@ -56,6 +57,7 @@ class ConsumerFlows(
             val message = MessageBuilder
               .withPayload(msg.payload)
               .copyHeaders(toWebhookieHeadersTransformer.transform(msg))
+              .setHeader(WH_HEADER_TRACE_ID, it)
               .build()
 
             internalConsumerChannel.send(message)
