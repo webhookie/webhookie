@@ -10,6 +10,7 @@ import com.hookiesolutions.webhookie.audit.domain.Trace.Keys.Companion.TRACE_COL
 import com.hookiesolutions.webhookie.audit.domain.TraceStatusUpdate.Keys.Companion.KEY_STATUS
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
+import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.regexField
 import com.hookiesolutions.webhookie.common.repository.GenericRepository.Companion.fieldName
 import org.springframework.data.annotation.TypeAlias
 import org.springframework.data.mongodb.core.index.Indexed
@@ -42,6 +43,10 @@ data class Trace(
     companion object {
       fun byTraceId(traceId: String): Criteria {
         return where(KEY_TRACE_ID).`is`(traceId)
+      }
+
+      fun traceIdRegex(traceId: String): Criteria {
+        return regexField(KEY_TRACE_ID, traceId)
       }
 
       fun statusIn(statusList: List<TraceStatus>): Criteria {

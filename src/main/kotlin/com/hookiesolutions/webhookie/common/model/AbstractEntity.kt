@@ -36,14 +36,14 @@ abstract class AbstractEntity : AbstractDocument() {
         return where(key).elemMatch(elemMatchCriteria)
       }
 
-      private fun regex(key: String, value: String): Criteria {
+      fun regexField(key: String, value: String): Criteria {
         return where(key).regex(".*$value.*", "i")
       }
 
       fun regex(vararg pairs: Pair<String, String?>): Array<Criteria> {
         return pairs
           .filter { it.second != null }
-          .map { regex(it.first, it.second!!) }
+          .map { regexField(it.first, it.second!!) }
           .toTypedArray()
       }
 
@@ -52,7 +52,7 @@ abstract class AbstractEntity : AbstractDocument() {
           .filter { it.second.first != null }
           .map {
             return@map if (it.second.second == FieldMatchingStrategy.PARTIAL_MATCH) {
-              regex(it.first, it.second.first!!)
+              regexField(it.first, it.second.first!!)
             } else {
               where(it.first).`is`(it.second.first!!)
             }

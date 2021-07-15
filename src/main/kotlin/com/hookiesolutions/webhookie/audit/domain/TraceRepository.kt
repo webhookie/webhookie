@@ -6,9 +6,9 @@ import com.hookiesolutions.webhookie.audit.domain.Trace.Keys.Companion.KEY_STATU
 import com.hookiesolutions.webhookie.audit.domain.Trace.Keys.Companion.KEY_STATUS_UPDATE
 import com.hookiesolutions.webhookie.audit.domain.Trace.Keys.Companion.KEY_SUMMARY
 import com.hookiesolutions.webhookie.audit.domain.Trace.Keys.Companion.KEY_TIME
-import com.hookiesolutions.webhookie.audit.domain.Trace.Keys.Companion.KEY_TRACE_ID
 import com.hookiesolutions.webhookie.audit.domain.Trace.Queries.Companion.byTraceId
 import com.hookiesolutions.webhookie.audit.domain.Trace.Queries.Companion.statusIn
+import com.hookiesolutions.webhookie.audit.domain.Trace.Queries.Companion.traceIdRegex
 import com.hookiesolutions.webhookie.audit.domain.Trace.Queries.Companion.traceTopicIn
 import com.hookiesolutions.webhookie.audit.domain.Trace.Queries.Companion.traceUpdatedAfter
 import com.hookiesolutions.webhookie.audit.domain.Trace.Queries.Companion.traceUpdatedBefore
@@ -112,7 +112,6 @@ class TraceRepository(
     requestedPageable: Pageable
   ): Flux<Trace> {
     val requestCriteria = filters(
-      KEY_TRACE_ID to (request.traceId to FieldMatchingStrategy.PARTIAL_MATCH),
       KEY_SPAN_TOPIC to (request.topic to FieldMatchingStrategy.EXACT_MATCH),
       Span.Keys.KEY_SPAN_APPLICATION_ID to (request.application to FieldMatchingStrategy.EXACT_MATCH),
       Span.Keys.KEY_SPAN_ENTITY to (request.entity to FieldMatchingStrategy.EXACT_MATCH),
@@ -129,6 +128,10 @@ class TraceRepository(
       spanCriteria = spanCriteria.andOperator(*requestCriteria)
     }
     val traceRequestCriteria = mutableListOf<Criteria>()
+
+    if(request.traceId != null) {
+      traceRequestCriteria.add(traceIdRegex(request.traceId))
+    }
 
     if(!ignoreTopicsFilter) {
       traceRequestCriteria.add(traceTopicIn(topics))
