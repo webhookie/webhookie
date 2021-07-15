@@ -21,8 +21,7 @@ class TraceAggregate: TraceAggregationStrategy {
   override fun aggregate(spanCriteria: Criteria, traceCriteria: Criteria): Aggregation {
     val asField = "spans"
 
-    val list: MutableList<AggregationOperation> = emptyArray<AggregationOperation>()
-      .toMutableList()
+    val list: MutableList<AggregationOperation> = mutableListOf()
 
     if(!traceCriteria.criteriaObject.isEmpty()) {
       list.add(Aggregation.match(traceCriteria))

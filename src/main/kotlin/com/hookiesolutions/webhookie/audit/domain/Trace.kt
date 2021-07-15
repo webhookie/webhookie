@@ -57,6 +57,10 @@ data class Trace(
         return where(KEY_TOPIC).`in`(topics)
       }
 
+      fun traceTopicIs(topics: String): Criteria {
+        return where(KEY_TOPIC).`is`(topics)
+      }
+
       fun traceUpdatedAfter(from: Instant): Criteria {
         return where(KEY_TIME).gte(from)
       }

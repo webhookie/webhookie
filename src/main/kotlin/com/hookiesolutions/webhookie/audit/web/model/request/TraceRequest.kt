@@ -11,9 +11,9 @@ import java.time.Instant
 data class TraceRequest(
   val traceId: String? = null,
   val topic: String? = null,
-  val application: String? = null,
+  val applicationId: String? = null,
   val entity: String? = null,
-  val callback: String? = null,
+  val callbackId: String? = null,
   val from: Instant? = null,
   val to: Instant? = null,
   val status: List<TraceStatus> = emptyList()
@@ -21,18 +21,18 @@ data class TraceRequest(
   class Builder {
     private var traceId: String? = null
     private var topic: String? = null
-    private var application: String? = null
+    private var applicationId: String? = null
     private var entity: String? = null
-    private var callback: String? = null
+    private var callbackId: String? = null
     private var status: List<TraceStatus> = emptyList()
     private var from: Instant? = null
     private var to: Instant? = null
 
     fun traceId(traceId: String?) = apply { this.traceId = traceId }
     fun topic(topic: String?) = apply { this.topic = topic }
-    fun application(application: String?) = apply { this.application = application }
+    fun applicationId(applicationId: String?) = apply { this.applicationId = applicationId }
     fun entity(entity: String?) = apply { this.entity = entity }
-    fun callback(callback: String?) = apply { this.callback = callback }
+    fun callbackId(callbackId: String?) = apply { this.callbackId = callbackId }
     fun status(status: List<TraceStatus>) = apply { this.status = status }
     fun from(from: Instant?) = apply { this.from = from }
     fun to(to: Instant?) = apply { this.to = to }
@@ -41,9 +41,9 @@ data class TraceRequest(
       return TraceRequest(
         traceId = traceId,
         topic = topic,
-        application = application,
+        applicationId = applicationId,
         entity = entity,
-        callback = callback,
+        callbackId = callbackId,
         from = from,
         to = to,
         status = status

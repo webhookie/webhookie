@@ -80,9 +80,9 @@ class TrafficController(
   )
   fun userTraces(
     @RequestParam(required = false) traceId: String?,
-    @RequestParam(required = false) application: String?,
+    @RequestParam(required = false) applicationId: String?,
     @RequestParam(required = false) entity: String?,
-    @RequestParam(required = false) callback: String?,
+    @RequestParam(required = false) callbackId: String?,
     @RequestParam(required = false) topic: String?,
     @RequestParam(required = false, defaultValue = "") status: List<TraceStatus>,
     @RequestParam(required = false) from: Instant?,
@@ -91,9 +91,9 @@ class TrafficController(
   ): Flux<TraceResponse> {
     val request = TraceRequest.Builder()
       .traceId(traceId)
-      .application(application)
+      .applicationId(applicationId)
       .entity(entity)
-      .callback(callback)
+      .callbackId(callbackId)
       .topic(topic)
       .status(status)
       .from(from)
@@ -109,15 +109,15 @@ class TrafficController(
   )
   fun traceSpans(
     @PathVariable traceId: String,
-    @RequestParam(required = false) application: String?,
+    @RequestParam(required = false) applicationId: String?,
     @RequestParam(required = false) entity: String?,
-    @RequestParam(required = false) callback: String?,
+    @RequestParam(required = false) callbackId: String?,
     pageable: Pageable
   ): Flux<SpanResponse> {
     val request = TraceRequest.Builder()
-      .application(application)
+      .applicationId(applicationId)
       .entity(entity)
-      .callback(callback)
+      .callbackId(callbackId)
       .build()
     return spanService.traceSpans(pageable, traceId, request)
       .map { SpanResponse.from(it)}

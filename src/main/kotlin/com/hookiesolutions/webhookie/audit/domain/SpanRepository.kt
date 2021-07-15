@@ -214,9 +214,9 @@ class SpanRepository(
     val pageable = pageableWith(requestedPageable, SPAN_DEFAULT_SORT, SPAN_DEFAULT_PAGE)
 
     val requestCriteria = AbstractEntity.Queries.filters(
-      KEY_SPAN_APPLICATION_ID to (request.application to FieldMatchingStrategy.EXACT_MATCH),
+      KEY_SPAN_APPLICATION_ID to (request.applicationId to FieldMatchingStrategy.EXACT_MATCH),
       KEY_SPAN_ENTITY to (request.entity to FieldMatchingStrategy.EXACT_MATCH),
-      KEY_SPAN_CALLBACK_ID to (request.callback to FieldMatchingStrategy.EXACT_MATCH)
+      KEY_SPAN_CALLBACK_ID to (request.callbackId to FieldMatchingStrategy.EXACT_MATCH)
     ).toMutableList()
 
     if(!ignoreTopicsFilter) {

@@ -1,6 +1,5 @@
 package com.hookiesolutions.webhookie.audit.domain
 
-import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SPAN_TOPIC
 import com.hookiesolutions.webhookie.audit.domain.Span.Queries.Companion.spanTopicIn
 import com.hookiesolutions.webhookie.audit.domain.Trace.Keys.Companion.KEY_STATUS_HISTORY
 import com.hookiesolutions.webhookie.audit.domain.Trace.Keys.Companion.KEY_STATUS_UPDATE
@@ -10,6 +9,7 @@ import com.hookiesolutions.webhookie.audit.domain.Trace.Queries.Companion.byTrac
 import com.hookiesolutions.webhookie.audit.domain.Trace.Queries.Companion.statusIn
 import com.hookiesolutions.webhookie.audit.domain.Trace.Queries.Companion.traceIdRegex
 import com.hookiesolutions.webhookie.audit.domain.Trace.Queries.Companion.traceTopicIn
+import com.hookiesolutions.webhookie.audit.domain.Trace.Queries.Companion.traceTopicIs
 import com.hookiesolutions.webhookie.audit.domain.Trace.Queries.Companion.traceUpdatedAfter
 import com.hookiesolutions.webhookie.audit.domain.Trace.Queries.Companion.traceUpdatedBefore
 import com.hookiesolutions.webhookie.audit.domain.Trace.Updates.Companion.traceStatusUpdate
@@ -112,10 +112,9 @@ class TraceRepository(
     requestedPageable: Pageable
   ): Flux<Trace> {
     val requestCriteria = filters(
-      KEY_SPAN_TOPIC to (request.topic to FieldMatchingStrategy.EXACT_MATCH),
-      Span.Keys.KEY_SPAN_APPLICATION_ID to (request.application to FieldMatchingStrategy.EXACT_MATCH),
+      Span.Keys.KEY_SPAN_APPLICATION_ID to (request.applicationId to FieldMatchingStrategy.EXACT_MATCH),
       Span.Keys.KEY_SPAN_ENTITY to (request.entity to FieldMatchingStrategy.EXACT_MATCH),
-      Span.Keys.KEY_SPAN_CALLBACK_ID to (request.callback to FieldMatchingStrategy.EXACT_MATCH)
+      Span.Keys.KEY_SPAN_CALLBACK_ID to (request.callbackId to FieldMatchingStrategy.EXACT_MATCH)
     )
 
     var spanCriteria = if(ignoreTopicsFilter) {
@@ -131,6 +130,10 @@ class TraceRepository(
 
     if(request.traceId != null) {
       traceRequestCriteria.add(traceIdRegex(request.traceId))
+    }
+
+    if(request.topic != null) {
+      traceRequestCriteria.add(traceTopicIs(request.topic))
     }
 
     if(!ignoreTopicsFilter) {
