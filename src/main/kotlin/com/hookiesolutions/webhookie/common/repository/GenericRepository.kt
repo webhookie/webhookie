@@ -14,10 +14,19 @@ import org.springframework.dao.DuplicateKeyException
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
-import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.FindAndReplaceOptions
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
-import org.springframework.data.mongodb.core.aggregation.*
+import org.springframework.data.mongodb.core.aggregation.AddFieldsOperation
+import org.springframework.data.mongodb.core.aggregation.Aggregation
+import org.springframework.data.mongodb.core.aggregation.AggregationExpression
+import org.springframework.data.mongodb.core.aggregation.AggregationOperation
+import org.springframework.data.mongodb.core.aggregation.AggregationUpdate
+import org.springframework.data.mongodb.core.aggregation.ArithmeticOperators
+import org.springframework.data.mongodb.core.aggregation.ArrayOperators
+import org.springframework.data.mongodb.core.aggregation.ComparisonOperators
+import org.springframework.data.mongodb.core.aggregation.ConditionalOperators
+import org.springframework.data.mongodb.core.aggregation.SetOperation
+import org.springframework.data.mongodb.core.aggregation.UnsetOperation
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query.query
 import reactor.core.publisher.Mono
@@ -72,13 +81,10 @@ abstract class GenericRepository<E: AbstractEntity>(
     clazz: Class<T>,
     vararg operations: AggregationOperation
   ): Mono<T> {
+    val query = query(criteria)
     return mongoTemplate
-      .findAndModify(
-        query(criteria),
-        AggregationUpdate.newUpdate(*operations),
-        FindAndModifyOptions.options().returnNew(true),
-        clazz
-      )
+      .updateFirst(query, AggregationUpdate.newUpdate(*operations), clazz)
+      .flatMap { mongoTemplate.findOne(query, clazz) }
   }
 
   fun sort(
