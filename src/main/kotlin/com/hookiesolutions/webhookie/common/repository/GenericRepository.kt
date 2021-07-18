@@ -14,6 +14,7 @@ import org.springframework.dao.DuplicateKeyException
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
+import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.FindAndReplaceOptions
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.aggregation.AddFieldsOperation
@@ -83,8 +84,12 @@ abstract class GenericRepository<E: AbstractEntity>(
   ): Mono<T> {
     val query = query(criteria)
     return mongoTemplate
-      .updateFirst(query, AggregationUpdate.newUpdate(*operations), clazz)
-      .flatMap { mongoTemplate.findOne(query, clazz) }
+      .findAndModify(
+        query,
+        AggregationUpdate.newUpdate(*operations),
+        FindAndModifyOptions.options().returnNew(true),
+        clazz
+      )
   }
 
   fun sort(
