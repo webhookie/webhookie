@@ -29,9 +29,9 @@ class IAMHealthIndicator(
       .bodyToMono(Any::class.java)
       .flatMap { up() }
       .onErrorResume(WebClientRequestException::class.java) {
-        RemoteServiceException("Unable to communicate to the spec parser! Please contact Administrator").toMono()
+        RemoteServiceException("IdP service is either starting up or not available").toMono()
       }
-      .onErrorResume { down(it) }
+      .onErrorResume { down() }
   }
 
   private fun up(): Mono<Health> {
@@ -42,10 +42,10 @@ class IAMHealthIndicator(
       .toMono()
   }
 
-  private fun down(ex: Throwable): Mono<Health> {
+  private fun down(): Mono<Health> {
     return         Health
       .down()
-      .withDetail("reason", ex.localizedMessage)
+      .withDetail("error", "IdP service is either starting up or not available")
       .build()
       .toMono()
   }
