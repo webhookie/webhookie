@@ -12,7 +12,6 @@ import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate.Companion.not
 import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate.Companion.ok
 import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate.Companion.retryingSpan
 import com.hookiesolutions.webhookie.audit.domain.TraceRepository
-import com.hookiesolutions.webhookie.audit.web.model.SSENotification
 import com.hookiesolutions.webhookie.audit.web.model.request.SpanRequest
 import com.hookiesolutions.webhookie.audit.web.model.request.TraceRequest
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.HEADER_CONTENT_TYPE
@@ -24,7 +23,6 @@ import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_ADMIN
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_CONSUMER
 import com.hookiesolutions.webhookie.common.exception.EntityExistsException
-import com.hookiesolutions.webhookie.common.message.publisher.GenericPublisherMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherOtherErrorMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherRequestErrorMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherResponseErrorMessage
@@ -37,10 +35,8 @@ import com.hookiesolutions.webhookie.security.service.SecurityHandler
 import com.hookiesolutions.webhookie.webhook.service.WebhookGroupServiceDelegate
 import org.slf4j.Logger
 import org.springframework.data.domain.Pageable
-import org.springframework.integration.core.GenericSelector
 import org.springframework.messaging.Message
 import org.springframework.messaging.MessageChannel
-import org.springframework.messaging.SubscribableChannel
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
@@ -57,7 +53,6 @@ import reactor.kotlin.core.publisher.toMono
  */
 @Service
 class SpanService(
-  private val sseChannel: SubscribableChannel,
   private val repository: SpanRepository,
   private val traceRepository: TraceRepository,
   private val timeMachine: TimeMachine,
@@ -66,10 +61,9 @@ class SpanService(
   private val subscriptionServiceDelegate: SubscriptionServiceDelegate,
   private val resendSpanChannel: MessageChannel,
   private val securityHandler: SecurityHandler,
-  private val retryableErrorSelector: GenericSelector<GenericPublisherMessage>,
   private val log: Logger
 ) {
-  fun createSpan(message: SignableSubscriptionMessage) {
+  fun createSpan(message: SignableSubscriptionMessage): Mono<Span> {
     log.info("'{}', '{}' span to be saved", message.spanId, message.traceId)
     val span = Span.Builder()
       .message(message)
@@ -77,23 +71,14 @@ class SpanService(
       .time(timeMachine.now())
       .build()
 
-    saveOrFetch(span)
-      .doOnNext { sseChannel.send(SSENotification.SpanNotification.created(it)) }
-      .subscribe { log.debug("'{}', '{}' span was saved/fetched", it.spanId, it.traceId) }
+    return saveOrFetch(span)
+      .doOnNext { log.info("'{}', '{}' span was saved/fetched", it.spanId, it.traceId) }
   }
 
-  fun retrying(message: Message<SignableSubscriptionMessage>) {
-    if(message.payload.isFirstRetryInCycle()) {
-      markAsRetrying(message)
-    } else {
-      addRetry(message.payload)
-    }
-  }
-
-  fun blockSpan(message: BlockedSubscriptionMessageDTO) {
+  fun blockSpan(message: BlockedSubscriptionMessageDTO): Mono<Span> {
     log.info("Blocking '{}', '{}' span. reason:", message.spanId, message.traceId, message.blockedDetails.reason)
     val at = timeMachine.now()
-    repository.addStatusUpdate(message.spanId, blocked(at))
+    return repository.addStatusUpdate(message.spanId, blocked(at))
       .switchIfEmpty {
         val span = Span.Builder()
           .message(message)
@@ -103,15 +88,11 @@ class SpanService(
 
         saveOrFetch(span)
       }
-      .doOnNext { sseChannel.send(SSENotification.SpanNotification.blocked(it)) }
-      .subscribe { logSpanStatus(it) }
+      .doOnNext { log.debug("'{}', '{}' Span was updated to: '{}'", it.spanId, it.traceId, it.lastStatus) }
   }
 
-  private fun logSpanStatus(it: Span) {
-    log.debug("'{}', '{}' Span was updated to: '{}'", it.spanId, it.traceId, it.lastStatus)
-  }
-
-  fun updateWithServerError(message: PublisherResponseErrorMessage) {
+  @Suppress("DuplicatedCode")
+  fun updateWithNonRetryableServerError(message: PublisherResponseErrorMessage): Mono<Span> {
     log.info("Updating span '{}', '{}' with server error", message.spanId, message.traceId, message.response.status)
     val time = timeMachine.now()
 
@@ -120,18 +101,25 @@ class SpanService(
       .message(message)
       .build()
 
-    if(retryableErrorSelector.accept(message)) {
-      repository.updateWithResponse(message.spanId, response)
-        .doOnNext { sseChannel.send(SSENotification.SpanNotification.failedWithServerError(it)) }
-        .subscribe { log.info("'{}', '{}' Span was updated with server response: '{}'", it.spanId, it.traceId, it.latestResult) }
-    } else {
-      repository.responseStatusUpdate(message.spanId, notOk(time), response)
-        .doOnNext { sseChannel.send(SSENotification.SpanNotification.failedWithStatusUpdate(it)) }
-        .subscribe { log.info("'{}', '{}' Span was updated with other error response: '{}'", it.spanId, it.traceId, it.latestResult?.statusCode) }
-    }
+    return repository.responseStatusUpdate(message.spanId, notOk(time), response)
+      .doOnNext { log.info("'{}', '{}' Span was updated with other error response: '{}'", it.spanId, it.traceId, it.latestResult?.statusCode) }
   }
 
-  fun updateWithClientError(message: PublisherRequestErrorMessage) {
+  fun updateWithRetryableServerError(message: PublisherResponseErrorMessage): Mono<Span> {
+    log.info("Updating span '{}', '{}' with RETRYABLE server error", message.spanId, message.traceId, message.response.status)
+    val time = timeMachine.now()
+
+    val response = SpanResult.Builder()
+      .time(time)
+      .message(message)
+      .build()
+
+    return repository.updateWithResponse(message.spanId, response)
+      .doOnNext { log.info("'{}', '{}' Span was updated with server response: '{}'", it.spanId, it.traceId, it.latestResult) }
+  }
+
+  @Suppress("DuplicatedCode")
+  fun updateWithClientError(message: PublisherRequestErrorMessage): Mono<Span> {
     log.info("Updating span '{}', '{}' with request error", message.spanId, message.traceId, message.reason)
     val time = timeMachine.now()
 
@@ -140,12 +128,12 @@ class SpanService(
       .message(message)
       .build()
 
-    repository.updateWithResponse(message.spanId, response)
-      .doOnNext { sseChannel.send(SSENotification.SpanNotification.failedWithClientError(it)) }
-      .subscribe { log.info("'{}', '{}' Span was updated with client error response: '{}'", it.spanId, it.traceId, it.latestResult?.statusCode) }
+    return repository.updateWithResponse(message.spanId, response)
+      .doOnNext { log.info("'{}', '{}' Span was updated with client error response: '{}'", it.spanId, it.traceId, it.latestResult?.statusCode) }
   }
 
-  fun updateWithOtherError(message: PublisherOtherErrorMessage) {
+  @Suppress("DuplicatedCode")
+  fun updateWithOtherError(message: PublisherOtherErrorMessage): Mono<Span> {
     log.info("Updating span '{}', '{}' with unknown error", message.spanId, message.traceId, message.reason)
     val time = timeMachine.now()
 
@@ -154,12 +142,11 @@ class SpanService(
       .message(message)
       .build()
 
-    repository.responseStatusUpdate(message.spanId, notOk(time), response)
-      .doOnNext { sseChannel.send(SSENotification.SpanNotification.failedWithOtherError(it)) }
-      .subscribe { log.info("'{}', '{}' Span was updated with other error response: '{}'", it.spanId, it.traceId, it.latestResult?.statusCode) }
+    return repository.responseStatusUpdate(message.spanId, notOk(time), response)
+      .doOnNext { log.info("'{}', '{}' Span was updated with other error response: '{}'", it.spanId, it.traceId, it.latestResult?.statusCode) }
   }
 
-  fun updateWithSuccessResponse(message: PublisherSuccessMessage) {
+  fun updateWithSuccessResponse(message: PublisherSuccessMessage): Mono<Span> {
     log.info("Updating span '{}', '{}' with SUCCESS", message.spanId, message.traceId, message.response.status)
     val time = timeMachine.now()
 
@@ -168,30 +155,27 @@ class SpanService(
       .message(message)
       .build()
 
-    repository.responseStatusUpdate(message.spanId, ok(time), response)
-      .doOnNext { sseChannel.send(SSENotification.SpanNotification.success(it)) }
-      .subscribe { log.debug("'{}', '{}' Span was updated with server response: '{}'", it.spanId, it.traceId, it.latestResult?.statusCode) }
+    return repository.responseStatusUpdate(message.spanId, ok(time), response)
+      .doOnNext { log.info("'{}', '{}' Span was updated with server response: '{}'", it.spanId, it.traceId, it.latestResult?.statusCode) }
   }
 
-  private fun markAsRetrying(message: Message<SignableSubscriptionMessage>) {
+  fun markAsRetrying(message: Message<SignableSubscriptionMessage>): Mono<Span> {
     val payload = message.payload
     log.info("Marking  '{}', '{}' as Retrying. ", payload.spanId, payload.traceId)
     val time = timeMachine.now()
       .plusSeconds(payload.delay.seconds)
     val details = factory.calculateSpanSendDetails(message)
     val retry = SpanRetry(time, payload.totalNumberOfTries, payload.numberOfRetries, details.t2, details.t1)
-    repository.retryStatusUpdate(payload.spanId, retryingSpan(time), retry)
-      .doOnNext { sseChannel.send(SSENotification.SpanNotification.markedRetrying(it)) }
-      .subscribe { logSpanStatus(it) }
+    return repository.retryStatusUpdate(payload.spanId, retryingSpan(time), retry)
+      .doOnNext { log.debug("'{}', '{}' Span was updated to: '{}'", it.spanId, it.traceId, it.lastStatus) }
   }
 
-  private fun addRetry(message: SignableSubscriptionMessage) {
+  fun addRetry(message: SignableSubscriptionMessage): Mono<Span> {
     log.info("Delaying '{}', '{}' span for '{}' seconds", message.spanId, message.traceId, message.delay.seconds)
     val time = timeMachine.now().plusSeconds(message.delay.seconds)
     val retry = SpanRetry(time, message.totalNumberOfTries, message.numberOfRetries, SENT_BY_WEBHOOKIE, SpanSendReason.RETRY)
-    repository.addRetry(message.spanId, retry)
-      .doOnNext { sseChannel.send(SSENotification.SpanNotification.isRetrying(it)) }
-      .subscribe { logSpanStatus(it) }
+    return repository.addRetry(message.spanId, retry)
+      .doOnNext { log.debug("'{}', '{}' Span was updated to: '{}'", it.spanId, it.traceId, it.lastStatus) }
   }
 
   private fun saveOrFetch(span: Span): Mono<Span> {

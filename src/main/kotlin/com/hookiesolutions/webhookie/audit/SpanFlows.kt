@@ -1,11 +1,14 @@
 package com.hookiesolutions.webhookie.audit
 
+import com.hookiesolutions.webhookie.audit.domain.Span
 import com.hookiesolutions.webhookie.audit.service.SpanService
+import com.hookiesolutions.webhookie.audit.web.model.SSENotification
 import com.hookiesolutions.webhookie.common.Constants
 import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.BLOCKED_SUBSCRIPTION_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.DELAYED_SUBSCRIPTION_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.SUBSCRIPTION_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.exception.messaging.SubscriptionMessageHandlingException
+import com.hookiesolutions.webhookie.common.message.publisher.GenericPublisherMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherOtherErrorMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherRequestErrorMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherResponseErrorMessage
@@ -15,10 +18,12 @@ import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscri
 import org.slf4j.Logger
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.integration.core.GenericSelector
 import org.springframework.integration.dsl.IntegrationFlow
 import org.springframework.integration.dsl.integrationFlow
 import org.springframework.messaging.Message
 import org.springframework.messaging.MessageHeaders
+import org.springframework.messaging.SubscribableChannel
 
 /**
  *
@@ -28,27 +33,43 @@ import org.springframework.messaging.MessageHeaders
 @Configuration
 class SpanFlows(
   private val log: Logger,
-  private val spanService: SpanService
+  private val spanService: SpanService,
+  private val retryableErrorSelector: GenericSelector<GenericPublisherMessage>,
+  private val sseChannel: SubscribableChannel
 ) {
   @Bean
   fun logSubscriptionMessage(): IntegrationFlow {
     return integrationFlow {
       channel(SUBSCRIPTION_CHANNEL_NAME)
       filter<SignableSubscriptionMessage> { it.isNew() }
-      handle { payload: SignableSubscriptionMessage, _: MessageHeaders ->
-        spanService.createSpan(payload)
-      }
+      transform<SignableSubscriptionMessage> { spanService.createSpan(it) }
+      split()
+      transform<Span> { SSENotification.SpanNotification.created(it) }
+      channel(sseChannel)
     }
   }
 
   @Bean
-  fun retryingSpanFlow(): IntegrationFlow {
+  fun markAsRetryingFlow(): IntegrationFlow {
     return integrationFlow {
       channel(DELAYED_SUBSCRIPTION_CHANNEL_NAME)
-      filter<SignableSubscriptionMessage> { it.isResend() }
-      handle { payload: Message<SignableSubscriptionMessage>, _: MessageHeaders ->
-        spanService.retrying(payload)
-      }
+      filter<SignableSubscriptionMessage> { it.isResend() && it.isFirstRetryInCycle() }
+      transform<Message<SignableSubscriptionMessage>> { spanService.markAsRetrying(it) }
+      split()
+      transform<Span> { SSENotification.SpanNotification.markedRetrying(it) }
+      channel(sseChannel)
+    }
+  }
+
+  @Bean
+  fun addRetryFlow(): IntegrationFlow {
+    return integrationFlow {
+      channel(DELAYED_SUBSCRIPTION_CHANNEL_NAME)
+      filter<SignableSubscriptionMessage> { it.isResend() && !it.isFirstRetryInCycle() }
+      transform<Message<SignableSubscriptionMessage>> { spanService.addRetry(it.payload) }
+      split()
+      transform<Span> { SSENotification.SpanNotification.isRetrying(it) }
+      channel(sseChannel)
     }
   }
 
@@ -56,9 +77,10 @@ class SpanFlows(
   fun blockSpanFlow(): IntegrationFlow {
     return integrationFlow {
       channel(BLOCKED_SUBSCRIPTION_CHANNEL_NAME)
-      handle { payload: BlockedSubscriptionMessageDTO, _: MessageHeaders ->
-        spanService.blockSpan(payload)
-      }
+      transform<BlockedSubscriptionMessageDTO> { spanService.blockSpan(it) }
+      split()
+      transform<Span> { SSENotification.SpanNotification.blocked(it) }
+      channel(sseChannel)
     }
   }
 
@@ -66,9 +88,10 @@ class SpanFlows(
   fun logPublisherSuccessMessage(): IntegrationFlow {
     return integrationFlow {
       channel(Constants.Channels.Publisher.PUBLISHER_SUCCESS_CHANNEL)
-      handle { payload: PublisherSuccessMessage, _: MessageHeaders ->
-        spanService.updateWithSuccessResponse(payload)
-      }
+      transform<PublisherSuccessMessage> { spanService.updateWithSuccessResponse(it) }
+      split()
+      transform<Span> { SSENotification.SpanNotification.success(it) }
+      channel(sseChannel)
     }
   }
 
@@ -76,19 +99,34 @@ class SpanFlows(
   fun logPublisherRequestErrorMessage(): IntegrationFlow {
     return integrationFlow {
       channel(Constants.Channels.Publisher.PUBLISHER_REQUEST_ERROR_CHANNEL)
-      handle { payload: PublisherRequestErrorMessage, _: MessageHeaders ->
-        spanService.updateWithClientError(payload)
-      }
+      transform<PublisherRequestErrorMessage> { spanService.updateWithClientError(it) }
+      split()
+      transform<Span> { SSENotification.SpanNotification.failedWithClientError(it) }
+      channel(sseChannel)
     }
   }
 
   @Bean
-  fun logPublisherResponseErrorMessage(): IntegrationFlow {
+  fun logPublisherRetryableResponseErrorMessage(): IntegrationFlow {
     return integrationFlow {
       channel(Constants.Channels.Publisher.PUBLISHER_RESPONSE_ERROR_CHANNEL)
-      handle { payload: PublisherResponseErrorMessage, _: MessageHeaders ->
-        spanService.updateWithServerError(payload)
-      }
+      filter<PublisherResponseErrorMessage> { retryableErrorSelector.accept(it) }
+      transform<PublisherResponseErrorMessage> { spanService.updateWithRetryableServerError(it) }
+      split()
+      transform<Span> { SSENotification.SpanNotification.failedWithServerError(it) }
+      channel(sseChannel)
+    }
+  }
+
+  @Bean
+  fun logPublisherNonRetryableResponseErrorMessage(): IntegrationFlow {
+    return integrationFlow {
+      channel(Constants.Channels.Publisher.PUBLISHER_RESPONSE_ERROR_CHANNEL)
+      filter<PublisherResponseErrorMessage> { !retryableErrorSelector.accept(it) }
+      transform<PublisherResponseErrorMessage> { spanService.updateWithNonRetryableServerError(it) }
+      split()
+      transform<Span> { SSENotification.SpanNotification.failedWithStatusUpdate(it) }
+      channel(sseChannel)
     }
   }
 
@@ -96,9 +134,10 @@ class SpanFlows(
   fun logPublisherOtherErrorMessage(): IntegrationFlow {
     return integrationFlow {
       channel(Constants.Channels.Publisher.PUBLISHER_OTHER_ERROR_CHANNEL)
-      handle { payload: PublisherOtherErrorMessage, _: MessageHeaders ->
-        spanService.updateWithOtherError(payload)
-      }
+      transform<PublisherOtherErrorMessage> { spanService.updateWithOtherError(it) }
+      split()
+      transform<Span> { SSENotification.SpanNotification.failedWithOtherError(it) }
+      channel(sseChannel)
     }
   }
 
