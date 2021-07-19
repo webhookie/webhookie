@@ -43,7 +43,10 @@ import org.springframework.data.mongodb.core.query.Query.query
 import org.springframework.stereotype.Repository
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.switchIfEmpty
 import reactor.kotlin.core.publisher.toMono
+import reactor.util.retry.Retry
+import java.time.Duration
 import java.util.Objects
 
 /**
@@ -146,7 +149,14 @@ class SpanRepository(
   }
 
   private fun updateSpan(spanId: String, vararg operations: AggregationOperation): Mono<Span> {
+    val retryBackoffSpec = Retry
+      .backoff(10, Duration.ofSeconds(15))
+      .doBeforeRetry { log.warn("Attempting (#{}) ({} in a row) for '{}'", it.totalRetries(), it.totalRetriesInARow(), spanId) }
+      .doAfterRetry { log.debug("Retried span '{}', details: '{}'", spanId, it) }
+
     return aggregationUpdate(bySpanId(spanId), Span::class.java, *operations)
+      .switchIfEmpty { EntityNotFoundException("Span '${spanId}' is not ready yet!").toMono() }
+      .retryWhen(retryBackoffSpec)
   }
 
   fun userSpans(
