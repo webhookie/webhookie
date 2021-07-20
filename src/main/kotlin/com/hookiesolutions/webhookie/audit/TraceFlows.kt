@@ -39,7 +39,7 @@ import reactor.util.function.Tuples
 @Configuration
 class TraceFlows(private val traceService: TraceService) {
   @Bean
-  fun logConsumerMessage(): IntegrationFlow {
+  fun createTraceFlow(): IntegrationFlow {
     return integrationFlow {
       channel(CONSUMER_CHANNEL_NAME)
       handle { payload: ConsumerMessage, _: MessageHeaders ->
@@ -157,7 +157,7 @@ class TraceFlows(private val traceService: TraceService) {
   }
 
   @Bean
-  fun logNoSubscriptionMessage(): IntegrationFlow {
+  fun noSubscriptionFlow(): IntegrationFlow {
     return integrationFlow {
       channel(NO_SUBSCRIPTION_CHANNEL_NAME)
       handle { payload: NoSubscriptionMessage, _: MessageHeaders ->
@@ -167,7 +167,7 @@ class TraceFlows(private val traceService: TraceService) {
   }
 
   @Bean
-  fun logRetrySubscriptionMessageMessage(): IntegrationFlow {
+  fun retrySubscriptionMessageFlow(): IntegrationFlow {
     return integrationFlow {
       channel(RETRYABLE_PUBLISHER_ERROR_CHANNEL)
       filter<PublisherErrorMessage> { it.subscriptionMessage.isTry() }

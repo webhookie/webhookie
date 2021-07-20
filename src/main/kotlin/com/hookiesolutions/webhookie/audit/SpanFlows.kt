@@ -38,7 +38,7 @@ class SpanFlows(
   private val sseChannel: SubscribableChannel
 ) {
   @Bean
-  fun logSubscriptionMessage(): IntegrationFlow {
+  fun createSpanFlow(): IntegrationFlow {
     return integrationFlow {
       channel(SUBSCRIPTION_CHANNEL_NAME)
       filter<SignableSubscriptionMessage> { it.isNew() }
@@ -85,7 +85,7 @@ class SpanFlows(
   }
 
   @Bean
-  fun logPublisherSuccessMessage(): IntegrationFlow {
+  fun successResponseFlow(): IntegrationFlow {
     return integrationFlow {
       channel(Constants.Channels.Publisher.PUBLISHER_SUCCESS_CHANNEL)
       transform<PublisherSuccessMessage> { spanService.updateWithSuccessResponse(it) }
@@ -96,7 +96,7 @@ class SpanFlows(
   }
 
   @Bean
-  fun logPublisherRequestErrorMessage(): IntegrationFlow {
+  fun requestErrorFlow(): IntegrationFlow {
     return integrationFlow {
       channel(Constants.Channels.Publisher.PUBLISHER_REQUEST_ERROR_CHANNEL)
       transform<PublisherRequestErrorMessage> { spanService.updateWithClientError(it) }
@@ -107,7 +107,7 @@ class SpanFlows(
   }
 
   @Bean
-  fun logPublisherRetryableResponseErrorMessage(): IntegrationFlow {
+  fun retryableResponseErrorFlow(): IntegrationFlow {
     return integrationFlow {
       channel(Constants.Channels.Publisher.PUBLISHER_RESPONSE_ERROR_CHANNEL)
       filter<PublisherResponseErrorMessage> { retryableErrorSelector.accept(it) }
@@ -119,7 +119,7 @@ class SpanFlows(
   }
 
   @Bean
-  fun logPublisherNonRetryableResponseErrorMessage(): IntegrationFlow {
+  fun nonRetryableResponseErrorFlow(): IntegrationFlow {
     return integrationFlow {
       channel(Constants.Channels.Publisher.PUBLISHER_RESPONSE_ERROR_CHANNEL)
       filter<PublisherResponseErrorMessage> { !retryableErrorSelector.accept(it) }
@@ -131,7 +131,7 @@ class SpanFlows(
   }
 
   @Bean
-  fun logPublisherOtherErrorMessage(): IntegrationFlow {
+  fun otherErrorFlow(): IntegrationFlow {
     return integrationFlow {
       channel(Constants.Channels.Publisher.PUBLISHER_OTHER_ERROR_CHANNEL)
       transform<PublisherOtherErrorMessage> { spanService.updateWithOtherError(it) }
@@ -142,7 +142,7 @@ class SpanFlows(
   }
 
   @Bean
-  fun logSubscriptionErrorMessage(): IntegrationFlow {
+  fun subscriptionErrorFlow(): IntegrationFlow {
     return integrationFlow {
       channel(Constants.Channels.Subscription.SUBSCRIPTION_ERROR_CHANNEL_NAME)
       handle { payload: SubscriptionMessageHandlingException, _: MessageHeaders ->
