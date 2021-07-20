@@ -10,18 +10,18 @@ import org.springframework.context.annotation.Configuration
  * @since 19/1/21 20:09
  */
 @Configuration
-class WebhookGroupAPIDocs {
+class WebhookApiAPIDocs {
   @Bean
   fun webhookOpenApi(): GroupedOpenApi {
-    val paths = arrayOf("${REQUEST_MAPPING_WEBHOOK_GROUPS}/**")
+    val paths = arrayOf("${REQUEST_MAPPING_WEBHOOK_APIS}/**")
     return GroupedOpenApi
       .builder()
-      .group("Webhook Groups")
+      .group("Webhook Apis")
       .pathsToMatch(*paths)
       .build()
   }
 
   companion object {
-    const val REQUEST_MAPPING_WEBHOOK_GROUPS = "/webhookgroups"
+    const val REQUEST_MAPPING_WEBHOOK_APIS = "/webhookapis"
   }
 }

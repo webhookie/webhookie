@@ -1,7 +1,7 @@
 package com.hookiesolutions.webhookie.webhook.service.security.voter
 
 import com.hookiesolutions.webhookie.webhook.domain.ProviderAccess
-import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup
+import com.hookiesolutions.webhookie.webhook.domain.WebhookApi
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
@@ -13,8 +13,8 @@ import org.springframework.stereotype.Component
  */
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
-class AllProviderWebhookGroupVoter: WebhookGroupProvideAccessVoter {
-  override fun vote(webhookGroup: WebhookGroup, tokenGroups: Collection<String>): Boolean {
-    return webhookGroup.providerAccess == ProviderAccess.ALL
+class AllProviderWebhookApiVoter: WebhookApiProvideAccessVoter {
+  override fun vote(webhookApi: WebhookApi, tokenGroups: Collection<String>): Boolean {
+    return webhookApi.providerAccess == ProviderAccess.ALL
   }
 }

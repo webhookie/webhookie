@@ -3,7 +3,7 @@ package com.hookiesolutions.webhookie.webhook.domain
 import org.springframework.data.mongodb.core.index.Indexed
 
 data class Topic(
-  @Indexed(name = "webhook_group.topic", unique = true)
+  @Indexed(name = "webhook_api.topic", unique = true)
   val name: String,
   val description: String?
 ) {

@@ -4,7 +4,7 @@ import com.hookiesolutions.webhookie.security.service.SecurityHandler
 import com.hookiesolutions.webhookie.subscription.domain.Application
 import com.hookiesolutions.webhookie.subscription.domain.ApplicationRepository
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
-import com.hookiesolutions.webhookie.webhook.service.WebhookGroupServiceDelegate
+import com.hookiesolutions.webhookie.webhook.service.WebhookApiServiceDelegate
 import org.slf4j.Logger
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Component
@@ -22,7 +22,7 @@ class ApplicationSecurityService(
   private val securityHandler: SecurityHandler,
   private val applicationAccessVoter: ApplicationAccessVoter,
   private val applicationRepository: ApplicationRepository,
-  private val webhookServiceDelegate: WebhookGroupServiceDelegate,
+  private val webhookServiceDelegate: WebhookApiServiceDelegate,
   private val log: Logger
 ) {
   fun verifyAccess(applicationMono: Mono<Application>): Mono<Application> {

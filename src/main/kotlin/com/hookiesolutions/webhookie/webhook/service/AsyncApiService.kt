@@ -2,7 +2,7 @@ package com.hookiesolutions.webhookie.webhook.service
 
 import com.hookiesolutions.webhookie.common.exception.RemoteServiceException
 import com.hookiesolutions.webhookie.webhook.service.model.AsyncApiSpec
-import com.hookiesolutions.webhookie.webhook.service.model.WebhookGroupRequest
+import com.hookiesolutions.webhookie.webhook.service.model.WebhookApiRequest
 import org.slf4j.Logger
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
@@ -22,7 +22,7 @@ class AsyncApiService(
   private val parserWebClient: WebClient,
   private val log: Logger
 ) {
-  fun parseAsyncApiSpecToWebhookApi(request: WebhookGroupRequest): Mono<AsyncApiSpec> {
+  fun parseAsyncApiSpecToWebhookApi(request: WebhookApiRequest): Mono<AsyncApiSpec> {
     return parserWebClient
       .post()
       .uri("/parse")

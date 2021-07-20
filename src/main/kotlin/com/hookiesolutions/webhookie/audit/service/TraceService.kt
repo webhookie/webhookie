@@ -10,7 +10,7 @@ import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.message.WebhookieMessage
 import com.hookiesolutions.webhookie.common.message.subscription.NoSubscriptionMessage
 import com.hookiesolutions.webhookie.common.service.TimeMachine
-import com.hookiesolutions.webhookie.webhook.service.WebhookGroupServiceDelegate
+import com.hookiesolutions.webhookie.webhook.service.WebhookApiServiceDelegate
 import org.slf4j.Logger
 import org.springframework.data.domain.Pageable
 import org.springframework.security.access.prepost.PreAuthorize
@@ -27,7 +27,7 @@ import reactor.core.publisher.Mono
 class TraceService(
   private val repository: TraceRepository,
   private val timeMachine: TimeMachine,
-  private val webhookServiceDelegate: WebhookGroupServiceDelegate,
+  private val webhookServiceDelegate: WebhookApiServiceDelegate,
   private val log: Logger,
 ) {
   fun save(message: ConsumerMessage) {

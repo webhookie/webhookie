@@ -2,15 +2,15 @@ package com.hookiesolutions.webhookie.webhook.domain
 
 import com.hookiesolutions.webhookie.common.repository.GenericRepository
 import com.hookiesolutions.webhookie.common.repository.GenericRepository.Query.Companion.pageableWith
-import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.KEY_NUMBER_OF_WEBHOOKS
-import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.KEY_WEBHOOKS
-import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Queries.Companion.accessibleForGroups
-import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Queries.Companion.accessibleForProvider
-import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Queries.Companion.elemMatchByTopic
-import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Queries.Companion.webhookGroupTopicIs
-import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Updates.Companion.incNumberOfSubscriptions
-import com.hookiesolutions.webhookie.webhook.service.security.annotation.VerifyWebhookGroupReadAccess
-import com.hookiesolutions.webhookie.webhook.service.security.annotation.VerifyWebhookGroupWriteAccess
+import com.hookiesolutions.webhookie.webhook.domain.WebhookApi.Keys.Companion.KEY_NUMBER_OF_WEBHOOKS
+import com.hookiesolutions.webhookie.webhook.domain.WebhookApi.Keys.Companion.KEY_WEBHOOKS
+import com.hookiesolutions.webhookie.webhook.domain.WebhookApi.Queries.Companion.accessibleForGroups
+import com.hookiesolutions.webhookie.webhook.domain.WebhookApi.Queries.Companion.accessibleForProvider
+import com.hookiesolutions.webhookie.webhook.domain.WebhookApi.Queries.Companion.elemMatchByTopic
+import com.hookiesolutions.webhookie.webhook.domain.WebhookApi.Queries.Companion.webhookApiTopicIs
+import com.hookiesolutions.webhookie.webhook.domain.WebhookApi.Updates.Companion.incNumberOfSubscriptions
+import com.hookiesolutions.webhookie.webhook.service.security.annotation.VerifyWebhookApiReadAccess
+import com.hookiesolutions.webhookie.webhook.service.security.annotation.VerifyWebhookApiWriteAccess
 import com.mongodb.client.result.UpdateResult
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
@@ -30,33 +30,33 @@ import reactor.core.publisher.Mono
  * @since 19/1/21 16:42
  */
 @Repository
-class WebhookGroupRepository(
+class WebhookApiRepository(
   private val mongoTemplate: ReactiveMongoTemplate
-): GenericRepository<WebhookGroup>(mongoTemplate, WebhookGroup::class.java) {
-  fun findMyWebhookGroups(tokenGroups: Collection<String>, pageable: Pageable): Flux<WebhookGroup> {
+): GenericRepository<WebhookApi>(mongoTemplate, WebhookApi::class.java) {
+  fun findMyWebhookApis(tokenGroups: Collection<String>, pageable: Pageable): Flux<WebhookApi> {
     return mongoTemplate.find(
       query(accessibleForGroups(tokenGroups))
         .with(pageableWith(pageable, DEFAULT_SORT, DEFAULT_PAGE)),
-      WebhookGroup::class.java
+      WebhookApi::class.java
     )
   }
 
-  @VerifyWebhookGroupReadAccess
-  fun findByIdVerifyingReadAccess(id: String): Mono<WebhookGroup> {
+  @VerifyWebhookApiReadAccess
+  fun findByIdVerifyingReadAccess(id: String): Mono<WebhookApi> {
     return findById(id)
   }
 
-  @VerifyWebhookGroupReadAccess
-  fun findByTopicVerifyingReadAccess(topic: String): Mono<WebhookGroup> {
+  @VerifyWebhookApiReadAccess
+  fun findByTopicVerifyingReadAccess(topic: String): Mono<WebhookApi> {
     return mongoTemplate
       .findOne(
-        query(webhookGroupTopicIs(topic)),
-        WebhookGroup::class.java
+        query(webhookApiTopicIs(topic)),
+        WebhookApi::class.java
       )
   }
 
-  @VerifyWebhookGroupWriteAccess
-  fun findByIdVerifyingWriteAccess(id: String): Mono<WebhookGroup> {
+  @VerifyWebhookApiWriteAccess
+  fun findByIdVerifyingWriteAccess(id: String): Mono<WebhookApi> {
     return findById(id)
   }
 
@@ -65,7 +65,7 @@ class WebhookGroupRepository(
       .updateMulti(
         query(where(attr).`is`(value)),
         Update().pull(attr, value),
-        WebhookGroup::class.java
+        WebhookApi::class.java
       )
   }
 
@@ -74,7 +74,7 @@ class WebhookGroupRepository(
       .updateMulti(
         query(where(attr).`is`(oldValue)),
         Update().set("$attr.$", newValue),
-        WebhookGroup::class.java
+        WebhookApi::class.java
       )
   }
 
@@ -89,14 +89,14 @@ class WebhookGroupRepository(
     return mongoTemplate
       .aggregate(
         aggregation,
-        WebhookGroup::class.java,
+        WebhookApi::class.java,
         Webhook::class.java
       )
       .map { it.topic }
   }
                                 
-  fun incTopicSubscriptions(topic: String, number: Int): Mono<WebhookGroup> {
-    return mongoTemplate.update(WebhookGroup::class.java)
+  fun incTopicSubscriptions(topic: String, number: Int): Mono<WebhookApi> {
+    return mongoTemplate.update(WebhookApi::class.java)
       .matching(query(elemMatchByTopic(topic)))
       .apply(incNumberOfSubscriptions(number))
       .findAndModify()

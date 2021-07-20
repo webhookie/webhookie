@@ -5,15 +5,15 @@ import com.hookiesolutions.webhookie.common.repository.GenericRepository.Compani
 import com.hookiesolutions.webhookie.webhook.domain.Topic.Keys.Companion.KEY_TOPIC_NAME
 import com.hookiesolutions.webhookie.webhook.domain.Webhook.Keys.Companion.KEY_NUMBER_OF_SUBSCRIPTIONS
 import com.hookiesolutions.webhookie.webhook.domain.Webhook.Keys.Companion.KEY_TOPIC
-import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.KEY_CONSUMER_ACCESS
-import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.KEY_CONSUMER_IAM_GROUPS
-import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.KEY_PROVIDER_ACCESS
-import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.KEY_PROVIDER_IAM_GROUPS
-import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.KEY_WEBHOOKS_No_OS_SUBSCRIPTIONS
-import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.KEY_WEBHOOK_GROUP_TOPIC
-import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.WEBHOOK_GROUP_COLLECTION_NAME
+import com.hookiesolutions.webhookie.webhook.domain.WebhookApi.Keys.Companion.KEY_CONSUMER_ACCESS
+import com.hookiesolutions.webhookie.webhook.domain.WebhookApi.Keys.Companion.KEY_CONSUMER_IAM_GROUPS
+import com.hookiesolutions.webhookie.webhook.domain.WebhookApi.Keys.Companion.KEY_PROVIDER_ACCESS
+import com.hookiesolutions.webhookie.webhook.domain.WebhookApi.Keys.Companion.KEY_PROVIDER_IAM_GROUPS
+import com.hookiesolutions.webhookie.webhook.domain.WebhookApi.Keys.Companion.KEY_WEBHOOKS_No_OS_SUBSCRIPTIONS
+import com.hookiesolutions.webhookie.webhook.domain.WebhookApi.Keys.Companion.KEY_WEBHOOK_API_TOPIC
+import com.hookiesolutions.webhookie.webhook.domain.WebhookApi.Keys.Companion.WEBHOOK_API_COLLECTION_NAME
 import com.hookiesolutions.webhookie.webhook.service.model.AsyncApiSpec
-import com.hookiesolutions.webhookie.webhook.service.model.WebhookGroupRequest
+import com.hookiesolutions.webhookie.webhook.service.model.WebhookApiRequest
 import org.springframework.data.annotation.TypeAlias
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
@@ -26,9 +26,9 @@ import org.springframework.data.mongodb.core.query.Update
  * @author Arthur Kazemi<bidadh@gmail.com>
  * @since 19/1/21 16:08
  */
-@Document(collection = WEBHOOK_GROUP_COLLECTION_NAME)
-@TypeAlias("webhookGroup")
-data class WebhookGroup(
+@Document(collection = WEBHOOK_API_COLLECTION_NAME)
+@TypeAlias("webhookApi")
+data class WebhookApi(
   val title: String,
   val webhookVersion: String,
   val description: String?,
@@ -38,7 +38,7 @@ data class WebhookGroup(
   val providerIAMGroups: Set<String>,
   val consumerAccess: ConsumerAccess,
   val providerAccess: ProviderAccess,
-  @Indexed(name = "webhook_group.numberOfWebhooks")
+  @Indexed(name = "webhook_api.numberOfWebhooks")
   val numberOfWebhooks: Int = webhooks.size
 ) : AbstractEntity() {
   class Queries {
@@ -59,8 +59,8 @@ data class WebhookGroup(
         return where(KEY_PROVIDER_ACCESS).`is`(ProviderAccess.ALL)
       }
 
-      fun webhookGroupTopicIs(topic: String): Criteria {
-        return where(KEY_WEBHOOK_GROUP_TOPIC).`is`(topic)
+      fun webhookApiTopicIs(topic: String): Criteria {
+        return where(KEY_WEBHOOK_API_TOPIC).`is`(topic)
       }
 
       fun accessibleForProvider(groups: Collection<String>): Criteria {
@@ -105,8 +105,8 @@ data class WebhookGroup(
       const val KEY_NUMBER_OF_WEBHOOKS = "numberOfWebhooks"
       const val KEY_PROVIDER_ACCESS = "providerAccess"
       const val KEY_WEBHOOKS = "webhooks"
-      const val WEBHOOK_GROUP_COLLECTION_NAME = "webhook_group"
-      val KEY_WEBHOOK_GROUP_TOPIC = fieldName(KEY_WEBHOOKS, KEY_TOPIC, KEY_TOPIC_NAME)
+      const val WEBHOOK_API_COLLECTION_NAME = "webhook_api"
+      val KEY_WEBHOOK_API_TOPIC = fieldName(KEY_WEBHOOKS, KEY_TOPIC, KEY_TOPIC_NAME)
       val KEY_WEBHOOKS_No_OS_SUBSCRIPTIONS = fieldName(KEY_WEBHOOKS, "$", KEY_NUMBER_OF_SUBSCRIPTIONS)
     }
   }
@@ -114,10 +114,10 @@ data class WebhookGroup(
   companion object {
     fun create(
       spec: AsyncApiSpec,
-      request: WebhookGroupRequest,
+      request: WebhookApiRequest,
       webhooks: List<Webhook>? = null
-    ): WebhookGroup {
-      return WebhookGroup(
+    ): WebhookApi {
+      return WebhookApi(
         spec.name,
         spec.version,
         spec.description,
@@ -132,9 +132,9 @@ data class WebhookGroup(
 
     fun create(
       spec: AsyncApiSpec,
-      request: WebhookGroupRequest,
-      webhookApi: WebhookGroup
-    ): WebhookGroup {
+      request: WebhookApiRequest,
+      webhookApi: WebhookApi
+    ): WebhookApi {
       val webhooks = spec.topics
         .map { topic ->
           val numberOfSubscriptions = webhookApi.webhooks

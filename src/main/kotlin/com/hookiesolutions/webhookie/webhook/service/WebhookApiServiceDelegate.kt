@@ -12,13 +12,13 @@ import reactor.kotlin.core.publisher.toMono
  * @since 10/2/21 19:13
  */
 @Service
-class WebhookGroupServiceDelegate(
-  private val webhookGroupService: WebhookGroupService,
+class WebhookApiServiceDelegate(
+  private val webhookApiService: WebhookApiService,
   private val securityHandler: SecurityHandler,
   private val log: Logger,
 ) {
   fun providerTopics(): Mono<List<String>> {
-    return webhookGroupService.myTopics()
+    return webhookApiService.myTopics()
       .map { it.name }
       .collectList()
   }

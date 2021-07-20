@@ -32,7 +32,7 @@ import com.hookiesolutions.webhookie.common.message.subscription.ResendSpanMessa
 import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
 import com.hookiesolutions.webhookie.common.service.TimeMachine
 import com.hookiesolutions.webhookie.security.service.SecurityHandler
-import com.hookiesolutions.webhookie.webhook.service.WebhookGroupServiceDelegate
+import com.hookiesolutions.webhookie.webhook.service.WebhookApiServiceDelegate
 import org.slf4j.Logger
 import org.springframework.data.domain.Pageable
 import org.springframework.messaging.Message
@@ -56,7 +56,7 @@ class SpanService(
   private val repository: SpanRepository,
   private val traceRepository: TraceRepository,
   private val timeMachine: TimeMachine,
-  private val webhookServiceDelegate: WebhookGroupServiceDelegate,
+  private val webhookServiceDelegate: WebhookApiServiceDelegate,
   private val factory: TrafficConversionFactory,
   private val subscriptionServiceDelegate: SubscriptionServiceDelegate,
   private val resendSpanChannel: MessageChannel,

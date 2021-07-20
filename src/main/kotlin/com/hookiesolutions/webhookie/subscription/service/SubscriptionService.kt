@@ -30,7 +30,7 @@ import com.hookiesolutions.webhookie.subscription.service.model.subscription.Rea
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.UpdateSubscriptionRequest
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.ValidateSubscriptionRequest
 import com.hookiesolutions.webhookie.subscription.service.validator.SubscriptionValidator
-import com.hookiesolutions.webhookie.webhook.service.WebhookGroupServiceDelegate
+import com.hookiesolutions.webhookie.webhook.service.WebhookApiServiceDelegate
 import org.slf4j.Logger
 import org.springframework.data.domain.Pageable
 import org.springframework.messaging.MessageChannel
@@ -63,7 +63,7 @@ class SubscriptionService(
   private val unblockedSubscriptionChannel: MessageChannel,
   private val subscriptionActivatedChannel: MessageChannel,
   private val subscriptionDeactivatedChannel: MessageChannel,
-  private val webhookServiceDelegate: WebhookGroupServiceDelegate
+  private val webhookServiceDelegate: WebhookApiServiceDelegate
 ) {
   @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")
   fun createSubscription(request: CreateSubscriptionRequest): Mono<Subscription> {

@@ -3,36 +3,36 @@ package com.hookiesolutions.webhookie.webhook.web.response
 import com.fasterxml.jackson.annotation.JsonView
 import com.hookiesolutions.webhookie.webhook.domain.ConsumerAccess
 import com.hookiesolutions.webhookie.webhook.domain.ProviderAccess
-import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup
+import com.hookiesolutions.webhookie.webhook.domain.WebhookApi
 
 /**
  *
  * @author Arthur Kazemi<bidadh@gmail.com>
  * @since 25/1/21 13:36
  */
-data class WebhookGroupResponse(
-  @JsonView(WebhookGroupViews.Summary::class)
+data class WebhookApiResponse(
+  @JsonView(WebhookApiViews.Summary::class)
   val id: String,
-  @JsonView(WebhookGroupViews.Summary::class)
+  @JsonView(WebhookApiViews.Summary::class)
   val title: String,
-  @JsonView(WebhookGroupViews.Summary::class)
+  @JsonView(WebhookApiViews.Summary::class)
   val webhookVersion: String,
-  @JsonView(WebhookGroupViews.Summary::class)
+  @JsonView(WebhookApiViews.Summary::class)
   val description: String?,
-  @JsonView(WebhookGroupViews.Summary::class)
+  @JsonView(WebhookApiViews.Summary::class)
   val webhooks: List<Webhook>,
-  @JsonView(WebhookGroupViews.Full::class)
+  @JsonView(WebhookApiViews.Full::class)
   val raw: String,
-  @JsonView(WebhookGroupViews.Summary::class)
+  @JsonView(WebhookApiViews.Summary::class)
   val consumerAccess: ConsumerAccess,
-  @JsonView(WebhookGroupViews.Full::class)
+  @JsonView(WebhookApiViews.Full::class)
   val consumerGroups: Set<String>,
-  @JsonView(WebhookGroupViews.Summary::class)
+  @JsonView(WebhookApiViews.Summary::class)
   val providerAccess: ProviderAccess,
-  @JsonView(WebhookGroupViews.Full::class)
+  @JsonView(WebhookApiViews.Full::class)
   val providerGroups: Set<String>
 ) {
-  constructor(entity: WebhookGroup) : this(
+  constructor(entity: WebhookApi) : this(
     entity.id!!,
     entity.title,
     entity.webhookVersion,
@@ -45,13 +45,13 @@ data class WebhookGroupResponse(
     entity.providerIAMGroups
   )
 
-  @JsonView(WebhookGroupViews.Summary::class)
+  @JsonView(WebhookApiViews.Summary::class)
   data class Webhook(
     val topic: Topic,
     val numberOfSubscriptions: Int
   )
 
-  @JsonView(WebhookGroupViews.Summary::class)
+  @JsonView(WebhookApiViews.Summary::class)
   data class Topic(
     val name: String,
     val description: String?

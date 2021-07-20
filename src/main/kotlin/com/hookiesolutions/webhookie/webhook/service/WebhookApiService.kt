@@ -13,11 +13,11 @@ import com.hookiesolutions.webhookie.common.model.DeletableEntity.Companion.dele
 import com.hookiesolutions.webhookie.common.model.UpdatableEntity.Companion.updatable
 import com.hookiesolutions.webhookie.common.service.AccessGroupServiceDelegate
 import com.hookiesolutions.webhookie.webhook.domain.Topic
-import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup
-import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.KEY_CONSUMER_IAM_GROUPS
-import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup.Keys.Companion.KEY_PROVIDER_IAM_GROUPS
-import com.hookiesolutions.webhookie.webhook.domain.WebhookGroupRepository
-import com.hookiesolutions.webhookie.webhook.service.model.WebhookGroupRequest
+import com.hookiesolutions.webhookie.webhook.domain.WebhookApi
+import com.hookiesolutions.webhookie.webhook.domain.WebhookApi.Keys.Companion.KEY_CONSUMER_IAM_GROUPS
+import com.hookiesolutions.webhookie.webhook.domain.WebhookApi.Keys.Companion.KEY_PROVIDER_IAM_GROUPS
+import com.hookiesolutions.webhookie.webhook.domain.WebhookApiRepository
+import com.hookiesolutions.webhookie.webhook.service.model.WebhookApiRequest
 import com.hookiesolutions.webhookie.webhook.service.security.WebhookSecurityService
 import org.slf4j.Logger
 import org.springframework.data.domain.Pageable
@@ -35,58 +35,58 @@ import reactor.kotlin.core.publisher.toMono
  * @since 19/1/21 15:31
  */
 @Service
-class WebhookGroupService(
-  private val repository: WebhookGroupRepository,
+class WebhookApiService(
+  private val repository: WebhookApiRepository,
   private val securityService: WebhookSecurityService,
   private val accessGroupServiceDelegate: AccessGroupServiceDelegate,
   private val asyncApiService: AsyncApiService,
   private val log: Logger,
 ) {
   @PreAuthorize("hasAuthority('${ROLE_PROVIDER}')")
-  fun createWebhookGroup(request: WebhookGroupRequest): Mono<WebhookGroup> {
+  fun createWebhookApi(request: WebhookApiRequest): Mono<WebhookApi> {
     return verifyRequestGroups(request)
       .flatMap { asyncApiService.parseAsyncApiSpecToWebhookApi(request) }
-      .map { WebhookGroup.create(it, request) }
+      .map { WebhookApi.create(it, request) }
       .flatMap {
-        log.info("Saving WebhookGroup: '{}'", it.title)
+        log.info("Saving WebhookApi: '{}'", it.title)
         repository.save(it)
       }
   }
 
   @PreAuthorize("permitAll()")
-  fun findMyWebhookGroups(pageable: Pageable): Flux<WebhookGroup> {
+  fun findMyWebhookApis(pageable: Pageable): Flux<WebhookApi> {
     return securityService.tokenGroups()
       .switchIfEmpty(emptyList<String>().toMono())
-      .doOnNext { log.info("Fetching all webhook groups for auth: '{}'", it) }
+      .doOnNext { log.info("Fetching all webhook apis for auth: '{}'", it) }
       .flatMapMany {
-        repository.findMyWebhookGroups(it, pageable)
+        repository.findMyWebhookApis(it, pageable)
       }
   }
 
   @PreAuthorize("hasAuthority('${ROLE_PROVIDER}')")
-  fun readWebhookGroup(id: String): Mono<WebhookGroup> {
+  fun readWebhookApi(id: String): Mono<WebhookApi> {
     return repository.findByIdVerifyingReadAccess(id)
   }
 
   @PreAuthorize("permitAll()")
-  fun readWebhookGroupByTopic(topic: String): Mono<WebhookGroup> {
+  fun readWebhookApiByTopic(topic: String): Mono<WebhookApi> {
     return repository.findByTopicVerifyingReadAccess(topic)
   }
 
   @PreAuthorize("hasAuthority('${ROLE_PROVIDER}')")
-  fun deleteWebhookGroup(id: String): Mono<String> {
+  fun deleteWebhookApi(id: String): Mono<String> {
     return repository.findByIdVerifyingWriteAccess(id)
       .map { deletable(it) }
       .flatMap { repository.delete(it) }
   }
 
   @PreAuthorize("hasAuthority('${ROLE_PROVIDER}')")
-  fun updateWebhookGroup(id: String, request: WebhookGroupRequest): Mono<WebhookGroup> {
+  fun updateWebhookApi(id: String, request: WebhookApiRequest): Mono<WebhookApi> {
     return verifyRequestGroups(request)
       .flatMap { asyncApiService.parseAsyncApiSpecToWebhookApi(request) }
       .flatMap { spec ->
         repository.findByIdVerifyingWriteAccess(id)
-          .map { WebhookGroup.create(spec, request, it) }
+          .map { WebhookApi.create(spec, request, it) }
       }
       .map { updatable(it) }
       .flatMap { repository.update(it, id) }
@@ -149,7 +149,7 @@ class WebhookGroupService(
       }
   }
 
-  private fun verifyRequestGroups(request: WebhookGroupRequest): Mono<Boolean> {
+  private fun verifyRequestGroups(request: WebhookApiRequest): Mono<Boolean> {
     return accessGroupServiceDelegate.verifyGroups(request.consumerGroups, request.providerGroups)
   }
 }

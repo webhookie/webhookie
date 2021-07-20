@@ -1,7 +1,7 @@
 package com.hookiesolutions.webhookie.audit.service.security.voter
 
 import com.hookiesolutions.webhookie.audit.domain.Span
-import com.hookiesolutions.webhookie.webhook.service.WebhookGroupServiceDelegate
+import com.hookiesolutions.webhookie.webhook.service.WebhookApiServiceDelegate
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 
@@ -12,7 +12,7 @@ import reactor.core.publisher.Mono
  */
 @Component
 class SpanProviderAccessVoter(
-  private val webhookServiceDelegate: WebhookGroupServiceDelegate,
+  private val webhookServiceDelegate: WebhookApiServiceDelegate,
 ) {
   fun vote(spanMono: Mono<Span>): Mono<Span> {
     val providerTopics = webhookServiceDelegate.providerTopicsConsideringAdmin()

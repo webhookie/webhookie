@@ -1,7 +1,7 @@
 package com.hookiesolutions.webhookie.webhook.config
 
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
-import com.hookiesolutions.webhookie.webhook.domain.WebhookGroup
+import com.hookiesolutions.webhookie.webhook.domain.WebhookApi
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
@@ -14,5 +14,5 @@ import org.springframework.context.annotation.Configuration
 class WebhookMongoConfig {
   @Bean
   fun webhookIndexEntities(): List<Class<out AbstractEntity>> =
-    listOf(WebhookGroup::class.java)
+    listOf(WebhookApi::class.java)
 }

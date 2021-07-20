@@ -20,7 +20,7 @@ import com.hookiesolutions.webhookie.security.jwt.JwtAuthoritiesConverter
 import com.hookiesolutions.webhookie.subscription.web.SubscriptionAPIDocs.Companion.REQUEST_MAPPING_APPLICATIONS
 import com.hookiesolutions.webhookie.subscription.web.SubscriptionAPIDocs.Companion.REQUEST_MAPPING_PROVIDER
 import com.hookiesolutions.webhookie.subscription.web.SubscriptionAPIDocs.Companion.REQUEST_MAPPING_SUBSCRIPTIONS
-import com.hookiesolutions.webhookie.webhook.config.WebhookGroupAPIDocs.Companion.REQUEST_MAPPING_WEBHOOK_GROUPS
+import com.hookiesolutions.webhookie.webhook.config.WebhookApiAPIDocs.Companion.REQUEST_MAPPING_WEBHOOK_APIS
 import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -98,7 +98,7 @@ class SecurityConfig(
         authorize(pathMatchers(HttpMethod.GET,"$REQUEST_MAPPING_USER_INFO/**"), authenticated)
         authorize(pathMatchers(HttpMethod.GET,"$REQUEST_MAPPING_TRAFFIC$REQUEST_MAPPING_TRAFFIC_SPAN/**"), hasAnyAuthority(ROLE_CONSUMER, ROLE_ADMIN))
         authorize(pathMatchers(HttpMethod.GET,"$REQUEST_MAPPING_TRAFFIC$REQUEST_MAPPING_TRAFFIC_TRACE/**"), hasAnyAuthority(ROLE_PROVIDER, ROLE_ADMIN))
-        authorize(pathMatchers(HttpMethod.GET,"$REQUEST_MAPPING_WEBHOOK_GROUPS/**"), permitAll)
+        authorize(pathMatchers(HttpMethod.GET,"$REQUEST_MAPPING_WEBHOOK_APIS/**"), permitAll)
 
         authorize()
       }
