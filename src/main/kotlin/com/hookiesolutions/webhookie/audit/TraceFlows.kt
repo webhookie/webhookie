@@ -74,20 +74,12 @@ class TraceFlows(private val traceService: TraceService) {
     retryableErrorSelector: GenericSelector<GenericPublisherMessage>,
     traceAggregationChannel: MessageChannel
   ): IntegrationFlow {
-    val updateTraceSelector: (Message<PublisherErrorMessage>) -> Boolean = {
-      !retryableErrorSelector.accept(it.payload) &&
-          originalMessageSelector.accept(it) &&
-          it.payload.subscriptionMessage.isTry()
-    }
-    val passToTraceAggregatorSelector: (Message<PublisherErrorMessage>) -> Boolean = {
-      !retryableErrorSelector.accept(it.payload) && originalMessageSelector.accept(it)
-    }
-
     return integrationFlow {
       channel(RETRYABLE_PUBLISHER_ERROR_CHANNEL)
+      filter<Message<PublisherErrorMessage>> { !retryableErrorSelector.accept(it.payload) && originalMessageSelector.accept(it) }
       routeToRecipients {
-        recipient(traceAggregationChannel, passToTraceAggregatorSelector)
-        recipientFlow(updateTraceSelector) {
+        recipient(traceAggregationChannel)
+        recipientFlow<Message<PublisherErrorMessage>>({ it.payload.subscriptionMessage.isTry() }) {
           handle { payload: PublisherErrorMessage, _: MessageHeaders ->
             traceService.updateWithIssues(payload)
           }
@@ -97,30 +89,24 @@ class TraceFlows(private val traceService: TraceService) {
   }
 
   @Bean
-  fun passSuccessMessageToTraceAggregatorFlow(
+  fun handleSuccessMessageFlow(
     originalMessageSelector: MessageSelector,
     unblockedMessageSelector: MessageSelector,
     resentMessageSelector: MessageSelector,
     traceAggregationChannel: MessageChannel,
     increaseSuccessChannel: MessageChannel
   ): IntegrationFlow {
+    val increaseSuccessCountSelector: (Message<*>) -> Boolean =
+      { unblockedMessageSelector.accept(it) || resentMessageSelector.accept(it) }
     return integrationFlow {
       channel(PUBLISHER_SUCCESS_CHANNEL)
       routeToRecipients {
         recipient<Message<*>>(traceAggregationChannel) { originalMessageSelector.accept(it)}
-        recipient<Message<*>>(increaseSuccessChannel) { unblockedMessageSelector.accept(it) || resentMessageSelector.accept(it)}
-      }
-    }
-  }
-
-  @Bean
-  fun increaseSuccessFlow(
-    increaseSuccessChannel: MessageChannel
-  ): IntegrationFlow {
-    return integrationFlow {
-      channel(increaseSuccessChannel)
-      handle { p: WebhookieMessage, _: MessageHeaders ->
-        traceService.increaseSuccessResponse(p.traceId)
+        recipientFlow<Message<WebhookieMessage>>(increaseSuccessCountSelector) {
+          handle { p: Message<WebhookieMessage>, _: MessageHeaders ->
+            traceService.increaseSuccessResponse(p.payload.traceId)
+          }
+        }
       }
     }
   }
