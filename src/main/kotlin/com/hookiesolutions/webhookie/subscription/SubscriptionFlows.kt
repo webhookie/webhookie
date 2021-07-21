@@ -3,16 +3,20 @@ package com.hookiesolutions.webhookie.subscription
 import com.hookiesolutions.webhookie.common.Constants.Channels.Consumer.Companion.CONSUMER_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Channels.Publisher.Companion.RETRYABLE_PUBLISHER_ERROR_CHANNEL
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.HEADER_CONTENT_TYPE
-import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_SEQUENCE_SIZE
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_SPAN_ID
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_TOPIC
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_TRACE_ID
+import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_TRACE_SEQUENCE_SIZE
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_UNBLOCKED
 import com.hookiesolutions.webhookie.common.exception.messaging.SubscriptionMessageHandlingException
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
-import com.hookiesolutions.webhookie.common.message.WebhookieMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherErrorMessage
-import com.hookiesolutions.webhookie.common.message.subscription.*
+import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscriptionMessageDTO
+import com.hookiesolutions.webhookie.common.message.subscription.GenericSubscriptionMessage
+import com.hookiesolutions.webhookie.common.message.subscription.ResendSpanMessage
+import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
+import com.hookiesolutions.webhookie.common.message.subscription.SignedSubscriptionMessage
+import com.hookiesolutions.webhookie.common.message.subscription.UnsignedSubscriptionMessage
 import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Keys.Companion.KEY_STATUS
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionStatus
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
@@ -60,6 +64,7 @@ class SubscriptionFlows(
     toSubscriptionMessageFlux: GenericTransformer<ConsumerMessage, Flux<GenericSubscriptionMessage>>,
     messageHasNoSubscription: (GenericSubscriptionMessage) -> Boolean,
     subscriptionIsBlocked: (GenericSubscriptionMessage) -> Boolean,
+    subscriptionIsWorking: (GenericSubscriptionMessage) -> Boolean,
     toBlockedSubscriptionMessageDTO: GenericTransformer<UnsignedSubscriptionMessage, BlockedSubscriptionMessageDTO>,
     toBeSignedWorkingSubscription: (GenericSubscriptionMessage) -> Boolean,
     nonSignableWorkingSubscription: (GenericSubscriptionMessage) -> Boolean,
@@ -75,7 +80,10 @@ class SubscriptionFlows(
       transform<Flux<GenericSubscriptionMessage>> { it.collectList() }
       split()
       enrichHeaders {
-        headerFunction<List<WebhookieMessage>>(WH_HEADER_SEQUENCE_SIZE, { it.payload.size}, true)
+        headerFunction<List<GenericSubscriptionMessage>>(
+          WH_HEADER_TRACE_SEQUENCE_SIZE,
+          { it.payload.size },
+          true)
       }
       split()
       routeToRecipients {

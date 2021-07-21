@@ -18,7 +18,7 @@ class Constants {
         const val WH_HEADER_REQUESTED_BY = "wh-requested-by"
         const val WH_HEADER_AUTHORIZED_SUBSCRIBER = "wh-authorized-subscriber"
         const val HEADER_CONTENT_TYPE = "content_type"
-        const val WH_HEADER_SEQUENCE_SIZE = "wh-sequence-size"
+        const val WH_HEADER_TRACE_SEQUENCE_SIZE = "wh-trace-sequence-size"
 
         val WH_REQUIRED_HEADERS = setOf(
           WH_HEADER_TOPIC,
@@ -34,7 +34,7 @@ class Constants {
           WH_HEADER_REQUESTED_BY,
           WH_HEADER_AUTHORIZED_SUBSCRIBER,
           HEADER_CONTENT_TYPE,
-          WH_HEADER_SEQUENCE_SIZE
+          WH_HEADER_TRACE_SEQUENCE_SIZE
         )
       }
     }
