@@ -7,10 +7,11 @@ import com.hookiesolutions.webhookie.common.Constants.Channels.Publisher.Compani
 import com.hookiesolutions.webhookie.common.Constants.Channels.Publisher.Companion.RETRYABLE_PUBLISHER_ERROR_CHANNEL
 import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.BLOCKED_SUBSCRIPTION_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.NO_SUBSCRIPTION_CHANNEL_NAME
-import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_SEQUENCE_SIZE
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_TRACE_ID
+import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_TRACE_SEQUENCE_SIZE
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.message.WebhookieMessage
+import com.hookiesolutions.webhookie.common.message.publisher.GenericPublisherMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherErrorMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherSuccessMessage
 import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscriptionMessageDTO
@@ -21,6 +22,7 @@ import org.springframework.integration.aggregator.CorrelationStrategy
 import org.springframework.integration.aggregator.HeaderAttributeCorrelationStrategy
 import org.springframework.integration.aggregator.MessageGroupProcessor
 import org.springframework.integration.aggregator.ReleaseStrategy
+import org.springframework.integration.core.GenericSelector
 import org.springframework.integration.core.MessageSelector
 import org.springframework.integration.dsl.IntegrationFlow
 import org.springframework.integration.dsl.integrationFlow
@@ -49,26 +51,48 @@ class TraceFlows(private val traceService: TraceService) {
   }
 
   @Bean
-  fun updateTraceWithBlockedSubscriptionMessageFlow(): IntegrationFlow {
-    return integrationFlow {
-      channel(BLOCKED_SUBSCRIPTION_CHANNEL_NAME)
-      handle { payload: BlockedSubscriptionMessageDTO, _: MessageHeaders ->
-        traceService.updateWithIssues(payload)
-      }
-    }
-  }
-
-  @Bean
-  fun passBlockedSubscriptionMessageToTraceAggregatorFlow(
+  fun handleBlockedSubscriptionMessageFlow(
     originalMessageSelector: MessageSelector,
     traceAggregationChannel: MessageChannel
   ): IntegrationFlow {
     return integrationFlow {
       channel(BLOCKED_SUBSCRIPTION_CHANNEL_NAME)
-      filter<Message<BlockedSubscriptionMessageDTO>> {
-        originalMessageSelector.accept(it)
+      routeToRecipients {
+        recipient<Message<BlockedSubscriptionMessageDTO>>(traceAggregationChannel) { originalMessageSelector.accept(it) }
+        recipientFlow {
+          handle { payload: BlockedSubscriptionMessageDTO, _: MessageHeaders ->
+            traceService.updateWithIssues(payload)
+          }
+        }
       }
-      channel(traceAggregationChannel)
+    }
+  }
+
+  @Bean
+  fun handleNonRetryableResponseFlow(
+    originalMessageSelector: MessageSelector,
+    retryableErrorSelector: GenericSelector<GenericPublisherMessage>,
+    traceAggregationChannel: MessageChannel
+  ): IntegrationFlow {
+    val updateTraceSelector: (Message<PublisherErrorMessage>) -> Boolean = {
+      !retryableErrorSelector.accept(it.payload) &&
+          originalMessageSelector.accept(it) &&
+          it.payload.subscriptionMessage.isTry()
+    }
+    val passToTraceAggregatorSelector: (Message<PublisherErrorMessage>) -> Boolean = {
+      !retryableErrorSelector.accept(it.payload) && originalMessageSelector.accept(it)
+    }
+
+    return integrationFlow {
+      channel(RETRYABLE_PUBLISHER_ERROR_CHANNEL)
+      routeToRecipients {
+        recipient(traceAggregationChannel, passToTraceAggregatorSelector)
+        recipientFlow(updateTraceSelector) {
+          handle { payload: PublisherErrorMessage, _: MessageHeaders ->
+            traceService.updateWithIssues(payload)
+          }
+        }
+      }
     }
   }
 
@@ -109,23 +133,35 @@ class TraceFlows(private val traceService: TraceService) {
   @Bean
   fun traceReleaseStrategy(): ReleaseStrategy {
     return ReleaseStrategy {
-      val size = it.one.headers[WH_HEADER_SEQUENCE_SIZE].toString().toInt()
+      val size = it.one.headers[WH_HEADER_TRACE_SEQUENCE_SIZE].toString().toInt()
       it.messages.size == size
     }
   }
 
   @Bean
-  fun traceOutputProcessor(): MessageGroupProcessor {
+  fun traceOutputProcessor(retryableErrorSelector: GenericSelector<GenericPublisherMessage>): MessageGroupProcessor {
     return MessageGroupProcessor { group ->
       val successSize = group.messages
-        .filter {
-          it.payload is PublisherSuccessMessage
-        }
+        .map { it.payload }
+        .filterIsInstance<PublisherSuccessMessage>()
+        .size
+
+      val errorSize = group.messages
+        .map { it.payload }
+        .filterIsInstance<PublisherErrorMessage>()
+        .size
+
+      val blockedSize = group.messages
+        .map { it.payload }
+        .filterIsInstance<BlockedSubscriptionMessageDTO>()
         .size
 
       val one = group.one.payload as WebhookieMessage
+      val numberOfSpans = group.one.headers[WH_HEADER_TRACE_SEQUENCE_SIZE].toString().toInt()
+      val workingSubscriptions = numberOfSpans - blockedSize - errorSize
 
-      val payload = Tuples.of(one.traceId, TraceSummary(group.messages.size, successSize))
+      val payload = Tuples.of(one.traceId,
+        TraceSummary(numberOfSpans, errorSize, blockedSize, successSize, workingSubscriptions, blockedSize, errorSize))
 
       MessageBuilder
         .withPayload(payload)
@@ -162,17 +198,6 @@ class TraceFlows(private val traceService: TraceService) {
       channel(NO_SUBSCRIPTION_CHANNEL_NAME)
       handle { payload: NoSubscriptionMessage, _: MessageHeaders ->
         traceService.updateWithNoSubscription(payload)
-      }
-    }
-  }
-
-  @Bean
-  fun retrySubscriptionMessageFlow(): IntegrationFlow {
-    return integrationFlow {
-      channel(RETRYABLE_PUBLISHER_ERROR_CHANNEL)
-      filter<PublisherErrorMessage> { it.subscriptionMessage.isTry() }
-      handle { payload: PublisherErrorMessage, _: MessageHeaders ->
-        traceService.updateWithIssues(payload)
       }
     }
   }

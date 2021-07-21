@@ -7,7 +7,12 @@ package com.hookiesolutions.webhookie.audit.domain
  */
 data class TraceSummary(
   val numberOfSpans: Int,
-  val numberOfSuccess: Int
+  val numberOfNotOKSpans: Int,
+  val numberOfBlockedSpans: Int,
+  val numberOfSuccess: Int,
+  val workingSubscriptions: Int,
+  val blockedSubscriptions: Int,
+  val errorSubscriptions: Int
 ) {
   fun isOK(): Boolean = numberOfSpans == numberOfSuccess
 
@@ -19,6 +24,6 @@ data class TraceSummary(
   }
 
   companion object {
-    fun unknown() = TraceSummary(-1, -1)
+    fun unknown() = TraceSummary(-1, -1, -1, -1, -1, -1, -1)
   }
 }
