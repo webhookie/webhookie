@@ -113,7 +113,7 @@ class SpanRepository(
     spanId: String,
     spanStatusUpdate: SpanStatusUpdate
   ): Mono<Span> {
-    return updateSpan(spanId, *statusUpdateOperations(spanStatusUpdate))
+    return updateSpanWithoutRetry(spanId, *statusUpdateOperations(spanStatusUpdate))
   }
 
   fun addRetry(spanId: String, retry: SpanRetry): Mono<Span> {
@@ -148,13 +148,17 @@ class SpanRepository(
     )
   }
 
+  private fun updateSpanWithoutRetry(spanId: String, vararg operations: AggregationOperation): Mono<Span> {
+    return aggregationUpdate(bySpanId(spanId), Span::class.java, *operations)
+  }
+
   private fun updateSpan(spanId: String, vararg operations: AggregationOperation): Mono<Span> {
     val retryBackoffSpec = Retry
       .backoff(10, Duration.ofSeconds(15))
       .doBeforeRetry { log.warn("Attempting (#{}) ({} in a row) for '{}'", it.totalRetries(), it.totalRetriesInARow(), spanId) }
       .doAfterRetry { log.debug("Retried span '{}', details: '{}'", spanId, it) }
 
-    return aggregationUpdate(bySpanId(spanId), Span::class.java, *operations)
+    return updateSpanWithoutRetry(spanId, *operations)
       .switchIfEmpty { EntityNotFoundException("Span '${spanId}' is not ready yet!").toMono() }
       .retryWhen(retryBackoffSpec)
   }

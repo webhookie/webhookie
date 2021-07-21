@@ -88,7 +88,7 @@ class SpanService(
 
         saveOrFetch(span)
       }
-      .doOnNext { log.debug("'{}', '{}' Span was updated to: '{}'", it.spanId, it.traceId, it.lastStatus) }
+      .doOnNext { logSpan(it) }
   }
 
   @Suppress("DuplicatedCode")
@@ -167,7 +167,7 @@ class SpanService(
     val details = factory.calculateSpanSendDetails(message)
     val retry = SpanRetry(time, payload.totalNumberOfTries, payload.numberOfRetries, details.t2, details.t1)
     return repository.retryStatusUpdate(payload.spanId, retryingSpan(time), retry)
-      .doOnNext { log.debug("'{}', '{}' Span was updated to: '{}'", it.spanId, it.traceId, it.lastStatus) }
+      .doOnNext { logSpan(it) }
   }
 
   fun addRetry(message: SignableSubscriptionMessage): Mono<Span> {
@@ -175,7 +175,7 @@ class SpanService(
     val time = timeMachine.now().plusSeconds(message.delay.seconds)
     val retry = SpanRetry(time, message.totalNumberOfTries, message.numberOfRetries, SENT_BY_WEBHOOKIE, SpanSendReason.RETRY)
     return repository.addRetry(message.spanId, retry)
-      .doOnNext { log.debug("'{}', '{}' Span was updated to: '{}'", it.spanId, it.traceId, it.lastStatus) }
+      .doOnNext { logSpan(it) }
   }
 
   private fun saveOrFetch(span: Span): Mono<Span> {
@@ -237,5 +237,9 @@ class SpanService(
 
         builder.build()
       }
+  }
+
+  private fun logSpan(it: Span) {
+    log.debug("'{}', '{}' Span was updated to: '{}'", it.spanId, it.traceId, it.lastStatus)
   }
 }
