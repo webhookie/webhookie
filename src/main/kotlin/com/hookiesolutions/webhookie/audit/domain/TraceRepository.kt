@@ -8,6 +8,7 @@ import com.hookiesolutions.webhookie.audit.domain.Trace.Keys.Companion.KEY_TIME
 import com.hookiesolutions.webhookie.audit.domain.Trace.Queries.Companion.byTraceId
 import com.hookiesolutions.webhookie.audit.domain.Trace.Queries.Companion.statusIn
 import com.hookiesolutions.webhookie.audit.domain.Trace.Queries.Companion.traceIdRegex
+import com.hookiesolutions.webhookie.audit.domain.Trace.Queries.Companion.traceStatusIsNot
 import com.hookiesolutions.webhookie.audit.domain.Trace.Queries.Companion.traceTopicIn
 import com.hookiesolutions.webhookie.audit.domain.Trace.Queries.Companion.traceTopicIs
 import com.hookiesolutions.webhookie.audit.domain.Trace.Queries.Companion.traceUpdatedAfter
@@ -64,7 +65,7 @@ class TraceRepository(
   fun addStatus(traceId: String, statusUpdate: TraceStatusUpdate): Mono<Trace> {
     return mongoTemplate
       .findAndModify(
-        query(byTraceId(traceId)),
+        query(byTraceId(traceId).andOperator(traceStatusIsNot(statusUpdate.status))),
         traceStatusUpdate(statusUpdate),
         FindAndModifyOptions.options().returnNew(true),
         Trace::class.java

@@ -53,6 +53,10 @@ data class Trace(
         return where(fieldName(KEY_STATUS_UPDATE, KEY_STATUS)).`in`(statusList.map { it.name })
       }
 
+      fun traceStatusIsNot(status: TraceStatus): Criteria {
+        return where(fieldName(KEY_STATUS_UPDATE, KEY_STATUS)).ne(status)
+      }
+
       fun traceTopicIn(topics: List<String>): Criteria {
         return where(KEY_TOPIC).`in`(topics)
       }
