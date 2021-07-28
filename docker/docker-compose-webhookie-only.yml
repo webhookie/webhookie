@@ -6,7 +6,7 @@ networks:
 services:
   webhookie:
     container_name: webhookie-server
-    image: hookiesolutions/webhookie
+    image: hookiesolutions/webhookie:1
     volumes:
       - ./webhookie-theme-yellow.css:/var/data/webhookie/webhookie-theme.css
       - ./logo.svg:/var/data/webhookie/webhookie-logo.svg

@@ -33,7 +33,7 @@ services:
 
   webhookie:
     container_name: webhookie-server
-    image: hookiesolutions/webhookie
+    image: hookiesolutions/webhookie:1
     environment:
       - WH_IAM_ISSUER_URI=http://localhost:8800/auth/realms/webhookie
       - WH_IAM_JWK_SET_URI=http://keycloak:8080/auth/realms/webhookie/protocol/openid-connect/certs
