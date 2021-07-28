@@ -34,9 +34,6 @@ services:
   webhookie:
     container_name: webhookie-server
     image: hookiesolutions/webhookie
-    volumes:
-      - ./webhookie-theme-yellow.css:/var/data/webhookie/webhookie-theme.css
-      - ./logo.svg:/var/data/webhookie/webhookie-logo.svg
     environment:
       - WH_IAM_ISSUER_URI=http://localhost:8800/auth/realms/webhookie
       - WH_IAM_JWK_SET_URI=http://keycloak:8080/auth/realms/webhookie/protocol/openid-connect/certs
