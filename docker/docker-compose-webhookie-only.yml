@@ -1,0 +1,35 @@
+version: '3.9'
+
+networks:
+  webhookie:
+
+services:
+  webhookie:
+    container_name: webhookie-server
+    image: hookiesolutions/webhookie
+    volumes:
+      - ./webhookie-theme-yellow.css:/var/data/webhookie/webhookie-theme.css
+      - ./logo.svg:/var/data/webhookie/webhookie-logo.svg
+    environment:
+      - WH_IAM_ISSUER_URI=your_iam_issuer_uri
+      # your_iam_issuer_uri should be accessible via your browser
+      # e.g. http://localhost:8800/auth/realms/webhookie
+      - WH_IAM_JWK_SET_URI=your_iam_iwk_set_uri
+      # your_iam_iwk_set_uri should be accessible in the webhookie container
+      # e.g. if you have keycloack in the same network http://keycloak:8080/auth/realms/webhookie/protocol/openid-connect/certs
+      - WH_IAM_JWS_ALG=your_iam_jws_alg
+      - WH_SECURITY_AUD=your_security_aud
+      - WH_SECURITY_CLIENT_ID=your_security_client_id
+      - WH_SECURITY_ROLES_JSON_PATH=your_security_roles_json_path # default: $$.realm_access.roles
+      - WH_SECURITY_GROUPS_JSON_PATH=your_security_groups_json_path # default: $$.groups
+      - WH_SECURITY_ENTITY_JSON_PATH=your_security_entity_json_path # default: $$.entity
+      - WH_SECURITY_AUTO_ASSIGN_CONSUMER_ROLE=true
+      - WH_SECURITY_OAUTH2_AUTHORIZATION_URI=your_security_oauth2_authorization_uri # default: /protocol/openid-connect/auth
+      - WH_SECURITY_OAUTH2_TOKEN_URI=your_security_oauth2_token_uri # default: /protocol/openid-connect/token
+      - WH_MONGODB_URI=your_mongodb_connection_uri
+      - WEBHOOKIE_SECURITY_ALLOWED-ORIGINS=http://localhost:4300
+    ports:
+      - "4300:80"
+      - "8000:8080"
+    networks:
+      webhookie:

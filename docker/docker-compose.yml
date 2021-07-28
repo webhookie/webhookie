@@ -1,20 +1,42 @@
 version: '3.9'
+
+volumes:
+  mongodb_data:
+
+networks:
+  webhookie:
+
 services:
+  mongodb:
+    image: mongo:4
+    volumes:
+      - 'mongodb_data:/data/db'
+    container_name: webhookie-db
+    ports:
+      - "27017:27017"
+    networks:
+      webhookie:
+
   keycloak:
     image: quay.io/keycloak/keycloak:14.0.0
     volumes:
       - ./realm-export.json:/var/data/webhookie/realm.json
       - ./kc-add-user.json:/opt/jboss/keycloak/standalone/configuration/keycloak-add-user.json
-#      - ./add-kc-user.cli:/opt/jboss/startup-scripts/add-kc-user.cli
+    container_name: webhookie-keycloack
     environment:
-#      - KEYCLOAK_USER=admin
-#      - KEYCLOAK_PASSWORD=admin
       - KEYCLOAK_IMPORT=/var/data/webhookie/realm.json
     ports:
-    - "9900:9990"
-    - "8800:8080"
+      - "9900:9990"
+      - "8800:8080"
+    networks:
+      webhookie:
+
   webhookie:
-    image: hookiesolutions/webhookie:1.0.0
+    container_name: webhookie-server
+    image: hookiesolutions/webhookie
+    volumes:
+      - ./webhookie-theme-yellow.css:/var/data/webhookie/webhookie-theme.css
+      - ./logo.svg:/var/data/webhookie/webhookie-logo.svg
     environment:
       - WH_IAM_ISSUER_URI=http://localhost:8800/auth/realms/webhookie
       - WH_IAM_JWK_SET_URI=http://keycloak:8080/auth/realms/webhookie/protocol/openid-connect/certs
@@ -27,8 +49,12 @@ services:
       - WH_SECURITY_AUTO_ASSIGN_CONSUMER_ROLE=true
       - WH_SECURITY_OAUTH2_AUTHORIZATION_URI=/protocol/openid-connect/auth
       - WH_SECURITY_OAUTH2_TOKEN_URI=/protocol/openid-connect/token
-      - WH_MONGODB_URI=mongodb+srv://wh-dev-user:5wOA2OYzb8NWN6TJ@cluster0.dglao.mongodb.net/wh-dev-db?retryWrites=true&w=majority
+      - WH_MONGODB_URI=mongodb://mongodb/webhookie-db?retryWrites=true&w=majority&maxPoolSize=200
       - WEBHOOKIE_SECURITY_ALLOWED-ORIGINS=http://localhost:4300
     ports:
       - "4300:80"
       - "8000:8080"
+    networks:
+      webhookie:
+    depends_on:
+      - mongodb
