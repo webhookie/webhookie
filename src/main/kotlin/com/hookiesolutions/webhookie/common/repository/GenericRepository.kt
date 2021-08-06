@@ -27,7 +27,9 @@ import com.hookiesolutions.webhookie.common.exception.EntityExistsException
 import com.hookiesolutions.webhookie.common.exception.EntityNotFoundException
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
 import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.byId
+import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.entityCreatedInRange
 import com.hookiesolutions.webhookie.common.model.DeletableEntity
+import com.hookiesolutions.webhookie.common.model.StatusCountRow
 import com.hookiesolutions.webhookie.common.model.UpdatableEntity
 import com.hookiesolutions.webhookie.common.repository.GenericRepository.Keys.Companion.KEY_GROUP_COUNT
 import com.hookiesolutions.webhookie.common.service.security.annotation.VerifyEntityCanBeDeleted
@@ -55,6 +57,7 @@ import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query.query
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
+import java.time.Instant
 
 /**
  *
@@ -140,16 +143,24 @@ abstract class GenericRepository<E: AbstractEntity>(
     return Aggregation.group(mongoField(id)).count().`as`(`as`)
   }
 
-  fun countGroupBy(vararg id: String): AggregationOperation {
-    return countGroupBy(fieldName(*id))
-  }
-
   fun projectGroupAs(name: String, count: String = KEY_GROUP_COUNT): AggregationOperation {
     return Aggregation
       .project()
       .and("_id").`as`(name)
       .andInclude(KEY_GROUP_COUNT)
       .andExclude("_id")
+  }
+
+  //TODO: refactor
+  fun countEntitiesGroupByCreatedBetween(from: Instant, to: Instant, vararg id: String): Mono<List<StatusCountRow>> {
+    val agg = Aggregation.newAggregation(
+      Aggregation.match(entityCreatedInRange(from, to)),
+      countGroupBy(fieldName(*id)),
+      projectGroupAs(StatusCountRow.KEY_GROUP_STATUS)
+    )
+
+    return mongoTemplate.aggregate(agg, clazz, StatusCountRow::class.java)
+      .collectList()
   }
 
   class Query {
