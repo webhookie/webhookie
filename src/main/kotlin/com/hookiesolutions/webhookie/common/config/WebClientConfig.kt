@@ -20,9 +20,8 @@
  * You should also get your employer (if you work as a programmer) or school, if any, to sign a "copyright disclaimer" for the program, if necessary. For more information on this, and how to apply and follow the GNU AGPL, see <https://www.gnu.org/licenses/>.
  */
 
-package com.hookiesolutions.webhookie.webhook.config.parser
+package com.hookiesolutions.webhookie.common.config
 
-import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.reactive.function.client.WebClient
@@ -30,31 +29,12 @@ import org.springframework.web.reactive.function.client.WebClient
 /**
  *
  * @author Arthur Kazemi<bidadh@gmail.com>
- * @since 25/5/21 01:16
+ * @since 3/8/21 15:56
  */
 @Configuration
-class WebClientConfig(
-  private val parserServiceProperties: ParserServiceProperties
-) {
+class WebClientConfig {
   @Bean
   fun webClientBuilder(): WebClient.Builder {
     return WebClient.builder()
-  }
-
-  @Bean
-  fun parserWebClient(webClientBuilder: WebClient.Builder): WebClient {
-    return webClientBuilder
-      .baseUrl(parserServiceProperties.url)
-      .build()
-  }
-
-  @Bean
-  fun jwtKeySetWebClient(
-    webClientBuilder: WebClient.Builder,
-    resourceServerProperties: OAuth2ResourceServerProperties
-  ): WebClient {
-    return webClientBuilder
-      .baseUrl(resourceServerProperties.jwt.jwkSetUri)
-      .build()
   }
 }
