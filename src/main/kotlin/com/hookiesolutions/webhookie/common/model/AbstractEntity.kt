@@ -27,6 +27,7 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.aggregation.Fields.UNDERSCORE_ID
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Criteria.where
+import java.time.Instant
 
 abstract class AbstractEntity : AbstractDocument() {
   @Id
@@ -41,6 +42,18 @@ abstract class AbstractEntity : AbstractDocument() {
 
       fun byObjectId(id: String): Criteria {
         return where(UNDERSCORE_ID).`is`(ObjectId(id))
+      }
+
+      private fun entityCreatedAfter(from: Instant): Criteria {
+        return where(AbstractDocument.Keys.KEY_CREATED_DATE).gte(from)
+      }
+
+      private fun entityCreatedBefore(from: Instant): Criteria {
+        return where(AbstractDocument.Keys.KEY_CREATED_DATE).lte(from)
+      }
+
+      fun entityCreatedInRange(from: Instant, to: Instant): Criteria {
+        return entityCreatedBefore(to).andOperator(entityCreatedAfter(from))
       }
 
       fun idIsIn(ids: Collection<String>): Criteria {
