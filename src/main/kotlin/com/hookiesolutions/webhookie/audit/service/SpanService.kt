@@ -29,6 +29,7 @@ import com.hookiesolutions.webhookie.audit.domain.SpanRetry
 import com.hookiesolutions.webhookie.audit.domain.SpanRetry.Companion.SENT_BY_WEBHOOKIE
 import com.hookiesolutions.webhookie.audit.domain.SpanSendReason
 import com.hookiesolutions.webhookie.audit.domain.SpanStatus
+import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate
 import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate.Companion.blocked
 import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate.Companion.notOk
 import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate.Companion.ok
@@ -52,6 +53,7 @@ import com.hookiesolutions.webhookie.common.message.publisher.PublisherSuccessMe
 import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscriptionMessageDTO
 import com.hookiesolutions.webhookie.common.message.subscription.ResendSpanMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
+import com.hookiesolutions.webhookie.common.model.StatusCountRow
 import com.hookiesolutions.webhookie.common.service.TimeMachine
 import com.hookiesolutions.webhookie.security.service.SecurityHandler
 import com.hookiesolutions.webhookie.webhook.service.WebhookApiServiceDelegate
@@ -67,6 +69,7 @@ import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.switchIfEmpty
 import reactor.kotlin.core.publisher.toFlux
 import reactor.kotlin.core.publisher.toMono
+import java.time.Instant
 
 /**
  *
@@ -263,5 +266,14 @@ class SpanService(
 
   private fun logSpan(it: Span) {
     log.debug("'{}', '{}' Span was updated to: '{}'", it.spanId, it.traceId, it.lastStatus)
+  }
+
+  fun spanSummaryBetween(from: Instant, to: Instant): Mono<List<StatusCountRow>> {
+    return repository.countEntitiesGroupByCreatedBetween(
+      from,
+      to,
+      Span.Keys.KEY_LAST_STATUS,
+      SpanStatusUpdate.Keys.KEY_STATUS
+    )
   }
 }

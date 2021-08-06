@@ -31,6 +31,7 @@ import com.hookiesolutions.webhookie.common.message.subscription.ResendSpanMessa
 import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
 import com.hookiesolutions.webhookie.common.model.DeletableEntity.Companion.deletable
 import com.hookiesolutions.webhookie.common.model.RoleActor
+import com.hookiesolutions.webhookie.common.model.StatusCountRow
 import com.hookiesolutions.webhookie.common.model.UpdatableEntity.Companion.updatable
 import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate
 import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Companion.activated
@@ -63,6 +64,7 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 import reactor.util.function.Tuples
+import java.time.Instant
 
 
 /**
@@ -334,5 +336,14 @@ class SubscriptionService(
     return repository
       .findById(message.subscriptionId)
       .map { factory.createSignableMessage(message, it)}
+  }
+
+  fun subscriptionSummaryBetween(from: Instant, to: Instant): Mono<List<StatusCountRow>> {
+    return repository.countEntitiesGroupByCreatedBetween(
+      from,
+      to,
+      Subscription.Keys.KEY_STATUS_UPDATE,
+      StatusUpdate.Keys.KEY_STATUS
+    )
   }
 }

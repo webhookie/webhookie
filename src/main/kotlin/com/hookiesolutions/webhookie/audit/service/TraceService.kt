@@ -22,8 +22,12 @@
 
 package com.hookiesolutions.webhookie.audit.service
 
-import com.hookiesolutions.webhookie.audit.domain.*
+import com.hookiesolutions.webhookie.audit.domain.Trace
 import com.hookiesolutions.webhookie.audit.domain.Trace.Queries.Companion.byTraceId
+import com.hookiesolutions.webhookie.audit.domain.TraceRepository
+import com.hookiesolutions.webhookie.audit.domain.TraceStatus
+import com.hookiesolutions.webhookie.audit.domain.TraceStatusUpdate
+import com.hookiesolutions.webhookie.audit.domain.TraceSummary
 import com.hookiesolutions.webhookie.audit.web.model.request.TraceRequest
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_ADMIN
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_PROVIDER
@@ -31,6 +35,7 @@ import com.hookiesolutions.webhookie.common.exception.EntityExistsException
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.message.WebhookieMessage
 import com.hookiesolutions.webhookie.common.message.subscription.NoSubscriptionMessage
+import com.hookiesolutions.webhookie.common.model.StatusCountRow
 import com.hookiesolutions.webhookie.common.service.TimeMachine
 import com.hookiesolutions.webhookie.webhook.service.WebhookApiServiceDelegate
 import org.slf4j.Logger
@@ -39,6 +44,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import java.time.Instant
 
 /**
  *
@@ -121,5 +127,14 @@ class TraceService(
 
   fun traceIdExists(traceId: String): Mono<Boolean> {
     return repository.exists(byTraceId(traceId))
+  }
+
+  fun traceSummaryBetween(from: Instant, to: Instant): Mono<List<StatusCountRow>> {
+    return repository.countEntitiesGroupByCreatedBetween(
+      from,
+      to,
+      Trace.Keys.KEY_STATUS_UPDATE,
+      TraceStatusUpdate.Keys.KEY_STATUS
+    )
   }
 }
