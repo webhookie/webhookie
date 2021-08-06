@@ -43,4 +43,12 @@ class TimeMachine {
   fun currentOffsetAt(timeZone: ZoneId): ZoneOffset {
     return now().atZone(timeZone).offset
   }
+
+  @Suppress("unused")
+  companion object {
+    const val EVERY_DAY_PATTERN = "0 0 0 * * *"
+    const val EVERY_HOUR_PATTERN = "0 0 * * * *"
+    const val EVERY_15s_SEC_PATTERN = "15 * * * * *"
+    const val EVERY_MINUTE_PATTERN = "0 * * * * *"
+  }
 }
