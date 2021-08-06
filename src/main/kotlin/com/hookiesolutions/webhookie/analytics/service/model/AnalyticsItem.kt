@@ -23,6 +23,7 @@
 package com.hookiesolutions.webhookie.analytics.service.model
 
 import com.hookiesolutions.webhookie.common.model.StatusCountRow
+import com.hookiesolutions.webhookie.common.model.TimedResult
 
 /**
  *
@@ -30,21 +31,21 @@ import com.hookiesolutions.webhookie.common.model.StatusCountRow
  * @since 5/8/21 01:31
  */
 interface AnalyticsItem {
-  val data: List<StatusCountRow>
+  val data: TimedResult<List<StatusCountRow>>
   val name: String
 }
 
 data class TraceAnalyticsItem(
-  override val data: List<StatusCountRow>,
+  override val data: TimedResult<List<StatusCountRow>>,
   override val name: String = "Trace"
 ): AnalyticsItem
 
 data class SpanAnalyticsItem(
-  override val data: List<StatusCountRow>,
+  override val data: TimedResult<List<StatusCountRow>>,
   override val name: String = "Span"
 ): AnalyticsItem
 
 data class SubscriptionAnalyticsItem(
-  override val data: List<StatusCountRow>,
+  override val data: TimedResult<List<StatusCountRow>>,
   override val name: String = "Subscription"
 ): AnalyticsItem

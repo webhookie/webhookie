@@ -41,6 +41,7 @@ import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Companion.sus
 import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Companion.validated
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionStatus
 import com.hookiesolutions.webhookie.common.service.TimeMachine
+import com.hookiesolutions.webhookie.common.model.TimedResult
 import com.hookiesolutions.webhookie.security.service.SecurityHandler
 import com.hookiesolutions.webhookie.subscription.domain.ApplicationRepository
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
@@ -338,8 +339,8 @@ class SubscriptionService(
       .map { factory.createSignableMessage(message, it)}
   }
 
-  fun subscriptionSummaryBetween(from: Instant, to: Instant): Mono<List<StatusCountRow>> {
-    return repository.countEntitiesGroupByCreatedBetween(
+  fun subscriptionSummaryBetween(from: Instant, to: Instant): Mono<TimedResult<List<StatusCountRow>>> {
+    return repository.timedCountEntitiesGroupByCreatedBetween(
       from,
       to,
       Subscription.Keys.KEY_STATUS_UPDATE,

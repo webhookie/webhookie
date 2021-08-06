@@ -30,6 +30,7 @@ import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Compani
 import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.entityCreatedInRange
 import com.hookiesolutions.webhookie.common.model.DeletableEntity
 import com.hookiesolutions.webhookie.common.model.StatusCountRow
+import com.hookiesolutions.webhookie.common.model.TimedResult
 import com.hookiesolutions.webhookie.common.model.UpdatableEntity
 import com.hookiesolutions.webhookie.common.repository.GenericRepository.Keys.Companion.KEY_GROUP_COUNT
 import com.hookiesolutions.webhookie.common.service.security.annotation.VerifyEntityCanBeDeleted
@@ -161,6 +162,12 @@ abstract class GenericRepository<E: AbstractEntity>(
 
     return mongoTemplate.aggregate(agg, clazz, StatusCountRow::class.java)
       .collectList()
+  }
+
+  fun timedCountEntitiesGroupByCreatedBetween(from: Instant, to: Instant, vararg id: String): Mono<TimedResult<List<StatusCountRow>>> {
+    return countEntitiesGroupByCreatedBetween(from, to, *id)
+      .elapsed()
+      .map { TimedResult(it.t2, it.t1) }
   }
 
   class Query {

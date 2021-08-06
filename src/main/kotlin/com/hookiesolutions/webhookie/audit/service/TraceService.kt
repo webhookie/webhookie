@@ -36,6 +36,7 @@ import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.message.WebhookieMessage
 import com.hookiesolutions.webhookie.common.message.subscription.NoSubscriptionMessage
 import com.hookiesolutions.webhookie.common.model.StatusCountRow
+import com.hookiesolutions.webhookie.common.model.TimedResult
 import com.hookiesolutions.webhookie.common.service.TimeMachine
 import com.hookiesolutions.webhookie.webhook.service.WebhookApiServiceDelegate
 import org.slf4j.Logger
@@ -129,8 +130,8 @@ class TraceService(
     return repository.exists(byTraceId(traceId))
   }
 
-  fun traceSummaryBetween(from: Instant, to: Instant): Mono<List<StatusCountRow>> {
-    return repository.countEntitiesGroupByCreatedBetween(
+  fun traceSummaryBetween(from: Instant, to: Instant): Mono<TimedResult<List<StatusCountRow>>> {
+    return repository.timedCountEntitiesGroupByCreatedBetween(
       from,
       to,
       Trace.Keys.KEY_STATUS_UPDATE,

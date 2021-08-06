@@ -20,39 +20,14 @@
  * You should also get your employer (if you work as a programmer) or school, if any, to sign a "copyright disclaimer" for the program, if necessary. For more information on this, and how to apply and follow the GNU AGPL, see <https://www.gnu.org/licenses/>.
  */
 
-package com.hookiesolutions.webhookie.analytics.service
-
-import com.hookiesolutions.webhookie.analytics.service.model.AnalyticsTimeCriteria
-import com.hookiesolutions.webhookie.audit.service.SpanService
-import com.hookiesolutions.webhookie.audit.service.TraceService
-import com.hookiesolutions.webhookie.common.model.StatusCountRow
-import com.hookiesolutions.webhookie.common.model.TimedResult
-import org.slf4j.Logger
-import org.springframework.stereotype.Service
-import reactor.core.publisher.Mono
+package com.hookiesolutions.webhookie.common.model
 
 /**
  *
  * @author Arthur Kazemi<bidadh@gmail.com>
- * @since 4/8/21 15:36
+ * @since 6/8/21 16:15
  */
-@Service
-class AnalyticsTrafficServiceDelegate(
-  private val log: Logger,
-  private val traceService: TraceService,
-  private val spanService: SpanService
-) {
-  fun fetchTraceAnalyticsData(analyticsTimeCriteria: AnalyticsTimeCriteria): Mono<TimedResult<List<StatusCountRow>>> {
-    val from = analyticsTimeCriteria.from
-    val to = analyticsTimeCriteria.to
-    log.info("Fetching trace Analytics data from: '[}' to: '{}'", from, to)
-    return traceService.traceSummaryBetween(from, to)
-  }
-
-  fun fetchSpanAnalyticsData(analyticsTimeCriteria: AnalyticsTimeCriteria): Mono<TimedResult<List<StatusCountRow>>> {
-    val from = analyticsTimeCriteria.from
-    val to = analyticsTimeCriteria.to
-    log.info("Fetching span Analytics data from: '[}' to: '{}'", from, to)
-    return spanService.spanSummaryBetween(from, to)
-  }
-}
+data class TimedResult<T>(
+  val value: T,
+  val time: Long
+)

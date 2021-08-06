@@ -54,6 +54,7 @@ import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscrip
 import com.hookiesolutions.webhookie.common.message.subscription.ResendSpanMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
 import com.hookiesolutions.webhookie.common.model.StatusCountRow
+import com.hookiesolutions.webhookie.common.model.TimedResult
 import com.hookiesolutions.webhookie.common.service.TimeMachine
 import com.hookiesolutions.webhookie.security.service.SecurityHandler
 import com.hookiesolutions.webhookie.webhook.service.WebhookApiServiceDelegate
@@ -268,8 +269,8 @@ class SpanService(
     log.debug("'{}', '{}' Span was updated to: '{}'", it.spanId, it.traceId, it.lastStatus)
   }
 
-  fun spanSummaryBetween(from: Instant, to: Instant): Mono<List<StatusCountRow>> {
-    return repository.countEntitiesGroupByCreatedBetween(
+  fun spanSummaryBetween(from: Instant, to: Instant): Mono<TimedResult<List<StatusCountRow>>> {
+    return repository.timedCountEntitiesGroupByCreatedBetween(
       from,
       to,
       Span.Keys.KEY_LAST_STATUS,

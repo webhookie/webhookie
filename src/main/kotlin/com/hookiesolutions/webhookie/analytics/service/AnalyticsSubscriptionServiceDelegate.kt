@@ -24,6 +24,7 @@ package com.hookiesolutions.webhookie.analytics.service
 
 import com.hookiesolutions.webhookie.analytics.service.model.AnalyticsTimeCriteria
 import com.hookiesolutions.webhookie.common.model.StatusCountRow
+import com.hookiesolutions.webhookie.common.model.TimedResult
 import com.hookiesolutions.webhookie.subscription.service.SubscriptionService
 import org.slf4j.Logger
 import org.springframework.stereotype.Service
@@ -39,7 +40,7 @@ class AnalyticsSubscriptionServiceDelegate(
   private val log: Logger,
   private val subscriptionService: SubscriptionService
 ) {
-  fun fetchSubscriptionAnalyticsData(analyticsTimeCriteria: AnalyticsTimeCriteria): Mono<List<StatusCountRow>> {
+  fun fetchSubscriptionAnalyticsData(analyticsTimeCriteria: AnalyticsTimeCriteria): Mono<TimedResult<List<StatusCountRow>>> {
     val from = analyticsTimeCriteria.from
     val to = analyticsTimeCriteria.to
     log.info("Fetching subscription Analytics data from: '[}' to: '{}'", from, to)
