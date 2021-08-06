@@ -29,6 +29,7 @@ import com.hookiesolutions.webhookie.common.model.AbstractEntity
 import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.byId
 import com.hookiesolutions.webhookie.common.model.DeletableEntity
 import com.hookiesolutions.webhookie.common.model.UpdatableEntity
+import com.hookiesolutions.webhookie.common.repository.GenericRepository.Keys.Companion.KEY_GROUP_COUNT
 import com.hookiesolutions.webhookie.common.service.security.annotation.VerifyEntityCanBeDeleted
 import com.hookiesolutions.webhookie.common.service.security.annotation.VerifyEntityCanBeUpdated
 import com.hookiesolutions.webhookie.subscription.domain.SubscriptionRepository
@@ -135,6 +136,22 @@ abstract class GenericRepository<E: AbstractEntity>(
     return mongoTemplate.exists(query(criteria), clazz)
   }
 
+  private fun countGroupBy(id: String, `as`: String = KEY_GROUP_COUNT): AggregationOperation {
+    return Aggregation.group(mongoField(id)).count().`as`(`as`)
+  }
+
+  fun countGroupBy(vararg id: String): AggregationOperation {
+    return countGroupBy(fieldName(*id))
+  }
+
+  fun projectGroupAs(name: String, count: String = KEY_GROUP_COUNT): AggregationOperation {
+    return Aggregation
+      .project()
+      .and("_id").`as`(name)
+      .andInclude(KEY_GROUP_COUNT)
+      .andExclude("_id")
+  }
+
   class Query {
     companion object {
       fun pageableWith(requested: Pageable, defaultSort: Sort, defaultPageable: Pageable): Pageable {
@@ -154,6 +171,12 @@ abstract class GenericRepository<E: AbstractEntity>(
 
         return PageRequest.of(page, size, sort)
       }
+    }
+  }
+
+  class Keys {
+    companion object {
+      const val KEY_GROUP_COUNT = "count"
     }
   }
 
