@@ -25,10 +25,15 @@ package com.hookiesolutions.webhookie.analytics.service
 import com.hookiesolutions.webhookie.analytics.domain.InstanceRepository
 import com.hookiesolutions.webhookie.analytics.domain.WebhookieInstance
 import com.hookiesolutions.webhookie.analytics.service.model.AnalyticsData
+import com.hookiesolutions.webhookie.analytics.service.model.RemoteInstance
+import com.hookiesolutions.webhookie.common.service.IdGenerator
+import com.hookiesolutions.webhookie.common.service.TimeMachine
+import com.hookiesolutions.webhookie.subscription.utils.CryptoUtils
 import org.slf4j.Logger
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.event.EventListener
+import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.BodyInserters
@@ -48,8 +53,13 @@ class AnalyticsService(
   @Qualifier("analyticsClient")
   private val analyticsClient: WebClient,
   private val log: Logger,
+  private val idGenerator: IdGenerator,
+  private val timeMachine: TimeMachine,
+  private val analyticsServerBaseUrl: String,
   private val repository: InstanceRepository
 ) {
+  private val analyticsApiKey = "ZJw6w476-Z4HUjLkjLi8gLLEBEldD1irxoPXYGPhG2w"
+
   @EventListener(ApplicationReadyEvent::class)
   fun initAnalytics() {
     val successHandler: Consumer<WebhookieInstance> = Consumer {
@@ -67,22 +77,33 @@ class AnalyticsService(
       .flatMap { saveInstance(it) }
   }
 
-  fun createRemoteInstance(): Mono<String> {
+  fun createRemoteInstance(): Mono<RemoteInstance> {
     log.info("Webhookie instance does not exist! creating one...")
-    return analyticsClient
-      .post()
-      .uri("/instances")
-      .contentType(MediaType.APPLICATION_JSON)
-      .accept(MediaType.ALL)
-      .retrieve()
-      .bodyToMono(String::class.java)
-      .doOnNext { log.debug("Remote Instance was created successfully with id: '{}'", it) }
-      .doOnError { log.warn("Was unable to create Remote instance due to: '{}'", it.localizedMessage) }
+    val time = timeMachine.now().toString()
+    val requestId = idGenerator.generate()
+    val signatureValue = "(request-target): POST $analyticsServerBaseUrl/instances date: $time x-request-id: $requestId"
+
+    return CryptoUtils.hmac(signatureValue, analyticsApiKey).flatMap { sig ->
+      val h = "keyId=1,algorithm=${CryptoUtils.ALG},headers=(request-target) date x-request-id,signature=$sig"
+      analyticsClient
+        .post()
+        .uri("/instances")
+        .contentType(MediaType.APPLICATION_JSON)
+        .header(HttpHeaders.AUTHORIZATION, "Signature $h")
+        .header("Date", time)
+        .header("x-request-id", requestId)
+        .accept(MediaType.ALL)
+        .retrieve()
+        .bodyToMono(RemoteInstance::class.java)
+        .doOnNext { log.debug("Remote Instance was created successfully with id: '{}'", it.id) }
+        .doOnError { log.warn("Was unable to create Remote instance due to: '{}'", it.localizedMessage) }
+    }
   }
 
-  fun saveInstance(instanceId: String): Mono<WebhookieInstance> {
+  fun saveInstance(remoteInstance: RemoteInstance): Mono<WebhookieInstance> {
+    val instanceId = remoteInstance.id
     log.info("Saving Webhookie instance: {}", instanceId)
-    val instance = WebhookieInstance(instanceId, "http://localhost:7070")
+    val instance = WebhookieInstance(instanceId, remoteInstance.apiKey, "http://localhost:7070")
     return repository.save(instance)
       .doOnNext { log.debug("Local Instance was created successfully with id: '{}'", it.instanceId) }
   }

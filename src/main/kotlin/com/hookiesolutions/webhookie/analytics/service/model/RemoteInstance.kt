@@ -20,21 +20,14 @@
  * You should also get your employer (if you work as a programmer) or school, if any, to sign a "copyright disclaimer" for the program, if necessary. For more information on this, and how to apply and follow the GNU AGPL, see <https://www.gnu.org/licenses/>.
  */
 
-package com.hookiesolutions.webhookie.analytics.domain
-
-import com.hookiesolutions.webhookie.common.model.AbstractEntity
-import org.springframework.data.annotation.TypeAlias
-import org.springframework.data.mongodb.core.mapping.Document
+package com.hookiesolutions.webhookie.analytics.service.model
 
 /**
  *
  * @author Arthur Kazemi<bidadh@gmail.com>
- * @since 3/8/21 16:03
+ * @since 9/8/21 23:00
  */
-@Document("instance")
-@TypeAlias("instance")
-data class WebhookieInstance(
-  val instanceId: String,
-  val apiKey: String,
-  val serverUri: String
-): AbstractEntity()
+data class RemoteInstance(
+  val id: String,
+  val apiKey: String
+)
