@@ -52,7 +52,7 @@ class CryptoUtils {
       return hmac(signatureValue, secret)
     }
 
-    private fun hmac(value: String, key: String): Mono<String> {
+    fun hmac(value: String, key: String): Mono<String> {
       return try {
         val sha256Hmac = Mac.getInstance(ALG)
         val secretKey = SecretKeySpec(key.toByteArray(), ALG)
