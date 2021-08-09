@@ -69,7 +69,7 @@ class AnalyticsConfig(
 
   @Bean
   @Profile("dev")
-  fun everyMinuteAnalyticsPoller(): PollerSpec = Pollers.cron(TimeMachine.EVERY_15s_SEC_PATTERN)
+  fun everyMinuteAnalyticsPoller(): PollerSpec = Pollers.cron(TimeMachine.EVERY_DAY_PATTERN)
 
   @Bean
   @Profile("!dev")
