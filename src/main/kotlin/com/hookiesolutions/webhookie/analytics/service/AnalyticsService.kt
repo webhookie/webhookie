@@ -75,12 +75,12 @@ class AnalyticsService(
   fun readOrCreateInstance(): Mono<WebhookieInstance> {
     return repository.findOne()
       .switchIfEmpty { createInstance() }
-      .flatMap { updateInstance(it) }
   }
 
   fun createInstance(): Mono<WebhookieInstance> {
     return createRemoteInstance()
       .flatMap { saveInstance(it) }
+      .flatMap { updateInstance(it) }
   }
 
   fun createRemoteInstance(): Mono<RemoteInstance> {

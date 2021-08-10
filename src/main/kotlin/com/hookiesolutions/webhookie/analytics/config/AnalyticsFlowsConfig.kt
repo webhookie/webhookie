@@ -50,38 +50,42 @@ import java.util.function.Supplier
 class AnalyticsFlowsConfig(
   private val timeMachine: TimeMachine
 ) {
-  @Bean
+  @Configuration
   @Profile("dev")
-  fun everyMinuteAnalyticsPoller(): PollerSpec = Pollers.cron(TimeMachine.EVERY_DAY_PATTERN)
+  class DevConfig {
+    @Bean
+    fun analyticsPoller(): PollerSpec = Pollers.cron(TimeMachine.EVERY_DAY_PATTERN)
 
-  @Bean
+    @Bean
+    fun analyticsTimeCriteriaSupplier(timeMachine: TimeMachine): Supplier<AnalyticsTimeCriteria> {
+      return Supplier {
+        val to = timeMachine.now()
+        val from = to.minus(1, ChronoUnit.DAYS)
+        AnalyticsTimeCriteria(from, to)
+      }
+    }
+  }
+
+  @Configuration
   @Profile("!dev")
-  fun everyDayAnalyticsPoller(): PollerSpec = Pollers.cron(TimeMachine.EVERY_DAY_PATTERN)
+  class Config {
+    @Bean
+    fun analyticsPoller(): PollerSpec = Pollers.cron(TimeMachine.EVERY_DAY_PATTERN)
+
+    @Bean
+    fun analyticsTimeCriteriaSupplier(timeMachine: TimeMachine): Supplier<AnalyticsTimeCriteria> {
+      return Supplier {
+        val to = timeMachine.now()
+          .truncatedTo(ChronoUnit.DAYS)
+        val from = to.minus(1, ChronoUnit.DAYS)
+        AnalyticsTimeCriteria(from, to)
+      }
+    }
+  }
 
   @Bean
   fun analyticsPollingSpec(pollerSpec: PollerSpec): SourcePollingChannelAdapterSpec.() -> Unit = {
     poller(pollerSpec)
-  }
-
-  @Bean
-  @Profile("dev")
-  fun devAnalyticsTimeCriteriaSupplier(): Supplier<AnalyticsTimeCriteria> {
-    return Supplier {
-      val to = timeMachine.now()
-      val from = to.minus(1, ChronoUnit.DAYS)
-      AnalyticsTimeCriteria(from, to)
-    }
-  }
-
-  @Bean
-  @Profile("!dev")
-  fun analyticsTimeCriteriaSupplier(): Supplier<AnalyticsTimeCriteria> {
-    return Supplier {
-      val to = timeMachine.now()
-        .truncatedTo(ChronoUnit.DAYS)
-      val from = to.minus(1, ChronoUnit.DAYS)
-      AnalyticsTimeCriteria(from, to)
-    }
   }
 
   @Bean

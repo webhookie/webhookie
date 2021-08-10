@@ -34,13 +34,19 @@ import org.springframework.web.reactive.function.client.WebClient
  */
 @Configuration
 class AnalyticsConfig {
-  @Bean
+  @Configuration
   @Profile("dev")
-  fun devAnalyticsServerBaseUrl() = "http://localhost:7070"
+  class DevConfig {
+    @Bean
+    fun analyticsServerBaseUrl() = "http://localhost:7070"
+  }
 
-  @Bean
+  @Configuration
   @Profile("!dev")
-  fun analyticsServerBaseUrl() = "https://analytics.webhookie.com/api"
+  class Config {
+    @Bean
+    fun analyticsServerBaseUrl() = "https://analytics.webhookie.com/api"
+  }
 
   @Bean
   fun analyticsClient(
