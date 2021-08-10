@@ -22,6 +22,7 @@
 
 package com.hookiesolutions.webhookie.analytics.service
 
+import com.hookiesolutions.webhookie.analytics.config.AnalyticsProperties
 import com.hookiesolutions.webhookie.analytics.domain.InstanceRepository
 import com.hookiesolutions.webhookie.analytics.domain.WebhookieInstance
 import com.hookiesolutions.webhookie.analytics.service.model.AnalyticsData
@@ -56,10 +57,9 @@ class AnalyticsService(
   private val idGenerator: IdGenerator,
   private val timeMachine: TimeMachine,
   private val analyticsServerBaseUrl: String,
+  private val analyticsProperties: AnalyticsProperties,
   private val repository: InstanceRepository
 ) {
-  private val analyticsApiKey = "ZJw6w476-Z4HUjLkjLi8gLLEBEldD1irxoPXYGPhG2w"
-
   @EventListener(ApplicationReadyEvent::class)
   fun initAnalytics() {
     val successHandler: Consumer<WebhookieInstance> = Consumer {
@@ -68,8 +68,14 @@ class AnalyticsService(
     val errorHandler: Consumer<Throwable> = Consumer {
       log.error("Failed to create/load webhookie instance due to: '{}'",  it.localizedMessage)
     }
-    readLocalInstance()
+    readOrCreateInstance()
       .subscribe(successHandler, errorHandler)
+  }
+
+  fun readOrCreateInstance(): Mono<WebhookieInstance> {
+    return repository.findOne()
+      .switchIfEmpty { createInstance() }
+      .flatMap { updateInstance(it) }
   }
 
   fun createInstance(): Mono<WebhookieInstance> {
@@ -81,17 +87,17 @@ class AnalyticsService(
     log.info("Webhookie instance does not exist! creating one...")
     val time = timeMachine.now().toString()
     val requestId = idGenerator.generate()
-    val signatureValue = "(request-target): POST $analyticsServerBaseUrl/instances date: $time x-request-id: $requestId"
+    val signatureValue = "(request-target): POST $analyticsServerBaseUrl/instances x-date: $time x-request-id: $requestId"
 
-    return CryptoUtils.hmac(signatureValue, analyticsApiKey)
+    return CryptoUtils.hmac(signatureValue, analyticsProperties.apiKey)
       .flatMap { sig ->
-        val h = "keyId=1,algorithm=${CryptoUtils.ALG},headers=(request-target) date x-request-id,signature=$sig"
+        val h = "keyId=1,algorithm=${CryptoUtils.ALG},headers=(request-target) x-date x-request-id,signature=$sig"
         analyticsClient
           .post()
           .uri("/instances")
           .contentType(MediaType.APPLICATION_JSON)
           .header(HttpHeaders.AUTHORIZATION, "Signature $h")
-          .header("Date", time)
+          .header("x-date", time)
           .header("x-request-id", requestId)
           .accept(MediaType.ALL)
           .retrieve()
@@ -99,6 +105,38 @@ class AnalyticsService(
           .doOnNext { log.debug("Remote Instance was created successfully with id: '{}'", it.id) }
           .doOnError { log.warn("Was unable to create Remote instance due to: '{}'", it.localizedMessage) }
       }
+  }
+
+  fun updateInstance(instance: WebhookieInstance): Mono<WebhookieInstance> {
+    val opt = if(analyticsProperties.send) {
+      AnalyticsOpt.IN
+    } else {
+      AnalyticsOpt.OUT
+    }
+
+    val uri = "/instances/${instance.instanceId}/${opt.name.lowercase()}"
+
+    log.info("Webhookie instance does not exist! creating one...")
+    val time = timeMachine.now().toString()
+    val requestId = idGenerator.generate()
+    val signatureValue = "(request-target): POST $analyticsServerBaseUrl$uri x-date: $time x-request-id: $requestId"
+
+    return CryptoUtils.hmac(signatureValue, instance.apiKey)
+      .flatMap { sig ->
+        val h = "algorithm=${CryptoUtils.ALG},headers=(request-target) x-date x-request-id,signature=$sig"
+        analyticsClient
+          .post()
+          .uri(uri)
+          .header(HttpHeaders.AUTHORIZATION, "Signature $h")
+          .header("x-date", time)
+          .header("x-request-id", requestId)
+          .accept(MediaType.ALL)
+          .retrieve()
+          .bodyToMono(String::class.java)
+          .doOnNext { log.debug("Remote Instance was updated successfully with result: '{}'", it, instance.instanceId) }
+          .doOnError { log.warn("Was unable to update Remote instance due to: '{}'", it.localizedMessage) }
+      }
+      .map { instance }
   }
 
   fun saveInstance(remoteInstance: RemoteInstance): Mono<WebhookieInstance> {
@@ -110,14 +148,9 @@ class AnalyticsService(
   }
 
   fun sendData(data: AnalyticsData): Mono<String> {
-    return readLocalInstance()
+    return readOrCreateInstance()
       .flatMap { postData(it, data)}
       .switchIfEmpty("Instance does not exist!".toMono())
-  }
-
-  fun readLocalInstance(): Mono<WebhookieInstance> {
-    return repository.findOne()
-      .switchIfEmpty { createInstance() }
   }
 
   private fun postData(instance: WebhookieInstance, data: AnalyticsData): Mono<String> {
@@ -153,3 +186,7 @@ class AnalyticsService(
   }
 }
 
+enum class AnalyticsOpt {
+  IN,
+  OUT
+}

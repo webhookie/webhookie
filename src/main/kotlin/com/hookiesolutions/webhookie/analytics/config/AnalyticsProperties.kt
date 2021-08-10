@@ -35,6 +35,7 @@ import org.springframework.boot.context.properties.ConstructorBinding
 @ConfigurationProperties(prefix = PROPS_ANALYTICS_PREFIX)
 class AnalyticsProperties(
   val send: Boolean = true,
+  val apiKey: String = "ZJw6w476-Z4HUjLkjLi8gLLEBEldD1irxoPXYGPhG2w"
 ) {
   companion object {
     const val PROPS_ANALYTICS_PREFIX = "webhookie.analytics"
