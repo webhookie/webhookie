@@ -83,21 +83,22 @@ class AnalyticsService(
     val requestId = idGenerator.generate()
     val signatureValue = "(request-target): POST $analyticsServerBaseUrl/instances date: $time x-request-id: $requestId"
 
-    return CryptoUtils.hmac(signatureValue, analyticsApiKey).flatMap { sig ->
-      val h = "keyId=1,algorithm=${CryptoUtils.ALG},headers=(request-target) date x-request-id,signature=$sig"
-      analyticsClient
-        .post()
-        .uri("/instances")
-        .contentType(MediaType.APPLICATION_JSON)
-        .header(HttpHeaders.AUTHORIZATION, "Signature $h")
-        .header("Date", time)
-        .header("x-request-id", requestId)
-        .accept(MediaType.ALL)
-        .retrieve()
-        .bodyToMono(RemoteInstance::class.java)
-        .doOnNext { log.debug("Remote Instance was created successfully with id: '{}'", it.id) }
-        .doOnError { log.warn("Was unable to create Remote instance due to: '{}'", it.localizedMessage) }
-    }
+    return CryptoUtils.hmac(signatureValue, analyticsApiKey)
+      .flatMap { sig ->
+        val h = "keyId=1,algorithm=${CryptoUtils.ALG},headers=(request-target) date x-request-id,signature=$sig"
+        analyticsClient
+          .post()
+          .uri("/instances")
+          .contentType(MediaType.APPLICATION_JSON)
+          .header(HttpHeaders.AUTHORIZATION, "Signature $h")
+          .header("Date", time)
+          .header("x-request-id", requestId)
+          .accept(MediaType.ALL)
+          .retrieve()
+          .bodyToMono(RemoteInstance::class.java)
+          .doOnNext { log.debug("Remote Instance was created successfully with id: '{}'", it.id) }
+          .doOnError { log.warn("Was unable to create Remote instance due to: '{}'", it.localizedMessage) }
+      }
   }
 
   fun saveInstance(remoteInstance: RemoteInstance): Mono<WebhookieInstance> {
@@ -110,7 +111,7 @@ class AnalyticsService(
 
   fun sendData(data: AnalyticsData): Mono<String> {
     return readLocalInstance()
-      .flatMap { postData(it.instanceId, data)}
+      .flatMap { postData(it, data)}
       .switchIfEmpty("Instance does not exist!".toMono())
   }
 
@@ -119,16 +120,36 @@ class AnalyticsService(
       .switchIfEmpty { createInstance() }
   }
 
-  private fun postData(instanceId: String, data: AnalyticsData): Mono<String> {
+  private fun postData(instance: WebhookieInstance, data: AnalyticsData): Mono<String> {
     log.info("Sending Webhookie instance data....")
-    return analyticsClient
-      .post()
-      .uri("/instances/$instanceId")
-      .contentType(MediaType.APPLICATION_JSON)
-      .accept(MediaType.ALL)
-      .body(BodyInserters.fromValue(data))
-      .retrieve()
-      .bodyToMono(String::class.java)
+    val time = timeMachine.now().toString()
+    val requestId = idGenerator.generate()
+    val signatureValue = "(request-target): " +
+        "POST $analyticsServerBaseUrl/instances/${instance.instanceId} " +
+        "x-date: $time " +
+        "x-from: ${data.from} " +
+        "x-to: ${data.to} " +
+        "x-items: ${data.items.hashCode()} " +
+        "x-request-id: $requestId"
+
+    return CryptoUtils.hmac(signatureValue, instance.apiKey)
+      .flatMap { sig ->
+        val h = "keyId=1,algorithm=${CryptoUtils.ALG},headers=(request-target) x-date x-from x-to x-items x-request-id,signature=$sig"
+        analyticsClient
+          .post()
+          .uri("/instances/${instance.instanceId}")
+          .contentType(MediaType.APPLICATION_JSON)
+          .header(HttpHeaders.AUTHORIZATION, "Signature $h")
+          .header("x-date", time)
+          .header("x-from", data.from.toString())
+          .header("x-to", data.to.toString())
+          .header("x-items", data.items.hashCode().toString())
+          .header("x-request-id", requestId)
+          .accept(MediaType.ALL)
+          .body(BodyInserters.fromValue(data))
+          .retrieve()
+          .bodyToMono(String::class.java)
+      }
   }
 }
 
