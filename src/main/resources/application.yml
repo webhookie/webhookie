@@ -1,4 +1,6 @@
 webhookie:
+  analytics:
+    send: ${WH_ANALYTICS_SEND:true}
   consumer:
     add-default-group: ${WH_CONSUMER_ADD_DEFAULT_GROUP:true}
     queue: ${WH_CONSUMER_QUEUE:wh-customer.event}

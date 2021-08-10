@@ -22,6 +22,7 @@
 
 package com.hookiesolutions.webhookie.analytics.service
 
+import com.hookiesolutions.webhookie.analytics.config.AnalyticsProperties
 import com.hookiesolutions.webhookie.analytics.service.model.AnalyticsData
 import com.hookiesolutions.webhookie.analytics.service.model.AnalyticsItem
 import com.hookiesolutions.webhookie.analytics.service.model.AnalyticsTimeCriteria
@@ -29,6 +30,7 @@ import com.hookiesolutions.webhookie.analytics.service.model.SpanAnalyticsItem
 import com.hookiesolutions.webhookie.analytics.service.model.SubscriptionAnalyticsItem
 import com.hookiesolutions.webhookie.analytics.service.model.TraceAnalyticsItem
 import org.slf4j.Logger
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.integration.aggregator.CorrelationStrategy
@@ -50,6 +52,7 @@ import java.time.Instant
  * @since 3/8/21 23:14
  */
 @Configuration
+@ConditionalOnProperty(prefix = AnalyticsProperties.PROPS_ANALYTICS_PREFIX, value = ["send"], havingValue = "true", matchIfMissing = true)
 class AnalyticsFlows(
   private val log: Logger,
   private val analyticsService: AnalyticsService,

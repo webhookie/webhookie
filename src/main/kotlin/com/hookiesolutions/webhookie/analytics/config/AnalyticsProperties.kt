@@ -22,33 +22,21 @@
 
 package com.hookiesolutions.webhookie.analytics.config
 
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Profile
-import org.springframework.web.reactive.function.client.WebClient
+import com.hookiesolutions.webhookie.analytics.config.AnalyticsProperties.Companion.PROPS_ANALYTICS_PREFIX
+import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.boot.context.properties.ConstructorBinding
 
 /**
  *
  * @author Arthur Kazemi<bidadh@gmail.com>
- * @since 3/8/21 15:53
+ * @since 10/8/21 12:33
  */
-@Configuration
-class AnalyticsConfig {
-  @Bean
-  @Profile("dev")
-  fun devAnalyticsServerBaseUrl() = "http://localhost:7070"
-
-  @Bean
-  @Profile("!dev")
-  fun analyticsServerBaseUrl() = "https://analytics.webhookie.com/api"
-
-  @Bean
-  fun analyticsClient(
-    webClientBuilder: WebClient.Builder,
-    analyticsServerBaseUrl: String
-  ): WebClient {
-    return webClientBuilder
-      .baseUrl(analyticsServerBaseUrl)
-      .build()
+@ConstructorBinding
+@ConfigurationProperties(prefix = PROPS_ANALYTICS_PREFIX)
+class AnalyticsProperties(
+  val send: Boolean = true,
+) {
+  companion object {
+    const val PROPS_ANALYTICS_PREFIX = "webhookie.analytics"
   }
 }
