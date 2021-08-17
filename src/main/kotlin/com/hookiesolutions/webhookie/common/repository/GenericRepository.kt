@@ -84,6 +84,11 @@ abstract class GenericRepository<E: AbstractEntity>(
       .switchIfEmpty(EntityNotFoundException("${clazz.simpleName} not found by id: '$id'").toMono())
   }
 
+  fun delete(criteria: Criteria): Mono<Long> {
+    return mongoTemplate.remove(query(criteria), clazz)
+      .map { it.deletedCount }
+  }
+
   @VerifyEntityCanBeDeleted
   fun delete(deletableEntity: DeletableEntity<E>): Mono<String> {
     return mongoTemplate.remove(deletableEntity.entity)

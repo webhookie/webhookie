@@ -45,6 +45,7 @@ import com.hookiesolutions.webhookie.common.model.TimedResult
 import com.hookiesolutions.webhookie.security.service.SecurityHandler
 import com.hookiesolutions.webhookie.subscription.domain.ApplicationRepository
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
+import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessageRepository
 import com.hookiesolutions.webhookie.subscription.domain.CallbackRepository
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.subscription.domain.SubscriptionRepository
@@ -82,6 +83,7 @@ class SubscriptionService(
   private val signor: SubscriptionSignor,
   private val factory: ConversionsFactory,
   private val repository: SubscriptionRepository,
+  private val bsmRepository: BlockedSubscriptionMessageRepository,
   private val callbackRepository: CallbackRepository,
   private val applicationRepository: ApplicationRepository,
   private val stateManager: SubscriptionStateManager,
@@ -116,6 +118,8 @@ class SubscriptionService(
       .switchIfEmpty { IllegalArgumentException("${SubscriptionStatus.ACTIVATED.name} subscription cannot be deleted!").toMono() }
       .map { deletable(it) }
       .flatMap { repository.delete(it) }
+      .flatMap { bsmRepository.deleteSubscriptionMessages(id) }
+      .map { it.toString() }
   }
 
   @PreAuthorize("isAuthenticated()")
