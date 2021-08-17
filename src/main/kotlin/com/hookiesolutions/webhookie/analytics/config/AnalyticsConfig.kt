@@ -38,7 +38,7 @@ class AnalyticsConfig {
   @Profile("dev")
   class DevConfig {
     @Bean
-    fun analyticsServerBaseUrl() = "http://localhost:7070"
+    fun analyticsServerBaseUrl() = "http://localhost:7070/api"
   }
 
   @Configuration
