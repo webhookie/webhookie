@@ -28,6 +28,7 @@ import com.hookiesolutions.webhookie.subscription.service.model.subscription.Sub
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
+import java.util.*
 
 /**
  *
@@ -65,7 +66,7 @@ class SubscriptionStateManager {
     return if (validStatusList.contains(subscription.statusUpdate.status)) {
       validStatusList.toMono()
     } else {
-      Mono.error(IllegalArgumentException("Cannot ${withAction.name.toLowerCase()} a '${subscription.statusUpdate.status}' Subscription!"))
+      Mono.error(IllegalArgumentException("Cannot ${withAction.name.lowercase(Locale.getDefault())} a '${subscription.statusUpdate.status}' Subscription!"))
     }
   }
 
@@ -97,6 +98,14 @@ class SubscriptionStateManager {
       else -> {
         return emptyList()
       }
+    }
+  }
+
+  fun canBeDeleted(subscription: Subscription): Mono<Subscription> {
+    return if(subscription.statusUpdate.status != SubscriptionStatus.ACTIVATED) {
+      subscription.toMono()
+    } else {
+      Mono.empty()
     }
   }
 }

@@ -63,6 +63,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.switchIfEmpty
 import reactor.kotlin.core.publisher.toMono
 import reactor.util.function.Tuples
 import java.time.Instant
@@ -111,6 +112,8 @@ class SubscriptionService(
   fun deleteSubscription(id: String): Mono<String> {
     log.info("Deleting Subscription by id: '{}'", id)
     return repository.findByIdVerifyingWriteAccess(id)
+      .flatMap { stateManager.canBeDeleted(it) }
+      .switchIfEmpty { IllegalArgumentException("${SubscriptionStatus.ACTIVATED.name} subscription cannot be deleted!").toMono() }
       .map { deletable(it) }
       .flatMap { repository.delete(it) }
   }
