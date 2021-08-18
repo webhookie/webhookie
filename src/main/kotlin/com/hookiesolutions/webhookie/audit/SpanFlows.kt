@@ -36,6 +36,7 @@ import com.hookiesolutions.webhookie.common.message.publisher.PublisherRequestEr
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherResponseErrorMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherSuccessMessage
 import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscriptionMessageDTO
+import com.hookiesolutions.webhookie.common.message.subscription.MissingSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
 import org.slf4j.Logger
 import org.springframework.context.annotation.Bean
@@ -161,6 +162,15 @@ class SpanFlows(
       transform<Span> { SSENotification.SpanNotification.failedWithOtherError(it) }
       channel(sseChannel)
     }
+  }
+
+  @Bean
+  fun subscriptionMissingFlow() = integrationFlow {
+    channel(Constants.Channels.Subscription.MISSING_SUBSCRIPTION_CHANNEL_NAME)
+    transform<MissingSubscriptionMessage> { spanService.updateWithSubscriptionError(it) }
+    split()
+    transform<Span> { SSENotification.SpanNotification.failedWithSubscriptionError(it) }
+    channel(sseChannel)
   }
 
   @Bean

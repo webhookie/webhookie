@@ -342,9 +342,18 @@ class SubscriptionService(
   }
 
   fun enrichResendSpanMessageReloadingSubscription(message: ResendSpanMessage): Mono<GenericSubscriptionMessage> {
-    return repository
-      .findById(message.subscriptionId)
+    return findActiveSubscriptionBy(message.subscriptionId)
       .map { factory.createSignableMessage(message, it)}
+  }
+
+  private fun findActiveSubscriptionBy(id: String): Mono<Subscription> {
+    return repository
+      .findById(id)
+      .filter { subscriptionCanReceiveMessage(it) }
+  }
+
+  private fun subscriptionCanReceiveMessage(subscription: Subscription): Boolean {
+    return subscription.statusUpdate.status == SubscriptionStatus.ACTIVATED
   }
 
   fun subscriptionSummaryBetween(from: Instant, to: Instant): Mono<TimedResult<List<StatusCountRow>>> {

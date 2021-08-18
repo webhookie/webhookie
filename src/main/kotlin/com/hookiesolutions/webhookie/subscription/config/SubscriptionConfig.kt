@@ -182,11 +182,10 @@ class SubscriptionConfig(
   @Bean
   fun toSignableSubscriptionMessageReloadingSubscriptionForResend(): GenericTransformer<ResendSpanMessage, Mono<GenericSubscriptionMessage>> {
     return GenericTransformer { rsm ->
-      val missingSubscriptionMessage = MissingSubscriptionMessage(rsm.consumerMessage)
       subscriptionService
         .enrichResendSpanMessageReloadingSubscription(rsm)
-        .onErrorReturn(EntityNotFoundException::class.java, missingSubscriptionMessage)
-        .switchIfEmpty { missingSubscriptionMessage.toMono() }
+        .onErrorReturn(EntityNotFoundException::class.java, MissingSubscriptionMessage(rsm.consumerMessage, "Subscription does not exist!", rsm.spanId))
+        .switchIfEmpty { MissingSubscriptionMessage(rsm.consumerMessage, "Subscription cannot receive messages", rsm.spanId).toMono() }
     }
   }
 

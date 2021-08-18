@@ -53,6 +53,10 @@ data class SSENotification(
         return message(span, "spanFailedWithOtherError", span)
       }
 
+      fun failedWithSubscriptionError(span: Span): Message<SSENotification> {
+        return message(span, "failedWithSubscriptionError", span)
+      }
+
       fun failedWithStatusUpdate(span: Span): Message<SSENotification> {
         return message(span, "spanFailedStatusUpdate", span)
       }

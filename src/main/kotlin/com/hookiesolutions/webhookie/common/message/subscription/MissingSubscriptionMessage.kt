@@ -30,5 +30,7 @@ import com.hookiesolutions.webhookie.common.message.ConsumerMessage
  * @since 18/8/21 14:36
  */
 class MissingSubscriptionMessage(
-  override val originalMessage: ConsumerMessage
+  override val originalMessage: ConsumerMessage,
+  val reason: String,
+  val spanId: String
 ): GenericSubscriptionMessage

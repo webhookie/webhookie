@@ -26,7 +26,9 @@ import com.hookiesolutions.webhookie.common.message.publisher.PublisherOtherErro
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherRequestErrorMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherResponseErrorMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherSuccessMessage
+import com.hookiesolutions.webhookie.common.message.subscription.MissingSubscriptionMessage
 import org.springframework.http.HttpHeaders
+import org.springframework.util.CollectionUtils
 import java.time.Instant
 
 data class SpanResult (
@@ -60,10 +62,19 @@ data class SpanResult (
     }
 
     fun message(message: PublisherOtherErrorMessage) = apply {
-      this.statusCode = -1
+      val headers = CollectionUtils.unmodifiableMultiValueMap(CollectionUtils.toMultiValueMap(mapOf("spanId" to listOf(message.spanId))))
+      this.statusCode = -2
       this.body = message.reason
-      this.headers = HttpHeaders()
+      this.headers = HttpHeaders(headers)
       this.retryNo = message.subscriptionMessage.totalNumberOfTries
+    }
+
+    fun message(message: MissingSubscriptionMessage) = apply {
+      val headers = CollectionUtils.unmodifiableMultiValueMap(CollectionUtils.toMultiValueMap(mapOf("spanId" to listOf(message.spanId))))
+      this.statusCode = -3
+      this.body = message.reason
+      this.headers = HttpHeaders(headers)
+      this.retryNo = -1
     }
 
     fun message(message: PublisherResponseErrorMessage) = apply {

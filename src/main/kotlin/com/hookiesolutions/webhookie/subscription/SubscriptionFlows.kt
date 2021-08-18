@@ -271,6 +271,7 @@ class SubscriptionFlows(
   fun resendSpanMessageFlow(
     toSignableSubscriptionMessageReloadingSubscriptionForResend: GenericTransformer<ResendSpanMessage, Mono<GenericSubscriptionMessage>>,
     signSubscriptionMessageChannel: MessageChannel,
+    missingSubscriptionChannel: MessageChannel
   ): IntegrationFlow {
     return integrationFlow {
       channel(TRAFFIC_RESEND_SPAN_CHANNEL_NAME)
@@ -283,12 +284,7 @@ class SubscriptionFlows(
             recipient<SignableSubscriptionMessage>(signSubscriptionMessageChannel) { it.isSignable }
           }
         }
-        recipientFlow<GenericSubscriptionMessage>({it is MissingSubscriptionMessage }) {
-          handle {
-            val spanId = it.headers[WH_HEADER_SPAN_ID]
-            log.info("Unable to resend span '{}' due to missing subscription", spanId)
-          }
-        }
+        recipient<GenericSubscriptionMessage>(missingSubscriptionChannel) { it is MissingSubscriptionMessage }
       }
     }
   }

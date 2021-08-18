@@ -51,6 +51,7 @@ import com.hookiesolutions.webhookie.common.message.publisher.PublisherRequestEr
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherResponseErrorMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherSuccessMessage
 import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscriptionMessageDTO
+import com.hookiesolutions.webhookie.common.message.subscription.MissingSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.ResendSpanMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
 import com.hookiesolutions.webhookie.common.model.StatusCountRow
@@ -170,6 +171,20 @@ class SpanService(
 
     return repository.responseStatusUpdate(message.spanId, notOk(time), response)
       .doOnNext { log.info("'{}', '{}' Span was updated with other error response: '{}'", it.spanId, it.traceId, it.latestResult?.statusCode) }
+  }
+
+  @Suppress("DuplicatedCode")
+  fun updateWithSubscriptionError(message: MissingSubscriptionMessage): Mono<Span> {
+    log.info("Updating span '{}', '{}' with subscription error", message.spanId, message.traceId, message.reason)
+    val time = timeMachine.now()
+
+    val response = SpanResult.Builder()
+      .time(time)
+      .message(message)
+      .build()
+
+    return repository.responseStatusUpdate(message.spanId, notOk(time), response)
+      .doOnNext { log.info("'{}', '{}' Span was updated with subscription error response: '{}'", it.spanId, it.traceId, it.latestResult?.statusCode) }
   }
 
   fun updateWithSuccessResponse(message: PublisherSuccessMessage): Mono<Span> {

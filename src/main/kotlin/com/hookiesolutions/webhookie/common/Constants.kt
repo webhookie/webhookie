@@ -78,6 +78,7 @@ class Constants {
         const val SUBSCRIPTION_ACTIVATED_CHANNEL_NAME = "subscriptionActivatedChannel"
         const val SUBSCRIPTION_DEACTIVATED_CHANNEL_NAME = "subscriptionDeactivatedChannel"
         const val NO_SUBSCRIPTION_CHANNEL_NAME = "noSubscriptionChannel"
+        const val MISSING_SUBSCRIPTION_CHANNEL_NAME = "missingSubscriptionChannel"
       }
     }
 
