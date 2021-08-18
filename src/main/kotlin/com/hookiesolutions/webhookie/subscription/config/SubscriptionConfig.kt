@@ -22,12 +22,14 @@
 
 package com.hookiesolutions.webhookie.subscription.config
 
+import com.hookiesolutions.webhookie.common.exception.EntityNotFoundException
 import com.hookiesolutions.webhookie.common.exception.messaging.SubscriptionMessageHandlingException
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.message.publisher.GenericPublisherMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherErrorMessage
 import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscriptionMessageDTO
 import com.hookiesolutions.webhookie.common.message.subscription.GenericSubscriptionMessage
+import com.hookiesolutions.webhookie.common.message.subscription.MissingSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.NoSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.ResendSpanMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
@@ -43,6 +45,7 @@ import org.springframework.integration.core.GenericSelector
 import org.springframework.integration.transformer.GenericTransformer
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.switchIfEmpty
 import reactor.kotlin.core.publisher.toMono
 import java.time.Duration
 
@@ -177,10 +180,13 @@ class SubscriptionConfig(
   }
 
   @Bean
-  fun toSignableSubscriptionMessageReloadingSubscriptionForResend(): GenericTransformer<ResendSpanMessage, Mono<SignableSubscriptionMessage>> {
-    return GenericTransformer { bsm ->
+  fun toSignableSubscriptionMessageReloadingSubscriptionForResend(): GenericTransformer<ResendSpanMessage, Mono<GenericSubscriptionMessage>> {
+    return GenericTransformer { rsm ->
+      val missingSubscriptionMessage = MissingSubscriptionMessage(rsm.consumerMessage)
       subscriptionService
-        .enrichResendSpanMessageReloadingSubscription(bsm)
+        .enrichResendSpanMessageReloadingSubscription(rsm)
+        .onErrorReturn(EntityNotFoundException::class.java, missingSubscriptionMessage)
+        .switchIfEmpty { missingSubscriptionMessage.toMono() }
     }
   }
 

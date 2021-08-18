@@ -99,6 +99,12 @@ class Constants {
         const val ADMIN_PROVIDER_GROUP_UPDATED_CHANNEL_NAME = "providerGroupHasBeenUpdatedChannel"
       }
     }
+
+    class Traffic {
+      companion object {
+        const val TRAFFIC_RESEND_SPAN_CHANNEL_NAME = "resendSpanChannel"
+      }
+    }
   }
 
   class Security {

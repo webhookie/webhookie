@@ -24,6 +24,7 @@ package com.hookiesolutions.webhookie.subscription
 
 import com.hookiesolutions.webhookie.common.Constants.Channels.Consumer.Companion.CONSUMER_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Channels.Publisher.Companion.RETRYABLE_PUBLISHER_ERROR_CHANNEL
+import com.hookiesolutions.webhookie.common.Constants.Channels.Traffic.Companion.TRAFFIC_RESEND_SPAN_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.HEADER_CONTENT_TYPE
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_SPAN_ID
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_TOPIC
@@ -35,6 +36,7 @@ import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherErrorMessage
 import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscriptionMessageDTO
 import com.hookiesolutions.webhookie.common.message.subscription.GenericSubscriptionMessage
+import com.hookiesolutions.webhookie.common.message.subscription.MissingSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.ResendSpanMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SignedSubscriptionMessage
@@ -268,16 +270,26 @@ class SubscriptionFlows(
 
   @Bean
   fun resendSpanMessageFlow(
-    toSignableSubscriptionMessageReloadingSubscriptionForResend: GenericTransformer<ResendSpanMessage, Mono<SignableSubscriptionMessage>>,
+    toSignableSubscriptionMessageReloadingSubscriptionForResend: GenericTransformer<ResendSpanMessage, Mono<GenericSubscriptionMessage>>,
     signSubscriptionMessageChannel: MessageChannel,
   ): IntegrationFlow {
     return integrationFlow {
-      channel("resendSpanChannel")
+      channel(TRAFFIC_RESEND_SPAN_CHANNEL_NAME)
       transform(toSignableSubscriptionMessageReloadingSubscriptionForResend)
       split()
       routeToRecipients {
-        recipient<SignableSubscriptionMessage>(delaySubscriptionChannel) { !it.isSignable }
-        recipient<SignableSubscriptionMessage>(signSubscriptionMessageChannel) { it.isSignable }
+        recipientFlow<GenericSubscriptionMessage>({it is SignableSubscriptionMessage}) {
+          routeToRecipients {
+            recipient<SignableSubscriptionMessage>(delaySubscriptionChannel) { !it.isSignable }
+            recipient<SignableSubscriptionMessage>(signSubscriptionMessageChannel) { it.isSignable }
+          }
+        }
+        recipientFlow<GenericSubscriptionMessage>({it is MissingSubscriptionMessage }) {
+          handle {
+            val spanId = it.headers[WH_HEADER_SPAN_ID]
+            log.info("Unable to resend span '{}' due to missing subscription", spanId)
+          }
+        }
       }
     }
   }

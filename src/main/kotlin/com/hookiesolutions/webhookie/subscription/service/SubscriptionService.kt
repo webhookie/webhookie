@@ -27,6 +27,7 @@ import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.R
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_PROVIDER
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherErrorMessage
+import com.hookiesolutions.webhookie.common.message.subscription.GenericSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.ResendSpanMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
 import com.hookiesolutions.webhookie.common.model.DeletableEntity.Companion.deletable
@@ -340,7 +341,7 @@ class SubscriptionService(
       .map { factory.updateBlockedSubscriptionMessageWithSubscription(message, it) }
   }
 
-  fun enrichResendSpanMessageReloadingSubscription(message: ResendSpanMessage): Mono<SignableSubscriptionMessage> {
+  fun enrichResendSpanMessageReloadingSubscription(message: ResendSpanMessage): Mono<GenericSubscriptionMessage> {
     return repository
       .findById(message.subscriptionId)
       .map { factory.createSignableMessage(message, it)}
