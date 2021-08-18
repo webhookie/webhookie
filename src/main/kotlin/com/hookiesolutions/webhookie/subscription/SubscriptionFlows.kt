@@ -81,6 +81,7 @@ class SubscriptionFlows(
   private val signSubscriptionMessageChannel: MessageChannel,
   private val globalSubscriptionErrorChannel: MessageChannel,
   private val subscriptionChannel: MessageChannel,
+  private val noSubscriptionChannel: MessageChannel,
   private val log: Logger
 ) {
   @Bean
@@ -88,11 +89,9 @@ class SubscriptionFlows(
     toSubscriptionMessageFlux: GenericTransformer<ConsumerMessage, Flux<GenericSubscriptionMessage>>,
     messageHasNoSubscription: (GenericSubscriptionMessage) -> Boolean,
     subscriptionIsBlocked: (GenericSubscriptionMessage) -> Boolean,
-    subscriptionIsWorking: (GenericSubscriptionMessage) -> Boolean,
     toBlockedSubscriptionMessageDTO: GenericTransformer<UnsignedSubscriptionMessage, BlockedSubscriptionMessageDTO>,
     toBeSignedWorkingSubscription: (GenericSubscriptionMessage) -> Boolean,
     nonSignableWorkingSubscription: (GenericSubscriptionMessage) -> Boolean,
-    noSubscriptionChannel: MessageChannel,
   ): IntegrationFlow {
     return integrationFlow {
       channel(CONSUMER_CHANNEL_NAME)
