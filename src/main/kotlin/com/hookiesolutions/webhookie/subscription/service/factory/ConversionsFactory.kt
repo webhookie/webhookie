@@ -197,20 +197,10 @@ class ConversionsFactory(
   }
 
   fun createSignableMessage(message: SignableSubscriptionMessage, subscription: Subscription): SignableSubscriptionMessage {
-    return when (message) {
-      is SignedSubscriptionMessage -> {
-        message.copy(
-          subscription = subscription.dto()
-        )
-      }
-      is UnsignedSubscriptionMessage -> {
-        message.copy(
-          subscription = subscription.dto()
-        )
-      }
-      else -> {
-        message
-      }
+    if(message is SignedSubscriptionMessage) {
+      return message.copy(subscription = subscription.dto())
     }
+
+    return (message as UnsignedSubscriptionMessage).copy(subscription = subscription.dto())
   }
 }
