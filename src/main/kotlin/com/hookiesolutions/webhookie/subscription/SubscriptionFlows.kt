@@ -123,7 +123,10 @@ class SubscriptionFlows(
   }
 
   @Bean
-  fun delayMessageFlow(): IntegrationFlow {
+  fun delayMessageFlow(
+    toSubscriptionMessageReloadingSubscription: GenericTransformer<SignableSubscriptionMessage, Mono<GenericSubscriptionMessage>>,
+    missingSubscriptionChannel: MessageChannel
+  ): IntegrationFlow {
     return integrationFlow {
       channel(delaySubscriptionChannel)
       delay("delay-message-group") {
@@ -135,7 +138,12 @@ class SubscriptionFlows(
           delayInSeconds * 1000
         }
       }
-      channel(subscriptionChannel)
+      transform(toSubscriptionMessageReloadingSubscription)
+      split()
+      routeToRecipients {
+        recipient<GenericSubscriptionMessage>(subscriptionChannel) { it is SignableSubscriptionMessage }
+        recipient<GenericSubscriptionMessage>(missingSubscriptionChannel) { it is MissingSubscriptionMessage }
+      }
     }
   }
 

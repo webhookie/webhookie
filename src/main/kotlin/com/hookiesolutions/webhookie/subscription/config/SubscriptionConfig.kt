@@ -180,6 +180,16 @@ class SubscriptionConfig(
   }
 
   @Bean
+  fun toSubscriptionMessageReloadingSubscription(): GenericTransformer<SignableSubscriptionMessage, Mono<GenericSubscriptionMessage>> {
+    return GenericTransformer { ssm ->
+      subscriptionService
+        .enrichSubscriptionMessageReloadingSubscription(ssm)
+        .onErrorReturn(EntityNotFoundException::class.java, MissingSubscriptionMessage(ssm.originalMessage, "Subscription does not exist!", ssm.spanId))
+        .switchIfEmpty { MissingSubscriptionMessage(ssm.originalMessage, "Subscription cannot receive messages", ssm.spanId).toMono() }
+    }
+  }
+
+  @Bean
   fun toSignableSubscriptionMessageReloadingSubscriptionForResend(): GenericTransformer<ResendSpanMessage, Mono<GenericSubscriptionMessage>> {
     return GenericTransformer { rsm ->
       subscriptionService

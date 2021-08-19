@@ -195,4 +195,22 @@ class ConversionsFactory(
       totalNumberOfTries = message.totalNumberOfTries
     )
   }
+
+  fun createSignableMessage(message: SignableSubscriptionMessage, subscription: Subscription): SignableSubscriptionMessage {
+    return when (message) {
+      is SignedSubscriptionMessage -> {
+        message.copy(
+          subscription = subscription.dto()
+        )
+      }
+      is UnsignedSubscriptionMessage -> {
+        message.copy(
+          subscription = subscription.dto()
+        )
+      }
+      else -> {
+        message
+      }
+    }
+  }
 }

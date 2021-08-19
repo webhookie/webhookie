@@ -346,6 +346,11 @@ class SubscriptionService(
       .map { factory.createSignableMessage(message, it)}
   }
 
+  fun enrichSubscriptionMessageReloadingSubscription(message: SignableSubscriptionMessage): Mono<GenericSubscriptionMessage> {
+    return findActiveSubscriptionBy(message.subscription.subscriptionId)
+      .map { factory.createSignableMessage(message, it)}
+  }
+
   private fun findActiveSubscriptionBy(id: String): Mono<Subscription> {
     return repository
       .findById(id)
