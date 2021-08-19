@@ -28,6 +28,7 @@ import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionSignature
 import com.hookiesolutions.webhookie.common.service.TimeMachine
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
+import org.slf4j.Logger
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 
@@ -39,9 +40,11 @@ import reactor.core.publisher.Mono
  */
 @Service
 class SubscriptionSignor(
+  private val log: Logger,
   private val timeMachine: TimeMachine
 ) {
   fun sign(subscription: Subscription, consumerMessage: ConsumerMessage, spanId: String): Mono<SubscriptionSignature> {
+    log.info("{} Signing message with topic: '{}' for span '{}'", subscription.callback.security!!.method, consumerMessage.topic, spanId)
     val time = timeMachine.now().toString()
     return Mono.justOrEmpty(subscription.callback.security)
       .zipWhen { CryptoUtils.hmac(it.secret.secret, subscription, time, consumerMessage.traceId, spanId) }
