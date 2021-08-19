@@ -249,7 +249,6 @@ class SubscriptionFlows(
   @Bean
   fun resendBlockedMessageFlow(
     resendBlockedMessageChannel: FluxMessageChannel,
-    signSubscriptionMessageChannel: MessageChannel,
     toSignableSubscriptionMessageReloadingSubscription: GenericTransformer<BlockedSubscriptionMessage, Mono<SignableSubscriptionMessage>>,
     deleteBlockedMessage: GenericTransformer<BlockedSubscriptionMessage, Mono<BlockedSubscriptionMessage>>
   ): IntegrationFlow {
@@ -278,7 +277,6 @@ class SubscriptionFlows(
   @Bean
   fun resendSpanMessageFlow(
     toSignableSubscriptionMessageReloadingSubscriptionForResend: GenericTransformer<ResendSpanMessage, Mono<GenericSubscriptionMessage>>,
-    signSubscriptionMessageChannel: MessageChannel,
     missingSubscriptionChannel: MessageChannel
   ): IntegrationFlow {
     return integrationFlow {
@@ -299,7 +297,6 @@ class SubscriptionFlows(
 
   @Bean
   fun signSubscriptionFlow(
-    signSubscriptionMessageChannel: MessageChannel,
     signSubscriptionMessage: GenericTransformer<SignableSubscriptionMessage, Mono<SignableSubscriptionMessage>>,
   ): IntegrationFlow {
     return integrationFlow {
