@@ -22,7 +22,11 @@
 
 package com.hookiesolutions.webhookie.common.config.web
 
-import com.hookiesolutions.webhookie.common.exception.*
+import com.hookiesolutions.webhookie.common.exception.EmptyResultException
+import com.hookiesolutions.webhookie.common.exception.EntityExistsException
+import com.hookiesolutions.webhookie.common.exception.EntityNotFoundException
+import com.hookiesolutions.webhookie.common.exception.RemoteServiceException
+import com.hookiesolutions.webhookie.common.exception.ValidationException
 import com.hookiesolutions.webhookie.common.service.ReactiveObjectMapper
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.data.mapping.context.InvalidPersistentPropertyPath
@@ -109,11 +113,24 @@ class GlobalExceptionHandler(
   @ExceptionHandler(WebClientResponseException::class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   fun handleWebClientResponseException(ex: WebClientResponseException): Mono<Map<String, Any>> {
-    return try {
-      om.readMap(ex.responseBodyAsString)
-    } catch (e: Exception) {
-      mutableMapOf("message" to e.localizedMessage).toMono()
-    }
+    val map = mutableMapOf<String, Any>(
+      "statusCode" to ex.statusCode,
+      "statusText" to ex.statusText,
+      "headers" to ex.headers,
+      "message" to ex.localizedMessage
+    )
+    return map.toMono()
+      .zipWhen {
+        om.readMap<String, Any>(ex.responseBodyAsString)
+          .onErrorReturn(emptyMap())
+      }
+      .map {
+        if(it.t2.isNotEmpty()) {
+          it.t1["response"] = it.t2
+        }
+
+        it.t1
+      }
   }
 
   @ExceptionHandler(ServerWebInputException::class)
