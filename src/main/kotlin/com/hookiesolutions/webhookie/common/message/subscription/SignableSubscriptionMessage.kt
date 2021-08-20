@@ -37,7 +37,22 @@ interface SignableSubscriptionMessage: GenericSubscriptionMessage, WebhookieSpan
   fun retryableCopy(
     delay: Duration,
     numberOfRetries: Int
-  ): SignableSubscriptionMessage
+  ): SignableSubscriptionMessage {
+    val totalNumberOfTries = totalNumberOfTries + 1
+    if(this is SignedSubscriptionMessage) {
+      return this.copy(
+        delay = delay,
+        numberOfRetries = numberOfRetries,
+        totalNumberOfTries = totalNumberOfTries
+      )
+    }
+
+    return (this as UnsignedSubscriptionMessage).copy(
+      delay = delay,
+      numberOfRetries = numberOfRetries,
+      totalNumberOfTries = totalNumberOfTries
+    )
+  }
 
   val isSignable: Boolean
     get() = subscription.callback.isSignable
