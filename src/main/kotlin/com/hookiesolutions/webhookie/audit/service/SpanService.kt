@@ -224,7 +224,7 @@ class SpanService(
     return repository.save(span)
       .doOnNext { log.info("'{}', '{}' Span saved successfully: '{}'", spanId, it.traceId, it.id) }
       .onErrorResume(EntityExistsException::class.java) {
-        log.warn("'{}' Span already exists! fetching the existing document...", spanId)
+        log.debug("'{}' Span already exists! fetching the existing document...", spanId)
         repository.findBySpanId(spanId)
       }
   }
