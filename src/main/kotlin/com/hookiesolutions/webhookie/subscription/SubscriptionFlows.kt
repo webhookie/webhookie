@@ -39,7 +39,6 @@ import com.hookiesolutions.webhookie.common.message.subscription.GenericSubscrip
 import com.hookiesolutions.webhookie.common.message.subscription.MissingSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.ResendSpanMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
-import com.hookiesolutions.webhookie.common.message.subscription.SignedSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.UnsignedSubscriptionMessage
 import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Keys.Companion.KEY_STATUS
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
@@ -89,10 +88,9 @@ class SubscriptionFlows(
   fun subscriptionFlow(
     toSubscriptionMessageFlux: GenericTransformer<ConsumerMessage, Flux<GenericSubscriptionMessage>>,
     messageHasNoSubscription: (GenericSubscriptionMessage) -> Boolean,
+    subscriptionIsWorking: (GenericSubscriptionMessage) -> Boolean,
     subscriptionIsBlocked: (GenericSubscriptionMessage) -> Boolean,
-    toBlockedSubscriptionMessageDTO: GenericTransformer<UnsignedSubscriptionMessage, BlockedSubscriptionMessageDTO>,
-    toBeSignedWorkingSubscription: (GenericSubscriptionMessage) -> Boolean,
-    nonSignableWorkingSubscription: (GenericSubscriptionMessage) -> Boolean,
+    toBlockedSubscriptionMessageDTO: GenericTransformer<UnsignedSubscriptionMessage, BlockedSubscriptionMessageDTO>
   ): IntegrationFlow {
     return integrationFlow {
       channel(CONSUMER_CHANNEL_NAME)
@@ -112,8 +110,7 @@ class SubscriptionFlows(
       split()
       routeToRecipients {
         applySequence(true)
-        recipient(signSubscriptionMessageChannel, toBeSignedWorkingSubscription)
-        recipient(delaySubscriptionChannel, nonSignableWorkingSubscription)
+        recipient(delaySubscriptionChannel, subscriptionIsWorking)
         recipient(noSubscriptionChannel, messageHasNoSubscription)
         recipientFlow(subscriptionIsBlocked) {
           transform(toBlockedSubscriptionMessageDTO)
@@ -125,6 +122,8 @@ class SubscriptionFlows(
 
   @Bean
   fun delayMessageFlow(
+    nonSignableWorkingSubscription: (GenericSubscriptionMessage) -> Boolean,
+    toBeSignedWorkingSubscription: (GenericSubscriptionMessage) -> Boolean,
     toSubscriptionMessageReloadingSubscription: GenericTransformer<SignableSubscriptionMessage, Mono<GenericSubscriptionMessage>>,
     missingSubscriptionChannel: MessageChannel
   ): IntegrationFlow {
@@ -142,7 +141,8 @@ class SubscriptionFlows(
       transform(toSubscriptionMessageReloadingSubscription)
       split()
       routeToRecipients {
-        recipient<GenericSubscriptionMessage>(subscriptionChannel) { it is SignableSubscriptionMessage }
+        recipient(signSubscriptionMessageChannel, toBeSignedWorkingSubscription)
+        recipient(subscriptionChannel, nonSignableWorkingSubscription)
         recipient<GenericSubscriptionMessage>(missingSubscriptionChannel) { it is MissingSubscriptionMessage }
       }
     }
@@ -191,10 +191,7 @@ class SubscriptionFlows(
     return integrationFlow {
       channel(retrySubscriptionChannel)
       transform(toDelayedSignableSubscriptionMessage)
-      routeToRecipients {
-        recipient<SignableSubscriptionMessage>(delaySubscriptionChannel) { it is UnsignedSubscriptionMessage}
-        recipient<SignableSubscriptionMessage>(signSubscriptionMessageChannel) {it is SignedSubscriptionMessage}
-      }
+      channel(delaySubscriptionChannel)
     }
   }
 
@@ -257,11 +254,7 @@ class SubscriptionFlows(
       routeToRecipients {
         recipientFlow {
           transform(toSignableSubscriptionMessageReloadingSubscription)
-          split()
-          routeToRecipients {
-            recipient<SignableSubscriptionMessage>(delaySubscriptionChannel) { !it.isSignable }
-            recipient<SignableSubscriptionMessage>(signSubscriptionMessageChannel) { it.isSignable }
-          }
+          channel(delaySubscriptionChannel)
         }
         recipientFlow {
           transform(deleteBlockedMessage)
@@ -284,12 +277,7 @@ class SubscriptionFlows(
       transform(toSignableSubscriptionMessageReloadingSubscriptionForResend)
       split()
       routeToRecipients {
-        recipientFlow<GenericSubscriptionMessage>({it is SignableSubscriptionMessage}) {
-          routeToRecipients {
-            recipient<SignableSubscriptionMessage>(delaySubscriptionChannel) { !it.isSignable }
-            recipient<SignableSubscriptionMessage>(signSubscriptionMessageChannel) { it.isSignable }
-          }
-        }
+        recipient<GenericSubscriptionMessage>(delaySubscriptionChannel) { it is SignableSubscriptionMessage }
         recipient<GenericSubscriptionMessage>(missingSubscriptionChannel) { it is MissingSubscriptionMessage }
       }
     }
@@ -303,7 +291,7 @@ class SubscriptionFlows(
       channel(signSubscriptionMessageChannel)
       transform(signSubscriptionMessage)
       split()
-      channel(delaySubscriptionChannel)
+      channel(subscriptionChannel)
     }
   }
 
