@@ -269,7 +269,7 @@ class SubscriptionService(
       .statusUpdate(id, activated(timeMachine.now()), SubscriptionStatus.values().asList())
       .doOnNext {
         log.info("Subscription '{}' was unblocked! Re-sending blocked messages...", id)
-        unblockedSubscriptionChannel.send(MessageBuilder.withPayload(it).build())
+        unblockedSubscriptionChannel.send(MessageBuilder.withPayload(it.dto()).build())
       }
       .map { it.statusUpdate.status }
   }
@@ -333,12 +333,6 @@ class SubscriptionService(
       .findById(subscriptionMessage.subscription.subscriptionId)
       .flatMap { signor.sign(it, subscriptionMessage.originalMessage, subscriptionMessage.spanId) }
       .map { factory.createSignedSubscriptionMessage(subscriptionMessage, it) }
-  }
-
-  fun enrichBlockedSubscriptionMessageReloadingSubscription(message: BlockedSubscriptionMessage): Mono<BlockedSubscriptionMessage> {
-    return repository
-      .findById(message.subscription.subscriptionId)
-      .map { factory.updateBlockedSubscriptionMessageWithSubscription(message, it) }
   }
 
   fun enrichResendSpanMessageReloadingSubscription(message: ResendSpanMessage): Mono<GenericSubscriptionMessage> {

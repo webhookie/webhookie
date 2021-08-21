@@ -42,6 +42,7 @@ import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscri
 import com.hookiesolutions.webhookie.common.message.subscription.SignedSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.UnsignedSubscriptionMessage
 import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Keys.Companion.KEY_STATUS
+import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionStatus
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
@@ -226,8 +227,7 @@ class SubscriptionFlows(
 
   @Bean
   fun unblockSubscriptionFlow(
-    mongoTemplate: ReactiveMongoTemplate,
-    toBlockedSubscriptionMessageFlux: GenericTransformer<Subscription, Flux<BlockedSubscriptionMessage>>,
+    toBlockedSubscriptionMessageFlux: GenericTransformer<SubscriptionDTO, Flux<BlockedSubscriptionMessage>>,
     unblockedSubscriptionChannel: MessageChannel,
     resendBlockedMessageChannel: FluxMessageChannel
   ): IntegrationFlow {
@@ -249,7 +249,7 @@ class SubscriptionFlows(
   @Bean
   fun resendBlockedMessageFlow(
     resendBlockedMessageChannel: FluxMessageChannel,
-    toSignableSubscriptionMessageReloadingSubscription: GenericTransformer<BlockedSubscriptionMessage, Mono<SignableSubscriptionMessage>>,
+    toSignableSubscriptionMessageReloadingSubscription: GenericTransformer<BlockedSubscriptionMessage, SignableSubscriptionMessage>,
     deleteBlockedMessage: GenericTransformer<BlockedSubscriptionMessage, Mono<BlockedSubscriptionMessage>>
   ): IntegrationFlow {
     return integrationFlow {

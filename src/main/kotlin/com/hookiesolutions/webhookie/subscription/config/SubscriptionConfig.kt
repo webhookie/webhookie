@@ -34,9 +34,9 @@ import com.hookiesolutions.webhookie.common.message.subscription.NoSubscriptionM
 import com.hookiesolutions.webhookie.common.message.subscription.ResendSpanMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.UnsignedSubscriptionMessage
+import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
 import com.hookiesolutions.webhookie.common.service.TimeMachine
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
-import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.subscription.service.SubscriptionService
 import com.hookiesolutions.webhookie.subscription.service.factory.ConversionsFactory
 import org.springframework.context.annotation.Bean
@@ -138,9 +138,10 @@ class SubscriptionConfig(
   }
 
   @Bean
-  fun toBlockedSubscriptionMessageFlux(): GenericTransformer<Subscription, Flux<BlockedSubscriptionMessage>> {
+  fun toBlockedSubscriptionMessageFlux(): GenericTransformer<SubscriptionDTO, Flux<BlockedSubscriptionMessage>> {
     return GenericTransformer { subscription ->
-      subscriptionService.findAllBlockedMessagesForSubscription(subscription.id!!)
+      subscriptionService.findAllBlockedMessagesForSubscription(subscription.subscriptionId)
+        .map { factory.updateBlockedSubscriptionMessageWithSubscription(it, subscription) }
         .onErrorMap { SubscriptionMessageHandlingException(it.localizedMessage) }
     }
   }
@@ -171,11 +172,9 @@ class SubscriptionConfig(
   }
 
   @Bean
-  fun toSignableSubscriptionMessageReloadingSubscription(): GenericTransformer<BlockedSubscriptionMessage, Mono<SignableSubscriptionMessage>> {
+  fun toSignableSubscriptionMessageReloadingSubscription(): GenericTransformer<BlockedSubscriptionMessage, SignableSubscriptionMessage> {
     return GenericTransformer { bsm ->
-      subscriptionService
-        .enrichBlockedSubscriptionMessageReloadingSubscription(bsm)
-        .map { factory.blockedSubscriptionMessageToSubscriptionMessage(it) }
+      factory.blockedSubscriptionMessageToSubscriptionMessage(bsm)
     }
   }
 

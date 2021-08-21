@@ -34,6 +34,7 @@ import com.hookiesolutions.webhookie.common.message.subscription.UnsignedSubscri
 import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate
 import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Companion.blocked
 import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Companion.saved
+import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
 import com.hookiesolutions.webhookie.common.service.IdGenerator
 import com.hookiesolutions.webhookie.common.service.TimeMachine
 import com.hookiesolutions.webhookie.subscription.domain.Application
@@ -148,9 +149,9 @@ class ConversionsFactory(
 
   fun updateBlockedSubscriptionMessageWithSubscription(
     message: BlockedSubscriptionMessage,
-    subscription: Subscription,
+    subscription: SubscriptionDTO,
   ): BlockedSubscriptionMessage {
-    val copy = message.copy(subscription = subscription.dto())
+    val copy = message.copy(subscription = subscription)
     copy.id = message.id
     copy.createdBy = message.createdBy
     copy.createdDate = message.createdDate
