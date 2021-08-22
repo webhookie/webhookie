@@ -37,6 +37,10 @@ data class SSENotification(
         return message(span, "spanCreated", span)
       }
 
+      fun increasedNumberOfTries(span: Span): Message<SSENotification> {
+        return message(span, "spanNumberOfTriesIncreased", span)
+      }
+
       fun blocked(span: Span): Message<SSENotification> {
         return message(span, "spanBlocked", span)
       }

@@ -127,6 +127,13 @@ class SpanRepository(
       spanId,
       *statusUpdateOperations(spanStatusUpdate),
       *addRetryOperations(retry),
+//      mongoIncOperation(KEY_TOTAL_NUMBER_OF_TRIES)
+    )
+  }
+
+  fun increaseNumberOfTries(spanId: String): Mono<Span> {
+    return updateSpan(
+      spanId,
       mongoIncOperation(KEY_TOTAL_NUMBER_OF_TRIES)
     )
   }
@@ -139,7 +146,7 @@ class SpanRepository(
   }
 
   fun addRetry(spanId: String, retry: SpanRetry): Mono<Span> {
-    return updateSpan(spanId, *addRetryOperations(retry), mongoIncOperation(KEY_TOTAL_NUMBER_OF_TRIES))
+    return updateSpan(spanId, *addRetryOperations(retry))
   }
 
   fun updateWithResponse(spanId: String, response: SpanResult): Mono<Span> {

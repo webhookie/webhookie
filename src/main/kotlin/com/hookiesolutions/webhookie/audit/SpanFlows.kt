@@ -74,6 +74,18 @@ class SpanFlows(
   }
 
   @Bean
+  fun increaseNumberOfTriesForSpanFlow(): IntegrationFlow {
+    return integrationFlow {
+      channel(SUBSCRIPTION_CHANNEL_NAME)
+      filter<SignableSubscriptionMessage> { it.isResend() }
+      transform<SignableSubscriptionMessage> { spanService.increaseNumberOfTries(it) }
+      split()
+      transform<Span> { SSENotification.SpanNotification.increasedNumberOfTries(it) }
+      channel(sseChannel)
+    }
+  }
+
+  @Bean
   fun markAsRetryingFlow(): IntegrationFlow {
     return integrationFlow {
       channel(DELAYED_SUBSCRIPTION_CHANNEL_NAME)

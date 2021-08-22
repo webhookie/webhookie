@@ -103,6 +103,12 @@ class SpanService(
       .doOnNext { log.info("'{}', '{}' span was saved/fetched", it.spanId, it.traceId) }
   }
 
+  fun increaseNumberOfTries(message: SignableSubscriptionMessage): Mono<Span> {
+    log.info("Increasing number of tries for '{}', traceId: '{}'", message.spanId, message.traceId)
+    return repository.increaseNumberOfTries(message.spanId)
+      .doOnNext { log.info("NumberOfTries increased to '{}' for span '{}', '{}'", it.totalNumberOfTries, it.spanId, it.traceId) }
+  }
+
   fun blockSpan(message: BlockedSubscriptionMessageDTO): Mono<Span> {
     log.info("Blocking '{}', '{}' span. reason:", message.spanId, message.traceId, message.blockedDetails.reason)
     val at = timeMachine.now()

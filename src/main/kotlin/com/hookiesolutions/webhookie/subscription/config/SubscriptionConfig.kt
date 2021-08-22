@@ -39,6 +39,7 @@ import com.hookiesolutions.webhookie.common.service.TimeMachine
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
 import com.hookiesolutions.webhookie.subscription.service.SubscriptionService
 import com.hookiesolutions.webhookie.subscription.service.factory.ConversionsFactory
+import org.slf4j.Logger
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.integration.core.GenericSelector
@@ -58,6 +59,7 @@ import java.time.Duration
 class SubscriptionConfig(
   private val timeMachine: TimeMachine,
   private val factory: ConversionsFactory,
+  private val log: Logger,
   private val subscriptionService: SubscriptionService
 ) {
   @Bean
@@ -181,6 +183,13 @@ class SubscriptionConfig(
   @Bean
   fun toSubscriptionMessageReloadingSubscription(): GenericTransformer<RetryableSubscriptionMessage, Mono<GenericSubscriptionMessage>> {
     return GenericTransformer { rsm ->
+      log.info("Sending delayed message '{}' retry: {}, Total tries: {}, traceId: '{}'",
+        rsm.spanId,
+        rsm.numberOfRetries,
+        rsm.totalNumberOfTries,
+        rsm.traceId
+      )
+
       subscriptionService
         .enrichSubscriptionMessageReloadingSubscription(rsm)
         .onErrorReturn(EntityNotFoundException::class.java, MissingSubscriptionMessage(rsm.originalMessage, "Subscription does not exist!", rsm.spanId))
