@@ -28,11 +28,12 @@ import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.R
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherErrorMessage
 import com.hookiesolutions.webhookie.common.message.subscription.GenericSubscriptionMessage
-import com.hookiesolutions.webhookie.common.message.subscription.ResendSpanMessage
+import com.hookiesolutions.webhookie.common.message.subscription.RetryableSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
 import com.hookiesolutions.webhookie.common.model.DeletableEntity.Companion.deletable
 import com.hookiesolutions.webhookie.common.model.RoleActor
 import com.hookiesolutions.webhookie.common.model.StatusCountRow
+import com.hookiesolutions.webhookie.common.model.TimedResult
 import com.hookiesolutions.webhookie.common.model.UpdatableEntity.Companion.updatable
 import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate
 import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Companion.activated
@@ -42,7 +43,6 @@ import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Companion.sus
 import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Companion.validated
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionStatus
 import com.hookiesolutions.webhookie.common.service.TimeMachine
-import com.hookiesolutions.webhookie.common.model.TimedResult
 import com.hookiesolutions.webhookie.security.service.SecurityHandler
 import com.hookiesolutions.webhookie.subscription.domain.ApplicationRepository
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
@@ -335,14 +335,9 @@ class SubscriptionService(
       .map { factory.createSignedSubscriptionMessage(subscriptionMessage, it) }
   }
 
-  fun enrichResendSpanMessageReloadingSubscription(message: ResendSpanMessage): Mono<GenericSubscriptionMessage> {
+  fun enrichSubscriptionMessageReloadingSubscription(message: RetryableSubscriptionMessage): Mono<GenericSubscriptionMessage> {
     return findActiveSubscriptionBy(message.subscriptionId)
-      .map { factory.createSignableMessage(message, it)}
-  }
-
-  fun enrichSubscriptionMessageReloadingSubscription(message: SignableSubscriptionMessage): Mono<GenericSubscriptionMessage> {
-    return findActiveSubscriptionBy(message.subscription.subscriptionId)
-      .map { factory.createSignableMessage(message, it)}
+      .map { message.updatingSubscriptionCopy(it.dto())}
   }
 
   private fun findActiveSubscriptionBy(id: String): Mono<Subscription> {

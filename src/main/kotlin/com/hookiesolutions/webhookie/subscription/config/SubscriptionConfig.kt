@@ -31,7 +31,7 @@ import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscrip
 import com.hookiesolutions.webhookie.common.message.subscription.GenericSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.MissingSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.NoSubscriptionMessage
-import com.hookiesolutions.webhookie.common.message.subscription.ResendSpanMessage
+import com.hookiesolutions.webhookie.common.message.subscription.RetryableSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.UnsignedSubscriptionMessage
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
@@ -179,22 +179,12 @@ class SubscriptionConfig(
   }
 
   @Bean
-  fun toSubscriptionMessageReloadingSubscription(): GenericTransformer<SignableSubscriptionMessage, Mono<GenericSubscriptionMessage>> {
-    return GenericTransformer { ssm ->
-      subscriptionService
-        .enrichSubscriptionMessageReloadingSubscription(ssm)
-        .onErrorReturn(EntityNotFoundException::class.java, MissingSubscriptionMessage(ssm.originalMessage, "Subscription does not exist!", ssm.spanId))
-        .switchIfEmpty { MissingSubscriptionMessage(ssm.originalMessage, "Subscription cannot receive messages", ssm.spanId).toMono() }
-    }
-  }
-
-  @Bean
-  fun toSignableSubscriptionMessageReloadingSubscriptionForResend(): GenericTransformer<ResendSpanMessage, Mono<GenericSubscriptionMessage>> {
+  fun toSubscriptionMessageReloadingSubscription(): GenericTransformer<RetryableSubscriptionMessage, Mono<GenericSubscriptionMessage>> {
     return GenericTransformer { rsm ->
       subscriptionService
-        .enrichResendSpanMessageReloadingSubscription(rsm)
-        .onErrorReturn(EntityNotFoundException::class.java, MissingSubscriptionMessage(rsm.consumerMessage, "Subscription does not exist!", rsm.spanId))
-        .switchIfEmpty { MissingSubscriptionMessage(rsm.consumerMessage, "Subscription cannot receive messages", rsm.spanId).toMono() }
+        .enrichSubscriptionMessageReloadingSubscription(rsm)
+        .onErrorReturn(EntityNotFoundException::class.java, MissingSubscriptionMessage(rsm.originalMessage, "Subscription does not exist!", rsm.spanId))
+        .switchIfEmpty { MissingSubscriptionMessage(rsm.originalMessage, "Subscription cannot receive messages", rsm.spanId).toMono() }
     }
   }
 
@@ -211,6 +201,11 @@ class SubscriptionConfig(
   @Bean
   fun subscriptionIsWorking(): (GenericSubscriptionMessage) -> Boolean {
     return { it is SignableSubscriptionMessage && it.subscriptionIsWorking }
+  }
+
+  @Bean
+  fun subscriptionIsMissing(): (GenericSubscriptionMessage) -> Boolean {
+    return { it is MissingSubscriptionMessage }
   }
 
   @Bean

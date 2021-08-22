@@ -25,7 +25,7 @@ package com.hookiesolutions.webhookie.audit.service
 import com.hookiesolutions.webhookie.audit.domain.SpanRetry
 import com.hookiesolutions.webhookie.audit.domain.SpanSendReason
 import com.hookiesolutions.webhookie.common.Constants
-import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
+import com.hookiesolutions.webhookie.common.message.subscription.RetryableSubscriptionMessage
 import org.springframework.integration.core.MessageSelector
 import org.springframework.messaging.Message
 import org.springframework.stereotype.Service
@@ -42,7 +42,7 @@ class TrafficConversionFactory(
   private val resentMessageSelector: MessageSelector,
   private val unblockedMessageSelector: MessageSelector,
 ) {
-  fun calculateSpanSendDetails(message: Message<SignableSubscriptionMessage>): Tuple2<SpanSendReason, String> {
+  fun calculateSpanSendDetails(message: Message<RetryableSubscriptionMessage>): Tuple2<SpanSendReason, String> {
     val isResend = resentMessageSelector.accept(message)
     val reason = when {
       unblockedMessageSelector.accept(message) -> {

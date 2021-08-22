@@ -184,7 +184,10 @@ class SubscriptionRepository(
   }
 
   fun deleteBlockedSubscriptionMessage(message: BlockedSubscriptionMessage): Mono<DeleteResult> {
-    return mongoTemplate.remove(message)
+    return mongoTemplate.remove(
+      query(byId(message.id)),
+      BlockedSubscriptionMessage::class.java
+    )
   }
 
   fun updateCallbackSubscriptions(id: String, details: Any): Mono<UpdateResult> {

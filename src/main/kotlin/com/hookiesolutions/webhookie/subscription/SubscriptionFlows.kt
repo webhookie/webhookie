@@ -36,8 +36,7 @@ import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherErrorMessage
 import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscriptionMessageDTO
 import com.hookiesolutions.webhookie.common.message.subscription.GenericSubscriptionMessage
-import com.hookiesolutions.webhookie.common.message.subscription.MissingSubscriptionMessage
-import com.hookiesolutions.webhookie.common.message.subscription.ResendSpanMessage
+import com.hookiesolutions.webhookie.common.message.subscription.RetryableSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.UnsignedSubscriptionMessage
 import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Keys.Companion.KEY_STATUS
@@ -124,13 +123,14 @@ class SubscriptionFlows(
   fun delayMessageFlow(
     nonSignableWorkingSubscription: (GenericSubscriptionMessage) -> Boolean,
     toBeSignedWorkingSubscription: (GenericSubscriptionMessage) -> Boolean,
-    toSubscriptionMessageReloadingSubscription: GenericTransformer<SignableSubscriptionMessage, Mono<GenericSubscriptionMessage>>,
+    subscriptionIsMissing: (GenericSubscriptionMessage) -> Boolean,
+    toSubscriptionMessageReloadingSubscription: GenericTransformer<RetryableSubscriptionMessage, Mono<GenericSubscriptionMessage>>,
     missingSubscriptionChannel: MessageChannel
   ): IntegrationFlow {
     return integrationFlow {
       channel(delaySubscriptionChannel)
       delay("delay-message-group") {
-        this.delayFunction<SignableSubscriptionMessage> {
+        this.delayFunction<RetryableSubscriptionMessage> {
           val delayInSeconds = it.payload.delay.seconds
           if(delayInSeconds > 0) {
             log.info("Delaying '{}' for '{}', traceId: '{}'", it.payload.spanId, delayInSeconds, it.payload.traceId)
@@ -143,7 +143,7 @@ class SubscriptionFlows(
       routeToRecipients {
         recipient(signSubscriptionMessageChannel, toBeSignedWorkingSubscription)
         recipient(subscriptionChannel, nonSignableWorkingSubscription)
-        recipient<GenericSubscriptionMessage>(missingSubscriptionChannel) { it is MissingSubscriptionMessage }
+        recipient(missingSubscriptionChannel, subscriptionIsMissing)
       }
     }
   }
@@ -268,19 +268,9 @@ class SubscriptionFlows(
   }
 
   @Bean
-  fun resendSpanMessageFlow(
-    toSignableSubscriptionMessageReloadingSubscriptionForResend: GenericTransformer<ResendSpanMessage, Mono<GenericSubscriptionMessage>>,
-    missingSubscriptionChannel: MessageChannel
-  ): IntegrationFlow {
-    return integrationFlow {
-      channel(TRAFFIC_RESEND_SPAN_CHANNEL_NAME)
-      transform(toSignableSubscriptionMessageReloadingSubscriptionForResend)
-      split()
-      routeToRecipients {
-        recipient<GenericSubscriptionMessage>(delaySubscriptionChannel) { it is SignableSubscriptionMessage }
-        recipient<GenericSubscriptionMessage>(missingSubscriptionChannel) { it is MissingSubscriptionMessage }
-      }
-    }
+  fun resendSpanMessageFlow() = integrationFlow {
+    channel(TRAFFIC_RESEND_SPAN_CHANNEL_NAME)
+    channel(delaySubscriptionChannel)
   }
 
   @Bean

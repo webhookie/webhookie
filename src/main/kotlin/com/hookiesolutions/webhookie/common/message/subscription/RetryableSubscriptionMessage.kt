@@ -22,39 +22,58 @@
 
 package com.hookiesolutions.webhookie.common.message.subscription
 
-import com.hookiesolutions.webhookie.audit.domain.Span
-import com.hookiesolutions.webhookie.audit.domain.Trace
-import com.hookiesolutions.webhookie.common.message.ConsumerMessage
+import com.hookiesolutions.webhookie.common.message.WebhookieSpanMessage
+import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
 import java.time.Duration
 
-/**
- *
- * @author Arthur Kazemi<bidadh@gmail.com>
- * @since 2/6/21 21:15
- */
-data class ResendSpanMessage(
-  override val spanId: String,
-  override val subscriptionId: String,
-  override val originalMessage: ConsumerMessage,
-  override val totalNumberOfTries: Int,
-  val requestedBy: String,
-  override val delay: Duration = Duration.ZERO,
-  override val numberOfRetries: Int = 0
-): RetryableSubscriptionMessage {
-  companion object {
-    fun create(
-      span: Span,
-      trace: Trace,
-      requestedBy: String
-    ): ResendSpanMessage {
-      val totalNumberOfTries = span.totalNumberOfTries + 1
-      return ResendSpanMessage(
-        span.spanId,
-        span.subscription.subscriptionId,
-        trace.consumerMessage,
-        totalNumberOfTries,
-        requestedBy
-      )
+interface RetryableSubscriptionMessage: GenericSubscriptionMessage, WebhookieSpanMessage {
+  override val spanId: String
+  val subscriptionId: String
+  val delay: Duration
+  val numberOfRetries: Int
+  val totalNumberOfTries: Int
+
+  fun updatingSubscriptionCopy(subscription: SubscriptionDTO): SignableSubscriptionMessage {
+    if(this is SignedSubscriptionMessage) {
+      return this.copy(subscription = subscription)
     }
+
+    if(this is UnsignedSubscriptionMessage) {
+      return this.copy(subscription = subscription)
+    }
+
+    val msg = this as ResendSpanMessage
+
+    return UnsignedSubscriptionMessage(
+      originalMessage = msg.originalMessage,
+      spanId = msg.spanId,
+      subscription = subscription,
+      totalNumberOfTries = msg.totalNumberOfTries
+    )
+  }
+
+  fun isNew(): Boolean {
+    return totalNumberOfTries == 1
+  }
+
+  fun isResend(): Boolean {
+    return totalNumberOfTries > 1
+  }
+
+  fun isFirstRetry(): Boolean {
+    return totalNumberOfTries == 2
+  }
+
+  fun isFirstRetryInCycle(): Boolean {
+    return (isRetry() && isFirstRetry()) ||
+        (isTry() && isResend())
+  }
+
+  fun isTry(): Boolean {
+    return numberOfRetries == 0
+  }
+
+  fun isRetry(): Boolean {
+    return numberOfRetries > 0
   }
 }

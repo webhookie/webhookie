@@ -37,6 +37,7 @@ import com.hookiesolutions.webhookie.common.message.publisher.PublisherResponseE
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherSuccessMessage
 import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscriptionMessageDTO
 import com.hookiesolutions.webhookie.common.message.subscription.MissingSubscriptionMessage
+import com.hookiesolutions.webhookie.common.message.subscription.RetryableSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
 import org.slf4j.Logger
 import org.springframework.context.annotation.Bean
@@ -76,8 +77,8 @@ class SpanFlows(
   fun markAsRetryingFlow(): IntegrationFlow {
     return integrationFlow {
       channel(DELAYED_SUBSCRIPTION_CHANNEL_NAME)
-      filter<SignableSubscriptionMessage> { it.isResend() && it.isFirstRetryInCycle() }
-      transform<Message<SignableSubscriptionMessage>> { spanService.markAsRetrying(it) }
+      filter<RetryableSubscriptionMessage> { it.isResend() && it.isFirstRetryInCycle() }
+      transform<Message<RetryableSubscriptionMessage>> { spanService.markAsRetrying(it) }
       split()
       transform<Span> { SSENotification.SpanNotification.markedRetrying(it) }
       channel(sseChannel)
@@ -88,8 +89,8 @@ class SpanFlows(
   fun addRetryFlow(): IntegrationFlow {
     return integrationFlow {
       channel(DELAYED_SUBSCRIPTION_CHANNEL_NAME)
-      filter<SignableSubscriptionMessage> { it.isResend() && !it.isFirstRetryInCycle() }
-      transform<Message<SignableSubscriptionMessage>> { spanService.addRetry(it.payload) }
+      filter<RetryableSubscriptionMessage> { it.isResend() && !it.isFirstRetryInCycle() }
+      transform<Message<RetryableSubscriptionMessage>> { spanService.addRetry(it.payload) }
       split()
       transform<Span> { SSENotification.SpanNotification.isRetrying(it) }
       channel(sseChannel)

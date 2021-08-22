@@ -53,6 +53,7 @@ import com.hookiesolutions.webhookie.common.message.publisher.PublisherSuccessMe
 import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscriptionMessageDTO
 import com.hookiesolutions.webhookie.common.message.subscription.MissingSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.ResendSpanMessage
+import com.hookiesolutions.webhookie.common.message.subscription.RetryableSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
 import com.hookiesolutions.webhookie.common.model.StatusCountRow
 import com.hookiesolutions.webhookie.common.model.TimedResult
@@ -200,7 +201,7 @@ class SpanService(
       .doOnNext { log.info("'{}', '{}' Span was updated with server response: '{}'", it.spanId, it.traceId, it.latestResult?.statusCode) }
   }
 
-  fun markAsRetrying(message: Message<SignableSubscriptionMessage>): Mono<Span> {
+  fun markAsRetrying(message: Message<RetryableSubscriptionMessage>): Mono<Span> {
     val payload = message.payload
     log.info("Marking  '{}', '{}' as Retrying. ", payload.spanId, payload.traceId)
     val time = timeMachine.now()
@@ -211,7 +212,7 @@ class SpanService(
       .doOnNext { logSpan(it) }
   }
 
-  fun addRetry(message: SignableSubscriptionMessage): Mono<Span> {
+  fun addRetry(message: RetryableSubscriptionMessage): Mono<Span> {
     log.info("Delaying '{}', '{}' span for '{}' seconds", message.spanId, message.traceId, message.delay.seconds)
     val time = timeMachine.now().plusSeconds(message.delay.seconds)
     val retry = SpanRetry(time, message.totalNumberOfTries, message.numberOfRetries, SENT_BY_WEBHOOKIE, SpanSendReason.RETRY)
@@ -269,12 +270,12 @@ class SpanService(
 
         val builder = MessageBuilder.withPayload(payload)
 
-        builder.setHeader(WH_HEADER_TOPIC, payload.consumerMessage.topic)
-        builder.setHeader(WH_HEADER_TRACE_ID, payload.consumerMessage.traceId )
+        builder.setHeader(WH_HEADER_TOPIC, payload.originalMessage.topic)
+        builder.setHeader(WH_HEADER_TRACE_ID, payload.originalMessage.traceId )
         builder.setHeader(WH_HEADER_SPAN_ID, payload.spanId )
         builder.setHeader(WH_HEADER_RESENT, true.toString() )
         builder.setHeader(WH_HEADER_REQUESTED_BY, payload.requestedBy )
-        builder.setHeader(HEADER_CONTENT_TYPE, payload.consumerMessage.contentType )
+        builder.setHeader(HEADER_CONTENT_TYPE, payload.originalMessage.contentType )
 
         builder.build()
       }

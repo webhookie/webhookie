@@ -26,7 +26,6 @@ import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherErrorMessage
 import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscriptionMessageDTO
 import com.hookiesolutions.webhookie.common.message.subscription.GenericSubscriptionMessage
-import com.hookiesolutions.webhookie.common.message.subscription.ResendSpanMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SignedSubscriptionMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionSignature
@@ -73,7 +72,7 @@ class ConversionsFactory(
       originalMessage = bsm.consumerMessage,
       spanId = bsm.spanId,
       subscription = bsm.subscription,
-      totalNumberOfTries = bsm.totalNumberOfTries + 1
+      totalNumberOfTries = bsm.totalNumberOfTries
     )
   }
 
@@ -186,22 +185,5 @@ class ConversionsFactory(
     copy.lastModifiedBy = subscription.lastModifiedBy
 
     return copy
-  }
-
-  fun createSignableMessage(message: ResendSpanMessage, subscription: Subscription): SignableSubscriptionMessage {
-    return UnsignedSubscriptionMessage(
-      originalMessage = message.consumerMessage,
-      spanId = message.spanId,
-      subscription = subscription.dto(),
-      totalNumberOfTries = message.totalNumberOfTries
-    )
-  }
-
-  fun createSignableMessage(message: SignableSubscriptionMessage, subscription: Subscription): SignableSubscriptionMessage {
-    if(message is SignedSubscriptionMessage) {
-      return message.copy(subscription = subscription.dto())
-    }
-
-    return (message as UnsignedSubscriptionMessage).copy(subscription = subscription.dto())
   }
 }
