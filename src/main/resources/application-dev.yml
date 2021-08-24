@@ -3,12 +3,12 @@ spring:
     user:
       name: wh-user
       password: password
-logging:
-  level:
-    com.hookiesolutions.webhookie: DEBUG
-    com.hookiesolutions.webhookie.audit.domain: DEBUG
-    com.hookiesolutions.webhookie.subscription.service.validator: DEBUG
-    org: WARN
+#logging:
+#  level:
+#    com.hookiesolutions.webhookie: DEBUG
+#    com.hookiesolutions.webhookie.audit.domain: DEBUG
+#    com.hookiesolutions.webhookie.subscription.service.validator: DEBUG
+#    org: WARN
 webhookie:
   security:
     allowed-origins: http://localhost:4200, http://localhost:4201

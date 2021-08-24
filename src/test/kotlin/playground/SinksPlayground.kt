@@ -13,7 +13,7 @@ class SinksPlayground {
   fun testSinksManyMulticast() {
     val hotSource = Sinks.many().multicast().directBestEffort<String>()
 
-    val hotFlux = hotSource.asFlux().map { obj: String -> obj.toUpperCase() }.cache()
+    val hotFlux = hotSource.asFlux().map { obj: String -> obj.uppercase() }.cache()
 
 
     hotFlux.subscribe { d: String -> println("Subscriber 1 to Hot Source: $d") }
