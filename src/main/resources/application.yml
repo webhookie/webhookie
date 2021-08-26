@@ -3,9 +3,9 @@ webhookie:
     send: ${WH_ANALYTICS_SEND:true}
   consumer:
     add-default-group: ${WH_CONSUMER_ADD_DEFAULT_GROUP:true}
-    queue: ${WH_CONSUMER_QUEUE:wh-customer.event}
+    queue: ${WH_CONSUMER_QUEUE:wh-consumer.event}
     missing-header:
-      exchange: ${WH_CONSUMER_MISSING_HEADER_EXCHANGE:wh-customer}
+      exchange: ${WH_CONSUMER_MISSING_HEADER_EXCHANGE:wh-consumer}
       routing-key: ${WH_CONSUMER_MISSING_HEADER_ROUTING_KEY:wh-missing-header}
   subscription:
     retry:
