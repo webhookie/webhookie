@@ -254,6 +254,15 @@ class TraceRepository(
     )
   }
 
+  fun topicTraces(topic: String, requestedPageable: Pageable): Flux<Trace> {
+    val pageable = Query.pageableWith(requestedPageable, SPAN_DEFAULT_SORT, SPAN_DEFAULT_PAGE)
+
+    return mongoTemplate.find(
+      query(traceTopicIs(topic)).with(pageable),
+      Trace::class.java
+    )
+  }
+
   companion object {
     val SPAN_DEFAULT_SORT = Sort.by("$KEY_STATUS_UPDATE.$KEY_TIME").descending()
     val SPAN_DEFAULT_PAGE = PageRequest.of(0, 20)

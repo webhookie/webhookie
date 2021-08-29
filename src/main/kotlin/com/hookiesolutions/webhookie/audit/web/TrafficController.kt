@@ -139,6 +139,18 @@ class TrafficController(
   }
 
   @GetMapping(
+    "$REQUEST_MAPPING_TRAFFIC_TRACE$REQUEST_MAPPING_TRAFFIC_TRACE_BY_TOPIC/{topic}",
+    produces = [MediaType.APPLICATION_JSON_VALUE]
+  )
+  fun subscriptionTraces(
+    @PathVariable topic: String,
+    pageable: Pageable
+  ): Flux<TraceResponse> {
+    return traceService.topicTraces(pageable, topic)
+      .map { TraceResponse.from(it)}
+  }
+
+  @GetMapping(
     "$REQUEST_MAPPING_TRAFFIC_TRACE/{traceId}/spans",
     produces = [MediaType.APPLICATION_JSON_VALUE]
   )
@@ -198,6 +210,7 @@ class TrafficController(
   companion object {
     const val REQUEST_MAPPING_TRAFFIC_SPAN = "/span"
     const val REQUEST_MAPPING_TRAFFIC_SPAN_BY_SUBSCRIPTION = "/bySubscription"
+    const val REQUEST_MAPPING_TRAFFIC_TRACE_BY_TOPIC = "/byTopic"
     const val REQUEST_MAPPING_TRAFFIC_TRACE = "/trace"
   }
 }
