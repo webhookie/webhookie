@@ -43,6 +43,7 @@ import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDetails
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDetails.Keys.Companion.KEY_APPLICATION
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDetails.Keys.Companion.KEY_CALLBACK
+import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDetails.Keys.Companion.KEY_SUBSCRIPTION_ID
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDetails.Keys.Companion.KEY_TOPIC
 import com.hookiesolutions.webhookie.common.repository.GenericRepository.Companion.fieldName
 import org.springframework.data.annotation.TypeAlias
@@ -81,6 +82,10 @@ data class Span(
 
       fun byTraceId(traceId: String): Criteria {
         return where(KEY_TRACE_ID).`is`(traceId)
+      }
+
+      fun bySubscriptionId(subscriptionId: String): Criteria {
+        return where(fieldName(KEY_SUBSCRIPTION, KEY_SUBSCRIPTION_ID)).`is`(subscriptionId)
       }
 
       fun applicationsIn(ids: Collection<String>): Criteria {

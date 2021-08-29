@@ -247,6 +247,15 @@ class SpanService(
       }
   }
 
+  @PreAuthorize("isAuthenticated()")
+  fun subscriptionSpans(pageable: Pageable, subscriptionId: String): Flux<Span> {
+    log.info("Fetching all subscription spans for subscription: '{}'", subscriptionId)
+    return subscriptionServiceDelegate.subscriptionByIdVerifyingReadAccess(subscriptionId)
+      .flatMapMany {
+        repository.subscriptionSpans(pageable, subscriptionId)
+      }
+  }
+
   @PreAuthorize("hasAnyAuthority('$ROLE_CONSUMER', '$ROLE_ADMIN')")
   fun traceSpans(pageable: Pageable, traceId: String, request: TraceRequest): Flux<Span> {
     return traceRepository.findByTraceIdVerifyingReadAccess(traceId)

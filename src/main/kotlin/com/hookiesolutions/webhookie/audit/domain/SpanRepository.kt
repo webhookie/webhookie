@@ -38,6 +38,7 @@ import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_TOTAL_
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_TRACE_ID
 import com.hookiesolutions.webhookie.audit.domain.Span.Queries.Companion.applicationsIn
 import com.hookiesolutions.webhookie.audit.domain.Span.Queries.Companion.bySpanId
+import com.hookiesolutions.webhookie.audit.domain.Span.Queries.Companion.bySubscriptionId
 import com.hookiesolutions.webhookie.audit.domain.Span.Queries.Companion.byTraceId
 import com.hookiesolutions.webhookie.audit.domain.Span.Queries.Companion.spanIsAfter
 import com.hookiesolutions.webhookie.audit.domain.Span.Queries.Companion.spanIsBefore
@@ -190,6 +191,18 @@ class SpanRepository(
     return updateSpanWithoutRetry(spanId, *operations)
       .switchIfEmpty { EntityNotFoundException("Span '${spanId}' is not ready yet!").toMono() }
       .retryWhen(retryBackoffSpec)
+  }
+
+  fun subscriptionSpans(
+    requestedPageable: Pageable,
+    subscriptionId: String
+  ): Flux<Span> {
+    val pageable = pageableWith(requestedPageable, SPAN_DEFAULT_SORT, SPAN_DEFAULT_PAGE)
+
+    return mongoTemplate.find(
+      query(bySubscriptionId(subscriptionId)).with(pageable),
+      Span::class.java
+    )
   }
 
   fun userSpans(

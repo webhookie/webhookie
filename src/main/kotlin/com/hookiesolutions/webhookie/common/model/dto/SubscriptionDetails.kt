@@ -39,6 +39,7 @@ data class SubscriptionDetails(
   class Keys {
     companion object {
       const val KEY_APPLICATION = "application"
+      const val KEY_SUBSCRIPTION_ID = "subscriptionId"
       const val KEY_CALLBACK = "callback"
       const val KEY_TOPIC = "topic"
     }
