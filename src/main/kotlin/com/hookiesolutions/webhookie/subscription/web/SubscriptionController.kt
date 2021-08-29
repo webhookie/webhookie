@@ -93,7 +93,7 @@ class SubscriptionController(
     produces = [MediaType.APPLICATION_JSON_VALUE]
   )
   fun getSubscription(@PathVariable id: String): Mono<SubscriptionDTO> {
-    return service.subscriptionById(id)
+    return service.subscriptionByIdVerifyingReadAccess(id)
       .map { it.dto()}
   }
 

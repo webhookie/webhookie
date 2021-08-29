@@ -53,7 +53,7 @@ class SubscriptionServiceDelegate(
   }
 
   fun subscriptionByIdVerifyingReadAccess(subscriptionId: String): Mono<SubscriptionDTO> {
-    return subscriptionService.subscriptionById(subscriptionId)
+    return subscriptionService.subscriptionByIdVerifyingReadAccess(subscriptionId)
       .map { it.dto() }
   }
 }

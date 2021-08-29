@@ -106,8 +106,8 @@ class SubscriptionService(
   }
 
   @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")
-  fun subscriptionById(id: String): Mono<Subscription> {
-    log.info("Fetching Subscription by id: '{}'", id)
+  fun subscriptionByIdVerifyingReadAccess(id: String): Mono<Subscription> {
+    log.info("Fetching Subscription by id Verifying Read Access: '{}'", id)
     return repository.findByIdVerifyingReadAccess(id)
   }
 
