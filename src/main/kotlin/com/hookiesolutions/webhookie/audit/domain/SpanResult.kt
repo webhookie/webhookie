@@ -38,6 +38,11 @@ data class SpanResult (
   val headers: HttpHeaders,
   val retryNo: Int
 ) {
+  class Keys {
+    companion object {
+      const val KEY_STATUS_CODE = "statusCode"
+    }
+  }
   class Builder {
     private lateinit var time: Instant
     private var statusCode: Int = -1

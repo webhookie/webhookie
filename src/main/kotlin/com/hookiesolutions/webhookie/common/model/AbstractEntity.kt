@@ -29,6 +29,7 @@ import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Criteria.where
 import java.time.Instant
 
+
 abstract class AbstractEntity : AbstractDocument() {
   @Id
   var id: String? = null
@@ -75,6 +76,10 @@ abstract class AbstractEntity : AbstractDocument() {
         return where(key).regex(".*$value.*", "i")
       }
 
+      private fun regexStartsWith(key: String, value: String): Criteria {
+        return where(key).regex("$value.*", "i")
+      }
+
       fun regex(vararg pairs: Pair<String, String?>): Array<Criteria> {
         return pairs
           .filter { it.second != null }
@@ -88,6 +93,8 @@ abstract class AbstractEntity : AbstractDocument() {
           .map {
             return@map if (it.second.second == FieldMatchingStrategy.PARTIAL_MATCH) {
               regexField(it.first, it.second.first!!)
+            } else if (it.second.second == FieldMatchingStrategy.STARTS_WITH) {
+              regexStartsWith(it.first, it.second.first!!)
             } else {
               where(it.first).`is`(it.second.first!!)
             }

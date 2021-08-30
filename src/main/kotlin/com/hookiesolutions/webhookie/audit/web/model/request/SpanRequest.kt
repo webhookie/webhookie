@@ -40,6 +40,7 @@ data class SpanRequest(
   val callback: String? = null,
   val from: Instant? = null,
   val to: Instant? = null,
+  val responseCode: Int? = null,
   val status: List<SpanStatus> = emptyList()
 ) {
   class Builder {
@@ -53,6 +54,7 @@ data class SpanRequest(
     private var status: List<SpanStatus> = emptyList()
     private var from: Instant? = null
     private var to: Instant? = null
+    private var responseCode: Int? = null
 
     fun subscriptionId(subscriptionId: String?) = apply { this.subscriptionId = subscriptionId }
     fun traceId(traceId: String?) = apply { this.traceId = traceId }
@@ -64,6 +66,7 @@ data class SpanRequest(
     fun status(status: List<SpanStatus>) = apply { this.status = status }
     fun from(from: Instant?) = apply { this.from = from }
     fun to(to: Instant?) = apply { this.to = to }
+    fun responseCode(responseCode: Int?) = apply { this.responseCode = responseCode }
 
     fun build(): SpanRequest {
       return SpanRequest(
@@ -76,6 +79,7 @@ data class SpanRequest(
         callback = callback,
         from = from,
         to = to,
+        responseCode = responseCode,
         status = status
       )
     }

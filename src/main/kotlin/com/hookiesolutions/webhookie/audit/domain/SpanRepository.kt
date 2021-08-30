@@ -32,6 +32,7 @@ import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SPAN_C
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SPAN_CALLBACK_NAME
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SPAN_ENTITY
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SPAN_ID
+import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SPAN_RESPONSE_CODE
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SPAN_SUBSCRIPTION_ID
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SPAN_TOPIC
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_STATUS_HISTORY
@@ -60,7 +61,9 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
+import org.springframework.data.mongodb.core.aggregation.Aggregation
 import org.springframework.data.mongodb.core.aggregation.AggregationOperation
+import org.springframework.data.mongodb.core.aggregation.ConvertOperators
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query.query
 import org.springframework.stereotype.Repository
@@ -208,6 +211,7 @@ class SpanRepository(
       KEY_SPAN_TOPIC to (request.topic to FieldMatchingStrategy.EXACT_MATCH),
       KEY_SPAN_APPLICATION_NAME to (request.application to FieldMatchingStrategy.PARTIAL_MATCH),
       KEY_SPAN_ENTITY to (request.entity to FieldMatchingStrategy.PARTIAL_MATCH),
+      KEY_SPAN_RESPONSE_CODE to (request.responseCode?.toString() to FieldMatchingStrategy.STARTS_WITH),
       KEY_SPAN_CALLBACK_NAME to ( request.callback to FieldMatchingStrategy.PARTIAL_MATCH)
     )
 
@@ -236,16 +240,30 @@ class SpanRepository(
       Criteria()
     }
 
-    val query = query(criteria).with(pageable)
-
-    if(log.isDebugEnabled) {
-      log.debug("Subscription Traffic query: '{}'", query)
+    val pipeline: MutableList<AggregationOperation> = mutableListOf(
+      Aggregation.match(criteria),
+      Aggregation.sort(pageable.sort),
+      Aggregation.skip(pageable.offset),
+      Aggregation.limit(pageable.pageSize.toLong())
+    )
+    if(request.responseCode != null) {
+      val toString = ConvertOperators.ToString
+        .toString(mongoField(fieldName(KEY_LATEST_RESULT, SpanResult.Keys.KEY_STATUS_CODE)))
+      pipeline.add(
+        0,
+        Aggregation.addFields()
+          .addField(KEY_SPAN_RESPONSE_CODE)
+          .withValue(toString)
+          .build(),
+      )
     }
 
-    return mongoTemplate.find(
-      query,
-      Span::class.java
-    )
+    val aggregation = Aggregation.newAggregation(pipeline)
+    if(log.isDebugEnabled) {
+      log.debug("Subscription Traffic aggregation: '{}'", aggregation)
+    }
+
+    return mongoTemplate.aggregate(aggregation, Span::class.java, Span::class.java)
   }
 
   fun traceSpans(

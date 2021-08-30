@@ -80,6 +80,7 @@ class TrafficController(
     @RequestParam(required = false, defaultValue = "") status: List<SpanStatus>,
     @RequestParam(required = false) from: Instant?,
     @RequestParam(required = false) to: Instant?,
+    @RequestParam(required = false) responseCode: Int?,
     pageable: Pageable
   ): Flux<SpanResponse> {
     val request = SpanRequest.Builder()
@@ -93,6 +94,7 @@ class TrafficController(
       .status(status)
       .from(from)
       .to(to)
+      .responseCode(responseCode)
       .build()
     return spanService.userSpans(pageable, request)
       .map { SpanResponse.from(it)}

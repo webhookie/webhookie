@@ -29,5 +29,6 @@ package com.hookiesolutions.webhookie.common.model
  */
 enum class FieldMatchingStrategy {
   PARTIAL_MATCH,
+  STARTS_WITH,
   EXACT_MATCH
 }
