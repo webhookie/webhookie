@@ -70,6 +70,7 @@ class TrafficController(
     produces = [MediaType.APPLICATION_JSON_VALUE]
   )
   fun userSpans(
+    @RequestParam(required = false) subscriptionId: String?,
     @RequestParam(required = false) traceId: String?,
     @RequestParam(required = false) spanId: String?,
     @RequestParam(required = false) application: String?,
@@ -82,6 +83,7 @@ class TrafficController(
     pageable: Pageable
   ): Flux<SpanResponse> {
     val request = SpanRequest.Builder()
+      .subscriptionId(subscriptionId)
       .traceId(traceId)
       .spanId(spanId)
       .application(application)
@@ -97,23 +99,11 @@ class TrafficController(
   }
 
   @GetMapping(
-    "$REQUEST_MAPPING_TRAFFIC_SPAN$REQUEST_MAPPING_TRAFFIC_SPAN_BY_SUBSCRIPTION/{subscriptionId}",
-    produces = [MediaType.APPLICATION_JSON_VALUE]
-  )
-  fun subscriptionSpans(
-    @PathVariable subscriptionId: String,
-    pageable: Pageable
-  ): Flux<SpanResponse> {
-    return spanService.subscriptionSpans(pageable, subscriptionId)
-      .map { SpanResponse.from(it)}
-  }
-
-
-  @GetMapping(
     REQUEST_MAPPING_TRAFFIC_TRACE,
     produces = [MediaType.APPLICATION_JSON_VALUE]
   )
   fun userTraces(
+    @RequestParam(required = false) subscriptionId: String?,
     @RequestParam(required = false) traceId: String?,
     @RequestParam(required = false) applicationId: String?,
     @RequestParam(required = false) entity: String?,
@@ -125,6 +115,7 @@ class TrafficController(
     pageable: Pageable
   ): Flux<TraceResponse> {
     val request = TraceRequest.Builder()
+      .subscriptionId(subscriptionId)
       .traceId(traceId)
       .applicationId(applicationId)
       .entity(entity)
@@ -139,29 +130,19 @@ class TrafficController(
   }
 
   @GetMapping(
-    "$REQUEST_MAPPING_TRAFFIC_TRACE$REQUEST_MAPPING_TRAFFIC_TRACE_BY_TOPIC/{topic}",
-    produces = [MediaType.APPLICATION_JSON_VALUE]
-  )
-  fun subscriptionTraces(
-    @PathVariable topic: String,
-    pageable: Pageable
-  ): Flux<TraceResponse> {
-    return traceService.topicTraces(pageable, topic)
-      .map { TraceResponse.from(it)}
-  }
-
-  @GetMapping(
     "$REQUEST_MAPPING_TRAFFIC_TRACE/{traceId}/spans",
     produces = [MediaType.APPLICATION_JSON_VALUE]
   )
   fun traceSpans(
     @PathVariable traceId: String,
+    @RequestParam(required = false) subscriptionId: String?,
     @RequestParam(required = false) applicationId: String?,
     @RequestParam(required = false) entity: String?,
     @RequestParam(required = false) callbackId: String?,
     pageable: Pageable
   ): Flux<SpanResponse> {
     val request = TraceRequest.Builder()
+      .subscriptionId(subscriptionId)
       .applicationId(applicationId)
       .entity(entity)
       .callbackId(callbackId)
@@ -209,8 +190,6 @@ class TrafficController(
 
   companion object {
     const val REQUEST_MAPPING_TRAFFIC_SPAN = "/span"
-    const val REQUEST_MAPPING_TRAFFIC_SPAN_BY_SUBSCRIPTION = "/bySubscription"
-    const val REQUEST_MAPPING_TRAFFIC_TRACE_BY_TOPIC = "/byTopic"
     const val REQUEST_MAPPING_TRAFFIC_TRACE = "/trace"
   }
 }

@@ -84,10 +84,6 @@ data class Span(
         return where(KEY_TRACE_ID).`is`(traceId)
       }
 
-      fun bySubscriptionId(subscriptionId: String): Criteria {
-        return where(fieldName(KEY_SUBSCRIPTION, KEY_SUBSCRIPTION_ID)).`is`(subscriptionId)
-      }
-
       fun applicationsIn(ids: Collection<String>): Criteria {
         return where("$KEY_SUBSCRIPTION.$KEY_APPLICATION.$KEY_APPLICATION_ID").`in`(ids)
       }
@@ -125,6 +121,7 @@ data class Span(
 
       val KEY_SPAN_TOPIC = fieldName(KEY_SUBSCRIPTION, KEY_TOPIC)
       val KEY_SPAN_APPLICATION_ID = fieldName(KEY_SUBSCRIPTION, KEY_APPLICATION, KEY_APPLICATION_ID)
+      val KEY_SPAN_SUBSCRIPTION_ID = fieldName(KEY_SUBSCRIPTION, KEY_SUBSCRIPTION_ID)
       val KEY_SPAN_APPLICATION_NAME = fieldName(KEY_SUBSCRIPTION, KEY_APPLICATION, KEY_APPLICATION_NAME)
       val KEY_SPAN_ENTITY = fieldName(KEY_SUBSCRIPTION, KEY_APPLICATION, KEY_APPLICATION_ENTITY)
       val KEY_SPAN_CALLBACK_ID = fieldName(KEY_SUBSCRIPTION, KEY_CALLBACK, KEY_CALLBACK_ID)

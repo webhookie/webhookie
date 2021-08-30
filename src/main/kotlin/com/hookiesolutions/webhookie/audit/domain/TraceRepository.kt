@@ -90,14 +90,6 @@ class TraceRepository(
     val subtract = ArithmeticOperators.Subtract
       .valueOf(ArrayOperators.arrayOf(historyField).length())
       .subtract(1)
-/*
-    val slice = ArrayOperators.arrayOf(listOf(historyField, 0, s)).slice()
-    val slice = AggregationOperation {
-      it.getMappedObject(Document.parse("""
-        aa: { {${'$'}slice : ["${'$'}statusHistory        ", 0, "        ${'$'}aSize        "]}
-      """.trimIndent()))
-    }
-*/
 
     val value = conditionalValue(
       neExpression("$KEY_STATUS_UPDATE.$KEY_STATUS", "update.status"),
@@ -140,17 +132,6 @@ class TraceRepository(
     )
 
     return aggregationUpdate(byTraceId(traceId), Trace::class.java, *operations)
-
-/*
-
-    return mongoTemplate
-      .findAndModify(
-        query(byTraceId(traceId).andOperator(traceStatusIsNot(statusUpdate.status))),
-        traceStatusUpdate(statusUpdate),
-        FindAndModifyOptions.options().returnNew(true),
-        Trace::class.java
-      )
-*/
   }
 
   fun updateWithSummary(traceId: String, summary: TraceSummary, traceStatusUpdate: TraceStatusUpdate): Mono<Trace> {
@@ -195,6 +176,7 @@ class TraceRepository(
   ): Flux<Trace> {
     val requestCriteria = filters(
       Span.Keys.KEY_SPAN_APPLICATION_ID to (request.applicationId to FieldMatchingStrategy.EXACT_MATCH),
+      Span.Keys.KEY_SPAN_SUBSCRIPTION_ID to (request.subscriptionId to FieldMatchingStrategy.EXACT_MATCH),
       Span.Keys.KEY_SPAN_ENTITY to (request.entity to FieldMatchingStrategy.EXACT_MATCH),
       Span.Keys.KEY_SPAN_CALLBACK_ID to (request.callbackId to FieldMatchingStrategy.EXACT_MATCH)
     )
@@ -250,15 +232,6 @@ class TraceRepository(
     return mongoTemplate.aggregate(
       tracesAggregation,
       aggregateStrategy.clazz,
-      Trace::class.java
-    )
-  }
-
-  fun topicTraces(topic: String, requestedPageable: Pageable): Flux<Trace> {
-    val pageable = Query.pageableWith(requestedPageable, SPAN_DEFAULT_SORT, SPAN_DEFAULT_PAGE)
-
-    return mongoTemplate.find(
-      query(traceTopicIs(topic)).with(pageable),
       Trace::class.java
     )
   }

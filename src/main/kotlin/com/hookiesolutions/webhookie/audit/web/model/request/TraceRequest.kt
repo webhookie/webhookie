@@ -31,6 +31,7 @@ import java.time.Instant
  * @since 19/3/21 14:40
  */
 data class TraceRequest(
+  val subscriptionId: String? = null,
   val traceId: String? = null,
   val topic: String? = null,
   val applicationId: String? = null,
@@ -41,6 +42,7 @@ data class TraceRequest(
   val status: List<TraceStatus> = emptyList()
 ) {
   class Builder {
+    private var subscriptionId: String? = null
     private var traceId: String? = null
     private var topic: String? = null
     private var applicationId: String? = null
@@ -50,6 +52,7 @@ data class TraceRequest(
     private var from: Instant? = null
     private var to: Instant? = null
 
+    fun subscriptionId(subscriptionId: String?) = apply { this.subscriptionId = subscriptionId }
     fun traceId(traceId: String?) = apply { this.traceId = traceId }
     fun topic(topic: String?) = apply { this.topic = topic }
     fun applicationId(applicationId: String?) = apply { this.applicationId = applicationId }
@@ -61,6 +64,7 @@ data class TraceRequest(
 
     fun build(): TraceRequest {
       return TraceRequest(
+        subscriptionId = subscriptionId,
         traceId = traceId,
         topic = topic,
         applicationId = applicationId,

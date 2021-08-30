@@ -32,13 +32,13 @@ import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SPAN_C
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SPAN_CALLBACK_NAME
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SPAN_ENTITY
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SPAN_ID
+import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SPAN_SUBSCRIPTION_ID
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SPAN_TOPIC
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_STATUS_HISTORY
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_TOTAL_NUMBER_OF_TRIES
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_TRACE_ID
 import com.hookiesolutions.webhookie.audit.domain.Span.Queries.Companion.applicationsIn
 import com.hookiesolutions.webhookie.audit.domain.Span.Queries.Companion.bySpanId
-import com.hookiesolutions.webhookie.audit.domain.Span.Queries.Companion.bySubscriptionId
 import com.hookiesolutions.webhookie.audit.domain.Span.Queries.Companion.byTraceId
 import com.hookiesolutions.webhookie.audit.domain.Span.Queries.Companion.spanIsAfter
 import com.hookiesolutions.webhookie.audit.domain.Span.Queries.Companion.spanIsBefore
@@ -70,7 +70,7 @@ import reactor.kotlin.core.publisher.switchIfEmpty
 import reactor.kotlin.core.publisher.toMono
 import reactor.util.retry.Retry
 import java.time.Duration
-import java.util.Objects
+import java.util.*
 
 /**
  *
@@ -128,7 +128,6 @@ class SpanRepository(
       spanId,
       *statusUpdateOperations(spanStatusUpdate),
       *addRetryOperations(retry),
-//      mongoIncOperation(KEY_TOTAL_NUMBER_OF_TRIES)
     )
   }
 
@@ -193,18 +192,6 @@ class SpanRepository(
       .retryWhen(retryBackoffSpec)
   }
 
-  fun subscriptionSpans(
-    requestedPageable: Pageable,
-    subscriptionId: String
-  ): Flux<Span> {
-    val pageable = pageableWith(requestedPageable, SPAN_DEFAULT_SORT, SPAN_DEFAULT_PAGE)
-
-    return mongoTemplate.find(
-      query(bySubscriptionId(subscriptionId)).with(pageable),
-      Span::class.java
-    )
-  }
-
   fun userSpans(
     applicationIds: List<String>,
     request: SpanRequest,
@@ -216,6 +203,7 @@ class SpanRepository(
 
     val requestCriteria = AbstractEntity.Queries.filters(
       KEY_TRACE_ID to (request.traceId to FieldMatchingStrategy.PARTIAL_MATCH),
+      KEY_SPAN_SUBSCRIPTION_ID to (request.subscriptionId to FieldMatchingStrategy.EXACT_MATCH),
       KEY_SPAN_ID to (request.spanId to FieldMatchingStrategy.PARTIAL_MATCH),
       KEY_SPAN_TOPIC to (request.topic to FieldMatchingStrategy.EXACT_MATCH),
       KEY_SPAN_APPLICATION_NAME to (request.application to FieldMatchingStrategy.PARTIAL_MATCH),
@@ -270,6 +258,7 @@ class SpanRepository(
     val pageable = pageableWith(requestedPageable, SPAN_DEFAULT_SORT, SPAN_DEFAULT_PAGE)
 
     val requestCriteria = AbstractEntity.Queries.filters(
+      KEY_SPAN_SUBSCRIPTION_ID to (request.subscriptionId to FieldMatchingStrategy.EXACT_MATCH),
       KEY_SPAN_APPLICATION_ID to (request.applicationId to FieldMatchingStrategy.EXACT_MATCH),
       KEY_SPAN_ENTITY to (request.entity to FieldMatchingStrategy.EXACT_MATCH),
       KEY_SPAN_CALLBACK_ID to (request.callbackId to FieldMatchingStrategy.EXACT_MATCH)

@@ -41,12 +41,10 @@ import com.hookiesolutions.webhookie.common.service.TimeMachine
 import com.hookiesolutions.webhookie.webhook.service.WebhookApiServiceDelegate
 import org.slf4j.Logger
 import org.springframework.data.domain.Pageable
-import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import reactor.kotlin.core.publisher.toMono
 import java.time.Instant
 
 /**
@@ -121,22 +119,6 @@ class TraceService(
       .flatMapMany {
         log.info("Fetching all traces by topics: '{}'", it)
         repository.userTraces(it.topics, request, it.isAdmin, pageable)
-      }
-  }
-
-  @PreAuthorize("isAuthenticated()")
-  fun topicTraces(pageable: Pageable, topic: String): Flux<Trace> {
-    return webhookServiceDelegate.providerTopicsConsideringAdmin()
-      .flatMap {
-        if(it.isAdmin || it.topics.contains(topic)) {
-          topic.toMono()
-        } else {
-          AccessDeniedException("Access to subscription traffic is denied due to '$topic' topic access").toMono()
-        }
-      }
-      .flatMapMany {
-        log.info("Fetching all traces by topic: '{}'", it)
-        repository.topicTraces(it, pageable)
       }
   }
 

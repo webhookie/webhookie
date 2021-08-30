@@ -31,6 +31,7 @@ import java.time.Instant
  * @since 19/3/21 14:40
  */
 data class SpanRequest(
+  val subscriptionId: String? = null,
   val traceId: String? = null,
   val spanId: String? = null,
   val topic: String? = null,
@@ -42,6 +43,7 @@ data class SpanRequest(
   val status: List<SpanStatus> = emptyList()
 ) {
   class Builder {
+    private var subscriptionId: String? = null
     private var traceId: String? = null
     private var spanId: String? = null
     private var topic: String? = null
@@ -52,6 +54,7 @@ data class SpanRequest(
     private var from: Instant? = null
     private var to: Instant? = null
 
+    fun subscriptionId(subscriptionId: String?) = apply { this.subscriptionId = subscriptionId }
     fun traceId(traceId: String?) = apply { this.traceId = traceId }
     fun spanId(spanId: String?) = apply { this.spanId = spanId }
     fun topic(topic: String?) = apply { this.topic = topic }
@@ -64,6 +67,7 @@ data class SpanRequest(
 
     fun build(): SpanRequest {
       return SpanRequest(
+        subscriptionId = subscriptionId,
         traceId = traceId,
         spanId = spanId,
         topic = topic,
