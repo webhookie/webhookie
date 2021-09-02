@@ -23,7 +23,6 @@
 package com.hookiesolutions.webhookie.audit.service
 
 import com.hookiesolutions.webhookie.common.model.dto.ApplicationDetails
-import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
 import com.hookiesolutions.webhookie.subscription.service.ApplicationService
 import com.hookiesolutions.webhookie.subscription.service.SubscriptionService
 import org.springframework.data.domain.Pageable
@@ -50,10 +49,5 @@ class SubscriptionServiceDelegate(
     return subscriptionService.consumerSubscriptions(Pageable.unpaged(), null, null)
       .map { it.topic }
       .collectList()
-  }
-
-  fun subscriptionByIdVerifyingReadAccess(subscriptionId: String): Mono<SubscriptionDTO> {
-    return subscriptionService.subscriptionByIdVerifyingReadAccess(subscriptionId)
-      .map { it.dto() }
   }
 }

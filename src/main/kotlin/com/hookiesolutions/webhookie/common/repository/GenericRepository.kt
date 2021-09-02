@@ -27,6 +27,7 @@ import com.hookiesolutions.webhookie.common.exception.EntityExistsException
 import com.hookiesolutions.webhookie.common.exception.EntityNotFoundException
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
 import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.byId
+import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.byObjectId
 import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.entityCreatedInRange
 import com.hookiesolutions.webhookie.common.model.DeletableEntity
 import com.hookiesolutions.webhookie.common.model.StatusCountRow
@@ -87,6 +88,10 @@ abstract class GenericRepository<E: AbstractEntity>(
   fun delete(criteria: Criteria): Mono<Long> {
     return mongoTemplate.remove(query(criteria), clazz)
       .map { it.deletedCount }
+  }
+
+  fun delete(id: String): Mono<Long> {
+    return delete(byObjectId(id))
   }
 
   @VerifyEntityCanBeDeleted
