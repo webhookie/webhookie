@@ -99,7 +99,8 @@ class WebhookApiService(
   fun deleteWebhookApi(id: String): Mono<String> {
     return repository.findByIdVerifyingWriteAccess(id)
       .map { deletable(it) }
-      .flatMap { repository.delete(it) }
+      .flatMap { repository.delete(id) }
+      .map { id }
   }
 
   @PreAuthorize("hasAuthority('${ROLE_PROVIDER}')")
