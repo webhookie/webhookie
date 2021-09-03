@@ -106,6 +106,12 @@ class Constants {
         const val TRAFFIC_RESEND_SPAN_CHANNEL_NAME = "resendSpanChannel"
       }
     }
+
+    class Webhook {
+      companion object {
+        const val WEBHOOK_API_DELETED_CHANNEL = "webhookApiDeletedChannel"
+      }
+    }
   }
 
   class Security {

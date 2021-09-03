@@ -22,6 +22,7 @@
 
 package com.hookiesolutions.webhookie.subscription.service
 
+import com.hookiesolutions.webhookie.common.Constants.Channels.Webhook.Companion.WEBHOOK_API_DELETED_CHANNEL
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_ADMIN
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_CONSUMER
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_PROVIDER
@@ -59,6 +60,7 @@ import com.hookiesolutions.webhookie.subscription.service.validator.Subscription
 import com.hookiesolutions.webhookie.webhook.service.WebhookApiServiceDelegate
 import org.slf4j.Logger
 import org.springframework.data.domain.Pageable
+import org.springframework.integration.annotation.ServiceActivator
 import org.springframework.messaging.MessageChannel
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.security.access.prepost.PreAuthorize
@@ -357,5 +359,15 @@ class SubscriptionService(
       Subscription.Keys.KEY_STATUS_UPDATE,
       StatusUpdate.Keys.KEY_STATUS
     )
+  }
+
+  @ServiceActivator(inputChannel = WEBHOOK_API_DELETED_CHANNEL)
+  fun suspendTopicSubscriptions(topics: List<String>) {
+    log.info("Suspending all subscriptions for '{}' topics due to deleted webhook api", topics.size)
+    val statusUpdate = suspended(timeMachine.now(), "Topic has been deleted")
+    repository.suspendAllFor(topics, statusUpdate)
+      .subscribe {
+        log.info("'{}'/'{}' subscription(s) have been suspended due to deleted webhook api", it.t2, it.t1)
+      }
   }
 }

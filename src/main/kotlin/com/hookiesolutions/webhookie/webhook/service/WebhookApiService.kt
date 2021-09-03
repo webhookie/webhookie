@@ -31,7 +31,6 @@ import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Comp
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_PROVIDER
 import com.hookiesolutions.webhookie.common.message.entity.EntityDeletedMessage
 import com.hookiesolutions.webhookie.common.message.entity.EntityUpdatedMessage
-import com.hookiesolutions.webhookie.common.model.DeletableEntity.Companion.deletable
 import com.hookiesolutions.webhookie.common.model.UpdatableEntity.Companion.updatable
 import com.hookiesolutions.webhookie.common.service.AccessGroupServiceDelegate
 import com.hookiesolutions.webhookie.webhook.domain.Topic
@@ -61,6 +60,7 @@ class WebhookApiService(
   private val repository: WebhookApiRepository,
   private val securityService: WebhookSecurityService,
   private val accessGroupServiceDelegate: AccessGroupServiceDelegate,
+  private val publisher: WebhookEventPublisher,
   private val asyncApiService: AsyncApiService,
   private val log: Logger,
 ) {
@@ -97,9 +97,21 @@ class WebhookApiService(
 
   @PreAuthorize("hasAuthority('${ROLE_PROVIDER}')")
   fun deleteWebhookApi(id: String): Mono<String> {
+    log.info("Deleting WebhookApi with id: '{}'", id)
     return repository.findByIdVerifyingWriteAccess(id)
-      .map { deletable(it) }
-      .flatMap { repository.delete(id) }
+      .flatMap { api ->
+        val noOfActiveSubscriptions = api.webhooks.map { it.numberOfSubscriptions }.reduce { l, r -> l + r }
+        if(noOfActiveSubscriptions == 0) {
+          repository.delete(id)
+            .map { api }
+        } else {
+          IllegalArgumentException("WebhookApo has $noOfActiveSubscriptions active subscriptions and cannot be deleted").toMono()
+        }
+      }
+      .doOnNext {
+        log.debug("'{}' Api has been deleted successfully!", it.title)
+        publisher.publishWebhookApiDeletedEvent(it)
+      }
       .map { id }
   }
 

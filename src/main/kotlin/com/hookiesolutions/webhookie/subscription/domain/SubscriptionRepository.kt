@@ -62,6 +62,8 @@ import org.springframework.data.mongodb.core.query.Query.query
 import org.springframework.stereotype.Repository
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import reactor.util.function.Tuple2
+import reactor.util.function.Tuples
 
 
 /**
@@ -223,6 +225,18 @@ class SubscriptionRepository(
       query(callbackIdIs(callbackId).andOperator(subscriptionIsActive())),
       Subscription::class.java
     )
+  }
+
+  fun suspendAllFor(topics: List<String>, statusUpdate: StatusUpdate): Mono<Tuple2<Long, Long>> {
+    return mongoTemplate
+      .updateMulti(
+        query(topicIsIn(topics)),
+        subscriptionStatusUpdate(statusUpdate),
+        Subscription::class.java
+      )
+      .map {
+        Tuples.of(it.matchedCount, it.modifiedCount)
+      }
   }
 
   companion object {
