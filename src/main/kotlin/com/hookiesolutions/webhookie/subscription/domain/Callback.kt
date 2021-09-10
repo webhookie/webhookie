@@ -43,8 +43,8 @@ import org.springframework.http.HttpMethod
 @TypeAlias("callback")
 @CompoundIndexes(
   CompoundIndex(
-    name = "callback_request_target",
-    def = "{'httpMethod' : 1, 'url': 1}",
+    name = "callback_applicationId_request_target",
+    def = "{'applicationId' : 1, 'httpMethod' : 1, 'url': 1}",
     unique = true
   ),
   CompoundIndex(
