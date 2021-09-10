@@ -164,6 +164,14 @@ class TrafficController(
   }
 
   @GetMapping(
+    "$REQUEST_MAPPING_TRAFFIC_SPAN/trace/{traceId}/request",
+    produces = [MediaType.APPLICATION_JSON_VALUE]
+  )
+  fun spanRequest(@PathVariable traceId: String): Mono<TraceRequestBody> {
+    return traceRequest(traceId)
+  }
+
+  @GetMapping(
     "$REQUEST_MAPPING_TRAFFIC_TRACE/{traceId}/request",
     produces = [MediaType.APPLICATION_JSON_VALUE]
   )
