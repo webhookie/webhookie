@@ -27,8 +27,15 @@ import com.hookiesolutions.webhookie.subscription.domain.Application
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
 import com.hookiesolutions.webhookie.subscription.domain.Callback
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
+import org.slf4j.Logger
+import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.event.EventListener
+import org.springframework.core.Ordered
+import org.springframework.core.annotation.Order
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate
+import org.springframework.data.mongodb.core.indexOps
 
 /**
  *
@@ -36,7 +43,21 @@ import org.springframework.context.annotation.Configuration
  * @since 3/12/20 17:33
  */
 @Configuration
-class SubscriptionMongoConfig {
+class SubscriptionMongoConfig(
+  private val mongoTemplate: ReactiveMongoTemplate,
+  private val logger: Logger
+) {
+  @Order(Ordered.HIGHEST_PRECEDENCE)
+  @EventListener(ApplicationReadyEvent::class)
+  fun deleteCallbackAfterStartup() {
+    mongoTemplate.indexOps<Callback>()
+      .dropIndex("callback_request_target")
+      .subscribe(
+        { logger.info("'callback_request_target' index was removed successfully!") },
+        { logger.warn("Unable to remove 'callback_request_target' index . original message: '{}'", it.localizedMessage)}
+      )
+  }
+
   @Bean
   fun subscriptionIndexEntities(): List<Class<out AbstractEntity>> =
     listOf(

@@ -23,7 +23,6 @@
 package com.hookiesolutions.webhookie.common.config
 
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
-import com.hookiesolutions.webhookie.subscription.domain.Callback
 import org.slf4j.Logger
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.annotation.Configuration
@@ -32,7 +31,6 @@ import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.index.MongoPersistentEntityIndexResolver
-import org.springframework.data.mongodb.core.indexOps
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toFlux
@@ -50,18 +48,7 @@ class CommonMongoConfig(
   private val logger: Logger,
   private val indexEntityList: List<List<Class<out AbstractEntity>>>
 ) {
-  @Order(Ordered.HIGHEST_PRECEDENCE)
-  @EventListener(ApplicationReadyEvent::class)
-  fun deleteCallbackAfterStartup() {
-    mongoTemplate.indexOps<Callback>()
-      .dropIndex("callback_request_target")
-      .subscribe(
-        { logger.info("'callback_request_target' index was removed successfully!") },
-        { logger.warn("Unable to remove 'callback_request_target' index . original message: '{}'", it.localizedMessage)}
-      )
-  }
-
-  @Order(Ordered.HIGHEST_PRECEDENCE + 1)
+  @Order(Ordered.HIGHEST_PRECEDENCE + 100)
   @EventListener(ApplicationReadyEvent::class)
   fun initIndicesAfterStartup() {
     val resolver = MongoPersistentEntityIndexResolver(mongoMappingContext)
