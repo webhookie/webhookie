@@ -38,12 +38,13 @@ class SpanConsumerAccessVoter(
 ) {
   fun vote(spanMono: Mono<Span>): Mono<Span> {
     val userApplicationsMono = subscriptionServiceDelegate.userApplications()
+      .map { it.applicationId }
       .collectList()
       .onErrorReturn(emptyList())
 
     return spanMono
       .zipWith(userApplicationsMono)
-      .filter { it.t2.contains(it.t1.subscription.application) }
+      .filter { it.t2.contains(it.t1.subscription.application.applicationId) }
       .map { it.t1 }
   }
 }
