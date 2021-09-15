@@ -90,6 +90,9 @@ class ApplicationSecurityService(
 
     return verifyReadAccess(applicationMono)
       .flatMap { subscriptionMono }
+      .onErrorResume(AccessDeniedException::class.java) {
+        verifySubscriptionProviderAccess(subscriptionMono)
+      }
   }
 
   fun verifySubscriptionWriteAccess(subscriptionMono: Mono<Subscription>): Mono<Subscription> {
