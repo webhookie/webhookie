@@ -82,7 +82,7 @@ class MongoPlayground {
     )
     val operations = arrayOf(
       f,
-      GenericRepository.mongoSet("$key.${SpanRetry.KEY_RETRY_STATUS_CODE}", 405),
+      GenericRepository.mongoSet("$key.response.statusCode", 405),
       GenericRepository.mongoSet(Span.Keys.KEY_RETRY_HISTORY,
       GenericRepository.insertIntoArray(Span.Keys.KEY_RETRY_HISTORY, SpanRetry.KEY_RETRY_NO, key, 3)),
       GenericRepository.mongoSet(Span.Keys.KEY_LATEST_RESULT, SpanRetry(Instant.now(), 3, 10, "", SpanSendReason.RETRY, r)),
