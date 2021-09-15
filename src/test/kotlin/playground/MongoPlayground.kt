@@ -1,6 +1,7 @@
 package playground
 
 import com.hookiesolutions.webhookie.audit.domain.Span
+import com.hookiesolutions.webhookie.audit.domain.SpanRequest
 import com.hookiesolutions.webhookie.audit.domain.SpanRetry
 import com.hookiesolutions.webhookie.audit.domain.SpanSendReason
 import com.hookiesolutions.webhookie.common.repository.GenericRepository
@@ -74,12 +75,17 @@ class MongoPlayground {
         .addField(key)
         .withValue(expr)
         .build()
+    val r = SpanRequest(
+      mapOf(),
+      "",
+      "".toByteArray()
+    )
     val operations = arrayOf(
       f,
       GenericRepository.mongoSet("$key.${SpanRetry.KEY_RETRY_STATUS_CODE}", 405),
       GenericRepository.mongoSet(Span.Keys.KEY_RETRY_HISTORY,
-        GenericRepository.insertIntoArray(Span.Keys.KEY_RETRY_HISTORY, SpanRetry.KEY_RETRY_NO, key, 3)),
-      GenericRepository.mongoSet(Span.Keys.KEY_LATEST_RESULT, SpanRetry(Instant.now(), 3, 10, "", SpanSendReason.RETRY)),
+      GenericRepository.insertIntoArray(Span.Keys.KEY_RETRY_HISTORY, SpanRetry.KEY_RETRY_NO, key, 3)),
+      GenericRepository.mongoSet(Span.Keys.KEY_LATEST_RESULT, SpanRetry(Instant.now(), 3, 10, "", SpanSendReason.RETRY, r)),
       GenericRepository.mongoSetLastElemOfArray(Span.Keys.KEY_RETRY_HISTORY, Span.Keys.KEY_NEXT_RETRY),
       GenericRepository.mongoUnset(key)
     )
