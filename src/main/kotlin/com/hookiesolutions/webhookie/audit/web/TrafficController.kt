@@ -148,9 +148,7 @@ class TrafficController(
   )
   fun spanResponse(@PathVariable spanId: String): Mono<SpanHttpResponse> {
     return spanService.fetchSpanVerifyingReadAccess(spanId)
-      .flatMap {
-        Mono.justOrEmpty(it.latestResponse)
-      }
+      .flatMap { Mono.justOrEmpty(it.response) }
       .switchIfEmpty(Mono.error(EntityNotFoundException("Span Response is not ready yet!")))
   }
 
@@ -160,7 +158,7 @@ class TrafficController(
   )
   fun spanRequest(@PathVariable spanId: String): Mono<SpanHttpRequest> {
     return spanService.fetchSpanVerifyingReadAccess(spanId)
-      .map { it.nextRetry.request }
+      .map { it.request }
   }
 
   @GetMapping(

@@ -82,7 +82,6 @@ import java.time.Instant
 @Service
 class SpanService(
   private val repository: SpanRepository,
-  private val spanRequestFactory: SpanRequestFactory,
   private val traceRepository: TraceRepository,
   private val timeMachine: TimeMachine,
   private val webhookServiceDelegate: WebhookApiServiceDelegate,
@@ -137,7 +136,7 @@ class SpanService(
       .build()
 
     return repository.responseStatusUpdate(message.spanId, notOk(time), response)
-      .doOnNext { log.info("'{}', '{}' Span was updated with other error response: '{}'", it.spanId, it.traceId, it.latestResponse?.statusCode) }
+      .doOnNext { log.info("'{}', '{}' Span was updated with other error response: '{}'", it.spanId, it.traceId, it.response?.statusCode) }
   }
 
   fun updateWithRetryableServerError(message: PublisherResponseErrorMessage): Mono<Span> {
@@ -150,7 +149,7 @@ class SpanService(
       .build()
 
     return repository.updateWithResponse(message.spanId, response)
-      .doOnNext { log.info("'{}', '{}' Span was updated with server response: '{}'", it.spanId, it.traceId, it.latestResponse?.statusCode) }
+      .doOnNext { log.info("'{}', '{}' Span was updated with server response: '{}'", it.spanId, it.traceId, it.response?.statusCode) }
   }
 
   @Suppress("DuplicatedCode")
@@ -164,7 +163,7 @@ class SpanService(
       .build()
 
     return repository.updateWithResponse(message.spanId, response)
-      .doOnNext { log.info("'{}', '{}' Span was updated with client error response: '{}'", it.spanId, it.traceId, it.latestResponse?.statusCode) }
+      .doOnNext { log.info("'{}', '{}' Span was updated with client error response: '{}'", it.spanId, it.traceId, it.response?.statusCode) }
   }
 
   @Suppress("DuplicatedCode")
@@ -178,7 +177,7 @@ class SpanService(
       .build()
 
     return repository.responseStatusUpdate(message.spanId, notOk(time), response)
-      .doOnNext { log.info("'{}', '{}' Span was updated with other error response: '{}'", it.spanId, it.traceId, it.latestResponse?.statusCode) }
+      .doOnNext { log.info("'{}', '{}' Span was updated with other error response: '{}'", it.spanId, it.traceId, it.response?.statusCode) }
   }
 
   @Suppress("DuplicatedCode")
@@ -192,7 +191,7 @@ class SpanService(
       .build()
 
     return repository.responseStatusUpdate(message.spanId, notOk(time), response)
-      .doOnNext { log.info("'{}', '{}' Span was updated with subscription error response: '{}'", it.spanId, it.traceId, it.latestResponse?.statusCode) }
+      .doOnNext { log.info("'{}', '{}' Span was updated with subscription error response: '{}'", it.spanId, it.traceId, it.response?.statusCode) }
   }
 
   fun updateWithSuccessResponse(message: PublisherSuccessMessage): Mono<Span> {
@@ -205,7 +204,7 @@ class SpanService(
       .build()
 
     return repository.responseStatusUpdate(message.spanId, ok(time), response)
-      .doOnNext { log.info("'{}', '{}' Span was updated with server response: '{}'", it.spanId, it.traceId, it.latestResponse?.statusCode) }
+      .doOnNext { log.info("'{}', '{}' Span was updated with server response: '{}'", it.spanId, it.traceId, it.response?.statusCode) }
   }
 
   fun markAsRetrying(message: Message<RetryableSubscriptionMessage>): Mono<Span> {
@@ -214,15 +213,7 @@ class SpanService(
     val time = timeMachine.now()
       .plusSeconds(payload.delay.seconds)
     val details = factory.calculateSpanSendDetails(message)
-
-    val retry = SpanRetry(
-      time,
-      payload.totalNumberOfTries,
-      payload.numberOfRetries,
-      details.t2,
-      details.t1,
-      spanRequestFactory.createFrom(message.payload)
-    )
+    val retry = SpanRetry(time, payload.totalNumberOfTries, payload.numberOfRetries, details.t2, details.t1)
     return repository.retryStatusUpdate(payload.spanId, retryingSpan(time), retry)
       .doOnNext { logSpan(it) }
   }
@@ -230,15 +221,7 @@ class SpanService(
   fun addRetry(message: RetryableSubscriptionMessage): Mono<Span> {
     log.info("Delaying '{}', '{}' span for '{}' seconds", message.spanId, message.traceId, message.delay.seconds)
     val time = timeMachine.now().plusSeconds(message.delay.seconds)
-
-    val retry = SpanRetry(
-      time,
-      message.totalNumberOfTries,
-      message.numberOfRetries,
-      SENT_BY_WEBHOOKIE,
-      SpanSendReason.RETRY,
-      spanRequestFactory.createFrom(message)
-    )
+    val retry = SpanRetry(time, message.totalNumberOfTries, message.numberOfRetries, SENT_BY_WEBHOOKIE, SpanSendReason.RETRY)
     return repository.addRetry(message.spanId, retry)
       .doOnNext { logSpan(it) }
   }

@@ -28,7 +28,6 @@ import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SPAN_T
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SUBSCRIPTION
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_TRACE_ID
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.SPAN_COLLECTION_NAME
-import com.hookiesolutions.webhookie.audit.domain.SpanRetry.Companion.KEY_SPAN_RESPONSE
 import com.hookiesolutions.webhookie.audit.domain.SpanRetry.Companion.SENT_BY_WEBHOOKIE
 import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate.Keys.Companion.KEY_STATUS
 import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate.Keys.Companion.KEY_TIME
@@ -72,14 +71,11 @@ data class Span(
   val totalNumberOfTries: Int = 1,
   val lastStatus: SpanStatusUpdate,
   val statusHistory: List<SpanStatusUpdate> = emptyList(),
-  val nextRetry: SpanRetry,
+  val nextRetry: SpanRetry? = null,
   val retryHistory: Set<SpanRetry> = emptySet(),
+  val request: SpanHttpRequest,
+  val response: SpanHttpResponse? = null
 ): AbstractEntity() {
-  val latestResponse: SpanHttpResponse?
-    get() = nextRetry.response ?: retryHistory
-      .filter { it.response != null }
-      .maxByOrNull { it.time }?.response
-
   class Queries {
     companion object {
       fun bySpanId(spanId: String): Criteria {
@@ -122,7 +118,7 @@ data class Span(
       const val KEY_LAST_STATUS = "lastStatus"
       const val KEY_NEXT_RETRY = "nextRetry"
       const val KEY_RETRY_HISTORY = "retryHistory"
-      val KEY_LATEST_RESULT = fieldName(KEY_NEXT_RETRY, KEY_SPAN_RESPONSE)
+      const val KEY_LATEST_RESULT = "response"
       const val KEY_TOTAL_NUMBER_OF_TRIES = "totalNumberOfTries"
 
       val KEY_SPAN_TOPIC = fieldName(KEY_SUBSCRIPTION, KEY_TOPIC)
@@ -190,15 +186,14 @@ data class Span(
 
     fun build(): Span {
       val statusUpdate = SpanStatusUpdate(status, time)
-      val spanRetry = SpanRetry(time, 1, retryNo.toInt(), sendBy, sendReason, request)
       return Span(
         traceId = traceId,
         spanId = spanId,
         subscription = SubscriptionDetails.from(subscription),
         lastStatus = statusUpdate,
         statusHistory = listOf(statusUpdate),
-        retryHistory = setOf(spanRetry),
-        nextRetry = spanRetry
+        retryHistory = setOf(SpanRetry(time, 1, retryNo.toInt(), sendBy, sendReason)),
+        request = request
       )
     }
   }

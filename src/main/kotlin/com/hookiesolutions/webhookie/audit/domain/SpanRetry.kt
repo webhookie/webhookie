@@ -30,12 +30,11 @@ data class SpanRetry (
   val retryNo: Int,
   val sentBy: String,
   val reason: SpanSendReason,
-  val request: SpanHttpRequest,
-  val response: SpanHttpResponse? = null
+  val statusCode: Int? = null
 ) {
   companion object {
     const val KEY_RETRY_NO = "no"
-    const val KEY_SPAN_RESPONSE = "response"
+    const val KEY_RETRY_STATUS_CODE = "statusCode"
 
     const val SENT_BY_WEBHOOKIE = "Webhookie"
   }

@@ -28,6 +28,7 @@ import com.hookiesolutions.webhookie.common.message.publisher.PublisherResponseE
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherSuccessMessage
 import com.hookiesolutions.webhookie.common.message.subscription.MissingSubscriptionMessage
 import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
 import org.springframework.util.CollectionUtils
 import java.time.Instant
 
@@ -36,6 +37,7 @@ data class SpanHttpResponse (
   val statusCode: Int,
   val body: String,
   val headers: HttpHeaders,
+  val contentType: String,
   val retryNo: Int
 ) {
   class Keys {
@@ -90,7 +92,8 @@ data class SpanHttpResponse (
     }
 
     fun build(): SpanHttpResponse {
-      return SpanHttpResponse(time, statusCode, body, headers, retryNo)
+      val contentType = headers.contentType ?: MediaType.TEXT_MARKDOWN
+      return SpanHttpResponse(time, statusCode, body, headers, contentType.toString(), retryNo)
     }
   }
 }

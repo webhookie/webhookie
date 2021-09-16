@@ -37,12 +37,13 @@ data class SpanResponse(
   val responseCode: Int,
   val status: SpanStatusUpdate,
   val tries: Int,
-  val nextRetry: SpanRetry,
-  val latestResponse: SpanHttpResponse?
+  val nextRetry: SpanRetry?,
+  val request: SpanHttpRequest,
+  val response: SpanHttpResponse?
 ) {
   companion object {
     fun from(span: Span): SpanResponse {
-      val responseCode = span.latestResponse?.statusCode ?: -1
+      val responseCode = span.response?.statusCode ?: -1
       return SpanResponse(
         span.traceId,
         span.spanId,
@@ -51,7 +52,8 @@ data class SpanResponse(
         span.lastStatus,
         span.totalNumberOfTries,
         span.nextRetry,
-        span.latestResponse
+        span.request,
+        span.response
       )
     }
   }

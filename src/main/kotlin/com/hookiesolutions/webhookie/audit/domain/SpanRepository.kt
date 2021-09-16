@@ -46,7 +46,7 @@ import com.hookiesolutions.webhookie.audit.domain.Span.Queries.Companion.spanIsB
 import com.hookiesolutions.webhookie.audit.domain.Span.Queries.Companion.spanTopicIn
 import com.hookiesolutions.webhookie.audit.domain.Span.Queries.Companion.statusIn
 import com.hookiesolutions.webhookie.audit.domain.SpanRetry.Companion.KEY_RETRY_NO
-import com.hookiesolutions.webhookie.audit.domain.SpanRetry.Companion.KEY_SPAN_RESPONSE
+import com.hookiesolutions.webhookie.audit.domain.SpanRetry.Companion.KEY_RETRY_STATUS_CODE
 import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate.Keys.Companion.KEY_TIME
 import com.hookiesolutions.webhookie.audit.service.security.VerifySpanReadAccess
 import com.hookiesolutions.webhookie.audit.web.model.request.SpanRequest
@@ -172,9 +172,9 @@ class SpanRepository(
 
     return arrayOf(
       addMongoField(key, eqFilter(KEY_RETRY_HISTORY, KEY_RETRY_NO, response.retryNo)),
-      mongoSet(fieldName(key, KEY_SPAN_RESPONSE), response),
+      mongoSet("$key.$KEY_RETRY_STATUS_CODE", response.statusCode),
       mongoSet(KEY_RETRY_HISTORY, insertIntoArray(KEY_RETRY_HISTORY, KEY_RETRY_NO, key, response.retryNo)),
-//      mongoSet(KEY_LATEST_RESULT, res),
+      mongoSet(KEY_LATEST_RESULT, response),
       mongoSetLastElemOfArray(KEY_RETRY_HISTORY, KEY_NEXT_RETRY),
       mongoUnset(key)
     )
