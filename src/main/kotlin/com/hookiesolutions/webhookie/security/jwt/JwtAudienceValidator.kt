@@ -22,7 +22,7 @@
 
 package com.hookiesolutions.webhookie.security.jwt
 
-import com.hookiesolutions.webhookie.security.WebHookieSecurityProperties
+import com.hookiesolutions.webhookie.security.WebhookieSecurityProperties
 import org.springframework.security.oauth2.core.OAuth2Error
 import org.springframework.security.oauth2.core.OAuth2TokenValidator
 import org.springframework.security.oauth2.core.OAuth2TokenValidatorResult
@@ -36,7 +36,7 @@ import org.springframework.stereotype.Component
  */
 @Component
 class AudienceValidator(
-  private val securityProperties: WebHookieSecurityProperties,
+  private val securityProperties: WebhookieSecurityProperties,
 ) : OAuth2TokenValidator<Jwt> {
   var error: OAuth2Error = OAuth2Error("invalid_token", "The required audience is missing", null)
 

@@ -23,7 +23,7 @@
 package com.hookiesolutions.webhookie.security.jwt
 
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_CONSUMER
-import com.hookiesolutions.webhookie.security.WebHookieSecurityProperties
+import com.hookiesolutions.webhookie.security.WebhookieSecurityProperties
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.stereotype.Component
@@ -35,7 +35,7 @@ import org.springframework.stereotype.Component
  */
 @Component
 class AuthoritiesMapper(
-  private val securityProperties: WebHookieSecurityProperties
+  private val securityProperties: WebhookieSecurityProperties
 ) {
   fun map(roles: List<String>): Set<GrantedAuthority> {
     return roles

@@ -22,7 +22,7 @@
 
 package com.hookiesolutions.webhookie.security.jwt
 
-import com.hookiesolutions.webhookie.security.WebHookieSecurityProperties
+import com.hookiesolutions.webhookie.security.WebhookieSecurityProperties
 import org.springframework.core.convert.converter.Converter
 import org.springframework.security.authentication.AbstractAuthenticationToken
 import org.springframework.security.oauth2.jwt.Jwt
@@ -36,7 +36,7 @@ import reactor.core.publisher.Mono
  */
 @Component
 class JwtAuthoritiesConverter(
-  private val securityProperties: WebHookieSecurityProperties,
+  private val securityProperties: WebhookieSecurityProperties,
   private val authoritiesMapper: AuthoritiesMapper,
   private val tokenGroupReader: TokenGroupReader,
   private val tokenAttributesExtractor: JwtTokenAttributesExtractor

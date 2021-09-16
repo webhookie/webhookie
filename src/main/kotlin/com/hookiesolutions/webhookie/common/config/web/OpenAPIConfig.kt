@@ -22,7 +22,7 @@
 
 package com.hookiesolutions.webhookie.common.config.web
 
-import com.hookiesolutions.webhookie.security.WebHookieSecurityProperties
+import com.hookiesolutions.webhookie.security.WebhookieSecurityProperties
 import io.swagger.v3.oas.models.Components
 import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.info.Info
@@ -63,7 +63,7 @@ class OpenAPIConfig {
   @Bean
   fun openApiSecurityScheme(
     oauthFlow: OAuthFlow,
-    securityProperties: WebHookieSecurityProperties
+    securityProperties: WebhookieSecurityProperties
   ) : SecurityScheme {
     return SecurityScheme()
       .scheme(OAUTH2_SCHEME)
@@ -79,7 +79,7 @@ class OpenAPIConfig {
   @Bean
   fun oauthFlow(
     resourceServerProperties: OAuth2ResourceServerProperties,
-    securityProperties: WebHookieSecurityProperties
+    securityProperties: WebhookieSecurityProperties
   ): OAuthFlow {
     val issuerUri = resourceServerProperties.jwt.issuerUri
     val authorizationUrl = "$issuerUri${securityProperties.oauth2.authorizationUri}?audience=${securityProperties.audience}"

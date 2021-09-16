@@ -23,7 +23,7 @@
 package com.hookiesolutions.webhookie.common.web
 
 import com.hookiesolutions.webhookie.common.web.CommonAPIDocs.Companion.REQUEST_MAPPING_PUBLIC
-import com.hookiesolutions.webhookie.security.WebHookieSecurityProperties
+import com.hookiesolutions.webhookie.security.WebhookieSecurityProperties
 import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
@@ -40,7 +40,7 @@ import reactor.kotlin.core.publisher.toMono
 @RestController
 @RequestMapping(REQUEST_MAPPING_PUBLIC)
 class PublicController(
-  private val securityProperties: WebHookieSecurityProperties,
+  private val securityProperties: WebhookieSecurityProperties,
   private val oAuth2ResourceServerProperties: OAuth2ResourceServerProperties
 ) {
   @GetMapping(

@@ -77,7 +77,7 @@ import javax.annotation.PostConstruct
 @EnableWebFluxSecurity
 @EnableReactiveMethodSecurity
 class SecurityConfig(
-  private val securityProperties: WebHookieSecurityProperties,
+  private val securityProperties: WebhookieSecurityProperties,
   private val audienceValidator: AudienceValidator,
   private val jwtDecoder: ReactiveJwtDecoder,
   private val resourceServerProperties: OAuth2ResourceServerProperties,
@@ -136,7 +136,7 @@ class SecurityConfig(
   }
 
   @Bean
-  fun corsConfigurationSource(securityProperties: WebHookieSecurityProperties): CorsConfigurationSource {
+  fun corsConfigurationSource(securityProperties: WebhookieSecurityProperties): CorsConfigurationSource {
     val configuration = CorsConfiguration()
     configuration.allowedOrigins = securityProperties.allowedOrigins
     configuration.addAllowedMethod(CorsConfiguration.ALL)

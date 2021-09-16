@@ -23,7 +23,7 @@
 package com.hookiesolutions.webhookie.common.health
 
 import com.hookiesolutions.webhookie.consumer.config.ConsumerProperties
-import com.hookiesolutions.webhookie.security.WebHookieSecurityProperties
+import com.hookiesolutions.webhookie.security.WebhookieSecurityProperties
 import com.hookiesolutions.webhookie.subscription.config.SubscriptionProperties
 import com.hookiesolutions.webhookie.webhook.config.parser.ParserServiceProperties
 import org.springframework.boot.actuate.health.Health
@@ -40,7 +40,7 @@ import reactor.kotlin.core.publisher.toMono
 @Component
 class WebhookieHealthIndicator(
   private val parserServiceProperties: ParserServiceProperties,
-  private val webHookieSecurityProperties: WebHookieSecurityProperties,
+  private val webHookieSecurityProperties: WebhookieSecurityProperties,
   private val subscriptionProperties: SubscriptionProperties,
   private val consumerProperties: ConsumerProperties
 ): ReactiveHealthIndicator {

@@ -24,7 +24,7 @@ package com.hookiesolutions.webhookie.security.jwt
 
 import com.hookiesolutions.webhookie.common.Constants.Companion.DEFAULT_CONSUMER_GROUP
 import com.hookiesolutions.webhookie.consumer.config.ConsumerProperties
-import com.hookiesolutions.webhookie.security.WebHookieSecurityProperties
+import com.hookiesolutions.webhookie.security.WebhookieSecurityProperties
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
@@ -36,7 +36,7 @@ import reactor.core.publisher.Mono
  */
 @Component
 class TokenGroupReader(
-  private val securityProperties: WebHookieSecurityProperties,
+  private val securityProperties: WebhookieSecurityProperties,
   private val tokenAttributesExtractor: JwtTokenAttributesExtractor,
   private val consumerProperties: ConsumerProperties
 ) {
