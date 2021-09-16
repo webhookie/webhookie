@@ -28,6 +28,7 @@ import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SPAN_T
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SUBSCRIPTION
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_TRACE_ID
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.SPAN_COLLECTION_NAME
+import com.hookiesolutions.webhookie.audit.domain.SpanRetry.Companion.KEY_SPAN_RESPONSE
 import com.hookiesolutions.webhookie.audit.domain.SpanRetry.Companion.SENT_BY_WEBHOOKIE
 import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate.Keys.Companion.KEY_STATUS
 import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate.Keys.Companion.KEY_TIME
@@ -51,6 +52,7 @@ import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Criteria.where
+import org.springframework.http.HttpHeaders
 import java.time.Instant
 
 /**
@@ -70,10 +72,14 @@ data class Span(
   val totalNumberOfTries: Int = 1,
   val lastStatus: SpanStatusUpdate,
   val statusHistory: List<SpanStatusUpdate> = emptyList(),
-  val nextRetry: SpanRetry? = null,
+  val nextRetry: SpanRetry,
   val retryHistory: Set<SpanRetry> = emptySet(),
-  val latestResult: SpanResult? = null
 ): AbstractEntity() {
+  val latestResult: SpanResult?
+    get() = nextRetry.response ?: retryHistory
+      .filter { it.response != null }
+      .maxByOrNull { it.time }?.response
+
   class Queries {
     companion object {
       fun bySpanId(spanId: String): Criteria {
@@ -116,7 +122,7 @@ data class Span(
       const val KEY_LAST_STATUS = "lastStatus"
       const val KEY_NEXT_RETRY = "nextRetry"
       const val KEY_RETRY_HISTORY = "retryHistory"
-      const val KEY_LATEST_RESULT = "latestResult"
+      val KEY_LATEST_RESULT = fieldName(KEY_NEXT_RETRY, KEY_SPAN_RESPONSE)
       const val KEY_TOTAL_NUMBER_OF_TRIES = "totalNumberOfTries"
 
       val KEY_SPAN_TOPIC = fieldName(KEY_SUBSCRIPTION, KEY_TOPIC)
@@ -138,6 +144,7 @@ data class Span(
     private lateinit var time: Instant
     private lateinit var sendBy: String
     private lateinit var sendReason: SpanSendReason
+    private lateinit var request: SubscriptionRequest
     private lateinit var retryNo: Number
 
     fun message(message: SignableSubscriptionMessage) = apply {
@@ -147,6 +154,15 @@ data class Span(
       this.sendBy = SENT_BY_WEBHOOKIE
       this.sendReason = SpanSendReason.SEND
       this.retryNo = message.numberOfRetries
+
+      val headers = HttpHeaders()
+      message.addMessageHeaders(headers)
+
+      this.request = SubscriptionRequest(
+        headers.toSingleValueMap(),
+        message.originalMessage.contentType,
+        message.originalMessage.payload.decodeToString()
+      )
     }
 
     fun message(message: BlockedSubscriptionMessageDTO) = apply {
@@ -156,6 +172,15 @@ data class Span(
       this.sendBy = SENT_BY_WEBHOOKIE
       this.sendReason = SpanSendReason.SEND
       this.retryNo = message.numberOfRetries
+
+      val headers = HttpHeaders()
+      message.consumerMessage.addMessageHeaders(headers)
+
+      this.request = SubscriptionRequest(
+        headers.toSingleValueMap(),
+        message.consumerMessage.contentType,
+        message.consumerMessage.payload.decodeToString()
+      )
     }
 
     fun traceId(traceId: String) = apply { this.traceId = traceId }
@@ -165,13 +190,15 @@ data class Span(
 
     fun build(): Span {
       val statusUpdate = SpanStatusUpdate(status, time)
+      val spanRetry = SpanRetry(time, 1, retryNo.toInt(), sendBy, sendReason, request)
       return Span(
         traceId = traceId,
         spanId = spanId,
         subscription = SubscriptionDetails.from(subscription),
         lastStatus = statusUpdate,
         statusHistory = listOf(statusUpdate),
-        retryHistory = setOf(SpanRetry(time, 1, retryNo.toInt(), sendBy, sendReason))
+        retryHistory = setOf(spanRetry),
+        nextRetry = spanRetry
       )
     }
   }

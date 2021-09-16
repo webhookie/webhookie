@@ -82,6 +82,7 @@ import java.time.Instant
 @Service
 class SpanService(
   private val repository: SpanRepository,
+  private val spanRequestFactory: SpanRequestFactory,
   private val traceRepository: TraceRepository,
   private val timeMachine: TimeMachine,
   private val webhookServiceDelegate: WebhookApiServiceDelegate,
@@ -149,7 +150,7 @@ class SpanService(
       .build()
 
     return repository.updateWithResponse(message.spanId, response)
-      .doOnNext { log.info("'{}', '{}' Span was updated with server response: '{}'", it.spanId, it.traceId, it.latestResult) }
+      .doOnNext { log.info("'{}', '{}' Span was updated with server response: '{}'", it.spanId, it.traceId, it.latestResult?.statusCode) }
   }
 
   @Suppress("DuplicatedCode")
@@ -213,7 +214,15 @@ class SpanService(
     val time = timeMachine.now()
       .plusSeconds(payload.delay.seconds)
     val details = factory.calculateSpanSendDetails(message)
-    val retry = SpanRetry(time, payload.totalNumberOfTries, payload.numberOfRetries, details.t2, details.t1)
+
+    val retry = SpanRetry(
+      time,
+      payload.totalNumberOfTries,
+      payload.numberOfRetries,
+      details.t2,
+      details.t1,
+      spanRequestFactory.createFrom(message.payload)
+    )
     return repository.retryStatusUpdate(payload.spanId, retryingSpan(time), retry)
       .doOnNext { logSpan(it) }
   }
@@ -221,7 +230,15 @@ class SpanService(
   fun addRetry(message: RetryableSubscriptionMessage): Mono<Span> {
     log.info("Delaying '{}', '{}' span for '{}' seconds", message.spanId, message.traceId, message.delay.seconds)
     val time = timeMachine.now().plusSeconds(message.delay.seconds)
-    val retry = SpanRetry(time, message.totalNumberOfTries, message.numberOfRetries, SENT_BY_WEBHOOKIE, SpanSendReason.RETRY)
+
+    val retry = SpanRetry(
+      time,
+      message.totalNumberOfTries,
+      message.numberOfRetries,
+      SENT_BY_WEBHOOKIE,
+      SpanSendReason.RETRY,
+      spanRequestFactory.createFrom(message)
+    )
     return repository.addRetry(message.spanId, retry)
       .doOnNext { logSpan(it) }
   }

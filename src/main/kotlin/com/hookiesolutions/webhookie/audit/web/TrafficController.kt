@@ -22,33 +22,23 @@
 
 package com.hookiesolutions.webhookie.audit.web
 
-import com.hookiesolutions.webhookie.audit.domain.Span
-import com.hookiesolutions.webhookie.audit.domain.SpanStatus
-import com.hookiesolutions.webhookie.audit.domain.TraceStatus
+import com.hookiesolutions.webhookie.audit.domain.*
 import com.hookiesolutions.webhookie.audit.service.SpanService
 import com.hookiesolutions.webhookie.audit.service.TraceService
 import com.hookiesolutions.webhookie.audit.web.TrafficAPIDocs.Companion.REQUEST_MAPPING_TRAFFIC
 import com.hookiesolutions.webhookie.audit.web.model.request.SpanRequest
 import com.hookiesolutions.webhookie.audit.web.model.request.TraceRequest
 import com.hookiesolutions.webhookie.audit.web.model.response.SpanResponse
-import com.hookiesolutions.webhookie.audit.web.model.response.SpanResponseBody
 import com.hookiesolutions.webhookie.audit.web.model.response.TraceRequestBody
 import com.hookiesolutions.webhookie.audit.web.model.response.TraceResponse
 import com.hookiesolutions.webhookie.common.config.web.OpenAPIConfig.Companion.OAUTH2_SCHEME
-import com.hookiesolutions.webhookie.common.service.TimeMachine
+import com.hookiesolutions.webhookie.common.exception.EntityNotFoundException
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.springframework.data.domain.Pageable
 import org.springframework.http.MediaType
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import reactor.kotlin.core.publisher.switchIfEmpty
 import java.time.Instant
 
 /**
@@ -63,7 +53,6 @@ import java.time.Instant
 class TrafficController(
   private val spanService: SpanService,
   private val traceService: TraceService,
-  private val timeMachine: TimeMachine
 ) {
   @GetMapping(
     REQUEST_MAPPING_TRAFFIC_SPAN,
@@ -157,18 +146,21 @@ class TrafficController(
     "$REQUEST_MAPPING_TRAFFIC_SPAN/{spanId}/response",
     produces = [MediaType.APPLICATION_JSON_VALUE]
   )
-  fun spanResponse(@PathVariable spanId: String): Mono<SpanResponseBody> {
+  fun spanResponse(@PathVariable spanId: String): Mono<SpanResult> {
     return spanService.fetchSpanVerifyingReadAccess(spanId)
-      .flatMap { SpanResponseBody.from(it) }
-      .switchIfEmpty { SpanResponseBody.notReady(spanId, timeMachine.now()) }
+      .flatMap {
+        Mono.justOrEmpty(it.latestResult)
+      }
+      .switchIfEmpty(Mono.error(EntityNotFoundException("Span Response is not ready yet!")))
   }
 
   @GetMapping(
-    "$REQUEST_MAPPING_TRAFFIC_SPAN/trace/{traceId}/request",
+    "$REQUEST_MAPPING_TRAFFIC_SPAN/{spanId}/request",
     produces = [MediaType.APPLICATION_JSON_VALUE]
   )
-  fun spanRequest(@PathVariable traceId: String): Mono<TraceRequestBody> {
-    return traceRequest(traceId)
+  fun spanRequest(@PathVariable spanId: String): Mono<SubscriptionRequest> {
+    return spanService.fetchSpanVerifyingReadAccess(spanId)
+      .map { it.nextRetry.request }
   }
 
   @GetMapping(

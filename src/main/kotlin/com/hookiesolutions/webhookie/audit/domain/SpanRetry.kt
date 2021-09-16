@@ -30,11 +30,12 @@ data class SpanRetry (
   val retryNo: Int,
   val sentBy: String,
   val reason: SpanSendReason,
-  val statusCode: Int? = null
+  val request: SubscriptionRequest,
+  val response: SpanResult? = null
 ) {
   companion object {
     const val KEY_RETRY_NO = "no"
-    const val KEY_RETRY_STATUS_CODE = "statusCode"
+    const val KEY_SPAN_RESPONSE = "response"
 
     const val SENT_BY_WEBHOOKIE = "Webhookie"
   }
@@ -46,3 +47,9 @@ enum class SpanSendReason {
   RESEND,
   UNBLOCK
 }
+
+data class SubscriptionRequest(
+  val headers: Map<String, Any>,
+  val contentType: String,
+  val payload: String
+)

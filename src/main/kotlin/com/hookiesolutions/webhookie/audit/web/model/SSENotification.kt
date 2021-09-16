@@ -23,6 +23,7 @@
 package com.hookiesolutions.webhookie.audit.web.model
 
 import com.hookiesolutions.webhookie.audit.domain.Span
+import com.hookiesolutions.webhookie.audit.web.model.response.SpanResponse
 import org.springframework.messaging.Message
 import org.springframework.messaging.support.MessageBuilder
 
@@ -34,47 +35,47 @@ data class SSENotification(
   class SpanNotification {
     companion object {
       fun created(span: Span): Message<SSENotification> {
-        return message(span, "spanCreated", span)
+        return message(span, "spanCreated", SpanResponse.from(span))
       }
 
       fun increasedNumberOfTries(span: Span): Message<SSENotification> {
-        return message(span, "spanNumberOfTriesIncreased", span)
+        return message(span, "spanNumberOfTriesIncreased", SpanResponse.from(span))
       }
 
       fun blocked(span: Span): Message<SSENotification> {
-        return message(span, "spanBlocked", span)
+        return message(span, "spanBlocked", SpanResponse.from(span))
       }
 
       fun failedWithServerError(span: Span): Message<SSENotification> {
-        return message(span, "spanFailedWithServerError", span)
+        return message(span, "spanFailedWithServerError", SpanResponse.from(span))
       }
 
       fun failedWithClientError(span: Span): Message<SSENotification> {
-        return message(span, "spanFailedWithClientError", span)
+        return message(span, "spanFailedWithClientError", SpanResponse.from(span))
       }
 
       fun failedWithOtherError(span: Span): Message<SSENotification> {
-        return message(span, "spanFailedWithOtherError", span)
+        return message(span, "spanFailedWithOtherError", SpanResponse.from(span))
       }
 
       fun failedWithSubscriptionError(span: Span): Message<SSENotification> {
-        return message(span, "failedWithSubscriptionError", span)
+        return message(span, "failedWithSubscriptionError", SpanResponse.from(span))
       }
 
       fun failedWithStatusUpdate(span: Span): Message<SSENotification> {
-        return message(span, "spanFailedStatusUpdate", span)
+        return message(span, "spanFailedStatusUpdate", SpanResponse.from(span))
       }
 
       fun success(span: Span): Message<SSENotification> {
-        return message(span, "spanWasOK", span)
+        return message(span, "spanWasOK", SpanResponse.from(span))
       }
 
       fun markedRetrying(span: Span): Message<SSENotification> {
-        return message(span, "spanMarkedRetrying", span)
+        return message(span, "spanMarkedRetrying", SpanResponse.from(span))
       }
 
       fun isRetrying(span: Span): Message<SSENotification> {
-        return message(span, "spanIsRetrying", span)
+        return message(span, "spanIsRetrying", SpanResponse.from(span))
       }
 
       private fun message(span: Span, type: String, data: Any): Message<SSENotification> {

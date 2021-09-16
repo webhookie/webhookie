@@ -22,9 +22,7 @@
 
 package com.hookiesolutions.webhookie.audit.web.model.response
 
-import com.hookiesolutions.webhookie.audit.domain.Span
-import com.hookiesolutions.webhookie.audit.domain.SpanRetry
-import com.hookiesolutions.webhookie.audit.domain.SpanStatusUpdate
+import com.hookiesolutions.webhookie.audit.domain.*
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDetails
 
 /**
@@ -39,7 +37,8 @@ data class SpanResponse(
   val responseCode: Int,
   val status: SpanStatusUpdate,
   val tries: Int,
-  val nextRetry: SpanRetry?
+  val nextRetry: SpanRetry,
+  val latestResponse: SpanResult?
 ) {
   companion object {
     fun from(span: Span): SpanResponse {
@@ -51,7 +50,8 @@ data class SpanResponse(
         responseCode,
         span.lastStatus,
         span.totalNumberOfTries,
-        span.nextRetry
+        span.nextRetry,
+        span.latestResult
       )
     }
   }
