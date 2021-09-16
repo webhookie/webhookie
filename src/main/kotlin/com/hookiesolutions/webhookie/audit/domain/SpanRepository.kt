@@ -23,7 +23,7 @@
 package com.hookiesolutions.webhookie.audit.domain
 
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_LAST_STATUS
-import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_LATEST_RESULT
+import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SPAN_RESPONSE
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_NEXT_RETRY
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_RETRY_HISTORY
 import com.hookiesolutions.webhookie.audit.domain.Span.Keys.Companion.KEY_SPAN_APPLICATION_ID
@@ -174,7 +174,7 @@ class SpanRepository(
       addMongoField(key, eqFilter(KEY_RETRY_HISTORY, KEY_RETRY_NO, response.retryNo)),
       mongoSet("$key.$KEY_RETRY_STATUS_CODE", response.statusCode),
       mongoSet(KEY_RETRY_HISTORY, insertIntoArray(KEY_RETRY_HISTORY, KEY_RETRY_NO, key, response.retryNo)),
-      mongoSet(KEY_LATEST_RESULT, response),
+      mongoSet(KEY_SPAN_RESPONSE, response),
       mongoSetLastElemOfArray(KEY_RETRY_HISTORY, KEY_NEXT_RETRY),
       mongoUnset(key)
     )
@@ -248,7 +248,7 @@ class SpanRepository(
     )
     if(request.responseCode != null) {
       val toString = ConvertOperators.ToString
-        .toString(mongoField(fieldName(KEY_LATEST_RESULT, SpanHttpResponse.Keys.KEY_STATUS_CODE)))
+        .toString(mongoField(fieldName(KEY_SPAN_RESPONSE, SpanHttpResponse.Keys.KEY_STATUS_CODE)))
       pipeline.add(
         0,
         Aggregation.addFields()

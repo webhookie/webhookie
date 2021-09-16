@@ -118,7 +118,7 @@ data class Span(
       const val KEY_LAST_STATUS = "lastStatus"
       const val KEY_NEXT_RETRY = "nextRetry"
       const val KEY_RETRY_HISTORY = "retryHistory"
-      const val KEY_LATEST_RESULT = "response"
+      const val KEY_SPAN_RESPONSE = "response"
       const val KEY_TOTAL_NUMBER_OF_TRIES = "totalNumberOfTries"
 
       val KEY_SPAN_TOPIC = fieldName(KEY_SUBSCRIPTION, KEY_TOPIC)

@@ -1,7 +1,6 @@
 package playground
 
 import com.hookiesolutions.webhookie.audit.domain.Span
-import com.hookiesolutions.webhookie.audit.domain.SpanHttpRequest
 import com.hookiesolutions.webhookie.audit.domain.SpanRetry
 import com.hookiesolutions.webhookie.audit.domain.SpanSendReason
 import com.hookiesolutions.webhookie.common.repository.GenericRepository
@@ -9,13 +8,7 @@ import com.hookiesolutions.webhookie.common.repository.GenericRepository.Compani
 import com.hookiesolutions.webhookie.common.repository.GenericRepository.Companion.mongoVariable
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.springframework.data.mongodb.core.aggregation.AddFieldsOperation
-import org.springframework.data.mongodb.core.aggregation.AggregationExpression
-import org.springframework.data.mongodb.core.aggregation.AggregationUpdate
-import org.springframework.data.mongodb.core.aggregation.ArrayOperators
-import org.springframework.data.mongodb.core.aggregation.ComparisonOperators
-import org.springframework.data.mongodb.core.aggregation.SetOperation
-import org.springframework.data.mongodb.core.aggregation.UnsetOperation
+import org.springframework.data.mongodb.core.aggregation.*
 import java.time.Instant
 
 /**
@@ -75,17 +68,12 @@ class MongoPlayground {
         .addField(key)
         .withValue(expr)
         .build()
-    val r = SpanHttpRequest(
-      mapOf(),
-      "",
-      ""
-    )
     val operations = arrayOf(
       f,
       GenericRepository.mongoSet("$key.response.statusCode", 405),
       GenericRepository.mongoSet(Span.Keys.KEY_RETRY_HISTORY,
       GenericRepository.insertIntoArray(Span.Keys.KEY_RETRY_HISTORY, SpanRetry.KEY_RETRY_NO, key, 3)),
-      GenericRepository.mongoSet(Span.Keys.KEY_LATEST_RESULT, SpanRetry(Instant.now(), 3, 10, "", SpanSendReason.RETRY, r)),
+      GenericRepository.mongoSet(Span.Keys.KEY_SPAN_RESPONSE, SpanRetry(Instant.now(), 3, 10, "", SpanSendReason.RETRY)),
       GenericRepository.mongoSetLastElemOfArray(Span.Keys.KEY_RETRY_HISTORY, Span.Keys.KEY_NEXT_RETRY),
       GenericRepository.mongoUnset(key)
     )
