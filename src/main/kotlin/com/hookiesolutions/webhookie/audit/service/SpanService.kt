@@ -137,7 +137,7 @@ class SpanService(
       .build()
 
     return repository.responseStatusUpdate(message.spanId, notOk(time), response)
-      .doOnNext { log.info("'{}', '{}' Span was updated with other error response: '{}'", it.spanId, it.traceId, it.latestResult?.statusCode) }
+      .doOnNext { log.info("'{}', '{}' Span was updated with other error response: '{}'", it.spanId, it.traceId, it.latestResponse?.statusCode) }
   }
 
   fun updateWithRetryableServerError(message: PublisherResponseErrorMessage): Mono<Span> {
@@ -150,7 +150,7 @@ class SpanService(
       .build()
 
     return repository.updateWithResponse(message.spanId, response)
-      .doOnNext { log.info("'{}', '{}' Span was updated with server response: '{}'", it.spanId, it.traceId, it.latestResult?.statusCode) }
+      .doOnNext { log.info("'{}', '{}' Span was updated with server response: '{}'", it.spanId, it.traceId, it.latestResponse?.statusCode) }
   }
 
   @Suppress("DuplicatedCode")
@@ -164,7 +164,7 @@ class SpanService(
       .build()
 
     return repository.updateWithResponse(message.spanId, response)
-      .doOnNext { log.info("'{}', '{}' Span was updated with client error response: '{}'", it.spanId, it.traceId, it.latestResult?.statusCode) }
+      .doOnNext { log.info("'{}', '{}' Span was updated with client error response: '{}'", it.spanId, it.traceId, it.latestResponse?.statusCode) }
   }
 
   @Suppress("DuplicatedCode")
@@ -178,7 +178,7 @@ class SpanService(
       .build()
 
     return repository.responseStatusUpdate(message.spanId, notOk(time), response)
-      .doOnNext { log.info("'{}', '{}' Span was updated with other error response: '{}'", it.spanId, it.traceId, it.latestResult?.statusCode) }
+      .doOnNext { log.info("'{}', '{}' Span was updated with other error response: '{}'", it.spanId, it.traceId, it.latestResponse?.statusCode) }
   }
 
   @Suppress("DuplicatedCode")
@@ -192,7 +192,7 @@ class SpanService(
       .build()
 
     return repository.responseStatusUpdate(message.spanId, notOk(time), response)
-      .doOnNext { log.info("'{}', '{}' Span was updated with subscription error response: '{}'", it.spanId, it.traceId, it.latestResult?.statusCode) }
+      .doOnNext { log.info("'{}', '{}' Span was updated with subscription error response: '{}'", it.spanId, it.traceId, it.latestResponse?.statusCode) }
   }
 
   fun updateWithSuccessResponse(message: PublisherSuccessMessage): Mono<Span> {
@@ -205,7 +205,7 @@ class SpanService(
       .build()
 
     return repository.responseStatusUpdate(message.spanId, ok(time), response)
-      .doOnNext { log.info("'{}', '{}' Span was updated with server response: '{}'", it.spanId, it.traceId, it.latestResult?.statusCode) }
+      .doOnNext { log.info("'{}', '{}' Span was updated with server response: '{}'", it.spanId, it.traceId, it.latestResponse?.statusCode) }
   }
 
   fun markAsRetrying(message: Message<RetryableSubscriptionMessage>): Mono<Span> {

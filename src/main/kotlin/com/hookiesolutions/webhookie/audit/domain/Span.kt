@@ -75,7 +75,7 @@ data class Span(
   val nextRetry: SpanRetry,
   val retryHistory: Set<SpanRetry> = emptySet(),
 ): AbstractEntity() {
-  val latestResult: SpanHttpResponse?
+  val latestResponse: SpanHttpResponse?
     get() = nextRetry.response ?: retryHistory
       .filter { it.response != null }
       .maxByOrNull { it.time }?.response
