@@ -117,7 +117,7 @@ class SpanRepository(
   fun responseStatusUpdate(
     spanId: String,
     spanStatusUpdate: SpanStatusUpdate,
-    response: SpanResult
+    response: SpanHttpResponse
   ): Mono<Span> {
     return updateSpan(spanId, *statusUpdateOperations(spanStatusUpdate), *addResponseOperations(response))
   }
@@ -152,7 +152,7 @@ class SpanRepository(
     return updateSpan(spanId, *addRetryOperations(retry))
   }
 
-  fun updateWithResponse(spanId: String, response: SpanResult): Mono<Span> {
+  fun updateWithResponse(spanId: String, response: SpanHttpResponse): Mono<Span> {
     return updateSpan(spanId, *addResponseOperations(response))
   }
 
@@ -167,7 +167,7 @@ class SpanRepository(
     )
   }
 
-  private fun addResponseOperations(response: SpanResult): Array<AggregationOperation> {
+  private fun addResponseOperations(response: SpanHttpResponse): Array<AggregationOperation> {
     val key = "tmpRetry"
 
     return arrayOf(
@@ -248,7 +248,7 @@ class SpanRepository(
     )
     if(request.responseCode != null) {
       val toString = ConvertOperators.ToString
-        .toString(mongoField(fieldName(KEY_LATEST_RESULT, SpanResult.Keys.KEY_STATUS_CODE)))
+        .toString(mongoField(fieldName(KEY_LATEST_RESULT, SpanHttpResponse.Keys.KEY_STATUS_CODE)))
       pipeline.add(
         0,
         Aggregation.addFields()

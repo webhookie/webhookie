@@ -30,8 +30,8 @@ data class SpanRetry (
   val retryNo: Int,
   val sentBy: String,
   val reason: SpanSendReason,
-  val request: SubscriptionRequest,
-  val response: SpanResult? = null
+  val request: SpanHttpRequest,
+  val response: SpanHttpResponse? = null
 ) {
   companion object {
     const val KEY_RETRY_NO = "no"
@@ -48,8 +48,3 @@ enum class SpanSendReason {
   UNBLOCK
 }
 
-data class SubscriptionRequest(
-  val headers: Map<String, Any>,
-  val contentType: String,
-  val payload: String
-)

@@ -75,7 +75,7 @@ data class Span(
   val nextRetry: SpanRetry,
   val retryHistory: Set<SpanRetry> = emptySet(),
 ): AbstractEntity() {
-  val latestResult: SpanResult?
+  val latestResult: SpanHttpResponse?
     get() = nextRetry.response ?: retryHistory
       .filter { it.response != null }
       .maxByOrNull { it.time }?.response
@@ -144,7 +144,7 @@ data class Span(
     private lateinit var time: Instant
     private lateinit var sendBy: String
     private lateinit var sendReason: SpanSendReason
-    private lateinit var request: SubscriptionRequest
+    private lateinit var request: SpanHttpRequest
     private lateinit var retryNo: Number
 
     fun message(message: SignableSubscriptionMessage) = apply {
@@ -158,7 +158,7 @@ data class Span(
       val headers = HttpHeaders()
       message.addMessageHeaders(headers)
 
-      this.request = SubscriptionRequest(
+      this.request = SpanHttpRequest(
         headers.toSingleValueMap(),
         message.originalMessage.contentType,
         message.originalMessage.payload.decodeToString()
@@ -176,7 +176,7 @@ data class Span(
       val headers = HttpHeaders()
       message.consumerMessage.addMessageHeaders(headers)
 
-      this.request = SubscriptionRequest(
+      this.request = SpanHttpRequest(
         headers.toSingleValueMap(),
         message.consumerMessage.contentType,
         message.consumerMessage.payload.decodeToString()

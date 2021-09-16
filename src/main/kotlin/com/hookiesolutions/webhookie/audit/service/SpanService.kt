@@ -24,7 +24,7 @@ package com.hookiesolutions.webhookie.audit.service
 
 import com.hookiesolutions.webhookie.audit.domain.Span
 import com.hookiesolutions.webhookie.audit.domain.SpanRepository
-import com.hookiesolutions.webhookie.audit.domain.SpanResult
+import com.hookiesolutions.webhookie.audit.domain.SpanHttpResponse
 import com.hookiesolutions.webhookie.audit.domain.SpanRetry
 import com.hookiesolutions.webhookie.audit.domain.SpanRetry.Companion.SENT_BY_WEBHOOKIE
 import com.hookiesolutions.webhookie.audit.domain.SpanSendReason
@@ -131,7 +131,7 @@ class SpanService(
     log.info("Updating span '{}', '{}' with server error", message.spanId, message.traceId, message.response.status)
     val time = timeMachine.now()
 
-    val response = SpanResult.Builder()
+    val response = SpanHttpResponse.Builder()
       .time(time)
       .message(message)
       .build()
@@ -144,7 +144,7 @@ class SpanService(
     log.info("Updating span '{}', '{}' with RETRYABLE server error", message.spanId, message.traceId, message.response.status)
     val time = timeMachine.now()
 
-    val response = SpanResult.Builder()
+    val response = SpanHttpResponse.Builder()
       .time(time)
       .message(message)
       .build()
@@ -158,7 +158,7 @@ class SpanService(
     log.info("Updating span '{}', '{}' with request error", message.spanId, message.traceId, message.reason)
     val time = timeMachine.now()
 
-    val response = SpanResult.Builder()
+    val response = SpanHttpResponse.Builder()
       .time(time)
       .message(message)
       .build()
@@ -172,7 +172,7 @@ class SpanService(
     log.info("Updating span '{}', '{}' with unknown error", message.spanId, message.traceId, message.reason)
     val time = timeMachine.now()
 
-    val response = SpanResult.Builder()
+    val response = SpanHttpResponse.Builder()
       .time(time)
       .message(message)
       .build()
@@ -186,7 +186,7 @@ class SpanService(
     log.info("Updating span '{}', '{}' with subscription error", message.spanId, message.traceId, message.reason)
     val time = timeMachine.now()
 
-    val response = SpanResult.Builder()
+    val response = SpanHttpResponse.Builder()
       .time(time)
       .message(message)
       .build()
@@ -199,7 +199,7 @@ class SpanService(
     log.info("Updating span '{}', '{}' with SUCCESS", message.spanId, message.traceId, message.response.status)
     val time = timeMachine.now()
 
-    val response = SpanResult.Builder()
+    val response = SpanHttpResponse.Builder()
       .time(time)
       .message(message)
       .build()

@@ -31,7 +31,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.util.CollectionUtils
 import java.time.Instant
 
-data class SpanResult (
+data class SpanHttpResponse (
   val time: Instant,
   val statusCode: Int,
   val body: String,
@@ -89,8 +89,8 @@ data class SpanResult (
       this.retryNo = message.subscriptionMessage.totalNumberOfTries
     }
 
-    fun build(): SpanResult {
-      return SpanResult(time, statusCode, body, headers, retryNo)
+    fun build(): SpanHttpResponse {
+      return SpanHttpResponse(time, statusCode, body, headers, retryNo)
     }
   }
 }

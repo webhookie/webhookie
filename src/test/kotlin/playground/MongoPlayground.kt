@@ -1,7 +1,7 @@
 package playground
 
 import com.hookiesolutions.webhookie.audit.domain.Span
-import com.hookiesolutions.webhookie.audit.domain.SubscriptionRequest
+import com.hookiesolutions.webhookie.audit.domain.SpanHttpRequest
 import com.hookiesolutions.webhookie.audit.domain.SpanRetry
 import com.hookiesolutions.webhookie.audit.domain.SpanSendReason
 import com.hookiesolutions.webhookie.common.repository.GenericRepository
@@ -75,7 +75,7 @@ class MongoPlayground {
         .addField(key)
         .withValue(expr)
         .build()
-    val r = SubscriptionRequest(
+    val r = SpanHttpRequest(
       mapOf(),
       "",
       ""

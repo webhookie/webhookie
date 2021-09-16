@@ -146,7 +146,7 @@ class TrafficController(
     "$REQUEST_MAPPING_TRAFFIC_SPAN/{spanId}/response",
     produces = [MediaType.APPLICATION_JSON_VALUE]
   )
-  fun spanResponse(@PathVariable spanId: String): Mono<SpanResult> {
+  fun spanResponse(@PathVariable spanId: String): Mono<SpanHttpResponse> {
     return spanService.fetchSpanVerifyingReadAccess(spanId)
       .flatMap {
         Mono.justOrEmpty(it.latestResult)
@@ -158,7 +158,7 @@ class TrafficController(
     "$REQUEST_MAPPING_TRAFFIC_SPAN/{spanId}/request",
     produces = [MediaType.APPLICATION_JSON_VALUE]
   )
-  fun spanRequest(@PathVariable spanId: String): Mono<SubscriptionRequest> {
+  fun spanRequest(@PathVariable spanId: String): Mono<SpanHttpRequest> {
     return spanService.fetchSpanVerifyingReadAccess(spanId)
       .map { it.nextRetry.request }
   }
