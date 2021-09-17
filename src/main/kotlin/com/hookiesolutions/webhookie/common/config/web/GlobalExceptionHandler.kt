@@ -22,17 +22,14 @@
 
 package com.hookiesolutions.webhookie.common.config.web
 
-import com.hookiesolutions.webhookie.common.exception.EmptyResultException
-import com.hookiesolutions.webhookie.common.exception.EntityExistsException
-import com.hookiesolutions.webhookie.common.exception.EntityNotFoundException
-import com.hookiesolutions.webhookie.common.exception.RemoteServiceException
-import com.hookiesolutions.webhookie.common.exception.ValidationException
+import com.hookiesolutions.webhookie.common.exception.*
 import com.hookiesolutions.webhookie.common.service.ReactiveObjectMapper
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.data.mapping.context.InvalidPersistentPropertyPath
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.validation.BindException
+import org.springframework.validation.FieldError
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestControllerAdvice
@@ -55,7 +52,12 @@ class GlobalExceptionHandler(
   @ExceptionHandler(WebExchangeBindException::class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   fun handleValidationException(ex: WebExchangeBindException): Mono<MutableMap<String, String>> {
-    return mutableMapOf("message" to ex.localizedMessage).toMono()
+    val message = ex.bindingResult.allErrors
+      .mapNotNull { it as? FieldError }
+      .map { "'${it.field}' ${it.defaultMessage}" }
+      .reduce { acc, s -> "$acc\n$s" }
+
+    return mutableMapOf("message" to message).toMono()
   }
 
   @ExceptionHandler(IllegalArgumentException::class)
