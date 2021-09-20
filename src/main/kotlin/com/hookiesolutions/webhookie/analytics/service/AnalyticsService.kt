@@ -142,7 +142,7 @@ class AnalyticsService(
   fun saveInstance(remoteInstance: RemoteInstance): Mono<WebhookieInstance> {
     val instanceId = remoteInstance.id
     log.info("Saving Webhookie instance: {}", instanceId)
-    val instance = WebhookieInstance(instanceId, remoteInstance.apiKey, "http://localhost:7070")
+    val instance = WebhookieInstance(instanceId, remoteInstance.apiKey, analyticsServerBaseUrl)
     return repository.save(instance)
       .doOnNext { log.debug("Local Instance was created successfully with id: '{}'", it.instanceId) }
   }
