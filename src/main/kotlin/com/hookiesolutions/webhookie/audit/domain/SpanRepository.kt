@@ -53,6 +53,7 @@ import com.hookiesolutions.webhookie.audit.web.model.request.SpanRequest
 import com.hookiesolutions.webhookie.audit.web.model.request.TraceRequest
 import com.hookiesolutions.webhookie.common.exception.EntityNotFoundException
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
+import com.hookiesolutions.webhookie.common.model.AggregationCountResult
 import com.hookiesolutions.webhookie.common.model.FieldMatchingStrategy
 import com.hookiesolutions.webhookie.common.repository.GenericRepository
 import com.hookiesolutions.webhookie.common.repository.GenericRepository.Query.Companion.pageableWith
@@ -200,8 +201,39 @@ class SpanRepository(
     request: SpanRequest,
     requestedPageable: Pageable
   ): Flux<Span> {
-    val pageable = pageableWith(requestedPageable, SPAN_DEFAULT_SORT, SPAN_DEFAULT_PAGE)
+    val aggregation = userSpansAggregation(applicationIds, request)
 
+    val pageable = pageableWith(requestedPageable, SPAN_DEFAULT_SORT, SPAN_DEFAULT_PAGE)
+    sort(aggregation, pageable, SPAN_DEFAULT_SORT, SPAN_DEFAULT_PAGE)
+
+    if(log.isDebugEnabled) {
+      log.debug("Subscription Traffic aggregation: '{}'", aggregation)
+    }
+
+    return mongoTemplate.aggregate(aggregation, Span::class.java, Span::class.java)
+  }
+
+  fun userSpansCount(
+    applicationIds: List<String>,
+    request: SpanRequest
+  ): Mono<Long> {
+    val aggregation = userSpansAggregation(applicationIds, request)
+
+    aggregation.pipeline.add(Aggregation.count().`as`("count"))
+
+    if(log.isDebugEnabled) {
+      log.debug("Subscription Traffic aggregation: '{}'", aggregation)
+    }
+
+    return mongoTemplate.aggregate(aggregation, Span::class.java, AggregationCountResult::class.java)
+      .last(AggregationCountResult.ZERO)
+      .map { it.count }
+  }
+
+  private fun userSpansAggregation(
+    applicationIds: List<String>,
+    request: SpanRequest
+  ): Aggregation {
     val queryCriteria = mutableListOf<Criteria>()
 
     val requestCriteria = AbstractEntity.Queries.filters(
@@ -242,9 +274,6 @@ class SpanRepository(
 
     val pipeline: MutableList<AggregationOperation> = mutableListOf(
       Aggregation.match(criteria),
-      Aggregation.sort(pageable.sort),
-      Aggregation.skip(pageable.offset),
-      Aggregation.limit(pageable.pageSize.toLong())
     )
     if(request.responseCode != null) {
       val toString = ConvertOperators.ToString
@@ -258,12 +287,7 @@ class SpanRepository(
       )
     }
 
-    val aggregation = Aggregation.newAggregation(pipeline)
-    if(log.isDebugEnabled) {
-      log.debug("Subscription Traffic aggregation: '{}'", aggregation)
-    }
-
-    return mongoTemplate.aggregate(aggregation, Span::class.java, Span::class.java)
+    return Aggregation.newAggregation(pipeline)
   }
 
   fun traceSpans(

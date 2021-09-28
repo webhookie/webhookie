@@ -247,6 +247,17 @@ class SpanService(
       }
   }
 
+  @PreAuthorize("hasAnyAuthority('$ROLE_CONSUMER')")
+  fun subscriptionTrafficCount(request: SpanRequest): Mono<Long> {
+    return subscriptionServiceDelegate.userApplications()
+      .map { it.applicationId }
+      .collectList()
+      .flatMap {
+        log.info("Fetching all spans by applications: '{}'", it)
+        repository.userSpansCount(it, request)
+      }
+  }
+
   @PreAuthorize("hasAnyAuthority('$ROLE_CONSUMER', '$ROLE_ADMIN')")
   fun traceSpans(pageable: Pageable, traceId: String, request: TraceRequest): Flux<Span> {
     return traceRepository.findByTraceIdVerifyingReadAccess(traceId)

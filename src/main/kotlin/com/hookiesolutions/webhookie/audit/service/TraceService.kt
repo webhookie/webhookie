@@ -22,12 +22,8 @@
 
 package com.hookiesolutions.webhookie.audit.service
 
-import com.hookiesolutions.webhookie.audit.domain.Trace
+import com.hookiesolutions.webhookie.audit.domain.*
 import com.hookiesolutions.webhookie.audit.domain.Trace.Queries.Companion.byTraceId
-import com.hookiesolutions.webhookie.audit.domain.TraceRepository
-import com.hookiesolutions.webhookie.audit.domain.TraceStatus
-import com.hookiesolutions.webhookie.audit.domain.TraceStatusUpdate
-import com.hookiesolutions.webhookie.audit.domain.TraceSummary
 import com.hookiesolutions.webhookie.audit.web.model.request.TraceRequest
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_ADMIN
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_PROVIDER
@@ -119,6 +115,15 @@ class TraceService(
       .flatMapMany {
         log.info("Fetching all traces by topics: '{}'", it)
         repository.userTraces(it.topics, request, it.isAdmin, pageable)
+      }
+  }
+
+  @PreAuthorize("hasAnyAuthority('$ROLE_PROVIDER', '$ROLE_ADMIN')")
+  fun webhookTrafficCount(request: TraceRequest): Mono<Long> {
+    return webhookServiceDelegate.providerTopicsConsideringAdmin()
+      .flatMap {
+        log.info("Fetching all traces by topics: '{}'", it)
+        repository.userTracesCount(it.topics, request, it.isAdmin)
       }
   }
 

@@ -22,6 +22,7 @@
 
 package com.hookiesolutions.webhookie.audit.domain
 
+import com.hookiesolutions.webhookie.common.model.AggregationCountResult.Companion.ZERO
 import com.hookiesolutions.webhookie.audit.domain.Span.Queries.Companion.spanTopicIn
 import com.hookiesolutions.webhookie.audit.domain.Trace.Keys.Companion.KEY_STATUS_HISTORY
 import com.hookiesolutions.webhookie.audit.domain.Trace.Keys.Companion.KEY_STATUS_UPDATE
@@ -42,6 +43,7 @@ import com.hookiesolutions.webhookie.audit.domain.aggregation.TraceAggregationSt
 import com.hookiesolutions.webhookie.audit.service.security.VerifyTraceReadAccess
 import com.hookiesolutions.webhookie.audit.web.model.request.TraceRequest
 import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.filters
+import com.hookiesolutions.webhookie.common.model.AggregationCountResult
 import com.hookiesolutions.webhookie.common.model.FieldMatchingStrategy
 import com.hookiesolutions.webhookie.common.repository.GenericRepository
 import org.bson.Document
@@ -52,10 +54,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
-import org.springframework.data.mongodb.core.aggregation.AddFieldsOperation
-import org.springframework.data.mongodb.core.aggregation.AggregationOperation
-import org.springframework.data.mongodb.core.aggregation.ArithmeticOperators
-import org.springframework.data.mongodb.core.aggregation.ArrayOperators
+import org.springframework.data.mongodb.core.aggregation.*
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query.query
 import org.springframework.stereotype.Repository
@@ -174,6 +173,33 @@ class TraceRepository(
     ignoreTopicsFilter: Boolean,
     requestedPageable: Pageable
   ): Flux<Trace> {
+
+    val tracesAggregation = userTracesAggregate(topics, request, ignoreTopicsFilter)
+    sort(tracesAggregation, requestedPageable, SPAN_DEFAULT_SORT, SPAN_DEFAULT_PAGE)
+
+    return mongoTemplate.aggregate(tracesAggregation, aggregateStrategy.clazz, Trace::class.java)
+  }
+
+  fun userTracesCount(
+    topics: List<String>,
+    request: TraceRequest,
+    ignoreTopicsFilter: Boolean
+  ): Mono<Long> {
+
+    val tracesAggregation = userTracesAggregate(topics, request, ignoreTopicsFilter)
+    tracesAggregation.pipeline.add(Aggregation.count().`as`("count"))
+
+    return mongoTemplate
+      .aggregate(tracesAggregation, aggregateStrategy.clazz, AggregationCountResult::class.java)
+      .last(ZERO)
+      .map { it.count }
+  }
+
+  private fun userTracesAggregate(
+    topics: List<String>,
+    request: TraceRequest,
+    ignoreTopicsFilter: Boolean
+  ): Aggregation {
     val requestCriteria = filters(
       Span.Keys.KEY_SPAN_APPLICATION_ID to (request.applicationId to FieldMatchingStrategy.EXACT_MATCH),
       Span.Keys.KEY_SPAN_SUBSCRIPTION_ID to (request.subscriptionId to FieldMatchingStrategy.EXACT_MATCH),
@@ -223,17 +249,12 @@ class TraceRepository(
     }
 
     val tracesAggregation = aggregateStrategy.aggregate(spanCriteria, traceCriteria)
-    sort(tracesAggregation, requestedPageable, SPAN_DEFAULT_SORT, SPAN_DEFAULT_PAGE)
 
     if(log.isDebugEnabled) {
       log.debug("Webhook Traffic Aggregation query: '{}'", tracesAggregation)
     }
 
-    return mongoTemplate.aggregate(
-      tracesAggregation,
-      aggregateStrategy.clazz,
-      Trace::class.java
-    )
+    return tracesAggregation
   }
 
   companion object {

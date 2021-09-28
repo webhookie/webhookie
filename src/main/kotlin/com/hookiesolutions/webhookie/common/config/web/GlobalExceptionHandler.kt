@@ -138,7 +138,8 @@ class GlobalExceptionHandler(
   @ExceptionHandler(ServerWebInputException::class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   fun handleServerWebInputException(ex: ServerWebInputException): Mono<Any> {
-    return mutableMapOf("message" to ex.localizedMessage).toMono()
+    val msg = "${ex.reason} ${ex.methodParameter?.parameter?.name}"
+    return mutableMapOf("message" to msg).toMono()
   }
 
   @ExceptionHandler(BindException::class)

@@ -90,6 +90,39 @@ class TrafficController(
   }
 
   @GetMapping(
+    "$REQUEST_MAPPING_TRAFFIC_SPAN/count",
+    produces = [MediaType.APPLICATION_JSON_VALUE]
+  )
+  fun subscriptionTrafficCount(
+    @RequestParam(required = false) subscriptionId: String?,
+    @RequestParam(required = false) traceId: String?,
+    @RequestParam(required = false) spanId: String?,
+    @RequestParam(required = false) application: String?,
+    @RequestParam(required = false) entity: String?,
+    @RequestParam(required = false) callback: String?,
+    @RequestParam(required = false) topic: String?,
+    @RequestParam(required = false, defaultValue = "") status: List<SpanStatus>,
+    @RequestParam(required = false) from: Instant?,
+    @RequestParam(required = false) to: Instant?,
+    @RequestParam(required = false) responseCode: Int?
+  ): Mono<Long> {
+    val request = SpanRequest.Builder()
+      .subscriptionId(subscriptionId)
+      .traceId(traceId)
+      .spanId(spanId)
+      .application(application)
+      .entity(entity)
+      .callback(callback)
+      .topic(topic)
+      .status(status)
+      .from(from)
+      .to(to)
+      .responseCode(responseCode)
+      .build()
+    return spanService.subscriptionTrafficCount(request)
+  }
+
+  @GetMapping(
     REQUEST_MAPPING_TRAFFIC_TRACE,
     produces = [MediaType.APPLICATION_JSON_VALUE]
   )
@@ -118,6 +151,35 @@ class TrafficController(
       .build()
     return traceService.userTraces(pageable, request)
       .map { TraceResponse.from(it)}
+  }
+
+  @GetMapping(
+    "$REQUEST_MAPPING_TRAFFIC_TRACE/count",
+    produces = [MediaType.APPLICATION_JSON_VALUE]
+  )
+  fun webhookTrafficCount(
+    @RequestParam(required = false) subscriptionId: String?,
+    @RequestParam(required = false) traceId: String?,
+    @RequestParam(required = false) applicationId: String?,
+    @RequestParam(required = false) entity: String?,
+    @RequestParam(required = false) callbackId: String?,
+    @RequestParam(required = false) topic: String?,
+    @RequestParam(required = false, defaultValue = "") status: List<TraceStatus>,
+    @RequestParam(required = false) from: Instant?,
+    @RequestParam(required = false) to: Instant?
+  ): Mono<Long> {
+    val request = TraceRequest.Builder()
+      .subscriptionId(subscriptionId)
+      .traceId(traceId)
+      .applicationId(applicationId)
+      .entity(entity)
+      .callbackId(callbackId)
+      .topic(topic)
+      .status(status)
+      .from(from)
+      .to(to)
+      .build()
+    return traceService.webhookTrafficCount(request)
   }
 
   @GetMapping(
