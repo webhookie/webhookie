@@ -26,6 +26,7 @@ import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
 plugins {
 	id("org.springframework.boot") version "2.5.4"
 	id("io.spring.dependency-management") version "1.0.11.RELEASE"
+	id("pl.allegro.tech.build.axion-release") version "1.13.3"
 	kotlin("jvm") version "1.5.21"
 	kotlin("plugin.spring") version "1.5.21"
 	kotlin("plugin.allopen") version "1.5.21"
