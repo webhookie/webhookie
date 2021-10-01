@@ -1,0 +1,2 @@
+GET https://analytics.webhookie.com/api/manage/health
+Accept: application/json
