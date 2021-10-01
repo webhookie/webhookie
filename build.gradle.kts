@@ -41,7 +41,7 @@ allOpen {
 }
 
 group = "com.hookiesolutions.webhookie"
-version = "1.0.0-SNAPSHOT"
+version = "1.0.0"
 java.sourceCompatibility = JavaVersion.VERSION_11
 
 configurations {
