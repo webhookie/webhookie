@@ -63,9 +63,9 @@ abstract class AccessGroupService<T : AccessGroup>(
   fun allGroups(): Flux<T> {
     log.info("Fetching all '{}' Access Groups...", clazz.simpleName)
     return repository.findAll()
-      .zipWith(securityHandler.groups())
-      .filter { it.t2.contains(it.t1.iamGroupName) }
-      .map { it.t1 }
+//      .zipWith(securityHandler.groups())
+//      .filter { it.t2.contains(it.t1.iamGroupName) }
+//      .map { it.t1 }
   }
 
   fun groupById(id: String): Mono<T> {
