@@ -31,13 +31,19 @@ import com.hookiesolutions.webhookie.webhook.service.model.WebhookApiRequest
 import com.hookiesolutions.webhookie.webhook.web.response.WebhookApiResponse
 import com.hookiesolutions.webhookie.webhook.web.response.WebhookApiViews
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
+import org.springframework.core.io.ByteArrayResource
+import org.springframework.core.io.Resource
 import org.springframework.data.domain.Pageable
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
+import org.springframework.util.CollectionUtils
 import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import javax.validation.Valid
+
 
 /**
  *
@@ -88,6 +94,32 @@ class WebhookApiController(
   fun getWebhookApi(@PathVariable id: String): Mono<WebhookApiResponse> {
     return service.readWebhookApi(id)
       .map { WebhookApiResponse(it) }
+  }
+
+  @GetMapping(
+    "/{id}/spec",
+    produces = [MediaType.APPLICATION_OCTET_STREAM_VALUE]
+  )
+  fun downloadSpec(@PathVariable id: String): Mono<ResponseEntity<Resource>> {
+    return service.readWebhookApi(id)
+      .map {
+        val resource = ByteArrayResource(it.raw.toByteArray())
+        val headers = CollectionUtils.unmodifiableMultiValueMap(
+          CollectionUtils.toMultiValueMap(
+            mapOf(
+              HttpHeaders.CONTENT_DISPOSITION to listOf("attachment; ${it.title}.yml"),
+              "Cache-Control" to listOf("no-cache, no-store, must-revalidate"),
+              "Pragma" to listOf("no-cache"),
+              "Expires" to listOf("0")
+            )
+          )
+        )
+        ResponseEntity.ok()
+          .headers(HttpHeaders(headers))
+          .contentLength(it.raw.length.toLong())
+          .contentType(MediaType.APPLICATION_OCTET_STREAM)
+          .body(resource)
+      }
   }
 
   @GetMapping(
