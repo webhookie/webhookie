@@ -105,7 +105,7 @@ class WebConfig(
     if (log.isTraceEnabled) {
       val requestHeaders = request.headers
         .mapValues {
-          val value = if (it.key != HttpHeaders.AUTHORIZATION) {
+          val value = if (!it.key.contentEquals(HttpHeaders.AUTHORIZATION, ignoreCase = true)) {
             it.value.toString()
           } else {
             "*****"

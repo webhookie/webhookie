@@ -1,0 +1,22 @@
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://theapihunt.eu.auth0.com/
+          jwk-set-uri: https://theapihunt.eu.auth0.com/.well-known/jwks.json
+          jws-algorithm: RS256
+webhookie:
+  security:
+    audience: https://theapihunt.webhookie.com/api
+    client-id: cFMf693ZLM9Hrgu5q9hNRi20gNk5wjhv
+    oauth2:
+      authorization-uri: authorize
+      token-uri: oauth/token
+    entity:
+      jwk-json-path: $['https://theapihunt.webhookie.com/claims/entity']
+    groups:
+      jwk-json-path: $['https://theapihunt.webhookie.com/claims/groups']
+    roles:
+      jwk-json-path: $['https://theapihunt.webhookie.com/claims/roles']
+      auto-assign-consumer: true

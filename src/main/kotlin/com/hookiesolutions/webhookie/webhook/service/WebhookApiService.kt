@@ -66,6 +66,10 @@ class WebhookApiService(
 ) {
   @PreAuthorize("hasAuthority('${ROLE_PROVIDER}')")
   fun createWebhookApi(request: WebhookApiRequest): Mono<WebhookApi> {
+    log.info("Creating a WebhookAPI consumer: ('{}', {}), provider: ('{}', {})",
+      request.consumerAccess, request.consumerGroups,
+      request.providerAccess, request.providerGroups
+    )
     return verifyRequestGroups(request)
       .flatMap { asyncApiService.parseAsyncApiSpecToWebhookApi(request) }
       .map { WebhookApi.create(it, request) }
