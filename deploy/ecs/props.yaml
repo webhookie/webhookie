@@ -1,0 +1,43 @@
+container:
+  name: webhookie-community
+  image: docker.io/hookiesolutions/webhookie:1
+  memory-limit: 4096
+  port:
+    - 80
+    - 8080
+env:
+  DB_USERNAME: arn:aws:secretsmanager:eu-north-1:358992842910:secret:apihunt-db-secrets-KLP4zz:db_username::
+  DB_PASSWORD: arn:aws:secretsmanager:eu-north-1:358992842910:secret:apihunt-db-secrets-KLP4zz:db_password::
+  WH_MONGODB_URI: mongodb://${DB_USERNAME}:${DB_PASSWORD}@theapihunt-docdb.cluster-cw1kak4bf0o0.eu-central-1.docdb.amazonaws.com:27017/?ssl=true&ssl_ca_certs=rds-combined-ca-bundle.pem&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false
+#  WH_MONGODB_URI: mongodb+srv://${DB_USERNAME}:${DB_PASSWORD}@cluster0.ntf68.mongodb.net/apihunt-db?retryWrites=true&w=majority&maxPoolSize=200
+  WH_IAM_ISSUER_URI: https://theapihunt.eu.auth0.com/
+  WH_IAM_JWK_SET_URI: https://theapihunt.eu.auth0.com/.well-known/jwks.json
+  WH_IAM_JWS_ALG: RS256
+  WH_SECURITY_AUD: https://theapihunt.webhookie.com/api
+  WH_SECURITY_CLIENT_ID: cFMf693ZLM9Hrgu5q9hNRi20gNk5wjhv
+  WH_SECURITY_ROLES_JSON_PATH: $['https://theapihunt.webhookie.com/claims/roles']
+  WH_SECURITY_GROUPS_JSON_PATH: $['https://theapihunt.webhookie.com/claims/groups']
+  WH_SECURITY_ENTITY_JSON_PATH: $['https://theapihunt.webhookie.com/claims/entity']
+  WH_SECURITY_AUTO_ASSIGN_CONSUMER_ROLE: true
+  WH_SECURITY_OAUTH2_AUTHORIZATION_URI: authorize
+  WH_SECURITY_OAUTH2_TOKEN_URI: oauth/token
+task:
+  name: apihunt-task-def
+  size:
+    memory: 4
+    cpu: 2
+service:
+  name: apihunt-service
+  lb:
+    type: alb
+    port: 80
+cluster:
+  name: apihunt-cluster
+
+a: https://theapihunt.webhookie.com
+scope: audience=https://theapihunt.webhookie.com/api
+
+  
+  
+  
+
