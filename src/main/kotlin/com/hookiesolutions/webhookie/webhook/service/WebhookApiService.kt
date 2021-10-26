@@ -89,7 +89,7 @@ class WebhookApiService(
       }
   }
 
-  @PreAuthorize("hasAuthority('${ROLE_PROVIDER}')")
+  @PreAuthorize("isAuthenticated()")
   fun readWebhookApi(id: String): Mono<WebhookApi> {
     return repository.findByIdVerifyingReadAccess(id)
   }

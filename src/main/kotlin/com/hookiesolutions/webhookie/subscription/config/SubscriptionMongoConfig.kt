@@ -58,6 +58,17 @@ class SubscriptionMongoConfig(
       )
   }
 
+  @Order(Ordered.HIGHEST_PRECEDENCE)
+  @EventListener(ApplicationReadyEvent::class)
+  fun deleteApplicationIndexAfterStartup() {
+    mongoTemplate.indexOps<Application>()
+      .dropIndex("application.name")
+      .subscribe(
+        { logger.info("'callback_request_target' index was removed successfully!") },
+        { logger.warn("Unable to remove 'callback_request_target' index . original message: '{}'", it.localizedMessage) }
+      )
+  }
+
   @Bean
   fun subscriptionIndexEntities(): List<Class<out AbstractEntity>> =
     listOf(

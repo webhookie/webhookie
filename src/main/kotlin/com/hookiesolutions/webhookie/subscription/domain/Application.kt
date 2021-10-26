@@ -42,7 +42,7 @@ import org.springframework.data.mongodb.core.query.Update
 @Document(collection = APPLICATION_COLLECTION_NAME)
 @TypeAlias("application")
 data class Application(
-  @Indexed(name = "application.name", unique = true)
+  @Indexed(name = "application.name")
   val name: String,
   val description: String? = null,
   @Indexed(name = "application.entity")
