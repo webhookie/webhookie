@@ -31,8 +31,10 @@ import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientRequestException
 import org.springframework.web.reactive.function.client.WebClientResponseException
+import org.springframework.web.util.UriUtils
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
+import java.nio.charset.StandardCharsets
 
 /**
  *
@@ -52,10 +54,12 @@ class SubscriptionPublisher(
       msg.spanId
     )
 
+    val decodedUrl = UriUtils.decode(msg.subscription.callback.url, StandardCharsets.UTF_8)
+
     return Mono
       .defer {
         WebClient
-          .create(msg.subscription.callback.url)
+          .create(decodedUrl)
           .method(msg.subscription.callback.httpMethod)
           .contentType(msg.originalMessage.mediaType())
           .body(BodyInserters.fromValue(msg.originalMessage.payload))

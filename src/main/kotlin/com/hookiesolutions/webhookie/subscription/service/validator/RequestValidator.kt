@@ -30,7 +30,9 @@ import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.util.UriUtils
 import reactor.core.publisher.Mono
+import java.nio.charset.StandardCharsets
 
 /**
  *
@@ -43,9 +45,10 @@ class RequestValidator(
   private val timeMachine: TimeMachine
 ) {
   fun validateRequest(sampleRequest: CallbackValidationSampleRequest): Mono<ResponseEntity<ByteArray>> {
+    val decodedUrl = UriUtils.decode(sampleRequest.url, StandardCharsets.UTF_8)
     log.info("Validating request to '{}'", sampleRequest.callback.requestTarget())
     return WebClient
-      .create(sampleRequest.url)
+      .create(decodedUrl)
       .method(sampleRequest.httpMethod)
       .accept(MediaType.ALL)
       .body(BodyInserters.fromValue(sampleRequest.payload.encodeToByteArray()))
