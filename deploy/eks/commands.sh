@@ -8,7 +8,7 @@ docker push ${ECR_REPOSITORY}:${PRODUCT_VERSION}
 aws ecr describe-images --repository-name ${PRODUCT_NAME}
 aws ecr describe-images --repository-name ${PRODUCT_NAME}
 
-envsubst < ./cluster.yaml > ./${PRODUCT_NAME}cluster.yaml
+envsubst < ./cluster.yaml > ./${PRODUCT_NAME}-cluster.yaml
 
 eksctl create cluster -f ./${PRODUCT_NAME}cluster.yaml
 
