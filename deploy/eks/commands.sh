@@ -10,12 +10,12 @@ aws ecr describe-images --repository-name "${PRODUCT_NAME}"
 
 envsubst < ./cluster.yaml > ./"${PRODUCT_NAME}"-cluster.yaml
 
-eksctl create cluster -f ./"${PRODUCT_NAME}"cluster.yaml
+eksctl create cluster -f ./"${PRODUCT_NAME}"-cluster.yaml
 
-aws eks describe-cluster --name "${PRODUCT_NAME}"cluster --region "$AWS_REGION"
+aws eks describe-cluster --name "${PRODUCT_NAME}"-cluster --region "$AWS_REGION"
 
 # shellcheck disable=SC2155
-export VPC_ID=$(aws eks describe-cluster --name "${PRODUCT_NAME}"cluster --region "$AWS_REGION"  | jq -r '.cluster.resourcesVpcConfig.vpcId')
+export VPC_ID=$(aws eks describe-cluster --name "${PRODUCT_NAME}"-cluster --region "$AWS_REGION" --output json  | jq -r '.cluster.resourcesVpcConfig.vpcId')
 
 
 ./deploy.sh # make sure you create ic as well as the app

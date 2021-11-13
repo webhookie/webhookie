@@ -5,7 +5,7 @@ kind: ClusterConfig
 metadata:
   name: ${PRODUCT_NAME}-cluster
   region: ${AWS_REGION}
-  version: "1.15"
+  version: "1.21"
 
 availabilityZones: ["${AWS_REGION}a", "${AWS_REGION}b"]
 
