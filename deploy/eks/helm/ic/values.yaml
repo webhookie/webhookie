@@ -2,12 +2,12 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-app : wh-test # metered container product
+app: webhookie # metered container product
 region:
 vpcId:
 
 ic: #ingress controller
-    name: 'ic'
-    replicas: 1
-    imageName: 'docker.io/amazon/aws-alb-ingress-controller'
-    imageVersion: 'v1.1.6'
+  name: 'ic'
+  replicas: 1
+  imageName: 'docker.io/amazon/aws-alb-ingress-controller'
+  imageVersion: 'v2.3.0'

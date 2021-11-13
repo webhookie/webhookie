@@ -1,17 +1,27 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-    name: {{.Values.app}}
-    annotations:
-        kubernetes.io/ingress.class: alb
-        alb.ingress.kubernetes.io/scheme: internet-facing
-    labels:
-        app: {{.Values.app}}
+  name: {{.Values.app}}
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+  labels:
+    app: {{.Values.app}}
 spec:
-    rules:
+  rules:
     - http:
-        paths:
+      paths:
         - path: /*
+          pathType: Prefix
           backend:
-            serviceName: {{.Values.app}}
-            servicePort: 8080
+            service:
+              name: {{.Values.app}}
+              port:
+                number: 4200
+        - path: /api/*
+          pathType: Prefix
+          backend:
+            service:
+              name: {{.Values.app}}
+              port:
+                number: 8080

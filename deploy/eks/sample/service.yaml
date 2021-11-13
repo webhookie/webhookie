@@ -4,12 +4,12 @@ metadata:
   annotations:
     alb.ingress.kubernetes.io/target-type: ip
   labels:
-    app: {{.Values.app}}
-  name: {{.Values.app}}
+    app: webhookie
+  name: webhookie-service
   namespace: "default"
 spec:
   selector:
-    app: {{.Values.app}}
+    app: webhookie
   type: NodePort
   ports:
     - protocol: TCP
@@ -19,4 +19,4 @@ spec:
     - protocol: TCP
       port: 4200
       targetPort: 4200
-      name: frontend
+      name: backend

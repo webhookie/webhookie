@@ -1,39 +1,44 @@
-function install_app() {
-    echo -e "\e[32mInstalling app\e[0m"
-    helm install ${PRODUCT_NAME} \
-    --set region=${AWS_REGION} \
-    --set app=${PRODUCT_NAME} \
-    --set productCode=${PRODUCT_CODE} \
-    --set vpcId=${VPC_ID} \
-    --set wh.imageName=${ECR_REPOSITORY} \
-    --set wh.imageVersion=${PRODUCT_VERSION} \
-    --set DbUsername=wh-dev-user \
-    --set DbPassword=5wOA2OYzb8NWN6TJ \
-    --set DbHost=cluster0.dglao.mongodb.net \
-    --set DbName=wh-dev-db \
-    --set AmqpPassword=CGc2Q72jafhBj3dk0uycGDxAVfe8JAPt \
-    --set AmqpVHost=nbcwvmaw \
-    --set AmqpUsername=nbcwvmaw \
-    --set AmqpHost=vulture.rmq.cloudamqp.com \
-    --set WhIamIssuerUri=https://webhookie.au.auth0.com/ \
-    --set WhIamJwkSetUri=https://webhookie.au.auth0.com/.well-known/jwks.json \
-    --set WhIamJwsAlg=RS256 \
-    --set WhSecurityAud=KbsOSWkS6GWvmh20mg24UdnrKwgUMfvK \
-    --set WhSecurityLoginUri=http://localhost:8080 \
-    --set WhSecurityRolesJsonPath=$$['https://webhookie.com/roles'] \
-    ./helm/wh
+install_app() {
+    echo "\e[32mInstalling app\e[0m"
+    helm install "${PRODUCT_NAME}" \
+    --set region="${AWS_REGION}" \
+    --set app="${PRODUCT_NAME}" \
+    --set productCode="${PRODUCT_CODE}" \
+    --set vpcId="${VPC_ID}" \
+    --set WH_IAM_ISSUER_URI=https://webhookie.au.auth0.com/ \
+    --set WH_IAM_JWK_SET_URI=https://webhookie.au.auth0.com/.well-known/jwks.json \
+    --set WH_IAM_JWS_ALG=RS256 \
+    --set WH_SECURITY_AUD=http://localhost:8080 \
+    --set WH_SECURITY_CLIENT_ID=nvKDmIK9Q5Zw1UKwpON8LE3tg9vZcXb4 \
+    --set WH_SECURITY_ROLES_JSON_PATH=$$['https://webhookie.com/roles'] \
+    --set WH_SECURITY_GROUPS_JSON_PATH=$$['https://webhookie.com/groups'] \
+    --set WH_SECURITY_ENTITY_JSON_PATH=$$['https://webhookie.com/entity'] \
+    --set WH_SECURITY_AUTO_ASSIGN_CONSUMER_ROLE="true" \
+    --set WH_SECURITY_OAUTH2_AUTHORIZATION_URI="authorize" \
+    --set WH_SECURITY_OAUTH2_TOKEN_URI=oauth/token \
+    --set WH_AMQP_PASSWORD=CGc2Q72jafhBj3dk0uycGDxAVfe8JAPt \
+    --set WH_AMQP_V_HOST=nbcwvmaw \
+    --set WH_AMQP_USERNAME=nbcwvmaw \
+    --set WH_AMQP_HOST=vulture.rmq.cloudamqp.com \
+    --set WH_CONSUMER_QUEUE=wh-customer.event \
+    --set WH_CONSUMER_MISSING_HEADER_EXCHANGE=wh-customer \
+    --set WH_MONGODB_URI="mongodb+srv://wh-user:8V3iEBda4EZe6Y3I@cluster0.47igq.mongodb.net/wh-dev-db?retryWrites=true&w=majority&maxPoolSize=200" \
+    --set WEBHOOKIE_SECURITY_ALLOWED-ORIGINS=http://localhost:4300 \
+    --set WEBHOOKIE_MAIN_COLOR="#090A3A" \
+    --set WEBHOOKIE_PAGE_TITLE="The API Hunt by webhookie" \
+    ./helm/webhookie
 }
 
-function install_ic() {
-    echo -e "\e[32mInstalling ingress controller\e[0m"
-    helm install ${PRODUCT_NAME}ic \
-    --set region=${AWS_REGION} \
-    --set app=${PRODUCT_NAME} \
-    --set vpcId=${VPC_ID} \
+install_ic() {
+    echo "\e[32mInstalling ingress controller\e[0m"
+    helm install "${PRODUCT_NAME}".ic \
+    --set region="${AWS_REGION}" \
+    --set app="${PRODUCT_NAME}" \
+    --set vpcId="${VPC_ID}" \
     ./helm/ic
 }
 
-function deploy () {
+deploy () {
     install_ic
     sleep 30
     install_app

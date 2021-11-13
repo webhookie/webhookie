@@ -2,13 +2,13 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-app : wh-test # metered container product
+app: webhookie # metered container product
 productCode:
 region:
 vpcId:
 
-wh-test: # metered container product
-    replicas: 1
-    imageName:
-    imageVersion:
+webhookie: # metered container product
+  replicas: 2
+  imageName: hookiesolutions/webhookie
+  imageVersion: latest
 

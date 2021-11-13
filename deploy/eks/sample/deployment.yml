@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webhookie
+  namespace: "default"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webhookie
+  template:
+    metadata:
+      annotations:
+      labels:
+        app: webhookie
+    spec:
+      containers:
+        - image: hookiesolutions/webhookie:latest
+          imagePullPolicy: Always
+          name: webhookie-community
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+            - containerPort: 4200
+              protocol: TCP
+          env:
+            - name: WH_IAM_ISSUER_URI
+              value: https://webhookie.au.auth0.com/
+            - name: WH_IAM_JWK_SET_URI
+              value: https://webhookie.au.auth0.com/.well-known/jwks.json
+            - name: WH_IAM_JWS_ALG
+              value: RS256
+            - name: WH_SECURITY_AUD
+              value: http://localhost:8080
+            - name: WH_SECURITY_CLIENT_ID
+              value: nvKDmIK9Q5Zw1UKwpON8LE3tg9vZcXb4
+            - name: WH_SECURITY_ROLES_JSON_PATH
+              value: $$['https://webhookie.com/roles']
+            - name: WH_SECURITY_GROUPS_JSON_PATH
+              value: $$['https://webhookie.com/groups']
+            - name: WH_SECURITY_ENTITY_JSON_PATH
+              value: $$['https://webhookie.com/entity']
+            - name: WH_SECURITY_AUTO_ASSIGN_CONSUMER_ROLE
+              value: "true"
+            - name: WH_SECURITY_OAUTH2_AUTHORIZATION_URI
+              value: authorize
+            - name: WH_SECURITY_OAUTH2_TOKEN_URI
+              value: oauth/token
+            - name: WH_AMQP_PASSWORD
+              value: CGc2Q72jafhBj3dk0uycGDxAVfe8JAPt
+            - name: WH_AMQP_V_HOST
+              value: nbcwvmaw
+            - name: WH_AMQP_USERNAME
+              value: nbcwvmaw
+            - name: WH_AMQP_HOST
+              value: vulture.rmq.cloudamqp.com
+            - name: WH_CONSUMER_QUEUE
+              value: wh-customer.event
+            - name: WH_CONSUMER_MISSING_HEADER_EXCHANGE
+              value: wh-customer
+            - name: WH_MONGODB_URI
+              value: mongodb+srv://wh-user:8V3iEBda4EZe6Y3I@cluster0.47igq.mongodb.net/wh-dev-db?retryWrites=true&w=majority&maxPoolSize=200
+            - name: WEBHOOKIE_SECURITY_ALLOWED_ORIGINS
+              value: http://localhost:4300
+            - name: WEBHOOKIE_MAIN_COLOR
+              value: "#090A3A"
+            - name: WEBHOOKIE_PAGE_TITLE
+              value: The API Hunt by webhookie

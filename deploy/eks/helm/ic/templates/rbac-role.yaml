@@ -49,5 +49,5 @@ roleRef:
   name: {{.Values.ic.name}}
 subjects:
   - kind: ServiceAccount
-    name: {{.Values.app}}icsa
+    name: {{.Values.app}}-icsa
     namespace: kube-system

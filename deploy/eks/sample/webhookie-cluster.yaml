@@ -3,11 +3,11 @@ apiVersion: eksctl.io/v1alpha5
 kind: ClusterConfig
 
 metadata:
-  name: ${PRODUCT_NAME}-cluster
-  region: ${AWS_REGION}
-  version: "1.15"
+  name: webhookie-cluster
+  region: eu-north-1
+  version: "1.21"
 
-availabilityZones: ["${AWS_REGION}a", "${AWS_REGION}b"]
+availabilityZones: ["eu-north-1a", "eu-north-1b"]
 
 fargateProfiles:
   - name: fp-default
@@ -22,7 +22,7 @@ iam:
   withOIDC: true
   serviceAccounts:
     - metadata:
-        name: ${PRODUCT_NAME}-sa
+        name: webhookie-sa
       attachPolicy:
         Version: '2012-10-17'
         Statement:
@@ -35,7 +35,7 @@ iam:
             Effect: Allow
             Resource: "*"
     - metadata:
-        name: ${PRODUCT_NAME}-icsa
+        name: webhookie-icsa
         namespace: kube-system
       attachPolicy:
         Version: '2012-10-17'
