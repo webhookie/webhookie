@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ required "You need to provide a value for .Values.app" .Values.app}}
+  name: {{ required "You need to provide a value for .Values.app" .Values.app}}-deployment
   namespace: "default"
 spec:
   replicas: {{.Values.webhookie.replicas}}
@@ -22,15 +22,15 @@ spec:
         name: {{.Values.app}}
         resources:
           limits:
-            memory: "2Gi"
-            cpu: "1"
+            memory: "4Gi"
+            cpu: "2"
           requests:
             memory: "2Gi"
             cpu: "1"
         ports:
         - containerPort: 8080
           protocol: TCP
-        - containerPort: 4200
+        - containerPort: 80
           protocol: TCP
         env:
         - name: AWS_REGION

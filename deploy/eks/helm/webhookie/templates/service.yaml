@@ -18,5 +18,5 @@ spec:
       name: backend
     - protocol: TCP
       port: 4200
-      targetPort: 4200
+      targetPort: 80
       name: frontend

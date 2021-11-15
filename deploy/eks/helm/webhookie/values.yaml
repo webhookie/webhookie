@@ -8,7 +8,7 @@ region:
 vpcId:
 
 webhookie: # metered container product
-  replicas: 2
+  replicas: 1
   imageName: hookiesolutions/webhookie
   imageVersion: latest
 
