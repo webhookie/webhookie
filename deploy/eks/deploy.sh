@@ -10,9 +10,9 @@ install_app() {
     --set WH_IAM_JWS_ALG=RS256 \
     --set WH_SECURITY_AUD=http://localhost:8080 \
     --set WH_SECURITY_CLIENT_ID=nvKDmIK9Q5Zw1UKwpON8LE3tg9vZcXb4 \
-    --set WH_SECURITY_ROLES_JSON_PATH=$$['https://webhookie.com/roles'] \
-    --set WH_SECURITY_GROUPS_JSON_PATH=$$['https://webhookie.com/groups'] \
-    --set WH_SECURITY_ENTITY_JSON_PATH=$$['https://webhookie.com/entity'] \
+    --set WH_SECURITY_ROLES_JSON_PATH="\$[\'https://webhookie.com/roles\']" \
+    --set WH_SECURITY_GROUPS_JSON_PATH="\$[\'https://webhookie.com/groups\']" \
+    --set WH_SECURITY_ENTITY_JSON_PATH="\$[\'https://webhookie.com/entity\']" \
     --set WH_SECURITY_AUTO_ASSIGN_CONSUMER_ROLE="true" \
     --set WH_SECURITY_OAUTH2_AUTHORIZATION_URI="authorize" \
     --set WH_SECURITY_OAUTH2_TOKEN_URI=oauth/token \
