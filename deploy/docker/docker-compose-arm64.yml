@@ -22,7 +22,7 @@ services:
     volumes:
       - ./realm-export.json:/var/data/webhookie/realm.json
       - ./kc-add-user.json:/opt/jboss/keycloak/standalone/configuration/keycloak-add-user.json
-    container_name: webhookie-keycloack
+    container_name: webhookie-keycloak
     environment:
       - KEYCLOAK_IMPORT=/var/data/webhookie/realm.json
     ports:
