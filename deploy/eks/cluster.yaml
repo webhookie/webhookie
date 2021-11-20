@@ -23,6 +23,8 @@ iam:
   serviceAccounts:
     - metadata:
         name: ${PRODUCT_NAME}-sa
+      wellKnownPolicies:
+        awsLoadBalancerController: true
       attachPolicy:
         Version: '2012-10-17'
         Statement:
