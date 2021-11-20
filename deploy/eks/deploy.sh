@@ -1,6 +1,6 @@
 install_app() {
-    echo "\e[32mInstalling app\e[0m"
-    helm install "${PRODUCT_NAME}" \
+  echo "Installing the app..."
+  helm install "${PRODUCT_NAME}" \
     --set region="${AWS_REGION}" \
     --set app="${PRODUCT_NAME}" \
     --set productCode="${PRODUCT_CODE}" \
@@ -30,27 +30,23 @@ install_app() {
 }
 
 install_ic() {
-    echo "\e[32mInstalling ingress controller\e[0m"
-    helm install "${PRODUCT_NAME}".ic \
+  echo "\e[32mInstalling ingress controller\e[0m"
+  helm install "${PRODUCT_NAME}".ic \
     --set region="${AWS_REGION}" \
     --set app="${PRODUCT_NAME}" \
     --set vpcId="${VPC_ID}" \
     ./helm/ic
 }
 
-deploy () {
-    install_ic
-    sleep 30
-    install_app
+deploy() {
+  install_ic
+  sleep 30
+  install_app
 }
 
 install_all() {
-    echo "\e[32mInstalling app\e[0m"
-    helm install "${PRODUCT_NAME}" \
-    --set region="${AWS_REGION}" \
-    --set app="${PRODUCT_NAME}" \
-    --set productCode="${PRODUCT_CODE}" \
-    --set vpcId="${VPC_ID}" \
+  echo "Installing the app..."
+  helm install "$PRODUCT_NAME" \
     --set WH_IAM_ISSUER_URI=http://localhost:8800/auth/realms/webhookie \
     --set WH_IAM_JWK_SET_URI=http://"$PRODUCT_NAME"-keycloak:8800/auth/realms/webhookie/protocol/openid-connect/certs \
     --set WH_IAM_JWS_ALG=RS256 \
@@ -69,4 +65,26 @@ install_all() {
     ./helm/webhookie-all
 }
 
-install_all
+install_repo() {
+  echo "Installing the app..."
+  NAME="webhookie-all"
+  helm install "$NAME" \
+    --set WH_IAM_ISSUER_URI=http://localhost:8800/auth/realms/webhookie \
+    --set WH_IAM_JWK_SET_URI=http://"$NAME"-keycloak:8800/auth/realms/webhookie/protocol/openid-connect/certs \
+    --set WH_IAM_JWS_ALG=RS256 \
+    --set WH_SECURITY_AUD=webhookie_client \
+    --set WH_SECURITY_CLIENT_ID=webhookie_client \
+    --set WH_SECURITY_ROLES_JSON_PATH="\$.resource_access.webhookie_client.roles" \
+    --set WH_SECURITY_GROUPS_JSON_PATH="\$.groups" \
+    --set WH_SECURITY_ENTITY_JSON_PATH="\$.entity" \
+    --set WH_SECURITY_AUTO_ASSIGN_CONSUMER_ROLE="true" \
+    --set WH_SECURITY_OAUTH2_AUTHORIZATION_URI="/protocol/openid-connect/auth" \
+    --set WH_SECURITY_OAUTH2_TOKEN_URI="/protocol/openid-connect/token" \
+    --set WH_MONGODB_URI="mongodb://$NAME-mongodb/webhookie-db?retryWrites=true&w=majority&maxPoolSize=200" \
+    --set WEBHOOKIE_SECURITY_ALLOWED_ORIGINS=http://localhost:4200 \
+    --set WEBHOOKIE_MAIN_COLOR="#090A3A" \
+    --set WEBHOOKIE_PAGE_TITLE="The API Hunt by webhookie" \
+    webhookie-repo/webhookie-all
+}
+
+install_repo

@@ -1,6 +1,6 @@
 apiVersion: v2
-name: helm
-description: A Helm chart for Kubernetes
+name: webhookie-all
+description: Webhookie Community Edition Helm chart for Kubernetes with all dependencies
 
 type: application
 

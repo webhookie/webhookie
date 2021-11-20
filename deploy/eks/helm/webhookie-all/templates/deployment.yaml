@@ -41,9 +41,9 @@ spec:
         - name: WEBHOOKIE_ANALYTICS_SEND
           value: "false"
         - name: AWS_REGION
-          value: {{ required "You need to provide a value for .Values.region" .Values.region}}
+          value: {{ .Values.region }}
         - name: PRODUCT_CODE
-          value: {{required "You need a AWS Marketplace product_code to test this sample application" .Values.productCode}}
+          value: {{ .Values.productCode }}
         - name: PRODUCT_VERSION
           value: {{.Values.webhookie.imageVersion}}
         - name: WH_IAM_ISSUER_URI
