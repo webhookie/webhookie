@@ -38,36 +38,28 @@ spec:
         - containerPort: 80
           protocol: TCP
         env:
-        - name: WEBHOOKIE_ANALYTICS_SEND
-          value: "false"
-        - name: AWS_REGION
-          value: {{ .Values.region }}
-        - name: PRODUCT_CODE
-          value: {{ .Values.productCode }}
-        - name: PRODUCT_VERSION
-          value: {{.Values.webhookie.imageVersion}}
         - name: WH_IAM_ISSUER_URI
-          value: {{.Values.WH_IAM_ISSUER_URI}}
+          value: "http://localhost:8800/auth/realms/webhookie"
         - name: WH_IAM_JWK_SET_URI
-          value: {{.Values.WH_IAM_JWK_SET_URI}}
+          value: "http://webhookie-all-keycloak:8800/auth/realms/webhookie/protocol/openid-connect/certs"
         - name: WH_IAM_JWS_ALG
-          value: {{.Values.WH_IAM_JWS_ALG}}
+          value: "RS256"
         - name: WH_SECURITY_AUD
-          value: {{.Values.WH_SECURITY_AUD}}
+          value: "webhookie_client"
         - name: WH_SECURITY_CLIENT_ID
-          value: {{.Values.WH_SECURITY_CLIENT_ID}}
+          value: "webhookie_client"
         - name: WH_SECURITY_ROLES_JSON_PATH
-          value: {{.Values.WH_SECURITY_ROLES_JSON_PATH}}
+          value: "$.resource_access.webhookie_client.roles"
         - name: WH_SECURITY_GROUPS_JSON_PATH
-          value: {{.Values.WH_SECURITY_GROUPS_JSON_PATH}}
+          value: "$.groups"
         - name: WH_SECURITY_ENTITY_JSON_PATH
-          value: {{.Values.WH_SECURITY_ENTITY_JSON_PATH}}
+          value: "$.entity"
         - name: WH_SECURITY_AUTO_ASSIGN_CONSUMER_ROLE
-          value: "{{.Values.WH_SECURITY_AUTO_ASSIGN_CONSUMER_ROLE}}"
+          value: "true"
         - name: WH_SECURITY_OAUTH2_AUTHORIZATION_URI
-          value: {{.Values.WH_SECURITY_OAUTH2_AUTHORIZATION_URI}}
+          value: "/protocol/openid-connect/auth"
         - name: WH_SECURITY_OAUTH2_TOKEN_URI
-          value: {{.Values.WH_SECURITY_OAUTH2_TOKEN_URI}}
+          value: "/protocol/openid-connect/token"
         - name: WH_AMQP_PASSWORD
           value: {{.Values.WH_AMQP_PASSWORD}}
         - name: WH_AMQP_V_HOST
@@ -81,13 +73,9 @@ spec:
         - name: WH_CONSUMER_MISSING_HEADER_EXCHANGE
           value: {{.Values.WH_CONSUMER_MISSING_HEADER_EXCHANGE}}
         - name: WH_MONGODB_URI
-          value: {{.Values.WH_MONGODB_URI}}
+          value: "mongodb://webhookie-all-mongodb/webhookie-db?retryWrites=true&w=majority&maxPoolSize=200"
         - name: WEBHOOKIE_SECURITY_ALLOWED_ORIGINS
-          value: {{.Values.WEBHOOKIE_SECURITY_ALLOWED_ORIGINS}}
-        - name: WEBHOOKIE_MAIN_COLOR
-          value: {{.Values.WEBHOOKIE_MAIN_COLOR}}
-        - name: WEBHOOKIE_PAGE_TITLE
-          value: {{.Values.WEBHOOKIE_PAGE_TITLE}}
+          value: "http://localhost:4200"
 ---
 apiVersion: apps/v1
 kind: Deployment
