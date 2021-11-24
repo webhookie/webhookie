@@ -38,8 +38,8 @@ import com.hookiesolutions.webhookie.common.service.IdGenerator
 import com.hookiesolutions.webhookie.common.service.TimeMachine
 import com.hookiesolutions.webhookie.subscription.domain.Application
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
-import com.hookiesolutions.webhookie.subscription.domain.Callback
-import com.hookiesolutions.webhookie.subscription.domain.CallbackDetails
+import com.hookiesolutions.webhookie.subscription.domain.callback.Callback
+import com.hookiesolutions.webhookie.subscription.domain.callback.CallbackDetails
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.subscription.service.model.ApplicationRequest
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.CreateSubscriptionRequest

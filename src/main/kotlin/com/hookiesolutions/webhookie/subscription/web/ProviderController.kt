@@ -24,7 +24,7 @@ package com.hookiesolutions.webhookie.subscription.web
 
 import com.hookiesolutions.webhookie.common.config.web.OpenAPIConfig.Companion.OAUTH2_SCHEME
 import com.hookiesolutions.webhookie.common.model.dto.ApplicationDetails
-import com.hookiesolutions.webhookie.subscription.domain.CallbackDetails
+import com.hookiesolutions.webhookie.subscription.domain.callback.CallbackDetails
 import com.hookiesolutions.webhookie.subscription.service.ProviderService
 import com.hookiesolutions.webhookie.subscription.web.SubscriptionAPIDocs.Companion.REQUEST_MAPPING_PROVIDER
 import io.swagger.v3.oas.annotations.security.SecurityRequirement

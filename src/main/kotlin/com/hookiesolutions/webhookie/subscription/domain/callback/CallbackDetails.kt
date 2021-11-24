@@ -20,67 +20,51 @@
  * You should also get your employer (if you work as a programmer) or school, if any, to sign a "copyright disclaimer" for the program, if necessary. For more information on this, and how to apply and follow the GNU AGPL, see <https://www.gnu.org/licenses/>.
  */
 
-package com.hookiesolutions.webhookie.subscription.domain
+package com.hookiesolutions.webhookie.subscription.domain.callback
 
-import com.fasterxml.jackson.annotation.JsonInclude
-import com.hookiesolutions.webhookie.common.model.AbstractEntity
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.hookiesolutions.webhookie.common.model.dto.CallbackDTO
-import com.hookiesolutions.webhookie.subscription.domain.Callback.Keys.Companion.KEY_APPLICATION_ID
-import org.springframework.data.annotation.TypeAlias
-import org.springframework.data.mongodb.core.index.CompoundIndex
-import org.springframework.data.mongodb.core.index.CompoundIndexes
-import org.springframework.data.mongodb.core.mapping.Document
-import org.springframework.data.mongodb.core.query.Criteria
-import org.springframework.data.mongodb.core.query.Criteria.where
+import com.hookiesolutions.webhookie.subscription.domain.callback.CallbackDetails.Keys.Companion.KEY_CALLBACK_ID
+import com.hookiesolutions.webhookie.subscription.domain.callback.CallbackDetails.Keys.Companion.KEY_METHOD
+import com.hookiesolutions.webhookie.subscription.domain.callback.CallbackDetails.Keys.Companion.KEY_NAME
+import com.hookiesolutions.webhookie.subscription.domain.callback.CallbackDetails.Keys.Companion.KEY_URL
 import org.springframework.http.HttpMethod
 
-/**
- *
- * @author Arthur Kazemi<bidadh@gmail.com>
- * @since 2/2/21 17:27
- */
-@Document(collection = "callback")
-@TypeAlias("callback")
-@CompoundIndexes(
-  CompoundIndex(
-    name = "callback_applicationId_request_target",
-    def = "{'applicationId' : 1, 'httpMethod' : 1, 'url': 1}",
-    unique = true
-  ),
-  CompoundIndex(
-    name = "callback_name_application",
-    def = "{'applicationId' : 1, 'name': 1}",
-    unique = true
-  )
-)
-@JsonInclude(JsonInclude.Include.NON_NULL)
-data class Callback(
+data class CallbackDetails(
+  @JsonProperty("id")
+  val callbackId: String,
   val name: String,
-  val applicationId: String,
   val httpMethod: HttpMethod,
   val url: String,
   val security: CallbackSecurity? = null,
-): AbstractEntity() {
+) {
   fun requestTarget(): String {
     return "${httpMethod.name} $url"
   }
 
-  fun details() = CallbackDetails(id!!, name, httpMethod, url, security)
+  fun dto(): CallbackDTO {
+    return CallbackDTO(callbackId, name, httpMethod, url, security?.dto())
+  }
 
-  fun dto() = CallbackDTO(id!!, name, httpMethod, url, security?.dto())
-
-  class Queries {
-    companion object {
-      fun applicationIdIs(id: String): Criteria {
-        return where(KEY_APPLICATION_ID).`is`(id)
+  fun json(): String {
+    return """
+      {
+            $KEY_CALLBACK_ID: '$callbackId',
+            $KEY_NAME: '$name',
+            $KEY_METHOD: '$httpMethod',
+            $KEY_URL: '$url',
+            
       }
-    }
+    """.trimIndent()
   }
 
   class Keys {
     companion object {
-      const val KEY_APPLICATION_ID = "applicationId"
+      const val KEY_CALLBACK_ID = "callbackId"
+      const val KEY_NAME = "name"
+      const val KEY_METHOD = "httpMethod"
+      const val KEY_URL = "url"
     }
   }
-}
 
+}

@@ -28,7 +28,7 @@ import com.hookiesolutions.webhookie.common.model.dto.ApplicationDetails
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
 import com.hookiesolutions.webhookie.common.model.dto.ApplicationDetails.Keys.Companion.KEY_APPLICATION_ID
 import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate
-import com.hookiesolutions.webhookie.subscription.domain.CallbackDetails.Keys.Companion.KEY_CALLBACK_ID
+import com.hookiesolutions.webhookie.subscription.domain.callback.CallbackDetails.Keys.Companion.KEY_CALLBACK_ID
 import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Keys.Companion.KEY_STATUS
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionStatus
 import com.hookiesolutions.webhookie.subscription.domain.Application.Keys.Companion.KEY_ENTITY
@@ -37,6 +37,7 @@ import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Compa
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_STATUS_UPDATE
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_TOPIC
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.SUBSCRIPTION_COLLECTION_NAME
+import com.hookiesolutions.webhookie.subscription.domain.callback.CallbackDetails
 import org.springframework.data.annotation.TypeAlias
 import org.springframework.data.mongodb.core.index.CompoundIndex
 import org.springframework.data.mongodb.core.index.CompoundIndexes

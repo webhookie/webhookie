@@ -25,8 +25,8 @@ package com.hookiesolutions.webhookie.subscription.service
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_CONSUMER
 import com.hookiesolutions.webhookie.common.model.DeletableEntity.Companion.deletable
 import com.hookiesolutions.webhookie.common.model.UpdatableEntity.Companion.updatable
-import com.hookiesolutions.webhookie.subscription.domain.Callback
-import com.hookiesolutions.webhookie.subscription.domain.CallbackRepository
+import com.hookiesolutions.webhookie.subscription.domain.callback.Callback
+import com.hookiesolutions.webhookie.subscription.domain.callback.CallbackRepository
 import com.hookiesolutions.webhookie.subscription.domain.SubscriptionRepository
 import com.hookiesolutions.webhookie.subscription.service.converter.CallbackSecretConverter
 import com.hookiesolutions.webhookie.subscription.service.model.CallbackRequest

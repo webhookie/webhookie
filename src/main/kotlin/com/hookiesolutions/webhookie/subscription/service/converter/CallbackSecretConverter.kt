@@ -23,9 +23,9 @@
 package com.hookiesolutions.webhookie.subscription.service.converter
 
 import com.bol.crypt.CryptVault
-import com.hookiesolutions.webhookie.subscription.domain.Callback
-import com.hookiesolutions.webhookie.subscription.domain.CallbackSecurity
-import com.hookiesolutions.webhookie.subscription.domain.Secret
+import com.hookiesolutions.webhookie.subscription.domain.callback.Callback
+import com.hookiesolutions.webhookie.subscription.domain.callback.CallbackSecurity
+import com.hookiesolutions.webhookie.subscription.domain.callback.Secret
 import com.mongodb.BasicDBList
 import com.mongodb.BasicDBObject
 import org.bson.BSONCallback

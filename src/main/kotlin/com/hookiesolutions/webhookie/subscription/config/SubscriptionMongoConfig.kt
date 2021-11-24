@@ -25,7 +25,7 @@ package com.hookiesolutions.webhookie.subscription.config
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
 import com.hookiesolutions.webhookie.subscription.domain.Application
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
-import com.hookiesolutions.webhookie.subscription.domain.Callback
+import com.hookiesolutions.webhookie.subscription.domain.callback.Callback
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import org.slf4j.Logger
 import org.springframework.boot.context.event.ApplicationReadyEvent

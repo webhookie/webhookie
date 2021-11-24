@@ -22,7 +22,7 @@
 
 package com.hookiesolutions.webhookie.subscription.utils
 
-import com.hookiesolutions.webhookie.subscription.domain.CallbackDetails
+import com.hookiesolutions.webhookie.subscription.domain.callback.CallbackDetails
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono

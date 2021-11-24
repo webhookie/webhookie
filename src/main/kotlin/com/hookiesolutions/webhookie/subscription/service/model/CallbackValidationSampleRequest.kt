@@ -23,8 +23,8 @@
 package com.hookiesolutions.webhookie.subscription.service.model
 
 import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionSignature
-import com.hookiesolutions.webhookie.subscription.domain.CallbackDetails
-import com.hookiesolutions.webhookie.subscription.domain.Secret
+import com.hookiesolutions.webhookie.subscription.domain.callback.CallbackDetails
+import com.hookiesolutions.webhookie.subscription.domain.callback.Secret
 import com.hookiesolutions.webhookie.subscription.utils.CryptoUtils
 import org.bson.types.ObjectId
 import org.springframework.http.HttpHeaders

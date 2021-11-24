@@ -20,29 +20,37 @@
  * You should also get your employer (if you work as a programmer) or school, if any, to sign a "copyright disclaimer" for the program, if necessary. For more information on this, and how to apply and follow the GNU AGPL, see <https://www.gnu.org/licenses/>.
  */
 
-package com.hookiesolutions.webhookie.subscription.domain
+package com.hookiesolutions.webhookie.subscription.domain.callback
 
-import com.hookiesolutions.webhookie.common.repository.GenericRepository
-import com.hookiesolutions.webhookie.subscription.domain.Callback.Queries.Companion.applicationIdIs
-import org.springframework.data.mongodb.core.ReactiveMongoTemplate
-import org.springframework.data.mongodb.core.query.Query.query
-import org.springframework.stereotype.Repository
-import reactor.core.publisher.Flux
+import com.bol.secure.Encrypted
+import com.hookiesolutions.webhookie.common.model.dto.CallbackSecurityDTO
 
 /**
  *
  * @author Arthur Kazemi<bidadh@gmail.com>
- * @since 3/2/21 01:33
+ * @since 17/12/20 23:22
  */
-@Repository
-class CallbackRepository(
-  private val mongoTemplate: ReactiveMongoTemplate
-): GenericRepository<Callback>(mongoTemplate, Callback::class.java) {
-  fun findApplicationCallbacks(applicationId: String): Flux<Callback> {
-    return mongoTemplate
-      .find(
-        query(applicationIdIs(applicationId)),
-        Callback::class.java
-      )
+data class CallbackSecurity(
+  val method: String = "HMAC",
+  @Encrypted
+  val secret: Secret
+) {
+  fun dto(): CallbackSecurityDTO {
+    return CallbackSecurityDTO(method, secret.keyId)
   }
 }
+
+data class Secret(
+  val keyId: String,
+  val secret: String
+) {
+  fun json(): String {
+    return """
+      {
+        keyId: '$keyId',
+        secret: '$secret'
+      }
+    """.trimIndent()
+  }
+}
+

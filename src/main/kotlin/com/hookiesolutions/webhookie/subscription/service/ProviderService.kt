@@ -25,7 +25,7 @@ package com.hookiesolutions.webhookie.subscription.service
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_ADMIN
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_PROVIDER
 import com.hookiesolutions.webhookie.common.model.dto.ApplicationDetails
-import com.hookiesolutions.webhookie.subscription.domain.CallbackDetails
+import com.hookiesolutions.webhookie.subscription.domain.callback.CallbackDetails
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import org.springframework.data.domain.Pageable
 import org.springframework.security.access.prepost.PreAuthorize
