@@ -25,7 +25,7 @@ package com.hookiesolutions.webhookie.subscription.service.converter
 import com.bol.crypt.CryptVault
 import com.hookiesolutions.webhookie.subscription.domain.callback.Callback
 import com.hookiesolutions.webhookie.subscription.domain.callback.security.CallbackSecurity
-import com.hookiesolutions.webhookie.subscription.domain.callback.security.Secret
+import com.hookiesolutions.webhookie.subscription.domain.callback.security.HmacSecret
 import com.mongodb.BasicDBList
 import com.mongodb.BasicDBObject
 import org.bson.BSONCallback
@@ -49,8 +49,8 @@ import org.springframework.stereotype.Component
 class CallbackSecretConverter(
   private val log: Logger,
   private val cryptVault: CryptVault
-): Converter<Binary, Secret> {
-  override fun convert(source: Binary): Secret? {
+): Converter<Binary, HmacSecret> {
+  override fun convert(source: Binary): HmacSecret? {
     return try {
       val decrypted = cryptVault.decrypt(source.data)
 
@@ -62,15 +62,15 @@ class CallbackSecretConverter(
       val keyId = obj.get("keyId") as String
       val secret = obj.get("secret") as String
 
-      Secret(keyId, secret)
+      HmacSecret(keyId, secret)
     } catch (ex: Exception) {
       log.warn("Unable to read Secret from Binary!, returning an EMPTY ( invalid ) Secret to be used")
-      Secret("", "")
+      HmacSecret("", "")
     }
   }
 
   //TODO: refactor
-  fun encode(secret: Secret): Binary {
+  fun encode(secret: HmacSecret): Binary {
     val en = BasicBSONEncoder()
 
     val document = Document.parse(secret.json())

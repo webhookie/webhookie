@@ -11,7 +11,7 @@ import com.hookiesolutions.webhookie.common.model.dto.CallbackSecurityDTO
 data class CallbackSecurity(
   val method: String = "HMAC",
   @Encrypted
-  val secret: Secret
+  val secret: HmacSecret
 ) {
   fun dto(): CallbackSecurityDTO {
     return CallbackSecurityDTO(method, secret.keyId)

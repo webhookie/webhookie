@@ -25,7 +25,7 @@ package com.hookiesolutions.webhookie.subscription.service.model
 import com.hookiesolutions.webhookie.common.validation.Url
 import com.hookiesolutions.webhookie.subscription.domain.callback.Callback
 import com.hookiesolutions.webhookie.subscription.domain.callback.security.CallbackSecurity
-import com.hookiesolutions.webhookie.subscription.domain.callback.security.Secret
+import com.hookiesolutions.webhookie.subscription.domain.callback.security.HmacSecret
 import org.springframework.http.HttpMethod
 import javax.validation.constraints.NotBlank
 
@@ -73,13 +73,13 @@ data class CallbackRequest(
 
     val secret = newSecurity.secret.secret
     if(currentSecurity == null) {
-      return CallbackSecurity(secret = Secret(newSecurity.secret.keyId, secret))
+      return CallbackSecurity(secret = HmacSecret(newSecurity.secret.keyId, secret))
     }
 
     return if(secret.replace("*", "").trim().isNotBlank()) {
-      CallbackSecurity(secret = Secret(newSecurity.secret.keyId, secret))
+      CallbackSecurity(secret = HmacSecret(newSecurity.secret.keyId, secret))
     } else {
-      CallbackSecurity(secret = Secret(newSecurity.secret.keyId, currentSecurity.secret.secret))
+      CallbackSecurity(secret = HmacSecret(newSecurity.secret.keyId, currentSecurity.secret.secret))
     }
   }
 }

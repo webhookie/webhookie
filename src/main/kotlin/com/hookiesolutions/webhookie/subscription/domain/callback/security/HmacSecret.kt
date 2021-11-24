@@ -22,7 +22,7 @@
 
 package com.hookiesolutions.webhookie.subscription.domain.callback.security
 
-data class Secret(
+data class HmacSecret(
   val keyId: String,
   val secret: String
 ) {
