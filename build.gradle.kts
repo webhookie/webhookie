@@ -24,13 +24,13 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
 
 plugins {
-	id("org.springframework.boot") version "2.5.4"
+	id("org.springframework.boot") version "2.6.0"
 	id("io.spring.dependency-management") version "1.0.11.RELEASE"
 	id("pl.allegro.tech.build.axion-release") version "1.13.3"
-	kotlin("jvm") version "1.5.21"
-	kotlin("plugin.spring") version "1.5.21"
-	kotlin("plugin.allopen") version "1.5.21"
-	kotlin("kapt") version "1.5.21"
+	kotlin("jvm") version "1.6.0"
+	kotlin("plugin.spring") version "1.6.0"
+	kotlin("plugin.allopen") version "1.6.0"
+	kotlin("kapt") version "1.6.0"
 }
 
 kapt.includeCompileClasspath = false
@@ -105,6 +105,8 @@ dependencies {
 	testImplementation("org.springframework.amqp:spring-rabbit-test")
 	testImplementation("org.springframework.integration:spring-integration-test")
 	testImplementation("org.springframework.security:spring-security-test")
+
+	runtimeOnly("org.springframework.boot:spring-boot-properties-migrator")
 
 	kapt("org.springframework.boot:spring-boot-configuration-processor")
 }
