@@ -60,15 +60,15 @@ data class Callback(
   val applicationId: String,
   val httpMethod: HttpMethod,
   val url: String,
-  val security: CallbackSecurity? = null,
+  val securityScheme: CallbackSecurity? = null,
 ): AbstractEntity() {
   fun requestTarget(): String {
     return "${httpMethod.name} $url"
   }
 
-  fun details() = CallbackDetails(id!!, name, httpMethod, url, security)
+  fun details() = CallbackDetails(id!!, name, httpMethod, url, securityScheme)
 
-  fun dto() = CallbackDTO(id!!, name, httpMethod, url, security?.dto())
+  fun dto() = CallbackDTO(id!!, name, httpMethod, url, securityScheme?.dto())
 
   class Queries {
     companion object {

@@ -85,11 +85,11 @@ class CallbackSecretConverter(
   }
 
   fun convert(callback: Callback): Any {
-    return if(callback.security == null) {
+    return if(callback.securityScheme == null) {
       callback.details()
     } else {
       val dbObject = Document.parse(callback.details().json())
-      dbObject["security"] = convert(callback.security)
+      dbObject["security"] = convert(callback.securityScheme)
 
       return dbObject
     }

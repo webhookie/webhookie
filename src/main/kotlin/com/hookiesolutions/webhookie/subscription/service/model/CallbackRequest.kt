@@ -58,7 +58,7 @@ data class CallbackRequest(
 
   //TODO: refactor this and use mongodb update instead
   fun copy(entity: Callback, applicationId: String): Callback {
-    val result = Callback(name, applicationId, httpMethod, url, createCallbackSecurity(entity.security, security))
+    val result = Callback(name, applicationId, httpMethod, url, createCallbackSecurity(entity.securityScheme, security))
     result.version = entity.version
     result.id = entity.id
     result.createdDate = entity.createdDate
