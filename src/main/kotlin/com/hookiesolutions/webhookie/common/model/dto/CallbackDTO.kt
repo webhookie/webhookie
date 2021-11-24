@@ -38,11 +38,11 @@ data class CallbackDTO(
   val name: String,
   val httpMethod: HttpMethod,
   val url: String,
-  val security: CallbackSecurityDTO?
+  val securityScheme: CallbackSecurityDTO?
 ) {
 
   val isSignable: Boolean
-    get() = security != null
+    get() = securityScheme != null
 
   class Keys {
     companion object {
