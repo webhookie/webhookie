@@ -28,6 +28,7 @@ import com.hookiesolutions.webhookie.subscription.domain.callback.CallbackDetail
 import com.hookiesolutions.webhookie.subscription.domain.callback.CallbackDetails.Keys.Companion.KEY_METHOD
 import com.hookiesolutions.webhookie.subscription.domain.callback.CallbackDetails.Keys.Companion.KEY_NAME
 import com.hookiesolutions.webhookie.subscription.domain.callback.CallbackDetails.Keys.Companion.KEY_URL
+import com.hookiesolutions.webhookie.subscription.domain.callback.security.CallbackSecurity
 import org.springframework.http.HttpMethod
 
 data class CallbackDetails(

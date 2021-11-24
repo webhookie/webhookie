@@ -20,25 +20,7 @@
  * You should also get your employer (if you work as a programmer) or school, if any, to sign a "copyright disclaimer" for the program, if necessary. For more information on this, and how to apply and follow the GNU AGPL, see <https://www.gnu.org/licenses/>.
  */
 
-package com.hookiesolutions.webhookie.subscription.domain.callback
-
-import com.bol.secure.Encrypted
-import com.hookiesolutions.webhookie.common.model.dto.CallbackSecurityDTO
-
-/**
- *
- * @author Arthur Kazemi<bidadh@gmail.com>
- * @since 17/12/20 23:22
- */
-data class CallbackSecurity(
-  val method: String = "HMAC",
-  @Encrypted
-  val secret: Secret
-) {
-  fun dto(): CallbackSecurityDTO {
-    return CallbackSecurityDTO(method, secret.keyId)
-  }
-}
+package com.hookiesolutions.webhookie.subscription.domain.callback.security
 
 data class Secret(
   val keyId: String,
