@@ -2,6 +2,7 @@ package com.hookiesolutions.webhookie.subscription.domain.callback.security
 
 import com.bol.secure.Encrypted
 import com.hookiesolutions.webhookie.common.model.dto.CallbackSecurityDTO
+import com.hookiesolutions.webhookie.subscription.domain.callback.security.hmac.HmacSecret
 
 /**
  *

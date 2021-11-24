@@ -25,7 +25,7 @@ package com.hookiesolutions.webhookie.subscription.service.model
 import com.hookiesolutions.webhookie.common.validation.Url
 import com.hookiesolutions.webhookie.subscription.domain.callback.Callback
 import com.hookiesolutions.webhookie.subscription.domain.callback.security.CallbackSecurity
-import com.hookiesolutions.webhookie.subscription.domain.callback.security.HmacSecret
+import com.hookiesolutions.webhookie.subscription.domain.callback.security.hmac.HmacSecret
 import org.springframework.http.HttpMethod
 import javax.validation.constraints.NotBlank
 
