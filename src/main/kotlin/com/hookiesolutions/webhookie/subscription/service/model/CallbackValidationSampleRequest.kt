@@ -98,7 +98,7 @@ data class CallbackValidationSampleRequest(
       callbackDetails.url,
       payload,
       headers,
-      callbackDetails.security?.secret
+      callbackDetails.securityScheme?.secret
     )
   }
 }

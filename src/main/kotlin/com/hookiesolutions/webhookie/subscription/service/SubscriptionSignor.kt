@@ -44,9 +44,9 @@ class SubscriptionSignor(
   private val timeMachine: TimeMachine
 ) {
   fun sign(subscription: Subscription, consumerMessage: ConsumerMessage, spanId: String): Mono<SubscriptionSignature> {
-    log.info("{} Signing message with topic: '{}' for span '{}'", subscription.callback.security!!.method, consumerMessage.topic, spanId)
+    log.info("{} Signing message with topic: '{}' for span '{}'", subscription.callback.securityScheme!!.method, consumerMessage.topic, spanId)
     val time = timeMachine.now().toString()
-    return Mono.justOrEmpty(subscription.callback.security)
+    return Mono.justOrEmpty(subscription.callback.securityScheme)
       .zipWhen { CryptoUtils.hmac(it.secret.secret, subscription, time, consumerMessage.traceId, spanId) }
       .map {
         SubscriptionSignature.Builder()

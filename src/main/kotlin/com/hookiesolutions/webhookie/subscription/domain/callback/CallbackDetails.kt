@@ -37,14 +37,14 @@ data class CallbackDetails(
   val name: String,
   val httpMethod: HttpMethod,
   val url: String,
-  val security: CallbackSecurity? = null,
+  val securityScheme: CallbackSecurity? = null,
 ) {
   fun requestTarget(): String {
     return "${httpMethod.name} $url"
   }
 
   fun dto(): CallbackDTO {
-    return CallbackDTO(callbackId, name, httpMethod, url, security?.dto())
+    return CallbackDTO(callbackId, name, httpMethod, url, securityScheme?.dto())
   }
 
   fun json(): String {
