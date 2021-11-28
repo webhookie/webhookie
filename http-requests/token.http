@@ -15,6 +15,19 @@ Content-Type: application/json
 
 ###
 
+POST https://webhookie.au.auth0.com/oauth/token HTTP/1.1
+Accept: application/json
+Content-Type: application/json
+
+{
+  "grant_type": "client_credentials",
+  "audience":"http://localhost:8080",
+  "client_id": "b1gFmwSTvsPuRp5f8B3ZnMieFVyWgHA9",
+  "client_secret": "0QIY4_I_0ne9TJtSiUQhecyqk4Uks15P2mPKjvJBSu4hTdBvrBI6Sy-oC4LJvK1o"
+}
+
+###
+
 POST {{host}}/oauth/token HTTP/1.1
 Accept: application/json
 Authorization: Basic oAuthClientAppID secret
