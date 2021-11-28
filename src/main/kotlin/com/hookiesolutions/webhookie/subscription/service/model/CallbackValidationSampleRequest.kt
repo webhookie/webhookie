@@ -24,6 +24,7 @@ package com.hookiesolutions.webhookie.subscription.service.model
 
 import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionSignature
 import com.hookiesolutions.webhookie.subscription.domain.callback.CallbackDetails
+import com.hookiesolutions.webhookie.subscription.domain.callback.security.CallbackSecurityScheme
 import com.hookiesolutions.webhookie.subscription.domain.callback.security.hmac.HmacDetails
 import com.hookiesolutions.webhookie.subscription.domain.callback.security.hmac.HmacSecurityScheme
 import com.hookiesolutions.webhookie.subscription.utils.CryptoUtils
@@ -38,7 +39,7 @@ data class CallbackValidationSampleRequest(
   val url: String,
   val payload: String,
   val headers: Map<String, Any>,
-  val secret: HmacDetails? = null,
+  val securityScheme: CallbackSecurityScheme?,
   val traceId: String? = null,
   val spanId: String? = null
 ) {
@@ -50,6 +51,9 @@ data class CallbackValidationSampleRequest(
     httpHeaders: HttpHeaders,
     time: Instant
   ) {
+
+    val scheme = securityScheme as? HmacSecurityScheme ?: return
+    val secret = scheme.details
     val traceId = this.traceId?: ObjectId.get().toHexString()
     val spanId = this.spanId?: ObjectId.get().toHexString()
     Mono
@@ -95,13 +99,12 @@ data class CallbackValidationSampleRequest(
     fun headers(headers: Map<String, Any>) = apply { this.headers = headers }
 
     fun build(): CallbackValidationSampleRequest {
-      val secret = (callbackDetails.securityScheme as? HmacSecurityScheme)?.details
       return CallbackValidationSampleRequest(
         callbackDetails.httpMethod,
         callbackDetails.url,
         payload,
         headers,
-        secret
+        callbackDetails.securityScheme
       )
     }
   }
