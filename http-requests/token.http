@@ -1,10 +1,15 @@
 POST https://webhookie.au.auth0.com/oauth/token HTTP/1.1
 Accept: application/json
-Authorization: Basic nvKDmIK9Q5Zw1UKwpON8LE3tg9vZcXb4 -DvNR2P88D3bNrcj7Z1huKbaFi7WmsQJCtwU-Zl-8oYEEgXoya_jXqdtP1cQZf94
-cache-control: no-cache
-Content-Type: application/x-www-form-urlencoded
+Content-Type: application/json
 
-password=weqzox-teGkec-zithu8&username=bidadh@gmail.com&grant_type=password
+{
+  "password": "weqzox-teGkec-zithu8",
+  "username": "bidadh@gmail.com",
+  "grant_type": "password",
+  "audience": "http://localhost:8080",
+  "client_id": "nvKDmIK9Q5Zw1UKwpON8LE3tg9vZcXb4",
+  "client_secret": "-DvNR2P88D3bNrcj7Z1huKbaFi7WmsQJCtwU-Zl-8oYEEgXoya_jXqdtP1cQZf94"
+}
 
 > response-handlers/token.js
 
