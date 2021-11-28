@@ -38,7 +38,7 @@ data class CallbackDTO(
   val name: String,
   val httpMethod: HttpMethod,
   val url: String,
-  val securityScheme: CallbackSecurityDTO?
+  val securityScheme: CallbackSecuritySchemeDTO?
 ) {
 
   val isSignable: Boolean

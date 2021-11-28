@@ -24,7 +24,8 @@ package com.hookiesolutions.webhookie.subscription.service.model
 
 import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionSignature
 import com.hookiesolutions.webhookie.subscription.domain.callback.CallbackDetails
-import com.hookiesolutions.webhookie.subscription.domain.callback.security.hmac.HmacSecret
+import com.hookiesolutions.webhookie.subscription.domain.callback.security.hmac.HmacDetails
+import com.hookiesolutions.webhookie.subscription.domain.callback.security.hmac.HmacSecurityScheme
 import com.hookiesolutions.webhookie.subscription.utils.CryptoUtils
 import org.bson.types.ObjectId
 import org.springframework.http.HttpHeaders
@@ -37,7 +38,7 @@ data class CallbackValidationSampleRequest(
   val url: String,
   val payload: String,
   val headers: Map<String, Any>,
-  val secret: HmacSecret? = null,
+  val secret: HmacDetails? = null,
   val traceId: String? = null,
   val spanId: String? = null
 ) {
@@ -52,7 +53,7 @@ data class CallbackValidationSampleRequest(
     val traceId = this.traceId?: ObjectId.get().toHexString()
     val spanId = this.spanId?: ObjectId.get().toHexString()
     Mono
-      .create<HmacSecret> { it.success(secret) }
+      .create<HmacDetails> { it.success(secret) }
       .zipWhen { CryptoUtils.hmac(it.secret, callback, time.toString(), traceId, spanId) }
       .map {
         SubscriptionSignature.Builder()
@@ -93,12 +94,15 @@ data class CallbackValidationSampleRequest(
     fun payload(payload: String) = apply { this.payload = payload }
     fun headers(headers: Map<String, Any>) = apply { this.headers = headers }
 
-    fun build(): CallbackValidationSampleRequest = CallbackValidationSampleRequest(
-      callbackDetails.httpMethod,
-      callbackDetails.url,
-      payload,
-      headers,
-      callbackDetails.securityScheme?.secret
-    )
+    fun build(): CallbackValidationSampleRequest {
+      val secret = (callbackDetails.securityScheme as? HmacSecurityScheme)?.details
+      return CallbackValidationSampleRequest(
+        callbackDetails.httpMethod,
+        callbackDetails.url,
+        payload,
+        headers,
+        secret
+      )
+    }
   }
 }

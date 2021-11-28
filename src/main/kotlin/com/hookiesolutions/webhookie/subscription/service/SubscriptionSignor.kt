@@ -22,12 +22,14 @@
 
 package com.hookiesolutions.webhookie.subscription.service
 
-import com.hookiesolutions.webhookie.subscription.utils.CryptoUtils
-import com.hookiesolutions.webhookie.subscription.utils.CryptoUtils.Companion.ALG
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionSignature
 import com.hookiesolutions.webhookie.common.service.TimeMachine
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
+import com.hookiesolutions.webhookie.subscription.domain.callback.security.CallbackSecurityScheme
+import com.hookiesolutions.webhookie.subscription.domain.callback.security.hmac.HmacSecurityScheme
+import com.hookiesolutions.webhookie.subscription.utils.CryptoUtils
+import com.hookiesolutions.webhookie.subscription.utils.CryptoUtils.Companion.ALG
 import org.slf4j.Logger
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
@@ -44,13 +46,18 @@ class SubscriptionSignor(
   private val timeMachine: TimeMachine
 ) {
   fun sign(subscription: Subscription, consumerMessage: ConsumerMessage, spanId: String): Mono<SubscriptionSignature> {
-    log.info("{} Signing message with topic: '{}' for span '{}'", subscription.callback.securityScheme!!.method, consumerMessage.topic, spanId)
+    if(!CallbackSecurityScheme.isHmac(subscription.callback.securityScheme)) {
+      return Mono.error(IllegalStateException())
+    }
+
+    val scheme = subscription.callback.securityScheme as HmacSecurityScheme
+    log.info("{} Signing message with topic: '{}' for span '{}'", scheme.method.name, consumerMessage.topic, spanId)
     val time = timeMachine.now().toString()
-    return Mono.justOrEmpty(subscription.callback.securityScheme)
-      .zipWhen { CryptoUtils.hmac(it.secret.secret, subscription, time, consumerMessage.traceId, spanId) }
+    return Mono.just(scheme)
+      .zipWhen { CryptoUtils.hmac(it.details.secret, subscription, time, consumerMessage.traceId, spanId) }
       .map {
         SubscriptionSignature.Builder()
-          .keyId(it.t1.secret.keyId)
+          .keyId(it.t1.details.keyId)
           .algorithm(ALG)
           .traceId(consumerMessage.traceId)
           .spanId(spanId)

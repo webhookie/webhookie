@@ -28,7 +28,7 @@ import com.hookiesolutions.webhookie.subscription.domain.callback.CallbackDetail
 import com.hookiesolutions.webhookie.subscription.domain.callback.CallbackDetails.Keys.Companion.KEY_METHOD
 import com.hookiesolutions.webhookie.subscription.domain.callback.CallbackDetails.Keys.Companion.KEY_NAME
 import com.hookiesolutions.webhookie.subscription.domain.callback.CallbackDetails.Keys.Companion.KEY_URL
-import com.hookiesolutions.webhookie.subscription.domain.callback.security.CallbackSecurity
+import com.hookiesolutions.webhookie.subscription.domain.callback.security.CallbackSecurityScheme
 import org.springframework.http.HttpMethod
 
 data class CallbackDetails(
@@ -37,7 +37,7 @@ data class CallbackDetails(
   val name: String,
   val httpMethod: HttpMethod,
   val url: String,
-  val securityScheme: CallbackSecurity? = null,
+  val securityScheme: CallbackSecurityScheme? = null,
 ) {
   fun requestTarget(): String {
     return "${httpMethod.name} $url"

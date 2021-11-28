@@ -22,11 +22,12 @@
 
 package com.hookiesolutions.webhookie.subscription.domain.callback
 
+import com.bol.secure.Encrypted
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
 import com.hookiesolutions.webhookie.common.model.dto.CallbackDTO
 import com.hookiesolutions.webhookie.subscription.domain.callback.Callback.Keys.Companion.KEY_APPLICATION_ID
-import com.hookiesolutions.webhookie.subscription.domain.callback.security.CallbackSecurity
+import com.hookiesolutions.webhookie.subscription.domain.callback.security.CallbackSecurityScheme
 import org.springframework.data.annotation.TypeAlias
 import org.springframework.data.mongodb.core.index.CompoundIndex
 import org.springframework.data.mongodb.core.index.CompoundIndexes
@@ -60,7 +61,8 @@ data class Callback(
   val applicationId: String,
   val httpMethod: HttpMethod,
   val url: String,
-  val securityScheme: CallbackSecurity? = null,
+  @Encrypted
+  val securityScheme: CallbackSecurityScheme? = null,
 ): AbstractEntity() {
   fun requestTarget(): String {
     return "${httpMethod.name} $url"

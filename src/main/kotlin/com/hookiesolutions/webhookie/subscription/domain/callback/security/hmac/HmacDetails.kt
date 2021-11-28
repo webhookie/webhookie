@@ -22,17 +22,22 @@
 
 package com.hookiesolutions.webhookie.subscription.domain.callback.security.hmac
 
-data class HmacSecret(
+data class HmacDetails(
   val keyId: String,
   val secret: String
 ) {
   fun json(): String {
     return """
       {
-        keyId: '$keyId',
-        secret: '$secret'
+        $PROPERTY_KEY_ID: '$keyId',
+        $PROPERTY_SECRET: '$secret'
       }
     """.trimIndent()
+  }
+
+  companion object {
+    const val PROPERTY_SECRET = "secret"
+    const val PROPERTY_KEY_ID = "keyId"
   }
 }
 

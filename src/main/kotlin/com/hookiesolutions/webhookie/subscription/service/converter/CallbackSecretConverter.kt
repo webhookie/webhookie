@@ -24,17 +24,14 @@ package com.hookiesolutions.webhookie.subscription.service.converter
 
 import com.bol.crypt.CryptVault
 import com.hookiesolutions.webhookie.subscription.domain.callback.Callback
-import com.hookiesolutions.webhookie.subscription.domain.callback.security.CallbackSecurity
-import com.hookiesolutions.webhookie.subscription.domain.callback.security.hmac.HmacSecret
+import com.hookiesolutions.webhookie.subscription.domain.callback.security.CallbackSecurityScheme.Companion.PROPERTY_KEY
+import com.hookiesolutions.webhookie.subscription.domain.callback.security.hmac.HmacDetails
+import com.hookiesolutions.webhookie.subscription.domain.callback.security.hmac.HmacDetails.Companion.PROPERTY_KEY_ID
+import com.hookiesolutions.webhookie.subscription.domain.callback.security.hmac.HmacDetails.Companion.PROPERTY_SECRET
+import com.hookiesolutions.webhookie.subscription.domain.callback.security.hmac.HmacSecurityScheme
 import com.mongodb.BasicDBList
 import com.mongodb.BasicDBObject
-import org.bson.BSONCallback
-import org.bson.BSONObject
-import org.bson.BasicBSONCallback
-import org.bson.BasicBSONDecoder
-import org.bson.BasicBSONEncoder
-import org.bson.BasicBSONObject
-import org.bson.Document
+import org.bson.*
 import org.bson.types.Binary
 import org.slf4j.Logger
 import org.springframework.core.convert.converter.Converter
@@ -49,8 +46,8 @@ import org.springframework.stereotype.Component
 class CallbackSecretConverter(
   private val log: Logger,
   private val cryptVault: CryptVault
-): Converter<Binary, HmacSecret> {
-  override fun convert(source: Binary): HmacSecret? {
+): Converter<Binary, HmacDetails> {
+  override fun convert(source: Binary): HmacDetails {
     return try {
       val decrypted = cryptVault.decrypt(source.data)
 
@@ -59,18 +56,18 @@ class CallbackSecretConverter(
       decoder.decode(decrypted, bsonCallback)
       val deserialized = bsonCallback.get() as BSONObject
       val obj = deserialized.get("") as BasicDBObject
-      val keyId = obj.get("keyId") as String
-      val secret = obj.get("secret") as String
+      val keyId = obj.get(PROPERTY_KEY_ID) as String
+      val secret = obj.get(PROPERTY_SECRET) as String
 
-      HmacSecret(keyId, secret)
+      HmacDetails(keyId, secret)
     } catch (ex: Exception) {
       log.warn("Unable to read Secret from Binary!, returning an EMPTY ( invalid ) Secret to be used")
-      HmacSecret("", "")
+      HmacDetails("", "")
     }
   }
 
   //TODO: refactor
-  fun encode(secret: HmacSecret): Binary {
+  fun encode(secret: HmacDetails): Binary {
     val en = BasicBSONEncoder()
 
     val document = Document.parse(secret.json())
@@ -78,21 +75,25 @@ class CallbackSecretConverter(
     return Binary(cryptVault.encrypt(serialized))
   }
 
-  fun convert(callbackSecurity: CallbackSecurity): BasicDBObject {
-    val dbObject = BasicDBObject("method", callbackSecurity.method)
-    dbObject["secret"] = encode(callbackSecurity.secret)
+  fun convert(securityScheme: HmacSecurityScheme): BasicDBObject {
+    val dbObject = BasicDBObject(PROPERTY_KEY, securityScheme.method.name)
+    dbObject[PROPERTY_SECRET] = encode(securityScheme.details)
     return dbObject
   }
 
   fun convert(callback: Callback): Any {
-    return if(callback.securityScheme == null) {
-      callback.details()
-    } else {
+    if(callback.securityScheme == null) {
+      return callback.details()
+    }
+
+    if(callback.securityScheme.isHmac()) {
       val dbObject = Document.parse(callback.details().json())
-      dbObject["security"] = convert(callback.securityScheme)
+      dbObject["securityScheme"] = convert(callback.securityScheme as HmacSecurityScheme)
 
       return dbObject
     }
+
+    TODO("Implement OAuth2 here!")
   }
 
   class BasicDBObjectCallback : BasicBSONCallback() {

@@ -24,8 +24,9 @@ package com.hookiesolutions.webhookie.subscription.service.model
 
 import com.hookiesolutions.webhookie.common.validation.Url
 import com.hookiesolutions.webhookie.subscription.domain.callback.Callback
-import com.hookiesolutions.webhookie.subscription.domain.callback.security.CallbackSecurity
-import com.hookiesolutions.webhookie.subscription.domain.callback.security.hmac.HmacSecret
+import com.hookiesolutions.webhookie.subscription.domain.callback.security.CallbackSecurityScheme
+import com.hookiesolutions.webhookie.subscription.domain.callback.security.hmac.HmacDetails
+import com.hookiesolutions.webhookie.subscription.domain.callback.security.hmac.HmacSecurityScheme
 import org.springframework.http.HttpMethod
 import javax.validation.constraints.NotBlank
 
@@ -40,7 +41,7 @@ data class CallbackRequest(
   val httpMethod: HttpMethod,
   @field:Url
   val url: String,
-  val security: CallbackSecurity?
+  val securityScheme: CallbackSecurityScheme?
 ) {
   fun requestTarget(): String {
     return "${httpMethod.name} $url"
@@ -52,13 +53,13 @@ data class CallbackRequest(
       applicationId,
       httpMethod,
       url,
-      security
+      securityScheme
     )
   }
 
   //TODO: refactor this and use mongodb update instead
   fun copy(entity: Callback, applicationId: String): Callback {
-    val result = Callback(name, applicationId, httpMethod, url, createCallbackSecurity(entity.securityScheme, security))
+    val result = Callback(name, applicationId, httpMethod, url, createCallbackSecurity(entity.securityScheme, securityScheme))
     result.version = entity.version
     result.id = entity.id
     result.createdDate = entity.createdDate
@@ -66,20 +67,26 @@ data class CallbackRequest(
     return result
   }
 
-  private fun createCallbackSecurity(currentSecurity: CallbackSecurity?, newSecurity: CallbackSecurity?): CallbackSecurity? {
+  private fun createCallbackSecurity(currentSecurity: CallbackSecurityScheme?, newSecurity: CallbackSecurityScheme?): CallbackSecurityScheme? {
     if(newSecurity == null) {
       return null
     }
 
-    val secret = newSecurity.secret.secret
-    if(currentSecurity == null) {
-      return CallbackSecurity(secret = HmacSecret(newSecurity.secret.keyId, secret))
+    if(newSecurity.isHmac()) {
+      val scheme = newSecurity as HmacSecurityScheme
+      val secret = scheme.details.secret
+      if(currentSecurity == null) {
+        return HmacSecurityScheme(HmacDetails(newSecurity.details.keyId, secret))
+      }
+
+      return if(secret.replace("*", "").trim().isNotBlank()) {
+        HmacSecurityScheme(details = HmacDetails(scheme.details.keyId, secret))
+      } else {
+        HmacSecurityScheme(details = HmacDetails(scheme.details.keyId, (currentSecurity as HmacSecurityScheme).details.secret))
+      }
+
     }
 
-    return if(secret.replace("*", "").trim().isNotBlank()) {
-      CallbackSecurity(secret = HmacSecret(newSecurity.secret.keyId, secret))
-    } else {
-      CallbackSecurity(secret = HmacSecret(newSecurity.secret.keyId, currentSecurity.secret.secret))
-    }
+    TODO("Implement OAuth2 here!")
   }
 }
