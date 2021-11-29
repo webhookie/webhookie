@@ -55,3 +55,28 @@ Authorization: Bearer {{token}}
 GET http://localhost:8080/applications/619eba6c18c9cf31bba331b2/callbacks
 Authorization: Bearer {{token}}
 Accept: application/json
+
+###
+POST http://localhost:8080/callbacks/test
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "httpMethod": "POST",
+  "url": "http://localhost:8001",
+  "payload": "{\"enterpriseId\":\"enterprise_id\",\"deviceId\":\"device_id\",\"position\":{\"x\":151.75634,\"y\":-123.67676,\"coordinates\":[151.75634,-123.67676]},\"properties\":{\"key1\":\"value1\",\"key2\":\"value2\"}}",
+  "headers": {
+    "trace-id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
+    "span-id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
+    "Content-Type": "application/json"
+  },
+  "securityScheme": {
+    "details": {
+      "type": "CLIENT_CREDENTIALS",
+      "tokenEndpoint": "https://dev-1807019.okta.com/oauth2/default/v1/token",
+      "clientId": "0oa2w5ur9pFnyGW3W5d7",
+      "secret": "2JWxnSDB1SbqriBvVLDue8fo9i-sXkkwgNafIyh0"
+    },
+    "method": "OAUTH2"
+  }
+}
