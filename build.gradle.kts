@@ -60,6 +60,8 @@ extra["jsonPathVersion"] = "2.5.0"
 extra["bolEncryptedVersion"] = "2.7.2"
 
 dependencies {
+	implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
+
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
 	implementation("org.springframework.boot:spring-boot-starter-amqp")
 	implementation("org.springframework.boot:spring-boot-starter-data-mongodb-reactive")
