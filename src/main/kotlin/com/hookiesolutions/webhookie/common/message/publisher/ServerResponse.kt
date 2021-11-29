@@ -39,6 +39,8 @@ data class ServerResponse(
 
   fun isNotFound(): Boolean = status == HttpStatus.NOT_FOUND
 
+  fun isUnauthorized(): Boolean = status == HttpStatus.UNAUTHORIZED
+
   fun body(): String = data.decodeToString()
 
   override fun equals(other: Any?): Boolean {
