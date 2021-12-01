@@ -24,6 +24,7 @@ package com.hookiesolutions.webhookie.common.message.subscription
 
 import com.hookiesolutions.webhookie.common.message.WebhookieSpanMessage
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
+import com.hookiesolutions.webhookie.subscription.enterprise.oauth2.model.message.OAuthSignedSubscriptionMessage
 import java.time.Duration
 
 interface RetryableSubscriptionMessage: GenericSubscriptionMessage, WebhookieSpanMessage {
@@ -35,6 +36,10 @@ interface RetryableSubscriptionMessage: GenericSubscriptionMessage, WebhookieSpa
 
   fun updatingSubscriptionCopy(subscription: SubscriptionDTO): SignableSubscriptionMessage {
     if(this is SignedSubscriptionMessage) {
+      return this.copy(subscription = subscription)
+    }
+
+    if(this is OAuthSignedSubscriptionMessage) {
       return this.copy(subscription = subscription)
     }
 
