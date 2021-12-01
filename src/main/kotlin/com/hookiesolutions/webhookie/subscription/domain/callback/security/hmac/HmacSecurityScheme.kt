@@ -1,7 +1,7 @@
 package com.hookiesolutions.webhookie.subscription.domain.callback.security.hmac
 
-import com.hookiesolutions.webhookie.common.model.dto.CallbackSecuritySchemeDTO
-import com.hookiesolutions.webhookie.common.model.dto.HmacCallbackSecuritySchemeDTO
+import com.hookiesolutions.webhookie.common.model.dto.security.CallbackSecuritySchemeDTO
+import com.hookiesolutions.webhookie.common.model.dto.security.hmac.HmacCallbackSecuritySchemeDTO
 import com.hookiesolutions.webhookie.subscription.domain.callback.security.CallbackSecurityScheme
 import com.hookiesolutions.webhookie.subscription.domain.callback.security.SecuritySchemeType
 import org.springframework.data.annotation.TypeAlias
