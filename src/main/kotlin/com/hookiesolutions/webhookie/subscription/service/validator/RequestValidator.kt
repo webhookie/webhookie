@@ -22,7 +22,6 @@
 
 package com.hookiesolutions.webhookie.subscription.service.validator
 
-import com.hookiesolutions.webhookie.common.service.TimeMachine
 import com.hookiesolutions.webhookie.subscription.service.model.CallbackValidationSampleRequest
 import org.slf4j.Logger
 import org.springframework.http.MediaType
@@ -42,33 +41,39 @@ import java.nio.charset.StandardCharsets
 @Service
 class RequestValidator(
   private val log: Logger,
-  private val timeMachine: TimeMachine
+  private val headerProvider: RequestHeaderProvider
 ) {
   fun validateRequest(sampleRequest: CallbackValidationSampleRequest): Mono<ResponseEntity<ByteArray>> {
     val decodedUrl = UriUtils.decode(sampleRequest.url, StandardCharsets.UTF_8)
     log.info("Validating request to '{}'", sampleRequest.callback.requestTarget())
-    return WebClient
-      .create(decodedUrl)
-      .method(sampleRequest.httpMethod)
-      .accept(MediaType.ALL)
-      .body(BodyInserters.fromValue(sampleRequest.payload.encodeToByteArray()))
-      .headers { sampleRequest.addMessageHeaders(it, timeMachine.now()) }
-      .retrieve()
-      .toEntity(ByteArray::class.java)
-      .doOnNext { log.debug("Received '{}' response", it.statusCode) }
-      .map {
-        return@map if(it.hasBody()) {
-          ResponseEntity
-            .ok()
-            .headers(it.headers)
-            .body(it.body)
-        } else {
-          ResponseEntity
-            .ok()
-            .headers(it.headers)
-            .build()
-        }
+    return headerProvider.headers(sampleRequest)
+      .flatMap { headers ->
+        WebClient
+          .create(decodedUrl)
+          .method(sampleRequest.httpMethod)
+          .accept(MediaType.ALL)
+          .body(BodyInserters.fromValue(sampleRequest.payload.encodeToByteArray()))
+          .headers{
+            it.putAll(headers)
+          }
+          .retrieve()
+          .toEntity(ByteArray::class.java)
+          .doOnNext { log.debug("Received '{}' response", it.statusCode) }
+          .map {
+            return@map if(it.hasBody()) {
+              ResponseEntity
+                .ok()
+                .headers(it.headers)
+                .body(it.body)
+            } else {
+              ResponseEntity
+                .ok()
+                .headers(it.headers)
+                .build()
+            }
+          }
+          .doOnError { log.warn("Validation Failed: '{}'", it.localizedMessage) }
       }
-      .doOnError { log.warn("Validation Failed: '{}'", it.localizedMessage) }
   }
 }
+

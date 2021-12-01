@@ -22,17 +22,9 @@
 
 package com.hookiesolutions.webhookie.subscription.service.model
 
-import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionSignature
 import com.hookiesolutions.webhookie.subscription.domain.callback.CallbackDetails
 import com.hookiesolutions.webhookie.subscription.domain.callback.security.CallbackSecurityScheme
-import com.hookiesolutions.webhookie.subscription.domain.callback.security.hmac.HmacDetails
-import com.hookiesolutions.webhookie.subscription.domain.callback.security.hmac.HmacSecurityScheme
-import com.hookiesolutions.webhookie.subscription.utils.CryptoUtils
-import org.bson.types.ObjectId
-import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
-import reactor.core.publisher.Mono
-import java.time.Instant
 
 data class CallbackValidationSampleRequest(
   val httpMethod: HttpMethod,
@@ -45,49 +37,7 @@ data class CallbackValidationSampleRequest(
 ) {
 
   val callback: CallbackDetails
-    get() = CallbackDetails("id", "TEMP", httpMethod, url)
-
-  fun addMessageHeaders(
-    httpHeaders: HttpHeaders,
-    time: Instant
-  ) {
-
-    val scheme = securityScheme as? HmacSecurityScheme ?: return
-    val secret = scheme.details
-    val traceId = this.traceId?: ObjectId.get().toHexString()
-    val spanId = this.spanId?: ObjectId.get().toHexString()
-    Mono
-      .create<HmacDetails> { it.success(secret) }
-      .zipWhen { CryptoUtils.hmac(it.secret, callback, time.toString(), traceId, spanId) }
-      .map {
-        SubscriptionSignature.Builder()
-          .keyId(it.t1.keyId)
-          .algorithm(CryptoUtils.ALG)
-          .traceId(traceId)
-          .spanId(spanId)
-          .date(time)
-          .signature(it.t2)
-          .build()
-      }
-      .subscribe { signature ->
-        signature.headers
-          .forEach {
-            httpHeaders.add(it.key, it.value)
-          }
-      }
-
-    headers.entries
-      .forEach {
-        val value = it.value
-        if(value is String) {
-          httpHeaders.add(it.key, value)
-        }
-        @Suppress("UNCHECKED_CAST") val stringList = value as? List<String>
-        if(stringList != null) {
-          httpHeaders.addAll(it.key, stringList)
-        }
-      }
-  }
+    get() = CallbackDetails("id", "TEMP", httpMethod, url, securityScheme)
 
   class Builder {
     private lateinit var callbackDetails: CallbackDetails
