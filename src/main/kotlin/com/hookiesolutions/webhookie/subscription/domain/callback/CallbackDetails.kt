@@ -22,6 +22,7 @@
 
 package com.hookiesolutions.webhookie.subscription.domain.callback
 
+import com.bol.secure.Encrypted
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.hookiesolutions.webhookie.common.model.dto.CallbackDTO
 import com.hookiesolutions.webhookie.subscription.domain.callback.CallbackDetails.Keys.Companion.KEY_CALLBACK_ID
@@ -37,6 +38,7 @@ data class CallbackDetails(
   val name: String,
   val httpMethod: HttpMethod,
   val url: String,
+  @Encrypted
   val securityScheme: CallbackSecurityScheme? = null,
 ) {
   fun requestTarget(): String {

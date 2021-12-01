@@ -14,9 +14,21 @@ import com.hookiesolutions.webhookie.subscription.domain.callback.security.oauth
 )
 abstract class CallbackSecurityScheme {
   abstract val method: SecuritySchemeType
+  abstract val alias: String
   abstract fun dto(): CallbackSecuritySchemeDTO?
+  abstract fun detailsJson(): String
 
   fun isHmac(): Boolean = method == SecuritySchemeType.HMAC
+
+  fun json(): String {
+    return """
+      {
+        "method": "${method.name}",
+        "details": ${detailsJson()},
+        "_class": "$alias"
+      }
+    """.trimIndent()
+  }
 
   companion object {
     const val PROPERTY_KEY = "method"

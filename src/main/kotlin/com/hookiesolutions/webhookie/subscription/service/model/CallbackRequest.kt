@@ -25,8 +25,6 @@ package com.hookiesolutions.webhookie.subscription.service.model
 import com.hookiesolutions.webhookie.common.validation.Url
 import com.hookiesolutions.webhookie.subscription.domain.callback.Callback
 import com.hookiesolutions.webhookie.subscription.domain.callback.security.CallbackSecurityScheme
-import com.hookiesolutions.webhookie.subscription.domain.callback.security.hmac.HmacDetails
-import com.hookiesolutions.webhookie.subscription.domain.callback.security.hmac.HmacSecurityScheme
 import org.springframework.http.HttpMethod
 import javax.validation.constraints.NotBlank
 
@@ -59,34 +57,11 @@ data class CallbackRequest(
 
   //TODO: refactor this and use mongodb update instead
   fun copy(entity: Callback, applicationId: String): Callback {
-    val result = Callback(name, applicationId, httpMethod, url, createCallbackSecurity(entity.securityScheme, securityScheme))
+    val result = Callback(name, applicationId, httpMethod, url, securityScheme)
     result.version = entity.version
     result.id = entity.id
     result.createdDate = entity.createdDate
     result.createdBy = entity.createdBy
     return result
-  }
-
-  private fun createCallbackSecurity(currentSecurity: CallbackSecurityScheme?, newSecurity: CallbackSecurityScheme?): CallbackSecurityScheme? {
-    if(newSecurity == null) {
-      return null
-    }
-
-    if(newSecurity.isHmac()) {
-      val scheme = newSecurity as HmacSecurityScheme
-      val secret = scheme.details.secret
-      if(currentSecurity == null) {
-        return HmacSecurityScheme(HmacDetails(newSecurity.details.keyId, secret))
-      }
-
-      return if(secret.replace("*", "").trim().isNotBlank()) {
-        HmacSecurityScheme(details = HmacDetails(scheme.details.keyId, secret))
-      } else {
-        HmacSecurityScheme(details = HmacDetails(scheme.details.keyId, (currentSecurity as HmacSecurityScheme).details.secret))
-      }
-
-    }
-
-    TODO("Implement OAuth2 here!")
   }
 }

@@ -117,9 +117,13 @@ data class Subscription(
 
   class Updates {
     companion object {
-      fun updateCallback(details: Any): Update {
+      fun updateCallback(details: Any?): Update {
         val update = Update()
-          .set(KEY_CALLBACK, details)
+        if(details == null) {
+           update.unset(KEY_CALLBACK)
+        } else {
+          update.set(KEY_CALLBACK, details)
+        }
         update.inc(KEY_VERSION)
         return update
       }

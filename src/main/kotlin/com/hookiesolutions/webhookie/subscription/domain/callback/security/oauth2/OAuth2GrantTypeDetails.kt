@@ -10,6 +10,7 @@ import com.hookiesolutions.webhookie.subscription.domain.callback.security.oauth
 )
 abstract class OAuth2GrantTypeDetails {
   abstract val type: OAuth2GrantType
+  abstract fun json(): String
 
   companion object {
     const val PROPERTY_TYPE = "type"

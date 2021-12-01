@@ -192,7 +192,7 @@ class SubscriptionRepository(
     )
   }
 
-  fun updateCallbackSubscriptions(id: String, details: Any): Mono<UpdateResult> {
+  fun updateCallbackSubscriptions(id: String, details: Any?): Mono<UpdateResult> {
     return mongoTemplate.updateMulti(
       query(callbackIdIs(id)),
       updateCallback(details),
