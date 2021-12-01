@@ -279,12 +279,12 @@ class SubscriptionFlows(
   ): IntegrationFlow {
     return integrationFlow {
       channel(signSubscriptionMessageChannel)
+      filter<SignableSubscriptionMessage> { it.subscription.callback.securityScheme?.isHmac() ?: false }
       transform(signSubscriptionMessage)
       split()
       channel(subscriptionChannel)
     }
   }
-
 }
 
 /**
