@@ -1,0 +1,54 @@
+POST http://localhost:9005/publish
+Accept: text/plain, application/json
+Content-Type: application/json
+wh-topic: DevicePositionUpdate
+#wh-topic: OrderChange
+#wh-topic: CancelledOrder
+#wh-topic: CreateNewOrder
+#wh-topic: OrderDelivered
+Authorization: Bearer {{token}}
+#wh-authorized-subscriber: Hookie Solutions
+
+< data.json
+
+###
+
+POST http://localhost:9005/publish/queue
+Accept: text/plain, application/json
+Content-Type: application/json
+#wh-topic: createdPet
+#wh-topic: updatedSong
+wh-topic: createdOrder
+#wh-topic: createdSong
+#wh-topic: createdAlbum
+#h-count: 10
+#wh-trace-id: b7823282-fef8-4af0-b162-e2f754aec9d4
+#wh-trace-id: 6
+Authorization: Bearer {{token}}
+#wh-authorized-subscriber: Hookie Solutions
+
+< data.json
+
+###
+
+POST http://localhost:8080/consumer/event
+Accept: text/plain, application/json
+Content-Type: application/json
+wh-topic: DevicePositionUpdate
+wh-trace-id: 1
+Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImhoMGlYalk5MTY3OG5obnRPS1BfbyJ9.eyJodHRwczovL3dlYmhvb2tpZS5jb20vZ3JvdXBzIjpbIndlYmhvb2tpZS1jb25zdW1lci1ncm91cC0xIiwid2ViaG9va2llLXByb3ZpZGVyLWdyb3VwLTEiLCJ3ZWJob29raWUtcHJvdmlkZXItZ3JvdXAtMiJdLCJodHRwczovL3dlYmhvb2tpZS5jb20vcm9sZXMiOlsiV0hfQ09OU1VNRVIiLCJXSF9BRE1JTiIsIldIX1VTRVIiLCJXSF9QUk9WSURFUiJdLCJodHRwczovL3dlYmhvb2tpZS5jb20vZW50aXR5IjoiSG9va2llIFNvbHV0aW9ucyIsImlzcyI6Imh0dHBzOi8vd2ViaG9va2llLmF1LmF1dGgwLmNvbS8iLCJzdWIiOiJhdXRoMHw1ZmRjMTllMWIxMGQ2ZDAwNmY2MjFkNmYiLCJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjgwODAiLCJpYXQiOjE2MzgzNjU1NzEsImV4cCI6MTYzODQ1MTk3MSwiYXpwIjoibnZLRG1JSzlRNVp3MVVLd3BPTjhMRTN0Zzl2WmNYYjQiLCJndHkiOiJwYXNzd29yZCJ9.JMU7qJ0vgdAoZ8HLjKbkMUwH9atGLk5mjTNWmdXzEXCACy6f3JkZOSXo-FOr2gRA4AufbpO2Wvz1aAtGXb0ZfO-k8NLDjmCBBOhOeuxvxeuK-eCINd3lp2Y5D21GQ6w-lN65eZKOAntZSIwWOP-OUh2auHEJbjwdDQCmOURVYh4BwiSXEZN-j6SO1PuM0DMbl0KMl2klNNKONDpbWU5EFehhQt7QW3L8e-gHTw7jwz0AgTfKBKkOnSKvWDV47ix39BHw6s518xRoONhmo2ZkiGpmKsqtv5CwrLDYxiz6w3ecfMWR6I-5hVNjZ1tT9D7DtF6ivOW_GsLHuY7LGDGTKQ
+
+< data.json
+
+###
+
+POST http://localhost:9005/publish
+Accept: text/plain, application/json
+Content-Type: application/json
+wh-topic: NewOrder
+Authorization: Bearer {{token}}
+
+< data.json
+
+###
+
