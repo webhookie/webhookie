@@ -1,7 +1,7 @@
 package com.hookiesolutions.webhookie.subscription.domain.callback.security.oauth2
 
-import com.hookiesolutions.webhookie.common.model.dto.CallbackSecuritySchemeDTO
-import com.hookiesolutions.webhookie.common.model.dto.OAuth2CallbackSecuritySchemeDTO
+import com.hookiesolutions.webhookie.common.model.dto.security.CallbackSecuritySchemeDTO
+import com.hookiesolutions.webhookie.subscription.enterprise.oauth2.model.dto.OAuth2CallbackSecuritySchemeDTO
 import com.hookiesolutions.webhookie.subscription.domain.callback.security.CallbackSecurityScheme
 import com.hookiesolutions.webhookie.subscription.domain.callback.security.SecuritySchemeType
 import org.springframework.data.annotation.TypeAlias
@@ -17,6 +17,6 @@ data class OAuth2SecurityScheme(
 
   override fun dto(): CallbackSecuritySchemeDTO {
     val details = details as ClientCredentialsGrantType
-    return OAuth2CallbackSecuritySchemeDTO(details.tokenEndpoint, details.clientId)
+    return OAuth2CallbackSecuritySchemeDTO(details.tokenEndpoint, details.clientId, details.scopes)
   }
 }

@@ -9,6 +9,7 @@ data class ClientCredentialsGrantType(
   val tokenEndpoint: String,
   val clientId: String,
   val secret: String,
+  val scopes: List<String>
 ): OAuth2GrantTypeDetails() {
   override val type: OAuth2GrantType
     get() = OAuth2GrantType.CLIENT_CREDENTIALS
