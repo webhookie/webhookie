@@ -16,13 +16,14 @@ data class ClientCredentialsGrantType(
     get() = OAuth2GrantType.CLIENT_CREDENTIALS
 
   override fun json(): String {
+    val scopes = scopes.joinToString(prefix = "[", postfix = "]") { "\"$it\"" }
     return """
       {
         "tokenEndpoint": "$tokenEndpoint",
         "clientId": "$clientId",
         "secret": "$secret",
-        "scopes": "$scopes"
-        "_class": ""$OAUTH2_CLIENT_CREDENTIALS_ALIAS
+        "scopes": $scopes,
+        "_class": "$OAUTH2_CLIENT_CREDENTIALS_ALIAS"
       }
     """.trimIndent()
   }
