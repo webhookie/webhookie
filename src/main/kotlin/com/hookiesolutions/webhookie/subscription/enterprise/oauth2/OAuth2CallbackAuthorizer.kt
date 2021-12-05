@@ -4,7 +4,6 @@ import com.hookiesolutions.webhookie.common.exception.RemoteServiceException
 import com.hookiesolutions.webhookie.subscription.domain.callback.CallbackDetails
 import com.hookiesolutions.webhookie.subscription.domain.callback.security.oauth2.ClientCredentialsGrantType
 import com.hookiesolutions.webhookie.subscription.domain.callback.security.oauth2.OAuth2SecurityScheme
-import com.hookiesolutions.webhookie.subscription.service.SubscriptionService
 import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest
 import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientManager
 import org.springframework.security.oauth2.client.registration.ClientRegistration
@@ -13,14 +12,8 @@ import reactor.core.publisher.Mono
 
 class OAuth2CallbackAuthorizer(
   private val manager: ReactiveOAuth2AuthorizedClientManager,
-  private val subscriptionService: SubscriptionService,
   private val repository: MutableReactiveClientRegistrationRepository
 ) {
-  fun authorize(subscriptionId: String): Mono<String> {
-    return subscriptionService.subscriptionById(subscriptionId)
-      .flatMap { authorize(it.callback) }
-  }
-
   fun authorize(callback: CallbackDetails): Mono<String> {
     val scheme = callback.securityScheme as OAuth2SecurityScheme
     val details = scheme.details as ClientCredentialsGrantType
