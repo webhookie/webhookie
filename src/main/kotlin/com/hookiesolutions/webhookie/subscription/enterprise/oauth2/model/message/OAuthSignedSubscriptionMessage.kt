@@ -22,4 +22,29 @@ data class OAuthSignedSubscriptionMessage(
     super.addMessageHeaders(headers)
     headers.add(HttpHeaders.AUTHORIZATION, "${OAuth2AccessToken.TokenType.BEARER.value} $token")
   }
+
+  class Builder {
+    private lateinit var msg: SignableSubscriptionMessage
+    private lateinit var token: String
+
+    fun message(message: SignableSubscriptionMessage) = apply {
+      this.msg = message
+    }
+
+    fun token(token: String) = apply {
+      this.token = token
+    }
+
+    fun build(): OAuthSignedSubscriptionMessage {
+      return OAuthSignedSubscriptionMessage(
+        originalMessage = msg.originalMessage,
+        spanId = msg.spanId,
+        subscription = msg.subscription,
+        delay = msg.delay,
+        numberOfRetries = msg.numberOfRetries,
+        totalNumberOfTries = msg.totalNumberOfTries,
+        token = token,
+      )
+    }
+  }
 }
