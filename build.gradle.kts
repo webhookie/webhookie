@@ -55,8 +55,8 @@ repositories {
 	mavenCentral()
 }
 
-extra["springdocVersion"] = "1.5.2"
-extra["jsonPathVersion"] = "2.5.0"
+extra["springdocVersion"] = "1.5.12"
+extra["jsonPathVersion"] = "2.6.0"
 extra["bolEncryptedVersion"] = "2.7.2"
 
 dependencies {
