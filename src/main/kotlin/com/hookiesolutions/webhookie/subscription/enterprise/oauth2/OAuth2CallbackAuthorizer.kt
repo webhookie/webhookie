@@ -1,5 +1,6 @@
 package com.hookiesolutions.webhookie.subscription.enterprise.oauth2
 
+import com.hookiesolutions.webhookie.common.exception.RemoteServiceException
 import com.hookiesolutions.webhookie.subscription.domain.callback.CallbackDetails
 import com.hookiesolutions.webhookie.subscription.domain.callback.security.oauth2.ClientCredentialsGrantType
 import com.hookiesolutions.webhookie.subscription.domain.callback.security.oauth2.OAuth2SecurityScheme
@@ -22,7 +23,7 @@ class OAuth2CallbackAuthorizer(
       .clientId(details.clientId)
       .clientSecret(details.secret)
       .scope(details.scopes)
-      .authorizationGrantType(AuthorizationGrantType("client_credentials"))
+      .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
       .build()
 
     repository.registerClient(registration)
@@ -36,5 +37,6 @@ class OAuth2CallbackAuthorizer(
       .map {
         it.accessToken.tokenValue
       }
+      .onErrorMap { RemoteServiceException(it.localizedMessage) }
   }
 }
