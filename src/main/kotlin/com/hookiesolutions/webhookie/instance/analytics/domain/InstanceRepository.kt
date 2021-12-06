@@ -20,14 +20,25 @@
  * You should also get your employer (if you work as a programmer) or school, if any, to sign a "copyright disclaimer" for the program, if necessary. For more information on this, and how to apply and follow the GNU AGPL, see <https://www.gnu.org/licenses/>.
  */
 
-package com.hookiesolutions.webhookie.analytics.service.model
+package com.hookiesolutions.webhookie.instance.analytics.domain
+
+import com.hookiesolutions.webhookie.common.repository.GenericRepository
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate
+import org.springframework.data.mongodb.core.query.Criteria
+import org.springframework.data.mongodb.core.query.Query.query
+import org.springframework.stereotype.Repository
+import reactor.core.publisher.Mono
 
 /**
  *
  * @author Arthur Kazemi<bidadh@gmail.com>
- * @since 9/8/21 23:00
+ * @since 3/8/21 16:02
  */
-data class RemoteInstance(
-  val id: String,
-  val apiKey: String
-)
+@Repository
+class InstanceRepository(
+  private val mongoTemplate: ReactiveMongoTemplate
+): GenericRepository<WebhookieInstance>(mongoTemplate, WebhookieInstance::class.java) {
+  fun findOne(): Mono<WebhookieInstance> {
+    return mongoTemplate.findOne(query(Criteria()), WebhookieInstance::class.java)
+  }
+}

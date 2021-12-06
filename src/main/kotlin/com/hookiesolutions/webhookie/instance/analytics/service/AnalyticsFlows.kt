@@ -20,15 +20,15 @@
  * You should also get your employer (if you work as a programmer) or school, if any, to sign a "copyright disclaimer" for the program, if necessary. For more information on this, and how to apply and follow the GNU AGPL, see <https://www.gnu.org/licenses/>.
  */
 
-package com.hookiesolutions.webhookie.analytics.service
+package com.hookiesolutions.webhookie.instance.analytics.service
 
-import com.hookiesolutions.webhookie.analytics.config.AnalyticsProperties
-import com.hookiesolutions.webhookie.analytics.service.model.AnalyticsData
-import com.hookiesolutions.webhookie.analytics.service.model.AnalyticsItem
-import com.hookiesolutions.webhookie.analytics.service.model.AnalyticsTimeCriteria
-import com.hookiesolutions.webhookie.analytics.service.model.SpanAnalyticsItem
-import com.hookiesolutions.webhookie.analytics.service.model.SubscriptionAnalyticsItem
-import com.hookiesolutions.webhookie.analytics.service.model.TraceAnalyticsItem
+import com.hookiesolutions.webhookie.instance.analytics.config.AnalyticsProperties
+import com.hookiesolutions.webhookie.instance.analytics.service.model.AnalyticsData
+import com.hookiesolutions.webhookie.instance.analytics.service.model.AnalyticsItem
+import com.hookiesolutions.webhookie.instance.analytics.service.model.AnalyticsTimeCriteria
+import com.hookiesolutions.webhookie.instance.analytics.service.model.SpanAnalyticsItem
+import com.hookiesolutions.webhookie.instance.analytics.service.model.SubscriptionAnalyticsItem
+import com.hookiesolutions.webhookie.instance.analytics.service.model.TraceAnalyticsItem
 import org.slf4j.Logger
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
@@ -127,7 +127,7 @@ class AnalyticsFlows(
   fun captureAnalyticsOutputProcessor(): MessageGroupProcessor {
     return MessageGroupProcessor { group ->
       val items = group.messages
-        .map { it.payload as AnalyticsItem}
+        .map { it.payload as AnalyticsItem }
 
       val one = group.one
       val from = one.headers[WH_ANALYTICS_QUERY_FROM] as Instant

@@ -20,13 +20,12 @@
  * You should also get your employer (if you work as a programmer) or school, if any, to sign a "copyright disclaimer" for the program, if necessary. For more information on this, and how to apply and follow the GNU AGPL, see <https://www.gnu.org/licenses/>.
  */
 
-package com.hookiesolutions.webhookie.analytics.service
+package com.hookiesolutions.webhookie.instance.analytics.service
 
-import com.hookiesolutions.webhookie.analytics.service.model.AnalyticsTimeCriteria
-import com.hookiesolutions.webhookie.audit.service.SpanService
-import com.hookiesolutions.webhookie.audit.service.TraceService
+import com.hookiesolutions.webhookie.instance.analytics.service.model.AnalyticsTimeCriteria
 import com.hookiesolutions.webhookie.common.model.StatusCountRow
 import com.hookiesolutions.webhookie.common.model.TimedResult
+import com.hookiesolutions.webhookie.subscription.service.SubscriptionService
 import org.slf4j.Logger
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
@@ -37,22 +36,14 @@ import reactor.core.publisher.Mono
  * @since 4/8/21 15:36
  */
 @Service
-class AnalyticsTrafficServiceDelegate(
+class AnalyticsSubscriptionServiceDelegate(
   private val log: Logger,
-  private val traceService: TraceService,
-  private val spanService: SpanService
+  private val subscriptionService: SubscriptionService
 ) {
-  fun fetchTraceAnalyticsData(analyticsTimeCriteria: AnalyticsTimeCriteria): Mono<TimedResult<List<StatusCountRow>>> {
+  fun fetchSubscriptionAnalyticsData(analyticsTimeCriteria: AnalyticsTimeCriteria): Mono<TimedResult<List<StatusCountRow>>> {
     val from = analyticsTimeCriteria.from
     val to = analyticsTimeCriteria.to
-    log.info("Fetching trace Analytics data from: '[}' to: '{}'", from, to)
-    return traceService.traceSummaryBetween(from, to)
-  }
-
-  fun fetchSpanAnalyticsData(analyticsTimeCriteria: AnalyticsTimeCriteria): Mono<TimedResult<List<StatusCountRow>>> {
-    val from = analyticsTimeCriteria.from
-    val to = analyticsTimeCriteria.to
-    log.info("Fetching span Analytics data from: '[}' to: '{}'", from, to)
-    return spanService.spanSummaryBetween(from, to)
+    log.info("Fetching subscription Analytics data from: '[}' to: '{}'", from, to)
+    return subscriptionService.subscriptionSummaryBetween(from, to)
   }
 }

@@ -20,30 +20,24 @@
  * You should also get your employer (if you work as a programmer) or school, if any, to sign a "copyright disclaimer" for the program, if necessary. For more information on this, and how to apply and follow the GNU AGPL, see <https://www.gnu.org/licenses/>.
  */
 
-package com.hookiesolutions.webhookie.analytics.service
+package com.hookiesolutions.webhookie.instance.analytics.config
 
-import com.hookiesolutions.webhookie.analytics.service.model.AnalyticsTimeCriteria
-import com.hookiesolutions.webhookie.common.model.StatusCountRow
-import com.hookiesolutions.webhookie.common.model.TimedResult
-import com.hookiesolutions.webhookie.subscription.service.SubscriptionService
-import org.slf4j.Logger
-import org.springframework.stereotype.Service
-import reactor.core.publisher.Mono
+import com.hookiesolutions.webhookie.instance.analytics.config.AnalyticsProperties.Companion.PROPS_ANALYTICS_PREFIX
+import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.boot.context.properties.ConstructorBinding
 
 /**
  *
  * @author Arthur Kazemi<bidadh@gmail.com>
- * @since 4/8/21 15:36
+ * @since 10/8/21 12:33
  */
-@Service
-class AnalyticsSubscriptionServiceDelegate(
-  private val log: Logger,
-  private val subscriptionService: SubscriptionService
+@ConstructorBinding
+@ConfigurationProperties(prefix = PROPS_ANALYTICS_PREFIX)
+class AnalyticsProperties(
+  val send: Boolean = true,
+  val apiKey: String = "ZJw6w476-Z4HUjLkjLi8gLLEBEldD1irxoPXYGPhG2w"
 ) {
-  fun fetchSubscriptionAnalyticsData(analyticsTimeCriteria: AnalyticsTimeCriteria): Mono<TimedResult<List<StatusCountRow>>> {
-    val from = analyticsTimeCriteria.from
-    val to = analyticsTimeCriteria.to
-    log.info("Fetching subscription Analytics data from: '[}' to: '{}'", from, to)
-    return subscriptionService.subscriptionSummaryBetween(from, to)
+  companion object {
+    const val PROPS_ANALYTICS_PREFIX = "webhookie.analytics"
   }
 }

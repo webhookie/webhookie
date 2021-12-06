@@ -20,11 +20,41 @@
  * You should also get your employer (if you work as a programmer) or school, if any, to sign a "copyright disclaimer" for the program, if necessary. For more information on this, and how to apply and follow the GNU AGPL, see <https://www.gnu.org/licenses/>.
  */
 
-package com.hookiesolutions.webhookie.analytics.service.model
+package com.hookiesolutions.webhookie.instance.analytics.config
 
-import java.time.Instant
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Profile
+import org.springframework.web.reactive.function.client.WebClient
 
-data class AnalyticsTimeCriteria(
-  val from: Instant,
-  val to: Instant
-)
+/**
+ *
+ * @author Arthur Kazemi<bidadh@gmail.com>
+ * @since 3/8/21 15:53
+ */
+@Configuration
+class AnalyticsConfig {
+  @Configuration
+  @Profile("dev")
+  class DevConfig {
+    @Bean
+    fun analyticsServerBaseUrl() = "http://localhost:7070/api"
+  }
+
+  @Configuration
+  @Profile("!dev")
+  class Config {
+    @Bean
+    fun analyticsServerBaseUrl() = "https://analytics.webhookie.com/api"
+  }
+
+  @Bean
+  fun analyticsClient(
+    webClientBuilder: WebClient.Builder,
+    analyticsServerBaseUrl: String
+  ): WebClient {
+    return webClientBuilder
+      .baseUrl(analyticsServerBaseUrl)
+      .build()
+  }
+}

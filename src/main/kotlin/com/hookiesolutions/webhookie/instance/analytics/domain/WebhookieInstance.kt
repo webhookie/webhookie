@@ -20,24 +20,21 @@
  * You should also get your employer (if you work as a programmer) or school, if any, to sign a "copyright disclaimer" for the program, if necessary. For more information on this, and how to apply and follow the GNU AGPL, see <https://www.gnu.org/licenses/>.
  */
 
-package com.hookiesolutions.webhookie.analytics.config
+package com.hookiesolutions.webhookie.instance.analytics.domain
 
-import com.hookiesolutions.webhookie.analytics.config.AnalyticsProperties.Companion.PROPS_ANALYTICS_PREFIX
-import org.springframework.boot.context.properties.ConfigurationProperties
-import org.springframework.boot.context.properties.ConstructorBinding
+import com.hookiesolutions.webhookie.common.model.AbstractEntity
+import org.springframework.data.annotation.TypeAlias
+import org.springframework.data.mongodb.core.mapping.Document
 
 /**
  *
  * @author Arthur Kazemi<bidadh@gmail.com>
- * @since 10/8/21 12:33
+ * @since 3/8/21 16:03
  */
-@ConstructorBinding
-@ConfigurationProperties(prefix = PROPS_ANALYTICS_PREFIX)
-class AnalyticsProperties(
-  val send: Boolean = true,
-  val apiKey: String = "ZJw6w476-Z4HUjLkjLi8gLLEBEldD1irxoPXYGPhG2w"
-) {
-  companion object {
-    const val PROPS_ANALYTICS_PREFIX = "webhookie.analytics"
-  }
-}
+@Document("instance")
+@TypeAlias("instance")
+data class WebhookieInstance(
+  val instanceId: String,
+  val apiKey: String,
+  val serverUri: String
+): AbstractEntity()

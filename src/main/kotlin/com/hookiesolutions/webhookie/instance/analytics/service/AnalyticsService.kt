@@ -20,13 +20,13 @@
  * You should also get your employer (if you work as a programmer) or school, if any, to sign a "copyright disclaimer" for the program, if necessary. For more information on this, and how to apply and follow the GNU AGPL, see <https://www.gnu.org/licenses/>.
  */
 
-package com.hookiesolutions.webhookie.analytics.service
+package com.hookiesolutions.webhookie.instance.analytics.service
 
-import com.hookiesolutions.webhookie.analytics.config.AnalyticsProperties
-import com.hookiesolutions.webhookie.analytics.domain.InstanceRepository
-import com.hookiesolutions.webhookie.analytics.domain.WebhookieInstance
-import com.hookiesolutions.webhookie.analytics.service.model.AnalyticsData
-import com.hookiesolutions.webhookie.analytics.service.model.RemoteInstance
+import com.hookiesolutions.webhookie.instance.analytics.config.AnalyticsProperties
+import com.hookiesolutions.webhookie.instance.analytics.domain.InstanceRepository
+import com.hookiesolutions.webhookie.instance.analytics.domain.WebhookieInstance
+import com.hookiesolutions.webhookie.instance.analytics.service.model.AnalyticsData
+import com.hookiesolutions.webhookie.instance.analytics.service.model.RemoteInstance
 import com.hookiesolutions.webhookie.common.service.IdGenerator
 import com.hookiesolutions.webhookie.common.service.TimeMachine
 import com.hookiesolutions.webhookie.subscription.utils.CryptoUtils

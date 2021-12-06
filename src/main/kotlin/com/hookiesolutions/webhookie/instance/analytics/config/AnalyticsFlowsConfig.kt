@@ -20,10 +20,10 @@
  * You should also get your employer (if you work as a programmer) or school, if any, to sign a "copyright disclaimer" for the program, if necessary. For more information on this, and how to apply and follow the GNU AGPL, see <https://www.gnu.org/licenses/>.
  */
 
-package com.hookiesolutions.webhookie.analytics.config
+package com.hookiesolutions.webhookie.instance.analytics.config
 
-import com.hookiesolutions.webhookie.analytics.service.AnalyticsFlows
-import com.hookiesolutions.webhookie.analytics.service.model.AnalyticsTimeCriteria
+import com.hookiesolutions.webhookie.instance.analytics.service.AnalyticsFlows
+import com.hookiesolutions.webhookie.instance.analytics.service.model.AnalyticsTimeCriteria
 import com.hookiesolutions.webhookie.common.service.TimeMachine
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
