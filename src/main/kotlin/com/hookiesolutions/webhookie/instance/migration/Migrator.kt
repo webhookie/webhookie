@@ -1,30 +1,76 @@
 package com.hookiesolutions.webhookie.instance.migration
 
+import com.hookiesolutions.webhookie.common.service.TimeMachine
+import com.hookiesolutions.webhookie.instance.migration.domain.Migration
+import com.hookiesolutions.webhookie.instance.migration.domain.MigrationHistory
 import org.slf4j.Logger
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.event.EventListener
+import org.springframework.data.mongodb.core.FindAndModifyOptions
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate
+import org.springframework.data.mongodb.core.query.Criteria
+import org.springframework.data.mongodb.core.query.Query.query
+import org.springframework.data.mongodb.core.query.Update
 import org.springframework.stereotype.Component
+import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.toMono
 import java.util.concurrent.atomic.AtomicBoolean
 
 @Component
 class Migrator(
   private val log: Logger,
-  private val migrations: List<Migration>,
+  private val migrations: List<VersionMigration>,
+  private val timeMachine: TimeMachine,
+  private val mongoTemplate: ReactiveMongoTemplate
 ) {
   private val finished = AtomicBoolean(false)
 
   @EventListener(ApplicationReadyEvent::class)
   fun migrate() {
-    val ver = "0.0.1"
+    mongoTemplate
+      .findOne(query(Criteria()), Migration::class.java)
+      .map { it.dbVersion }
+      .switchIfEmpty("1.0.0".toMono())
+      .flatMap { ver ->
+        val list = migrations
+          .sortedBy { it.toVersion }
+          .filter { it.toVersion > ver }
+          .map { it.migrate() }
 
-    migrations
-      .sortedBy { it.toVersion }
-      .filter { it.toVersion > ver }
-      .map { it.migrate() }
-      .reduce { acc, migration -> acc.then(migration) }
+        return@flatMap if(list.isEmpty()) {
+          Mono.just("UP-TO-DATE")
+        } else {
+          list.reduce { acc, migration ->
+            acc
+              .then(updateWith(migration))
+              .then(migration)
+          }
+        }
+      }
       .subscribe {
-        log.info("Migration to '{}' has been completed!", it)
+        if(it == "UP-TO-DATE") {
+          log.info("DB version is {}", it)
+        } else {
+          log.info("Migration to '{}' has been completed!", it)
+        }
         done()
+      }
+  }
+
+  private fun updateWith(versionMono: Mono<String>): Mono<Migration> {
+    val doneAt = timeMachine.now()
+    return versionMono
+      .flatMap {
+        log.info("DB has been migrated to version: '{}' at '{}'", it, doneAt)
+        mongoTemplate.findAndModify(
+          query(Criteria()),
+          Update()
+            .set("dbVersion", it)
+            .set("migratedAt", doneAt)
+            .addToSet("history", MigrationHistory(it, doneAt)),
+          FindAndModifyOptions.options().returnNew(true).upsert(true),
+          Migration::class.java
+        )
       }
   }
 

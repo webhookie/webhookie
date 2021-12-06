@@ -1,7 +1,7 @@
 package com.hookiesolutions.webhookie.instance.migration.versions.v110
 
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
-import com.hookiesolutions.webhookie.instance.migration.Migration
+import com.hookiesolutions.webhookie.instance.migration.VersionMigration
 import com.hookiesolutions.webhookie.subscription.service.converter.CallbackSecretConverter
 import org.bson.types.Binary
 import org.bson.types.ObjectId
@@ -14,11 +14,11 @@ import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 
 @Component
-class MigrationV110(
+class VersionMigrationV110(
   private val mongoTemplate: ReactiveMongoTemplate,
   private val converter: SecretConverter,
   private val encoder: CallbackSecretConverter,
-) : Migration {
+) : VersionMigration {
   override val toVersion: String
     get() = "1.1.0"
 

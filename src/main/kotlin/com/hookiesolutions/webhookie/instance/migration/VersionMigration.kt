@@ -2,7 +2,7 @@ package com.hookiesolutions.webhookie.instance.migration
 
 import reactor.core.publisher.Mono
 
-interface Migration {
+interface VersionMigration {
   val toVersion: String
   fun doMigrate(): Mono<String>
 
