@@ -6,6 +6,8 @@ import com.hookiesolutions.webhookie.instance.migration.domain.MigrationHistory
 import org.slf4j.Logger
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.event.EventListener
+import org.springframework.core.Ordered
+import org.springframework.core.annotation.Order
 import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
@@ -25,6 +27,7 @@ class Migrator(
 ) {
   private val finished = AtomicBoolean(false)
 
+  @Order(Ordered.HIGHEST_PRECEDENCE)
   @EventListener(ApplicationReadyEvent::class)
   fun migrate() {
     mongoTemplate
