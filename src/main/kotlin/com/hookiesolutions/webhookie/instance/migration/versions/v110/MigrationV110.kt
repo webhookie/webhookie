@@ -1,4 +1,4 @@
-package com.hookiesolutions.webhookie.instance.migration.v110
+package com.hookiesolutions.webhookie.instance.migration.versions.v110
 
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
 import com.hookiesolutions.webhookie.instance.migration.Migration

@@ -1,4 +1,4 @@
-package com.hookiesolutions.webhookie.instance.migration.v110
+package com.hookiesolutions.webhookie.instance.migration.versions.v110
 
 import com.bol.crypt.CryptVault
 import com.hookiesolutions.webhookie.subscription.domain.callback.security.hmac.HmacDetails
