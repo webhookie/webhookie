@@ -22,6 +22,7 @@
 
 package com.hookiesolutions.webhookie.admin.service.model
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.hookiesolutions.webhookie.admin.domain.ConsumerGroup
 import com.hookiesolutions.webhookie.common.extension.isSimilarTo
 import javax.validation.constraints.NotBlank
@@ -39,6 +40,7 @@ data class SaveGroupRequest(
   @field:NotBlank
   val iamGroupName: String
 ) {
+  @JsonIgnore
   fun isSimilarToDefault(): Boolean {
     val consumerGroup = ConsumerGroup.DEFAULT
     return name.isSimilarTo(consumerGroup.name) ||
