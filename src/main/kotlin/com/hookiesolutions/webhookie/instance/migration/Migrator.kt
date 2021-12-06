@@ -37,8 +37,9 @@ class Migrator(
           .filter { it.toVersion > ver }
           .map { it.migrate() }
 
+        //TODO: refactor
         return@flatMap if(list.isEmpty()) {
-          Mono.just("UP-TO-DATE")
+          Mono.just(UP_TP_DATE)
         } else {
           list.reduce { acc, migration ->
             acc
@@ -48,7 +49,7 @@ class Migrator(
         }
       }
       .subscribe {
-        if(it == "UP-TO-DATE") {
+        if(it == UP_TP_DATE) {
           log.info("DB version is {}", it)
         } else {
           log.info("Migration to '{}' has been completed!", it)
@@ -80,5 +81,9 @@ class Migrator(
 
   fun isDone(): Boolean {
     return finished.get()
+  }
+
+  companion object {
+    const val UP_TP_DATE = "UP-TO-DATE"
   }
 }
