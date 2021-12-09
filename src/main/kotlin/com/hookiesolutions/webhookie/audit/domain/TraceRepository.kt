@@ -22,7 +22,6 @@
 
 package com.hookiesolutions.webhookie.audit.domain
 
-import com.hookiesolutions.webhookie.common.model.AggregationCountResult.Companion.ZERO
 import com.hookiesolutions.webhookie.audit.domain.Span.Queries.Companion.spanTopicIn
 import com.hookiesolutions.webhookie.audit.domain.Trace.Keys.Companion.KEY_STATUS_HISTORY
 import com.hookiesolutions.webhookie.audit.domain.Trace.Keys.Companion.KEY_STATUS_UPDATE
@@ -39,16 +38,16 @@ import com.hookiesolutions.webhookie.audit.domain.Trace.Updates.Companion.update
 import com.hookiesolutions.webhookie.audit.domain.TraceStatusUpdate.Keys.Companion.KEY_STATUS
 import com.hookiesolutions.webhookie.audit.domain.TraceSummary.Keys.Companion.KEY_NUMBER_OF_SPANS
 import com.hookiesolutions.webhookie.audit.domain.TraceSummary.Keys.Companion.KEY_NUMBER_OF_SUCCESS
-import com.hookiesolutions.webhookie.audit.domain.aggregation.TraceAggregationStrategy
+import com.hookiesolutions.webhookie.audit.domain.aggregation.TraceAggregate
 import com.hookiesolutions.webhookie.audit.service.security.VerifyTraceReadAccess
 import com.hookiesolutions.webhookie.audit.web.model.request.TraceRequest
 import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.filters
 import com.hookiesolutions.webhookie.common.model.AggregationCountResult
+import com.hookiesolutions.webhookie.common.model.AggregationCountResult.Companion.ZERO
 import com.hookiesolutions.webhookie.common.model.FieldMatchingStrategy
 import com.hookiesolutions.webhookie.common.repository.GenericRepository
 import org.bson.Document
 import org.slf4j.Logger
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
@@ -71,8 +70,7 @@ import java.util.*
 @Repository
 class TraceRepository(
   private val mongoTemplate: ReactiveMongoTemplate,
-  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-  @Qualifier("traceAggregate") private val aggregateStrategy: TraceAggregationStrategy,
+  private val aggregateStrategy: TraceAggregate,
   private val log: Logger
 ) : GenericRepository<Trace>(mongoTemplate, Trace::class.java) {
   fun findByTraceId(traceId: String): Mono<Trace> {

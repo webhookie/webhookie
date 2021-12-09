@@ -1,0 +1,1 @@
+echo $ECR_REPOSITORY
