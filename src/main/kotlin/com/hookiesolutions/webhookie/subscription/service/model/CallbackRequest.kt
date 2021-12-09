@@ -40,12 +40,12 @@ data class CallbackRequest(
   @field:Url
   val url: String,
   val securityScheme: CallbackSecurityScheme?
-) {
-  fun requestTarget(): String {
+): CreateCallbackRequest {
+  override fun requestTarget(): String {
     return "${httpMethod.name} $url"
   }
 
-  fun callback(applicationId: String): Callback {
+  override fun callback(applicationId: String): Callback {
     return Callback(
       name,
       applicationId,

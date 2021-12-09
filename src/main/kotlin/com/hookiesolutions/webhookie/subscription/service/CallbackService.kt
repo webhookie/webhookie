@@ -30,6 +30,7 @@ import com.hookiesolutions.webhookie.subscription.domain.callback.Callback
 import com.hookiesolutions.webhookie.subscription.domain.callback.CallbackRepository
 import com.hookiesolutions.webhookie.subscription.service.converter.CallbackSecretConverter
 import com.hookiesolutions.webhookie.subscription.service.model.CallbackRequest
+import com.hookiesolutions.webhookie.subscription.service.model.CreateCallbackRequest
 import com.hookiesolutions.webhookie.subscription.service.security.annotation.ApplicationAccessType
 import com.hookiesolutions.webhookie.subscription.service.security.annotation.VerifyApplicationAccessById
 import org.slf4j.Logger
@@ -53,7 +54,7 @@ class CallbackService(
 ) {
   @PreAuthorize("hasAuthority('${ROLE_CONSUMER}')")
   @VerifyApplicationAccessById(access = ApplicationAccessType.WRITE)
-  fun createCallback(applicationId: String, request: CallbackRequest): Mono<Callback> {
+  fun createCallback(applicationId: String, request: CreateCallbackRequest): Mono<Callback> {
     log.info("adding Callback: '{}' to application: '{}'", request.requestTarget(), applicationId)
     val callback = request.callback(applicationId)
     return repository.save(callback)
