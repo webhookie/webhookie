@@ -29,7 +29,7 @@ import org.springframework.context.event.EventListener
 import reactor.tools.agent.ReactorDebugAgent
 
 @Configuration
-@Profile("dev")
+@Profile("development")
 class DebugAgentConfig {
   @EventListener(ApplicationReadyEvent::class)
   fun initForDebug() {
