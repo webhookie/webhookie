@@ -49,4 +49,16 @@ data class SignedSubscriptionMessage(
         headers.add(it.key, it.value)
       }
   }
+
+  override fun retryableCopy(delay: Duration, numberOfRetries: Int): SignableSubscriptionMessage {
+    return this.copy(
+      delay = delay,
+      numberOfRetries = numberOfRetries,
+      totalNumberOfTries = totalNumberOfTries
+    )
+  }
+
+  override fun updatingSubscriptionCopy(subscription: SubscriptionDTO): SignableSubscriptionMessage {
+    return this.copy(subscription = subscription)
+  }
 }

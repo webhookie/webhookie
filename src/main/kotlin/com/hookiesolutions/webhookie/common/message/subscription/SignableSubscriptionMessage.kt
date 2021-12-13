@@ -23,7 +23,6 @@
 package com.hookiesolutions.webhookie.common.message.subscription
 
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
-import com.hookiesolutions.webhookie.subscription.enterprise.oauth2.model.message.OAuthSignedSubscriptionMessage
 import java.time.Duration
 
 interface SignableSubscriptionMessage: RetryableSubscriptionMessage {
@@ -32,32 +31,7 @@ interface SignableSubscriptionMessage: RetryableSubscriptionMessage {
   val subscriptionIsBlocked: Boolean
   val subscriptionIsWorking: Boolean
 
-  fun retryableCopy(
-    delay: Duration,
-    numberOfRetries: Int
-  ): SignableSubscriptionMessage {
-    val totalNumberOfTries = totalNumberOfTries + 1
-    if(this is SignedSubscriptionMessage) {
-      return this.copy(
-        delay = delay,
-        numberOfRetries = numberOfRetries,
-        totalNumberOfTries = totalNumberOfTries
-      )
-    } else if(this is OAuthSignedSubscriptionMessage) {
-      return this.copy(
-        delay = delay,
-        numberOfRetries = numberOfRetries,
-        totalNumberOfTries = totalNumberOfTries
-      )
-    }
-
-    return (this as UnsignedSubscriptionMessage).copy(
-      delay = delay,
-      numberOfRetries = numberOfRetries,
-      totalNumberOfTries = totalNumberOfTries
-    )
-  }
-
+  fun retryableCopy(delay: Duration, numberOfRetries: Int): SignableSubscriptionMessage
   val isSignable: Boolean
     get() = subscription.callback.isSignable
 

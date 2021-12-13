@@ -24,7 +24,6 @@ package com.hookiesolutions.webhookie.common.message.subscription
 
 import com.hookiesolutions.webhookie.common.message.WebhookieSpanMessage
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
-import com.hookiesolutions.webhookie.subscription.enterprise.oauth2.model.message.OAuthSignedSubscriptionMessage
 import java.time.Duration
 
 interface RetryableSubscriptionMessage: GenericSubscriptionMessage, WebhookieSpanMessage {
@@ -34,28 +33,7 @@ interface RetryableSubscriptionMessage: GenericSubscriptionMessage, WebhookieSpa
   val numberOfRetries: Int
   val totalNumberOfTries: Int
 
-  fun updatingSubscriptionCopy(subscription: SubscriptionDTO): SignableSubscriptionMessage {
-    if(this is SignedSubscriptionMessage) {
-      return this.copy(subscription = subscription)
-    }
-
-    if(this is OAuthSignedSubscriptionMessage) {
-      return this.copy(subscription = subscription)
-    }
-
-    if(this is UnsignedSubscriptionMessage) {
-      return this.copy(subscription = subscription)
-    }
-
-    val msg = this as ResendSpanMessage
-
-    return UnsignedSubscriptionMessage(
-      originalMessage = msg.originalMessage,
-      spanId = msg.spanId,
-      subscription = subscription,
-      totalNumberOfTries = msg.totalNumberOfTries
-    )
-  }
+  fun updatingSubscriptionCopy(subscription: SubscriptionDTO): SignableSubscriptionMessage
 
   fun isNew(): Boolean {
     return totalNumberOfTries == 1

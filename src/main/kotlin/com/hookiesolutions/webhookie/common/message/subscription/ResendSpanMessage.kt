@@ -25,6 +25,7 @@ package com.hookiesolutions.webhookie.common.message.subscription
 import com.hookiesolutions.webhookie.audit.domain.Span
 import com.hookiesolutions.webhookie.audit.domain.Trace
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
+import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
 import java.time.Duration
 
 /**
@@ -41,6 +42,17 @@ data class ResendSpanMessage(
   override val delay: Duration = Duration.ZERO,
   override val numberOfRetries: Int = 0
 ): RetryableSubscriptionMessage {
+  override fun updatingSubscriptionCopy(subscription: SubscriptionDTO): SignableSubscriptionMessage {
+    val msg = this
+
+    return UnsignedSubscriptionMessage(
+      originalMessage = msg.originalMessage,
+      spanId = msg.spanId,
+      subscription = subscription,
+      totalNumberOfTries = msg.totalNumberOfTries
+    )
+  }
+
   companion object {
     fun create(
       span: Span,
