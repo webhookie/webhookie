@@ -20,30 +20,35 @@
  * You should also get your employer (if you work as a programmer) or school, if any, to sign a "copyright disclaimer" for the program, if necessary. For more information on this, and how to apply and follow the GNU AGPL, see <https://www.gnu.org/licenses/>.
  */
 
-package com.hookiesolutions.webhookie.consumer.web
+package com.hookiesolutions.webhookie.ingress.config
 
-import org.springdoc.core.GroupedOpenApi
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.integration.dsl.MessageChannels
+import org.springframework.messaging.SubscribableChannel
+import java.util.concurrent.Executors
 
 /**
  *
  * @author Arthur Kazemi<bidadh@gmail.com>
- * @since 3/12/20 17:43
+ * @since 2/12/20 13:45
  */
 @Configuration
-class ConsumerAPIDocs {
+class IngressChannels {
   @Bean
-  fun consumerOpenApi(): GroupedOpenApi {
-    val paths = arrayOf("${REQUEST_MAPPING_CONSUMER}/**")
-    return GroupedOpenApi
-      .builder()
-      .group("Consumer")
-      .pathsToMatch(*paths)
-      .build()
+  fun ingressChannel(): SubscribableChannel {
+    return MessageChannels.publishSubscribe().get()
   }
 
-  companion object {
-    const val REQUEST_MAPPING_CONSUMER = "/consumer"
+  @Bean
+  fun internalIngressChannel(): SubscribableChannel {
+    return MessageChannels
+      .publishSubscribe(Executors.newCachedThreadPool())
+      .get()
+  }
+
+  @Bean
+  fun missingHeadersChannel(): SubscribableChannel {
+    return MessageChannels.publishSubscribe().get()
   }
 }

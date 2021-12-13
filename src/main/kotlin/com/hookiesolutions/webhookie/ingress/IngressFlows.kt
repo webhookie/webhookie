@@ -20,12 +20,12 @@
  * You should also get your employer (if you work as a programmer) or school, if any, to sign a "copyright disclaimer" for the program, if necessary. For more information on this, and how to apply and follow the GNU AGPL, see <https://www.gnu.org/licenses/>.
  */
 
-package com.hookiesolutions.webhookie.consumer
+package com.hookiesolutions.webhookie.ingress
 
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_TRACE_ID
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
-import com.hookiesolutions.webhookie.consumer.config.ConsumerProperties
-import com.hookiesolutions.webhookie.consumer.service.TrafficServiceDelegate
+import com.hookiesolutions.webhookie.ingress.config.IngressProperties
+import com.hookiesolutions.webhookie.ingress.service.TrafficServiceDelegate
 import org.slf4j.Logger
 import org.springframework.amqp.core.AmqpTemplate
 import org.springframework.amqp.rabbit.annotation.RabbitListener
@@ -54,11 +54,11 @@ import org.springframework.retry.support.RetryTemplate
  * @since 2/12/20 13:36
  */
 @Configuration
-class ConsumerFlows(
-  private val internalConsumerChannel: SubscribableChannel,
-  private val consumerChannel: SubscribableChannel,
+class IngressFlows(
+  private val internalIngressChannel: SubscribableChannel,
+  private val ingressChannel: SubscribableChannel,
   private val missingHeadersChannel: SubscribableChannel,
-  private val consumerProperties: ConsumerProperties,
+  private val ingressProperties: IngressProperties,
   private val consumerRetryTemplate: RetryTemplate,
   private val missingHeadersSelector: GenericSelector<Message<*>>,
   private val traceIdExtractor: GenericTransformer<Message<*>, String?>,
@@ -82,7 +82,7 @@ class ConsumerFlows(
               .setHeader(WH_HEADER_TRACE_ID, it)
               .build()
 
-            internalConsumerChannel.send(message)
+            internalIngressChannel.send(message)
           },
           {
             log.warn("Message was rejected due to duplicate traceId '{}'", traceId)
@@ -94,9 +94,9 @@ class ConsumerFlows(
   @Bean
   fun internalConsumerFlow(toConsumerMessageTransformer: GenericTransformer<Message<ByteArray>, ConsumerMessage>): IntegrationFlow {
     return integrationFlow {
-      channel(internalConsumerChannel)
+      channel(internalIngressChannel)
       transform<Message<ByteArray>> { toConsumerMessageTransformer.transform(it) }
-      channel(consumerChannel)
+      channel(ingressChannel)
     }
   }
 
@@ -104,8 +104,8 @@ class ConsumerFlows(
   @ConditionalOnBean(AmqpTemplate::class)
   fun missingHeadersFlow(amqpTemplate: AmqpTemplate, ): IntegrationFlow {
     val outboundAdapter = Amqp.outboundAdapter(amqpTemplate)
-      .routingKey(consumerProperties.missingHeader.routingKey)
-      .exchangeName(consumerProperties.missingHeader.exchange)
+      .routingKey(ingressProperties.missingHeader.routingKey)
+      .exchangeName(ingressProperties.missingHeader.exchange)
     return integrationFlow {
       channel(missingHeadersChannel)
       handle(outboundAdapter)
@@ -120,7 +120,7 @@ class ConsumerFlows(
     amqpTemplate: AmqpTemplate,
   ): IntegrationFlow {
     val inboundGateway = Amqp
-      .inboundGateway(connectionFactory, amqpTemplate, consumerProperties.queue)
+      .inboundGateway(connectionFactory, amqpTemplate, ingressProperties.queue)
       .retryTemplate(consumerRetryTemplate)
     return integrationFlow(inboundGateway) {
       enrichHeaders {
@@ -131,7 +131,7 @@ class ConsumerFlows(
         recipient(missingHeadersChannel) { msg: Message<*> ->
           missingHeadersSelector.accept(msg)
         }
-        recipient(internalConsumerChannel) { msg: Message<*> ->
+        recipient(internalIngressChannel) { msg: Message<*> ->
           !missingHeadersSelector.accept(msg)
         }
       }

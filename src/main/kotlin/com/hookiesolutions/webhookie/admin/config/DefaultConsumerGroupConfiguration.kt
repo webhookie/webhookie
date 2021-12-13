@@ -25,7 +25,7 @@ package com.hookiesolutions.webhookie.admin.config
 import com.hookiesolutions.webhookie.admin.domain.ConsumerGroup
 import com.hookiesolutions.webhookie.admin.service.ConsumerGroupService
 import com.hookiesolutions.webhookie.admin.service.model.SaveGroupRequest
-import com.hookiesolutions.webhookie.consumer.config.ConsumerProperties
+import com.hookiesolutions.webhookie.ingress.config.IngressProperties
 import org.slf4j.Logger
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.annotation.Configuration
@@ -40,14 +40,14 @@ import org.springframework.core.annotation.Order
 @Configuration
 class DefaultConsumerGroupConfiguration(
   private val consumerGroupService: ConsumerGroupService,
-  private val consumerProperties: ConsumerProperties,
+  private val ingressProperties: IngressProperties,
   private val log: Logger
 ) {
   @Order(0)
   @EventListener(ApplicationReadyEvent::class)
   fun checkDefaultConsumerGroup() {
     val defaultConsumerGroup = ConsumerGroup.DEFAULT
-    if(consumerProperties.addDefaultGroup) {
+    if(ingressProperties.addDefaultGroup) {
       log.info("checking db for default consumer group.....")
       val saveGroupRequest = SaveGroupRequest(defaultConsumerGroup.name, defaultConsumerGroup.description, defaultConsumerGroup.iamGroupName)
       consumerGroupService.groupByIAM(defaultConsumerGroup.iamGroupName)

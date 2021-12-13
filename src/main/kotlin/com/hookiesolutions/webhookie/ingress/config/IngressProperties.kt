@@ -20,35 +20,30 @@
  * You should also get your employer (if you work as a programmer) or school, if any, to sign a "copyright disclaimer" for the program, if necessary. For more information on this, and how to apply and follow the GNU AGPL, see <https://www.gnu.org/licenses/>.
  */
 
-package com.hookiesolutions.webhookie.consumer.config
+package com.hookiesolutions.webhookie.ingress.config
 
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
-import org.springframework.integration.dsl.MessageChannels
-import org.springframework.messaging.SubscribableChannel
-import java.util.concurrent.Executors
+import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.boot.context.properties.ConstructorBinding
 
 /**
  *
  * @author Arthur Kazemi<bidadh@gmail.com>
- * @since 2/12/20 13:45
+ * @since 3/12/20 00:29
  */
-@Configuration
-class ConsumerChannels {
-  @Bean
-  fun consumerChannel(): SubscribableChannel {
-    return MessageChannels.publishSubscribe().get()
-  }
+@ConstructorBinding
+@ConfigurationProperties(prefix = "webhookie.consumer")
+data class IngressProperties(
+  val queue: String = "wh-customer.event",
+  val addDefaultGroup: Boolean = true,
+  val missingHeader: IngressErrorExchangeProperties = IngressErrorExchangeProperties(
+    exchange = "wh-customer",
+    routingKey = "wh-missing-header"
+  )
+)
 
-  @Bean
-  fun internalConsumerChannel(): SubscribableChannel {
-    return MessageChannels
-      .publishSubscribe(Executors.newCachedThreadPool())
-      .get()
-  }
-
-  @Bean
-  fun missingHeadersChannel(): SubscribableChannel {
-    return MessageChannels.publishSubscribe().get()
-  }
-}
+@ConstructorBinding
+@ConfigurationProperties(prefix = "webhookie.consumer.missing-header")
+data class IngressErrorExchangeProperties(
+  val exchange: String,
+  val routingKey: String
+)

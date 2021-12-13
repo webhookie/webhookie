@@ -22,7 +22,7 @@
 
 package com.hookiesolutions.webhookie.subscription
 
-import com.hookiesolutions.webhookie.common.Constants.Channels.Consumer.Companion.CONSUMER_CHANNEL_NAME
+import com.hookiesolutions.webhookie.common.Constants.Channels.Consumer.Companion.INGRESS_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Channels.Publisher.Companion.RETRYABLE_PUBLISHER_ERROR_CHANNEL
 import com.hookiesolutions.webhookie.common.Constants.Channels.Traffic.Companion.TRAFFIC_RESEND_SPAN_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.HEADER_CONTENT_TYPE
@@ -92,7 +92,7 @@ class SubscriptionFlows(
     toBlockedSubscriptionMessageDTO: GenericTransformer<UnsignedSubscriptionMessage, BlockedSubscriptionMessageDTO>
   ): IntegrationFlow {
     return integrationFlow {
-      channel(CONSUMER_CHANNEL_NAME)
+      channel(INGRESS_CHANNEL_NAME)
       enrichHeaders {
         defaultOverwrite(true)
         errorChannel(globalSubscriptionErrorChannel)

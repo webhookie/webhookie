@@ -20,15 +20,15 @@
  * You should also get your employer (if you work as a programmer) or school, if any, to sign a "copyright disclaimer" for the program, if necessary. For more information on this, and how to apply and follow the GNU AGPL, see <https://www.gnu.org/licenses/>.
  */
 
-package com.hookiesolutions.webhookie.consumer.web
+package com.hookiesolutions.webhookie.ingress.web
 
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.HEADER_CONTENT_TYPE
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_AUTHORIZED_SUBSCRIBER
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_TOPIC
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_TRACE_ID
 import com.hookiesolutions.webhookie.common.config.web.OpenAPIConfig.Companion.OAUTH2_SCHEME
-import com.hookiesolutions.webhookie.consumer.service.TrafficServiceDelegate
-import com.hookiesolutions.webhookie.consumer.web.ConsumerAPIDocs.Companion.REQUEST_MAPPING_CONSUMER
+import com.hookiesolutions.webhookie.ingress.service.TrafficServiceDelegate
+import com.hookiesolutions.webhookie.ingress.web.IngressAPIDocs.Companion.REQUEST_MAPPING_CONSUMER
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.slf4j.Logger
 import org.springframework.http.HttpHeaders
@@ -49,7 +49,7 @@ import reactor.core.publisher.Mono
 class PublisherController(
   private val log: Logger,
   private val traceServiceDelegate: TrafficServiceDelegate,
-  private val internalConsumerChannel: SubscribableChannel,
+  private val internalIngressChannel: SubscribableChannel,
 ) {
   @PostMapping(REQUEST_MAPPING_CONSUMER_EVENT, produces = [MediaType.TEXT_PLAIN_VALUE])
   fun publishEvent(
@@ -78,7 +78,7 @@ class PublisherController(
         }
         val message = messageBuilder.build()
 
-        internalConsumerChannel.send(message)
+        internalIngressChannel.send(message)
       }
       .doOnNext { log.debug("Message with traceId: '{}' is being processed") }
       .map { "OK" }

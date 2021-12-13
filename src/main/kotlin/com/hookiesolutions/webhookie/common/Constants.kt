@@ -65,7 +65,7 @@ class Constants {
   class Channels {
     class Consumer {
       companion object {
-        const val CONSUMER_CHANNEL_NAME = "consumerChannel"
+        const val INGRESS_CHANNEL_NAME = "ingressChannel"
       }
     }
 

@@ -24,7 +24,7 @@ package com.hookiesolutions.webhookie.audit
 
 import com.hookiesolutions.webhookie.audit.domain.TraceSummary
 import com.hookiesolutions.webhookie.audit.service.TraceService
-import com.hookiesolutions.webhookie.common.Constants.Channels.Consumer.Companion.CONSUMER_CHANNEL_NAME
+import com.hookiesolutions.webhookie.common.Constants.Channels.Consumer.Companion.INGRESS_CHANNEL_NAME
 import com.hookiesolutions.webhookie.common.Constants.Channels.Publisher.Companion.PUBLISHER_SUCCESS_CHANNEL
 import com.hookiesolutions.webhookie.common.Constants.Channels.Publisher.Companion.RETRYABLE_PUBLISHER_ERROR_CHANNEL
 import com.hookiesolutions.webhookie.common.Constants.Channels.Subscription.Companion.BLOCKED_SUBSCRIPTION_CHANNEL_NAME
@@ -65,7 +65,7 @@ class TraceFlows(private val traceService: TraceService) {
   @Bean
   fun createTraceFlow(): IntegrationFlow {
     return integrationFlow {
-      channel(CONSUMER_CHANNEL_NAME)
+      channel(INGRESS_CHANNEL_NAME)
       handle { payload: ConsumerMessage, _: MessageHeaders ->
         traceService.save(payload)
       }

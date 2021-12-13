@@ -22,7 +22,7 @@
 
 package com.hookiesolutions.webhookie.common.health
 
-import com.hookiesolutions.webhookie.consumer.config.ConsumerProperties
+import com.hookiesolutions.webhookie.ingress.config.IngressProperties
 import com.hookiesolutions.webhookie.security.WebhookieSecurityProperties
 import com.hookiesolutions.webhookie.subscription.config.SubscriptionProperties
 import com.hookiesolutions.webhookie.webhook.config.parser.ParserServiceProperties
@@ -42,13 +42,13 @@ class WebhookieHealthIndicator(
   private val parserServiceProperties: ParserServiceProperties,
   private val webHookieSecurityProperties: WebhookieSecurityProperties,
   private val subscriptionProperties: SubscriptionProperties,
-  private val consumerProperties: ConsumerProperties
+  private val ingressProperties: IngressProperties
 ): ReactiveHealthIndicator {
   override fun health(): Mono<Health> {
     return Health
       .up()
       .withDetail("parser", parserServiceProperties)
-      .withDetail("consumer", consumerProperties)
+      .withDetail("consumer", ingressProperties)
       .withDetail("security", webHookieSecurityProperties)
       .withDetail("subscription", subscriptionProperties)
       .build()

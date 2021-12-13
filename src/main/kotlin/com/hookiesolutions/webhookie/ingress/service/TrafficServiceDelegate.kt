@@ -20,30 +20,45 @@
  * You should also get your employer (if you work as a programmer) or school, if any, to sign a "copyright disclaimer" for the program, if necessary. For more information on this, and how to apply and follow the GNU AGPL, see <https://www.gnu.org/licenses/>.
  */
 
-package com.hookiesolutions.webhookie.consumer.config
+package com.hookiesolutions.webhookie.ingress.service
 
-import org.springframework.boot.context.properties.ConfigurationProperties
-import org.springframework.boot.context.properties.ConstructorBinding
+import com.hookiesolutions.webhookie.audit.service.TraceService
+import com.hookiesolutions.webhookie.common.service.IdGenerator
+import org.slf4j.Logger
+import org.springframework.dao.DuplicateKeyException
+import org.springframework.stereotype.Service
+import org.springframework.util.StringUtils
+import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.toMono
 
 /**
  *
  * @author Arthur Kazemi<bidadh@gmail.com>
- * @since 3/12/20 00:29
+ * @since 12/7/21 16:22
  */
-@ConstructorBinding
-@ConfigurationProperties(prefix = "webhookie.consumer")
-data class ConsumerProperties(
-  val queue: String = "wh-customer.event",
-  val addDefaultGroup: Boolean = true,
-  val missingHeader: ConsumerErrorExchangeProperties = ConsumerErrorExchangeProperties(
-    exchange = "wh-customer",
-    routingKey = "wh-missing-header"
-  )
-)
+@Service
+class TrafficServiceDelegate(
+  private val log: Logger,
+  private val idGenerator: IdGenerator,
+  private val traceService: TraceService
+) {
+  fun traceIdExists(traceId: String): Mono<String> {
+    log.info("checking trace id existence '{}'", traceId)
+    return traceService.traceIdExists(traceId)
+      .flatMap {
+        return@flatMap if (it) {
+          Mono.error(DuplicateKeyException("TraceId $traceId already exists!"))
+        } else {
+          traceId.toMono()
+        }
+      }
+  }
 
-@ConstructorBinding
-@ConfigurationProperties(prefix = "webhookie.consumer.missing-header")
-data class ConsumerErrorExchangeProperties(
-  val exchange: String,
-  val routingKey: String
-)
+  fun checkOrGenerateTrace(traceId: String?): Mono<String> {
+    return if (StringUtils.hasText(traceId)) {
+      traceIdExists(traceId!!)
+    } else {
+      idGenerator.generate().toMono()
+    }
+  }
+}

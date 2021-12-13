@@ -23,7 +23,7 @@
 package com.hookiesolutions.webhookie.security.jwt
 
 import com.hookiesolutions.webhookie.common.Constants.Companion.DEFAULT_CONSUMER_GROUP
-import com.hookiesolutions.webhookie.consumer.config.ConsumerProperties
+import com.hookiesolutions.webhookie.ingress.config.IngressProperties
 import com.hookiesolutions.webhookie.security.WebhookieSecurityProperties
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.stereotype.Component
@@ -38,7 +38,7 @@ import reactor.core.publisher.Mono
 class TokenGroupReader(
   private val securityProperties: WebhookieSecurityProperties,
   private val tokenAttributesExtractor: JwtTokenAttributesExtractor,
-  private val consumerProperties: ConsumerProperties
+  private val ingressProperties: IngressProperties
 ) {
   fun readGroups(jwt: Jwt): Mono<List<String>> {
     return tokenAttributesExtractor
@@ -48,7 +48,7 @@ class TokenGroupReader(
   }
 
   private fun enrichGroups(tokenGroups: List<String>): List<String> {
-    return if(consumerProperties.addDefaultGroup) {
+    return if(ingressProperties.addDefaultGroup) {
       tokenGroups.plus(DEFAULT_CONSUMER_GROUP)
     } else {
       tokenGroups
