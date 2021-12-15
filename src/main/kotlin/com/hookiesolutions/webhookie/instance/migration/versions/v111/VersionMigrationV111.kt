@@ -1,27 +1,42 @@
 package com.hookiesolutions.webhookie.instance.migration.versions.v111
 
+import com.hookiesolutions.webhookie.common.model.AbstractDocument
 import com.hookiesolutions.webhookie.common.repository.GenericRepository.Companion.mongoField
 import com.hookiesolutions.webhookie.instance.migration.VersionMigration
 import com.hookiesolutions.webhookie.subscription.domain.Application
-import com.hookiesolutions.webhookie.subscription.domain.ApplicationRepository
 import org.slf4j.Logger
+import org.springframework.data.mongodb.core.FindAndModifyOptions
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate
+import org.springframework.data.mongodb.core.aggregation.AggregationUpdate
 import org.springframework.data.mongodb.core.aggregation.SetOperation
+import org.springframework.data.mongodb.core.aggregation.UnsetOperation
+import org.springframework.data.mongodb.core.query.Criteria
+import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 
 @Component
 class VersionMigrationV111(
   private val log: Logger,
-  private val applicationRepository: ApplicationRepository
+  private val mongoTemplate: ReactiveMongoTemplate
 ) : VersionMigration {
   override val toVersion: String
     get() = "1.1.1"
 
   override fun doMigrate(): Mono<String> {
-    val operation = SetOperation
-      .set("managers")
-      .toValueOf(listOf(mongoField("createdBy")))
-    return applicationRepository.aggregationUpdateAll(Application::class.java, operation)
+    val setManagers = SetOperation
+      .set(Application.Keys.KEY_MANAGES)
+      .toValueOf(listOf(mongoField(AbstractDocument.Keys.KEY_CREATED_BY)))
+    val unsetConsumerGroups = UnsetOperation
+      .unset("consumerIAMGroups")
+
+    return mongoTemplate
+      .findAndModify(
+        Query.query(Criteria()),
+        AggregationUpdate.newUpdate(setManagers, unsetConsumerGroups),
+        FindAndModifyOptions.options().returnNew(false),
+        Application::class.java
+      )
       .doOnNext { log.info("All applications have been updated with the managers list") }
       .map { toVersion }
   }

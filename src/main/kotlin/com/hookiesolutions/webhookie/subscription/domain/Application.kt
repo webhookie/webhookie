@@ -87,6 +87,7 @@ data class Application(
     companion object {
       const val KEY_ENTITY = "entity"
       const val KEY_CONSUMER_IAM_GROUPS = "consumerIAMGroups"
+      const val KEY_MANAGES = "manages"
       const val APPLICATION_COLLECTION_NAME = "application"
     }
   }

@@ -63,6 +63,7 @@ abstract class AbstractDocument {
     companion object {
       const val KEY_VERSION = "version"
       const val KEY_CREATED_DATE = "createdDate"
+      const val KEY_CREATED_BY = "createdBy"
     }
   }
 }
