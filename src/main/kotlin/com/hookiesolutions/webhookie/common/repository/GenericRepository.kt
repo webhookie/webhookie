@@ -129,6 +129,13 @@ abstract class GenericRepository<E: AbstractEntity>(
       )
   }
 
+  fun <T: AbstractEntity> aggregationUpdateAll(
+    clazz: Class<T>,
+    vararg operations: AggregationOperation
+  ): Mono<T> {
+    return aggregationUpdate(Criteria(), clazz, *operations)
+  }
+
   fun sort(
     aggregation: Aggregation,
     requestedPageable: Pageable,
