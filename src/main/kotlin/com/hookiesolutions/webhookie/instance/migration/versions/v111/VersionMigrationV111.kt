@@ -25,7 +25,7 @@ class VersionMigrationV111(
 
   override fun doMigrate(): Mono<String> {
     val setManagers = SetOperation
-      .set(Application.Keys.KEY_MANAGES)
+      .set(Application.Keys.KEY_MANAGERS)
       .toValueOf(listOf(mongoField(AbstractDocument.Keys.KEY_CREATED_BY)))
     val unsetConsumerGroups = UnsetOperation
       .unset("consumerIAMGroups")
