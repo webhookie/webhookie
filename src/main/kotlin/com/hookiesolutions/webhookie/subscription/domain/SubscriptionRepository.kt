@@ -28,7 +28,7 @@ import com.hookiesolutions.webhookie.common.model.dto.ApplicationDetails.Keys.Co
 import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionStatus
 import com.hookiesolutions.webhookie.common.repository.GenericRepository
-import com.hookiesolutions.webhookie.subscription.domain.Application.Queries.Companion.applicationConsumerGroupsIn
+import com.hookiesolutions.webhookie.subscription.domain.Application.Queries.Companion.applicationManagersIncludes
 import com.hookiesolutions.webhookie.subscription.domain.Application.Queries.Companion.applicationsByEntity
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage.Queries.Companion.bySubscriptionId
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_APPLICATION
@@ -93,7 +93,7 @@ class SubscriptionRepository(
 
   fun findAllConsumerSubscriptions(
     entity: String,
-    groups: List<String>,
+    userId: String,
     requestedPageable: Pageable,
     topic: String?,
     callbackId: String?
@@ -101,7 +101,7 @@ class SubscriptionRepository(
     val criteria = Criteria()
       .andOperator(
         applicationsByEntity(entity),
-        applicationConsumerGroupsIn(groups)
+        applicationManagersIncludes(userId)
       )
     val `as` = "subscriptions"
     val subscriptionsKey = "${'$'}subscriptions"

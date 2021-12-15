@@ -5,7 +5,6 @@ import com.hookiesolutions.webhookie.common.repository.GenericRepository.Compani
 import com.hookiesolutions.webhookie.instance.migration.VersionMigration
 import com.hookiesolutions.webhookie.subscription.domain.Application
 import org.slf4j.Logger
-import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.aggregation.AggregationUpdate
 import org.springframework.data.mongodb.core.aggregation.SetOperation
@@ -31,11 +30,10 @@ class VersionMigrationV111(
       .unset("consumerIAMGroups")
 
     return mongoTemplate
-      .findAndModify(
+      .updateMulti(
         Query.query(Criteria()),
         AggregationUpdate.newUpdate(setManagers, unsetConsumerGroups),
-        FindAndModifyOptions.options().returnNew(false),
-        Application::class.java
+        Application.Keys.APPLICATION_COLLECTION_NAME
       )
       .doOnNext { log.info("All applications have been updated with the managers list") }
       .map { toVersion }

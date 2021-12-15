@@ -23,14 +23,10 @@
 package com.hookiesolutions.webhookie.subscription.domain
 
 import com.hookiesolutions.webhookie.common.repository.GenericRepository
-import com.hookiesolutions.webhookie.subscription.domain.Application.Queries.Companion.applicationConsumerGroupsIn
-import com.hookiesolutions.webhookie.subscription.domain.Application.Queries.Companion.applicationConsumerGroupsIs
+import com.hookiesolutions.webhookie.subscription.domain.Application.Queries.Companion.applicationManagersIncludes
 import com.hookiesolutions.webhookie.subscription.domain.Application.Queries.Companion.applicationsByEntity
-import com.hookiesolutions.webhookie.subscription.domain.Application.Updates.Companion.pullConsumerGroup
-import com.hookiesolutions.webhookie.subscription.domain.Application.Updates.Companion.setConsumerGroup
 import com.hookiesolutions.webhookie.subscription.service.security.annotation.VerifyApplicationReadAccess
 import com.hookiesolutions.webhookie.subscription.service.security.annotation.VerifyApplicationWriteAccess
-import com.mongodb.client.result.UpdateResult
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.query.Query.query
 import org.springframework.stereotype.Repository
@@ -46,9 +42,9 @@ import reactor.core.publisher.Mono
 class ApplicationRepository(
   private val mongoTemplate: ReactiveMongoTemplate,
 ): GenericRepository<Application>(mongoTemplate, Application::class.java) {
-  fun userApplications(entity: String, userGroups: Collection<String>): Flux<Application> {
+  fun userApplications(entity: String, userId: String): Flux<Application> {
     val criteria = applicationsByEntity(entity)
-      .andOperator(applicationConsumerGroupsIn(userGroups))
+      .andOperator(applicationManagersIncludes(userId))
     return mongoTemplate
       .find(
         query(criteria),
@@ -64,23 +60,5 @@ class ApplicationRepository(
   @VerifyApplicationWriteAccess
   fun findByIdVerifyingWriteAccess(id: String): Mono<Application> {
     return findById(id)
-  }
-
-  fun removeConsumerGroup(value: String): Mono<UpdateResult> {
-    return mongoTemplate
-      .updateMulti(
-        query(applicationConsumerGroupsIs(value)),
-        pullConsumerGroup(value),
-        Application::class.java
-      )
-  }
-
-  fun updateConsumerGroup(oldValue: String, newValue: String): Mono<UpdateResult> {
-    return mongoTemplate
-      .updateMulti(
-        query(applicationConsumerGroupsIs(oldValue)),
-        setConsumerGroup(newValue),
-        Application::class.java
-      )
   }
 }

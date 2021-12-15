@@ -150,7 +150,7 @@ class SubscriptionService(
   ): Flux<Subscription> {
     return securityHandler.data()
       .doOnNext { log.info("Fetching all subscriptions for token: '{}'", it) }
-      .flatMapMany { repository.findAllConsumerSubscriptions(it.entity, it.groups, pageable, topic, callbackId) }
+      .flatMapMany { repository.findAllConsumerSubscriptions(it.entity, it.email, pageable, topic, callbackId) }
   }
 
   @PreAuthorize("hasAnyAuthority('$ROLE_PROVIDER', '$ROLE_ADMIN')")

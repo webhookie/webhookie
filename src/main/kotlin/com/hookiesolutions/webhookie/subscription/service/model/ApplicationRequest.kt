@@ -33,7 +33,5 @@ import javax.validation.constraints.NotEmpty
 data class ApplicationRequest(
   @field:NotBlank
   val name: String,
-  val description: String? = null,
-  @field:NotEmpty
-  val consumerGroups: Set<String>
+  val description: String? = null
 )

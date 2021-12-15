@@ -32,8 +32,8 @@ import org.springframework.stereotype.Component
  */
 @Component
 class ApplicationAccessVoter {
-  fun vote(application: Application, entity: String, groups: Collection<String>) : Boolean {
+  fun vote(application: Application, entity: String, userId: String) : Boolean {
     return application.entity == entity &&
-        groups.any { application.consumerIAMGroups.contains(it) }
+        application.managers.contains(userId)
   }
 }

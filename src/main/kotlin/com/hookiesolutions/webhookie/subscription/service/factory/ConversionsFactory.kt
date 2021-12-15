@@ -60,9 +60,9 @@ class ConversionsFactory(
   fun createApplicationRequestToApplication(
     request: ApplicationRequest,
     entity: String,
-    validConsumerGroups: Set<String>,
+    creatorUserId: String,
     ): Application {
-    return Application(request.name, request.description, entity, validConsumerGroups)
+    return Application(request.name, request.description, entity, setOf(creatorUserId))
   }
 
   fun blockedSubscriptionMessageToSubscriptionMessage(

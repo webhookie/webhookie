@@ -49,7 +49,7 @@ class ApplicationSecurityService(
 ) {
   fun verifyAccess(applicationMono: Mono<Application>): Mono<Application> {
     return Mono.zip(applicationMono, securityHandler.data())
-      .filter { applicationAccessVoter.vote(it.t1, it.t2.entity, it.t2.groups) }
+      .filter { applicationAccessVoter.vote(it.t1, it.t2.entity, it.t2.email) }
       .map { it.t1 }
       .switchIfEmpty { AccessDeniedException("Access Denied!").toMono() }
   }
