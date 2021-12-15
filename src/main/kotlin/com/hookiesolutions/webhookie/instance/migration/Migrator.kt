@@ -35,24 +35,16 @@ class Migrator(
       .map { it.dbVersion }
       .switchIfEmpty("1.0.0".toMono())
       .flatMap { ver ->
-        val list = migrations
+        migrations
           .sortedBy { it.toVersion }
           .filter { it.toVersion > ver }
           .map { it.migrate() }
-
-        //TODO: refactor
-        return@flatMap if(list.isEmpty()) {
-          Mono.just(UP_TP_DATE)
-        } else {
-          list.reduce { acc, migration ->
-            acc
-              .then(updateWith(migration))
-              .then(migration)
+          .fold(Mono.just(UP_TP_DATE)) { acc, migration ->
+            acc.then(updateWith(migration))
           }
-        }
       }
       .subscribe {
-        if(it == UP_TP_DATE) {
+        if (it == UP_TP_DATE) {
           log.info("DB version is {}", it)
         } else {
           log.info("Migration to '{}' has been completed!", it)
@@ -61,7 +53,7 @@ class Migrator(
       }
   }
 
-  private fun updateWith(versionMono: Mono<String>): Mono<Migration> {
+  private fun updateWith(versionMono: Mono<String>): Mono<String> {
     val doneAt = timeMachine.now()
     return versionMono
       .flatMap {
@@ -76,6 +68,7 @@ class Migrator(
           Migration::class.java
         )
       }
+      .map { it.dbVersion }
   }
 
   fun done() {
