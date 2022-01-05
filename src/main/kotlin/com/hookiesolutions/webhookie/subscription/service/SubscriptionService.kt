@@ -325,8 +325,6 @@ class SubscriptionService(
       .findAllBlockedMessagesForSubscription(id)
       .switchIfEmpty {
         log.info("No blocked messages found for subscription: '{}'", id)
-
-        Flux.empty<BlockedSubscriptionMessage>()
       }
   }
 
