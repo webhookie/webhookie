@@ -38,6 +38,7 @@ import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Co
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Companion.isAuthorized
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Companion.statusIsIn
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Companion.subscriptionIsActive
+import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Companion.subscriptionIsDraft
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Companion.topicIs
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Queries.Companion.topicIsIn
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Updates.Companion.subscriptionStatusUpdate
@@ -237,6 +238,19 @@ class SubscriptionRepository(
       .map {
         Tuples.of(it.matchedCount, it.modifiedCount)
       }
+  }
+
+  fun findDraftSubscription(topic: String, callbackId: String): Mono<Subscription> {
+    return mongoTemplate.findOne(
+      query(
+        Criteria().andOperator(
+          topicIs(topic),
+          callbackIdIs(callbackId),
+          subscriptionIsDraft()
+        )
+      ),
+      Subscription::class.java
+    )
   }
 
   companion object {

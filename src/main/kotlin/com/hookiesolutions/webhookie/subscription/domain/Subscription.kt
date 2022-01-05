@@ -100,6 +100,10 @@ data class Subscription(
         return where("$KEY_STATUS_UPDATE.$KEY_STATUS").`is`(SubscriptionStatus.ACTIVATED)
       }
 
+      fun subscriptionIsDraft(): Criteria {
+        return where("$KEY_STATUS_UPDATE.$KEY_STATUS").`is`(SubscriptionStatus.SAVED)
+      }
+
       fun isAuthorized(entities: Set<String>): Criteria {
         return where("$KEY_APPLICATION.$KEY_ENTITY")
           .`in`(entities)

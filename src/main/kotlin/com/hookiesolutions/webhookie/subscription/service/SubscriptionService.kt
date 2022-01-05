@@ -100,7 +100,10 @@ class SubscriptionService(
       .findById(request.callbackId)
       .zipWhen { applicationRepository.findByIdVerifyingReadAccess(it.applicationId) }
       .map { factory.createSubscription(it.t2, it.t1, request)}
-      .flatMap { repository.save(it) }
+      .flatMap {
+        repository.findDraftSubscription(it.topic, it.callback.callbackId)
+          .switchIfEmpty { repository.save(it) }
+      }
       .doOnNext { log.info("Subscribed to '{}' using callback: '{}'", it.topic, it.callback.requestTarget()) }
   }
 
