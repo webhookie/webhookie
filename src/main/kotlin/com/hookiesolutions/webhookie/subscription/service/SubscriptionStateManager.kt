@@ -76,7 +76,7 @@ class SubscriptionStateManager {
   ): List<SubscriptionStatus> {
     return when (toBeStatus) {
       SubscriptionStatus.VALIDATED -> {
-        listOf(SubscriptionStatus.SAVED, SubscriptionStatus.BLOCKED, SubscriptionStatus.DEACTIVATED)
+        listOf(SubscriptionStatus.SAVED, SubscriptionStatus.VALIDATED, SubscriptionStatus.BLOCKED, SubscriptionStatus.DEACTIVATED)
       }
       SubscriptionStatus.ACTIVATED -> {
         listOf(SubscriptionStatus.VALIDATED, SubscriptionStatus.DEACTIVATED)

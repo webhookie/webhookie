@@ -26,6 +26,7 @@ import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.subscription.service.model.CallbackValidationSampleRequest
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.ValidateSubscriptionRequest
 import org.slf4j.Logger
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 
@@ -39,7 +40,7 @@ class SubscriptionValidator(
   private val log: Logger,
   private val requestValidator: RequestValidator
 ) {
-  fun validate(subscription: Subscription, request: ValidateSubscriptionRequest): Mono<Subscription> {
+  fun validate(subscription: Subscription, request: ValidateSubscriptionRequest): Mono<ResponseEntity<ByteArray>> {
     val sampleRequest = CallbackValidationSampleRequest.Builder()
       .callbackDetails(subscription.callback)
       .payload(request.payload)
@@ -49,6 +50,5 @@ class SubscriptionValidator(
     log.info("Validating Subscription '{}' with callback: '{}'...", subscription.id, subscription.callback.requestTarget())
 
     return requestValidator.validateRequest(sampleRequest)
-      .map { subscription }
   }
 }

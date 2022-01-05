@@ -56,6 +56,7 @@ import com.hookiesolutions.webhookie.subscription.service.validator.Subscription
 import com.hookiesolutions.webhookie.webhook.service.WebhookApiServiceDelegate
 import org.slf4j.Logger
 import org.springframework.data.domain.Pageable
+import org.springframework.http.ResponseEntity
 import org.springframework.integration.annotation.ServiceActivator
 import org.springframework.messaging.MessageChannel
 import org.springframework.messaging.support.MessageBuilder
@@ -185,16 +186,18 @@ class SubscriptionService(
   }
 
   @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")
-  fun validateSubscription(id: String, request: ValidateSubscriptionRequest): Mono<SubscriptionStatus> {
+  fun validateSubscription(id: String, request: ValidateSubscriptionRequest): Mono<ResponseEntity<ByteArray>> {
     log.info("Validating Subscription '{}'...", id)
 
     return repository
       .findByIdVerifyingWriteAccess(id)
       .zipWhen { stateManager.canBeValidated(it) }
       .zipWhen { subscriptionValidator.validate(it.t1, request) }
-      .flatMap { repository.statusUpdate(id, validated(timeMachine.now()), it.t1.t2) }
+      .flatMap {
+        repository.statusUpdate(id, validated(timeMachine.now()), it.t1.t2)
+          .map { _ -> it.t2 }
+      }
       .doOnNext { log.info("Subscription '{}' validated successfully", id) }
-      .map { it.statusUpdate.status }
   }
 
   @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")

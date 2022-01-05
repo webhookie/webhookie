@@ -37,6 +37,7 @@ import org.slf4j.Logger
 import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
@@ -121,14 +122,13 @@ class SubscriptionController(
   @PostMapping(
     "/{id}/validate",
     consumes = [MediaType.APPLICATION_JSON_VALUE],
-    produces = [MediaType.TEXT_PLAIN_VALUE]
+    produces = [MediaType.APPLICATION_JSON_VALUE]
   )
   fun validateSubscription(
     @PathVariable id: String,
     @RequestBody @Valid request: ValidateSubscriptionRequest
-  ): Mono<String> {
+  ): Mono<ResponseEntity<ByteArray>> {
     return service.validateSubscription(id, request)
-      .map { it.name }
   }
 
   @PostMapping(
