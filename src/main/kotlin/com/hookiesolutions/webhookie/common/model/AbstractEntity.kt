@@ -27,6 +27,7 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.aggregation.Fields.UNDERSCORE_ID
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Criteria.where
+import org.springframework.data.mongodb.core.query.Query
 import java.time.Instant
 
 
@@ -37,6 +38,10 @@ abstract class AbstractEntity : AbstractDocument() {
   @Suppress("unused")
   class Queries {
     companion object {
+      fun all(): Query {
+        return Query.query(Criteria())
+      }
+      
       fun byId(id: String?): Criteria {
         return where(UNDERSCORE_ID).`is`(id)
       }

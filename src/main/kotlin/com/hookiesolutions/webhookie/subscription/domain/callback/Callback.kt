@@ -27,6 +27,7 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
 import com.hookiesolutions.webhookie.common.model.dto.CallbackDTO
 import com.hookiesolutions.webhookie.subscription.domain.callback.Callback.Keys.Companion.KEY_APPLICATION_ID
+import com.hookiesolutions.webhookie.subscription.domain.callback.Callback.Keys.Companion.KEY_EDIT_STATUS
 import com.hookiesolutions.webhookie.subscription.domain.callback.security.CallbackSecurityScheme
 import org.springframework.data.annotation.TypeAlias
 import org.springframework.data.mongodb.core.index.CompoundIndex
@@ -34,6 +35,8 @@ import org.springframework.data.mongodb.core.index.CompoundIndexes
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Criteria.where
+import org.springframework.data.mongodb.core.query.Update
+import org.springframework.data.mongodb.core.query.UpdateDefinition
 import org.springframework.http.HttpMethod
 
 /**
@@ -61,6 +64,7 @@ data class Callback(
   val applicationId: String,
   val httpMethod: HttpMethod,
   val url: String,
+  val editStatus: CallbackEditStatus = CallbackEditStatus.OPEN,
   @Encrypted
   val securityScheme: CallbackSecurityScheme? = null,
 ): AbstractEntity() {
@@ -70,7 +74,7 @@ data class Callback(
 
   fun details() = CallbackDetails(id!!, name, httpMethod, url, securityScheme)
 
-  fun dto() = CallbackDTO(id!!, name, httpMethod, url, securityScheme?.dto())
+  fun dto() = CallbackDTO(id!!, name, httpMethod, url, editStatus, securityScheme?.dto())
 
   class Queries {
     companion object {
@@ -80,10 +84,32 @@ data class Callback(
     }
   }
 
+  class Updates {
+    companion object {
+      fun lockCallback(): UpdateDefinition {
+        return updateWith(CallbackEditStatus.LOCKED)
+      }
+
+      fun openCallback(): UpdateDefinition {
+        return updateWith(CallbackEditStatus.OPEN)
+      }
+
+      private fun updateWith(editStatus: CallbackEditStatus): UpdateDefinition {
+        return Update.update(KEY_EDIT_STATUS, editStatus)
+      }
+    }
+  }
+
   class Keys {
     companion object {
       const val KEY_APPLICATION_ID = "applicationId"
+      const val KEY_EDIT_STATUS = "editStatus"
     }
   }
+}
+
+enum class CallbackEditStatus {
+  LOCKED,
+  OPEN
 }
 

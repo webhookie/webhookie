@@ -38,6 +38,7 @@ import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Compa
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.KEY_TOPIC
 import com.hookiesolutions.webhookie.subscription.domain.Subscription.Keys.Companion.SUBSCRIPTION_COLLECTION_NAME
 import com.hookiesolutions.webhookie.subscription.domain.callback.CallbackDetails
+import com.hookiesolutions.webhookie.subscription.domain.callback.CallbackEditStatus
 import org.springframework.data.annotation.TypeAlias
 import org.springframework.data.mongodb.core.index.CompoundIndex
 import org.springframework.data.mongodb.core.index.CompoundIndexes
@@ -73,11 +74,16 @@ data class Subscription(
   val statusUpdate: StatusUpdate
 ) : AbstractEntity() {
   fun dto(): SubscriptionDTO {
+    val callbackEditStatus = if(statusUpdate.status == SubscriptionStatus.ACTIVATED) {
+      CallbackEditStatus.LOCKED
+    } else {
+      CallbackEditStatus.OPEN
+    }
     return SubscriptionDTO(
       id!!,
       application,
       topic,
-      callback.dto(),
+      callback.dto(callbackEditStatus),
       statusUpdate
     )
   }

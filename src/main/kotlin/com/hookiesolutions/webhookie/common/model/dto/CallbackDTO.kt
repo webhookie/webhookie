@@ -25,6 +25,7 @@ package com.hookiesolutions.webhookie.common.model.dto
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.hookiesolutions.webhookie.common.model.dto.security.CallbackSecuritySchemeDTO
+import com.hookiesolutions.webhookie.subscription.domain.callback.CallbackEditStatus
 import org.springframework.http.HttpMethod
 
 /**
@@ -39,6 +40,7 @@ data class CallbackDTO(
   val name: String,
   val httpMethod: HttpMethod,
   val url: String,
+  val editStatus: CallbackEditStatus,
   val securityScheme: CallbackSecuritySchemeDTO?
 ) {
 

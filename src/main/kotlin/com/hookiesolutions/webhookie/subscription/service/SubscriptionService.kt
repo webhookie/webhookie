@@ -211,6 +211,7 @@ class SubscriptionService(
       .findByIdVerifyingWriteAccess(id)
       .zipWhen { stateManager.canBeActivated(it) }
       .flatMap { repository.statusUpdate(id, activated(timeMachine.now()), it.t2) }
+      .flatMap { s -> callbackRepository.lockCallback(s.callback.callbackId).map { s } }
       .doOnNext { log.info("Subscription '{}' activated successfully", id) }
       .doOnNext {
         log.info("Increasing no of subscriptions for '{}' ...", it.id, it.topic)

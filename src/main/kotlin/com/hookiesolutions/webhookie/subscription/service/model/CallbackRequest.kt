@@ -24,6 +24,7 @@ package com.hookiesolutions.webhookie.subscription.service.model
 
 import com.hookiesolutions.webhookie.common.validation.Url
 import com.hookiesolutions.webhookie.subscription.domain.callback.Callback
+import com.hookiesolutions.webhookie.subscription.domain.callback.CallbackEditStatus
 import com.hookiesolutions.webhookie.subscription.domain.callback.security.CallbackSecurityScheme
 import org.springframework.http.HttpMethod
 import javax.validation.constraints.NotBlank
@@ -51,13 +52,14 @@ data class CallbackRequest(
       applicationId,
       httpMethod,
       url,
+      CallbackEditStatus.OPEN,
       securityScheme
     )
   }
 
   //TODO: refactor this and use mongodb update instead
   fun copy(entity: Callback, applicationId: String): Callback {
-    val result = Callback(name, applicationId, httpMethod, url, securityScheme)
+    val result = Callback(name, applicationId, httpMethod, url, entity.editStatus, securityScheme)
     result.version = entity.version
     result.id = entity.id
     result.createdDate = entity.createdDate

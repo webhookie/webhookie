@@ -45,8 +45,8 @@ data class CallbackDetails(
     return "${httpMethod.name} $url"
   }
 
-  fun dto(): CallbackDTO {
-    return CallbackDTO(callbackId, name, httpMethod, url, securityScheme?.dto())
+  fun dto(callbackEditStatus: CallbackEditStatus): CallbackDTO {
+    return CallbackDTO(callbackId, name, httpMethod, url, callbackEditStatus, securityScheme?.dto())
   }
 
   fun json(): String {

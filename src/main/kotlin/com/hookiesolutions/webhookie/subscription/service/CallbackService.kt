@@ -27,6 +27,7 @@ import com.hookiesolutions.webhookie.common.model.DeletableEntity.Companion.dele
 import com.hookiesolutions.webhookie.common.model.UpdatableEntity.Companion.updatable
 import com.hookiesolutions.webhookie.subscription.domain.SubscriptionRepository
 import com.hookiesolutions.webhookie.subscription.domain.callback.Callback
+import com.hookiesolutions.webhookie.subscription.domain.callback.CallbackEditStatus
 import com.hookiesolutions.webhookie.subscription.domain.callback.CallbackRepository
 import com.hookiesolutions.webhookie.subscription.service.converter.CallbackSecretConverter
 import com.hookiesolutions.webhookie.subscription.service.model.CallbackRequest
@@ -34,11 +35,14 @@ import com.hookiesolutions.webhookie.subscription.service.model.CreateCallbackRe
 import com.hookiesolutions.webhookie.subscription.service.security.annotation.ApplicationAccessType
 import com.hookiesolutions.webhookie.subscription.service.security.annotation.VerifyApplicationAccessById
 import org.slf4j.Logger
+import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.switchIfEmpty
+import reactor.kotlin.core.publisher.toMono
 
 /**
  *
@@ -91,6 +95,8 @@ class CallbackService(
     log.info("updating Callback: '{}', '{}'", body.requestTarget(), id)
 
     return repository.findById(id)
+      .filter { it.editStatus == CallbackEditStatus.OPEN }
+      .switchIfEmpty { AccessDeniedException("Callback is LOCKED. there are active subscriptions").toMono() }
       .map { updatable(body.copy(it, applicationId)) }
       .flatMap { repository.update(it, id) }
       .zipWhen { callback ->

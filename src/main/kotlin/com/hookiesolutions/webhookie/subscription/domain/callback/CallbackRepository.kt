@@ -22,12 +22,14 @@
 
 package com.hookiesolutions.webhookie.subscription.domain.callback
 
+import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.byId
 import com.hookiesolutions.webhookie.common.repository.GenericRepository
 import com.hookiesolutions.webhookie.subscription.domain.callback.Callback.Queries.Companion.applicationIdIs
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.query.Query.query
 import org.springframework.stereotype.Repository
 import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
 
 /**
  *
@@ -44,5 +46,12 @@ class CallbackRepository(
         query(applicationIdIs(applicationId)),
         Callback::class.java
       )
+  }
+
+  fun lockCallback(callbackId: String): Mono<String> {
+    val update = Callback.Updates.lockCallback()
+    val query = query(byId(callbackId))
+    return mongoTemplate.updateFirst(query, update, Callback::class.java)
+      .map { callbackId }
   }
 }
