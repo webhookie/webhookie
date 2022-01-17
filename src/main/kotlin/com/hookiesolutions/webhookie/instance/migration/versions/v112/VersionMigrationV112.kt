@@ -3,6 +3,7 @@ package com.hookiesolutions.webhookie.instance.migration.versions.v112
 import com.hookiesolutions.webhookie.common.model.AbstractEntity.Companion.mongoField
 import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.all
 import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.idIsIn
+import com.hookiesolutions.webhookie.common.model.dto.SubscriptionStatus
 import com.hookiesolutions.webhookie.common.repository.GenericRepository.Companion.fieldName
 import com.hookiesolutions.webhookie.instance.migration.VersionMigration
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
@@ -14,7 +15,9 @@ import org.slf4j.Logger
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.aggregation.Aggregation
 import org.springframework.data.mongodb.core.aggregation.Fields.UNDERSCORE_ID
+import org.springframework.data.mongodb.core.query.Criteria.where
 import org.springframework.data.mongodb.core.query.Query
+import org.springframework.data.mongodb.core.query.Update
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 
@@ -43,6 +46,13 @@ class VersionMigrationV112(
           .map { map -> map.map { it[KEY_CALLBACK_ID] as String } }
       }
       .flatMap { mongoTemplate.updateMulti(Query.query(idIsIn(it)), Callback.Updates.lockCallback(), callbackClass) }
+      .flatMap {
+        mongoTemplate.updateMulti(
+          Query.query(where("statusUpdate.status").`is`("SAVED")),
+          Update.update("statusUpdate.status", SubscriptionStatus.DRAFT),
+          subscriptionClass
+        )
+      }
       .doOnNext { log.info("All callbacks have been updated with the edit status") }
       .map { toVersion }
   }

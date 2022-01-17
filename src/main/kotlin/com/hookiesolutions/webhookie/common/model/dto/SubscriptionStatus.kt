@@ -28,7 +28,7 @@ package com.hookiesolutions.webhookie.common.model.dto
  * @since 11/2/21 14:31
  */
 enum class SubscriptionStatus {
-  SAVED,
+  DRAFT,
   VALIDATED,
   ACTIVATED,
   DEACTIVATED,

@@ -107,7 +107,7 @@ data class Subscription(
       }
 
       fun subscriptionIsDraft(): Criteria {
-        return where("$KEY_STATUS_UPDATE.$KEY_STATUS").`is`(SubscriptionStatus.SAVED)
+        return where("$KEY_STATUS_UPDATE.$KEY_STATUS").`is`(SubscriptionStatus.DRAFT)
       }
 
       fun isAuthorized(entities: Set<String>): Criteria {
