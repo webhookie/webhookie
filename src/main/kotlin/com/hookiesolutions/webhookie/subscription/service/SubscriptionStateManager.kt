@@ -25,6 +25,7 @@ package com.hookiesolutions.webhookie.subscription.service
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionStatus
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.SubscriptionStatueAction
+import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
@@ -105,7 +106,16 @@ class SubscriptionStateManager {
     return if(subscription.statusUpdate.status != SubscriptionStatus.ACTIVATED) {
       subscription.toMono()
     } else {
-      Mono.empty()
+      Mono.error(AccessDeniedException("${SubscriptionStatus.ACTIVATED.name} subscription cannot be deleted!"))
+    }
+  }
+
+  fun canBeUpdated(subscription: Subscription): Mono<Subscription> {
+    val editableStatusList = listOf(SubscriptionStatus.DRAFT, SubscriptionStatus.VALIDATED)
+    return if(subscription.statusUpdate.status in editableStatusList) {
+      subscription.toMono()
+    } else {
+      Mono.error(AccessDeniedException("only $editableStatusList subscriptions can be updated"))
     }
   }
 }

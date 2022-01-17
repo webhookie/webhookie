@@ -122,7 +122,6 @@ class SubscriptionService(
     log.info("Deleting Subscription by id: '{}'", id)
     return repository.findByIdVerifyingWriteAccess(id)
       .flatMap { stateManager.canBeDeleted(it) }
-      .switchIfEmpty { IllegalArgumentException("${SubscriptionStatus.ACTIVATED.name} subscription cannot be deleted!").toMono() }
       .map { deletable(it) }
       .flatMap { repository.delete(it) }
       .flatMap { bsmRepository.deleteSubscriptionMessages(id) }
@@ -173,6 +172,7 @@ class SubscriptionService(
     log.info("Updating Subscription '{}' using callback: '{}'", id, request.callbackId)
     return repository
       .findByIdVerifyingWriteAccess(id)
+      .flatMap { stateManager.canBeUpdated(it) }
       .flatMap { subscription ->
         return@flatMap if(subscription.callback.callbackId == request.callbackId) {
           subscription.toMono()
