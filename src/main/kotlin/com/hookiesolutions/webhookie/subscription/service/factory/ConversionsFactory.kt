@@ -34,6 +34,7 @@ import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate
 import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Companion.blocked
 import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Companion.saved
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
+import com.hookiesolutions.webhookie.common.model.dto.SubscriptionStatus
 import com.hookiesolutions.webhookie.common.service.IdGenerator
 import com.hookiesolutions.webhookie.common.service.TimeMachine
 import com.hookiesolutions.webhookie.subscription.domain.Application
@@ -172,11 +173,13 @@ class ConversionsFactory(
     application: Application,
     callback: Callback,
     subscription: Subscription,
-    request: UpdateSubscriptionRequest
+    request: UpdateSubscriptionRequest,
+    at: Instant
   ): Subscription {
     val copy = subscription.copy(
       application = application.details(),
-      callback = CallbackDetails(callback.id!!, callback.name, callback.httpMethod, callback.url, callback.securityScheme)
+      callback = CallbackDetails(callback.id!!, callback.name, callback.httpMethod, callback.url, callback.securityScheme),
+      statusUpdate = StatusUpdate(SubscriptionStatus.SAVED, "Edit Subscription", at)
     )
     copy.id = subscription.id
     copy.createdBy = subscription.createdBy

@@ -180,7 +180,7 @@ class SubscriptionService(
           callbackRepository
             .findById(request.callbackId)
             .zipWhen { applicationRepository.findByIdVerifyingReadAccess(it.applicationId) }
-            .map { factory.modifySubscription(it.t2, it.t1, subscription, request)}
+            .map { factory.modifySubscription(it.t2, it.t1, subscription, request, timeMachine.now())}
             .map { updatable(it) }
             .flatMap { repository.update(it, id) }
             .doOnNext { log.info("Subscription '{}' was modified to callback: '{}'", it.id, it.callback.requestTarget()) }
