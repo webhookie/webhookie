@@ -179,7 +179,7 @@ class ConversionsFactory(
     val copy = subscription.copy(
       application = application.details(),
       callback = CallbackDetails(callback.id!!, callback.name, callback.httpMethod, callback.url, callback.securityScheme),
-      statusUpdate = StatusUpdate(SubscriptionStatus.SAVED, "Edit Subscription", at)
+      statusUpdate = StatusUpdate(SubscriptionStatus.DRAFT, "Edit Subscription", at)
     )
     copy.id = subscription.id
     copy.createdBy = subscription.createdBy
