@@ -59,7 +59,7 @@ spec:
             - name: WH_CONSUMER_MISSING_HEADER_EXCHANGE
               value: wh-customer
             - name: WH_MONGODB_URI
-              value: mongodb+srv://wh-user:8V3iEBda4EZe6Y3I@cluster0.47igq.mongodb.net/wh-dev-db?retryWrites=true&w=majority&maxPoolSize=200
+              value: mongodb+srv://${MONGO_USER}:${MONGO_PASS}@${MONGO_HOST}/${MONGO_DB}?retryWrites=true&w=majority&maxPoolSize=200
             - name: WEBHOOKIE_SECURITY_ALLOWED_ORIGINS
               value: http://localhost:4300
             - name: WEBHOOKIE_MAIN_COLOR
