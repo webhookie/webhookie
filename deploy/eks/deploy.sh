@@ -22,7 +22,7 @@ install_app() {
     --set WH_AMQP_HOST=vulture.rmq.cloudamqp.com \
     --set WH_CONSUMER_QUEUE=wh-customer.event \
     --set WH_CONSUMER_MISSING_HEADER_EXCHANGE=wh-customer \
-    --set WH_MONGODB_URI="mongodb+srv://wh-user:8V3iEBda4EZe6Y3I@cluster0.47igq.mongodb.net/wh-dev-db?retryWrites=true&w=majority&maxPoolSize=200" \
+    --set WH_MONGODB_URI="mongodb+srv://${MONGO_USER}:${MONGO_PASS}@${MONGO_HOST}/${MONGO_DB}?retryWrites=true&w=majority&maxPoolSize=200" \
     --set WEBHOOKIE_SECURITY_ALLOWED-ORIGINS=http://localhost:4300 \
     --set WEBHOOKIE_MAIN_COLOR="#090A3A" \
     --set WEBHOOKIE_PAGE_TITLE="The API Hunt by webhookie" \
