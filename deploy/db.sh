@@ -1,7 +1,0 @@
-SRC_DB_NAME="wh-bk-db"
-DST_DB_NAME="wh-mig-test-db"
-USER="wh-user"
-PASS="8V3iEBda4EZe6Y3I"
-SRC_DB="mongodb+srv://$USER:$PASS@cluster0.47igq.mongodb.net/$SRC_DB_NAME?retryWrites=true&w=majority"
-DST_DB="mongodb+srv://$USER:$PASS@cluster0.47igq.mongodb.net/$SRC_DB_NAME?retryWrites=true&w=majority"
-mongodump "$SRC_DB" --archive --db="$SRC_DB_NAME" | mongorestore "$DST_DB" --archive  --nsFrom="$SRC_DB_NAME.*" --nsTo="$DST_DB_NAME.*"
