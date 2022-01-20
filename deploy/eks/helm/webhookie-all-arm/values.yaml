@@ -13,8 +13,8 @@ webhookie: # metered container product
   imageVersion: latest
 keycloak: # metered container product
   replicas: 1
-  imageName: quay.io/keycloak/keycloak
-  imageVersion: 14.0.0
+  imageName: wizzn/keycloak
+  imageVersion: 14
 mongodb: # metered container product
   replicas: 1
   imageName: mongo

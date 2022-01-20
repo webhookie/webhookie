@@ -130,7 +130,7 @@ spec:
     spec:
       containers:
         - name: keycloak
-          image: quay.io/keycloak/keycloak:14.0.0
+          image: "{{.Values.keycloak.imageName}}:{{.Values.keycloak.imageVersion}}"
           volumeMounts:
             - name: realm-config-volume
               mountPath: /var/data/webhookie/realm-export.json
