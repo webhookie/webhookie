@@ -34,11 +34,11 @@ import org.springframework.context.annotation.Configuration
 @Configuration
 class IngressAPIDocs {
   @Bean
-  fun consumerOpenApi(): GroupedOpenApi {
+  fun ingressOpenApi(): GroupedOpenApi {
     val paths = arrayOf("${REQUEST_MAPPING_CONSUMER}/**")
     return GroupedOpenApi
       .builder()
-      .group("Consumer")
+      .group("Ingress")
       .pathsToMatch(*paths)
       .build()
   }
