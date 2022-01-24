@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicReference
 
 @Component
 class Migrator(
@@ -26,6 +27,8 @@ class Migrator(
   private val mongoTemplate: ReactiveMongoTemplate
 ) {
   private val finished = AtomicBoolean(false)
+  private val version = AtomicReference("")
+  private val oldVersion = AtomicReference("")
 
   @Order(Ordered.HIGHEST_PRECEDENCE)
   @EventListener(ApplicationReadyEvent::class)
@@ -35,6 +38,7 @@ class Migrator(
       .map { it.dbVersion }
       .switchIfEmpty("1.0.0".toMono())
       .flatMap { ver ->
+        oldVersion.set(ver)
         migrations
           .sortedBy { it.toVersion }
           .filter { it.toVersion > ver }
@@ -49,7 +53,7 @@ class Migrator(
         } else {
           log.info("Migration to '{}' has been completed!", it)
         }
-        done()
+        done(it)
       }
   }
 
@@ -71,12 +75,25 @@ class Migrator(
       .map { it.dbVersion }
   }
 
-  fun done() {
+  fun done(currentVersion: String) {
+    if(currentVersion == UP_TP_DATE) {
+      version.set(oldVersion.get())
+    } else {
+      version.set(currentVersion)
+    }
     finished.set(true)
   }
 
   fun isDone(): Boolean {
     return finished.get()
+  }
+
+  fun previousVersion(): String {
+    return oldVersion.get()
+  }
+
+  fun currentVersion(): String {
+    return version.get()
   }
 
   companion object {

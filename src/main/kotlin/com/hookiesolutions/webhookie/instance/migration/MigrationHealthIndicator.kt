@@ -13,11 +13,13 @@ class MigrationHealthIndicator(
   override fun health(): Mono<Health> {
     return if(migrator.isDone()) {
       Health.up()
+        .withDetail("Previous Version", migrator.previousVersion())
+        .withDetail("Current Version", migrator.currentVersion())
         .build()
         .toMono()
     } else {
       Health.down()
-        .withDetail("migration", "migrating data...")
+        .withDetail("migration", "Data Migration is in progress...")
         .build()
         .toMono()
     }
