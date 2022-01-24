@@ -1,4 +1,4 @@
-package com.hookiesolutions.webhookie.instance.migration.versions.v112
+package com.hookiesolutions.webhookie.instance.migration.versions.v120
 
 import com.hookiesolutions.webhookie.common.model.AbstractEntity.Companion.mongoField
 import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.all
@@ -22,12 +22,12 @@ import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 
 @Component
-class VersionMigrationV112(
+class VersionMigrationV120(
   private val log: Logger,
   private val mongoTemplate: ReactiveMongoTemplate
 ) : VersionMigration {
   override val toVersion: String
-    get() = "1.1.2"
+    get() = "1.2.0"
 
   override fun doMigrate(): Mono<String> {
     val agg = Aggregation.newAggregation(
