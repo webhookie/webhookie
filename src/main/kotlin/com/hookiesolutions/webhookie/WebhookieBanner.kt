@@ -74,7 +74,7 @@ class WebhookieBanner: Banner {
   companion object {
     private const val SPRING_BOOT = " :: Spring Boot :: "
     private const val WEBHOOKIE = " :: Webhookie :: "
-    private const val VERSION = "(v1.1.1)"
+    private const val VERSION = "(v1.2.0)"
     private const val STRAP_LINE_SIZE = 51
     private val BANNER = arrayOf(
       "",
