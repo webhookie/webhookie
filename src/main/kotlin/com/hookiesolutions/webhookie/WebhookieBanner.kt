@@ -31,7 +31,7 @@ import org.springframework.core.env.Environment
 import java.io.PrintStream
 import java.lang.StringBuilder
 
-class WebhookieBanner: Banner {
+open class WebhookieBanner: Banner {
   override fun printBanner(environment: Environment?, sourceClass: Class<*>, out: PrintStream) {
     for (line in BANNER) {
       out.println(line)
