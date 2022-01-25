@@ -71,6 +71,7 @@ data class Subscription(
   val topic: String,
   val application: ApplicationDetails,
   val callback: CallbackDetails,
+  val approvalDetails: SubscriptionApprovalDetails,
   val statusUpdate: StatusUpdate
 ) : AbstractEntity() {
   fun dto(): SubscriptionDTO {
