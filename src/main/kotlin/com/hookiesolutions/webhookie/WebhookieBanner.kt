@@ -36,7 +36,7 @@ open class WebhookieBanner: Banner {
     for (line in BANNER) {
       out.println(line)
     }
-    val implementationVersion = javaClass.`package`.implementationVersion
+    val implementationVersion = javaClass.`package`.implementationVersion?: ""
     var version = SpringBootVersion.getVersion()
     version = if (version != null) " (v$version)" else ""
     val bootPadding = StringBuilder()

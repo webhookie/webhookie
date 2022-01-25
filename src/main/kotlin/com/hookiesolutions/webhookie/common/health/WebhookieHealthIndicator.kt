@@ -28,6 +28,7 @@ import com.hookiesolutions.webhookie.subscription.config.SubscriptionProperties
 import com.hookiesolutions.webhookie.webhook.config.parser.ParserServiceProperties
 import org.springframework.boot.actuate.health.Health
 import org.springframework.boot.actuate.health.ReactiveHealthIndicator
+import org.springframework.boot.info.BuildProperties
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
@@ -39,6 +40,7 @@ import reactor.kotlin.core.publisher.toMono
  */
 @Component
 class WebhookieHealthIndicator(
+  private val buildProperties: BuildProperties,
   private val parserServiceProperties: ParserServiceProperties,
   private val webHookieSecurityProperties: WebhookieSecurityProperties,
   private val subscriptionProperties: SubscriptionProperties,
@@ -47,6 +49,10 @@ class WebhookieHealthIndicator(
   override fun health(): Mono<Health> {
     return Health
       .up()
+      .withDetail("build", mapOf(
+        "version" to buildProperties.version,
+        "time" to buildProperties.time
+      ))
       .withDetail("parser", parserServiceProperties)
       .withDetail("consumer", ingressProperties)
       .withDetail("security", webHookieSecurityProperties)
