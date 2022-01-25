@@ -60,6 +60,7 @@ data class WebhookApi(
   val providerIAMGroups: Set<String>,
   val consumerAccess: ConsumerAccess,
   val providerAccess: ProviderAccess,
+  val approvalDetails: WebhookApiApprovalDetails,
   @Indexed(name = "webhook_api.numberOfWebhooks")
   val numberOfWebhooks: Int = webhooks.size
 ) : AbstractEntity() {
@@ -127,6 +128,7 @@ data class WebhookApi(
       const val KEY_NUMBER_OF_WEBHOOKS = "numberOfWebhooks"
       const val KEY_PROVIDER_ACCESS = "providerAccess"
       const val KEY_WEBHOOKS = "webhooks"
+      const val KEY_APPROVAL_DETAILS = "approvalDetails"
       const val WEBHOOK_API_COLLECTION_NAME = "webhook_api"
       val KEY_WEBHOOK_API_TOPIC = fieldName(KEY_WEBHOOKS, KEY_TOPIC, KEY_TOPIC_NAME)
       val KEY_WEBHOOKS_No_OS_SUBSCRIPTIONS = fieldName(KEY_WEBHOOKS, "$", KEY_NUMBER_OF_SUBSCRIPTIONS)
@@ -148,7 +150,8 @@ data class WebhookApi(
         request.consumerGroups,
         request.providerGroups,
         request.consumerAccess,
-        request.providerAccess
+        request.providerAccess,
+        WebhookApiApprovalDetails(request.requiresApproval)
       )
     }
 

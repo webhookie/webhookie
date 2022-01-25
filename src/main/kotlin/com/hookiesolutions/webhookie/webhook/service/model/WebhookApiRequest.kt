@@ -27,6 +27,7 @@ import com.hookiesolutions.webhookie.webhook.domain.ProviderAccess
 
 data class WebhookApiRequest(
   val asyncApiSpec: String,
+  val requiresApproval: Boolean,
   val consumerGroups: Set<String>,
   val providerGroups: Set<String>,
   val consumerAccess: ConsumerAccess,
