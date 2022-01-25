@@ -28,7 +28,7 @@ import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH
 import com.hookiesolutions.webhookie.common.Constants.Queue.Headers.Companion.WH_HEADER_TRACE_ID
 import com.hookiesolutions.webhookie.common.config.web.OpenAPIConfig.Companion.OAUTH2_SCHEME
 import com.hookiesolutions.webhookie.ingress.service.TrafficServiceDelegate
-import com.hookiesolutions.webhookie.ingress.web.IngressAPIDocs.Companion.REQUEST_MAPPING_CONSUMER
+import com.hookiesolutions.webhookie.ingress.web.IngressAPIDocs.Companion.REQUEST_MAPPING_INGRESS
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.slf4j.Logger
 import org.springframework.http.HttpHeaders
@@ -45,7 +45,7 @@ import reactor.core.publisher.Mono
  */
 @RestController
 @SecurityRequirement(name = OAUTH2_SCHEME)
-@RequestMapping(REQUEST_MAPPING_CONSUMER)
+@RequestMapping(REQUEST_MAPPING_INGRESS)
 class PublisherController(
   private val log: Logger,
   private val traceServiceDelegate: TrafficServiceDelegate,

@@ -35,7 +35,7 @@ import org.springframework.context.annotation.Configuration
 class IngressAPIDocs {
   @Bean
   fun ingressOpenApi(): GroupedOpenApi {
-    val paths = arrayOf("${REQUEST_MAPPING_CONSUMER}/**")
+    val paths = arrayOf("${REQUEST_MAPPING_INGRESS}/**")
     return GroupedOpenApi
       .builder()
       .group("Ingress")
@@ -44,6 +44,6 @@ class IngressAPIDocs {
   }
 
   companion object {
-    const val REQUEST_MAPPING_CONSUMER = "/consumer"
+    const val REQUEST_MAPPING_INGRESS = "/ingress"
   }
 }

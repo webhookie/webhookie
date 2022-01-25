@@ -33,7 +33,7 @@ import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.R
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_CONSUMER
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_PROVIDER
 import com.hookiesolutions.webhookie.common.web.CommonAPIDocs.Companion.REQUEST_MAPPING_USER_INFO
-import com.hookiesolutions.webhookie.ingress.web.IngressAPIDocs.Companion.REQUEST_MAPPING_CONSUMER
+import com.hookiesolutions.webhookie.ingress.web.IngressAPIDocs.Companion.REQUEST_MAPPING_INGRESS
 import com.hookiesolutions.webhookie.ingress.web.PublisherController.Companion.REQUEST_MAPPING_CONSUMER_EVENT
 import com.hookiesolutions.webhookie.security.customizer.AllowAllPermissionEvaluator
 import com.hookiesolutions.webhookie.security.customizer.DelegateAuthenticationEntryPoint
@@ -114,7 +114,7 @@ class SecurityConfig(
         authorize(pathMatchers(HttpMethod.GET,"$REQUEST_MAPPING_GROUP$REQUEST_MAPPING_CONSUMER_GROUPS"), authenticated)
         authorize(pathMatchers("$REQUEST_MAPPING_ADMIN/**"), hasAuthority(ROLE_ADMIN))
         authorize(pathMatchers("$REQUEST_MAPPING_APPLICATIONS/**"), hasAuthority(ROLE_CONSUMER))
-        authorize(pathMatchers("$REQUEST_MAPPING_CONSUMER/$REQUEST_MAPPING_CONSUMER_EVENT/**"), hasAuthority(ROLE_PROVIDER))
+        authorize(pathMatchers("$REQUEST_MAPPING_INGRESS/$REQUEST_MAPPING_CONSUMER_EVENT/**"), hasAuthority(ROLE_PROVIDER))
         authorize(pathMatchers("$REQUEST_MAPPING_PROVIDER/**"), hasAnyAuthority(ROLE_PROVIDER, ROLE_ADMIN))
         authorize(pathMatchers("$REQUEST_MAPPING_SUBSCRIPTIONS/**"), authenticated)
         authorize(pathMatchers(HttpMethod.GET,"$REQUEST_MAPPING_USER_INFO/**"), authenticated)
