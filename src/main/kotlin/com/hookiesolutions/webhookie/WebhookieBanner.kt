@@ -36,6 +36,7 @@ open class WebhookieBanner: Banner {
     for (line in BANNER) {
       out.println(line)
     }
+    val implementationVersion = javaClass.`package`.implementationVersion
     var version = SpringBootVersion.getVersion()
     version = if (version != null) " (v$version)" else ""
     val bootPadding = StringBuilder()
@@ -44,7 +45,7 @@ open class WebhookieBanner: Banner {
     }
 
     val webhookiePadding = StringBuilder()
-    while (webhookiePadding.length < STRAP_LINE_SIZE - (VERSION.length + WEBHOOKIE.length)) {
+    while (webhookiePadding.length < STRAP_LINE_SIZE - (implementationVersion.length + WEBHOOKIE.length)) {
       webhookiePadding.append(" ")
     }
 
@@ -55,7 +56,7 @@ open class WebhookieBanner: Banner {
         AnsiColor.DEFAULT,
         webhookiePadding.toString(),
         AnsiStyle.FAINT,
-        VERSION,
+        implementationVersion,
       )
     )
     out.println(
@@ -74,7 +75,6 @@ open class WebhookieBanner: Banner {
   companion object {
     private const val SPRING_BOOT = " :: Spring Boot :: "
     private const val WEBHOOKIE = " :: Webhookie :: "
-    private const val VERSION = "(v1.2.0)"
     private const val STRAP_LINE_SIZE = 51
     private val BANNER = arrayOf(
       "",
