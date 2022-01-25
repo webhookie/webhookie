@@ -38,6 +38,8 @@ data class WebhookApiResponse(
   @JsonView(WebhookApiViews.Summary::class)
   val title: String,
   @JsonView(WebhookApiViews.Summary::class)
+  val approvalDetails: ApprovalDetails,
+  @JsonView(WebhookApiViews.Summary::class)
   val webhookVersion: String,
   @JsonView(WebhookApiViews.Summary::class)
   val description: String?,
@@ -57,6 +59,7 @@ data class WebhookApiResponse(
   constructor(entity: WebhookApi) : this(
     entity.id!!,
     entity.title,
+    ApprovalDetails(entity.approvalDetails.required, entity.approvalDetails.email?.value),
     entity.webhookVersion,
     entity.description,
     entity.webhooks.map { Webhook(Topic(it.topic.name, it.topic.description), it.numberOfSubscriptions) },
@@ -71,6 +74,12 @@ data class WebhookApiResponse(
   data class Webhook(
     val topic: Topic,
     val numberOfSubscriptions: Int
+  )
+
+  @JsonView(WebhookApiViews.Summary::class)
+  data class ApprovalDetails(
+    val required: Boolean,
+    val email: String?
   )
 
   @JsonView(WebhookApiViews.Summary::class)
