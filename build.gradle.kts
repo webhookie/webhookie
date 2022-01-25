@@ -41,7 +41,7 @@ allOpen {
 }
 
 group = "com.hookiesolutions.webhookie"
-version = "1.0.0"
+version = "1.3.0"
 java.sourceCompatibility = JavaVersion.VERSION_11
 
 configurations {
@@ -133,4 +133,8 @@ configure<SourceSetContainer> {
 	named("main") {
 		java.srcDir("src/main/kotlin")
 	}
+}
+
+springBoot {
+	buildInfo()
 }
