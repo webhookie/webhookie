@@ -16,7 +16,7 @@ bin/
 !**/src/main/**/bin/
 !**/src/test/**/bin/
 
-http-requests/rest.client.env.json
+http-requests/rest-client.env.json
 ### IntelliJ IDEA ###
 .idea
 *.iws
