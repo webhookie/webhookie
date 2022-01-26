@@ -95,7 +95,7 @@ class SubscriptionService(
 ) {
   @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")
   fun createSubscription(request: CreateSubscriptionRequest): Mono<Subscription> {
-    log.info("Subscribing to '{}' using callback: '{}'", request.webhookDetails.topic, request.callbackId)
+    log.info("Subscribing to '{}' using callback: '{}'", request.topic, request.callbackId)
     return callbackRepository
       .findById(request.callbackId)
       .zipWhen { applicationRepository.findByIdVerifyingReadAccess(it.applicationId) }

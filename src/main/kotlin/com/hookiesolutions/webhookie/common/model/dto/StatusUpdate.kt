@@ -54,7 +54,7 @@ data class StatusUpdate(
   }
 
   companion object {
-    fun saved(at: Instant): StatusUpdate {
+    fun draft(at: Instant): StatusUpdate {
       return Builder()
         .status(SubscriptionStatus.DRAFT)
         .at(at)

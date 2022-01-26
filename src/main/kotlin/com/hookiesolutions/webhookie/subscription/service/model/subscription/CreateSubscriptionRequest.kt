@@ -22,10 +22,8 @@
 
 package com.hookiesolutions.webhookie.subscription.service.model.subscription
 
-import com.hookiesolutions.webhookie.common.model.EmailValue
 import com.hookiesolutions.webhookie.common.validation.ObjectId
 import javax.validation.constraints.NotBlank
-import javax.validation.constraints.NotNull
 
 /**
  *
@@ -33,17 +31,9 @@ import javax.validation.constraints.NotNull
  * @since 17/12/20 23:22
  */
 data class CreateSubscriptionRequest(
-  @field:NotNull
-  val webhookDetails: WebhookSubscriptionDetails,
+  @field:NotBlank
+  val topic: String,
   @field:NotBlank
   @field:ObjectId
   val callbackId: String
-)
-
-data class WebhookSubscriptionDetails(
-  @field:NotBlank
-  val topic: String,
-  val requiresApproval: Boolean,
-  val reason: String? = null,
-  val email: EmailValue? = null
 )

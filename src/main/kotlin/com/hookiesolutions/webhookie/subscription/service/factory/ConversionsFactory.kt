@@ -24,25 +24,19 @@ package com.hookiesolutions.webhookie.subscription.service.factory
 
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherErrorMessage
-import com.hookiesolutions.webhookie.common.message.subscription.BlockedSubscriptionMessageDTO
-import com.hookiesolutions.webhookie.common.message.subscription.GenericSubscriptionMessage
-import com.hookiesolutions.webhookie.common.message.subscription.SignableSubscriptionMessage
-import com.hookiesolutions.webhookie.common.message.subscription.SignedSubscriptionMessage
-import com.hookiesolutions.webhookie.common.message.subscription.SubscriptionSignature
-import com.hookiesolutions.webhookie.common.message.subscription.UnsignedSubscriptionMessage
+import com.hookiesolutions.webhookie.common.message.subscription.*
 import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate
 import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Companion.blocked
-import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Companion.saved
+import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Companion.draft
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionStatus
 import com.hookiesolutions.webhookie.common.service.IdGenerator
 import com.hookiesolutions.webhookie.common.service.TimeMachine
 import com.hookiesolutions.webhookie.subscription.domain.Application
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
+import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.subscription.domain.callback.Callback
 import com.hookiesolutions.webhookie.subscription.domain.callback.CallbackDetails
-import com.hookiesolutions.webhookie.subscription.domain.Subscription
-import com.hookiesolutions.webhookie.subscription.domain.SubscriptionApprovalDetails
 import com.hookiesolutions.webhookie.subscription.service.model.ApplicationRequest
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.CreateSubscriptionRequest
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.UpdateSubscriptionRequest
@@ -163,11 +157,10 @@ class ConversionsFactory(
 
   fun createSubscription(application: Application, callback: Callback, request: CreateSubscriptionRequest): Subscription {
     return Subscription(
-      request.webhookDetails.topic,
+      request.topic,
       application.details(),
       callback.details(),
-      SubscriptionApprovalDetails.from(request.webhookDetails),
-      saved(timeMachine.now())
+      statusUpdate = draft(timeMachine.now())
     )
   }
 

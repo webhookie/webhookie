@@ -71,7 +71,7 @@ data class Subscription(
   val topic: String,
   val application: ApplicationDetails,
   val callback: CallbackDetails,
-  val approvalDetails: SubscriptionApprovalDetails,
+  val approvalDetails: SubscriptionApprovalDetails? = null,
   val statusUpdate: StatusUpdate
 ) : AbstractEntity() {
   fun dto(): SubscriptionDTO {
@@ -160,7 +160,6 @@ data class Subscription(
       const val KEY_TOPIC = "topic"
       const val KEY_APPLICATION = "application"
       const val KEY_CALLBACK = "callback"
-      const val KEY_APPROVAL_DETAILS = "approvalDetails"
       const val KEY_STATUS_UPDATE = "statusUpdate"
       const val SUBSCRIPTION_COLLECTION_NAME = "subscription"
     }
