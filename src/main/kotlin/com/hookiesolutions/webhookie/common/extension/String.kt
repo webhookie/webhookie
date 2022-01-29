@@ -25,3 +25,11 @@ package com.hookiesolutions.webhookie.common.extension
 fun String.isSimilarTo(another: String): Boolean {
   return this.trim().lowercase() == another.trim().lowercase()
 }
+
+fun String.capitalize(): String {
+  return this.lowercase().replaceFirstChar { it.uppercase() }
+}
+
+fun Enum<*>.capitalize(): String {
+  return this.name.capitalize()
+}

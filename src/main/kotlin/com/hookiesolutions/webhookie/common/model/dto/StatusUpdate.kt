@@ -22,6 +22,7 @@
 
 package com.hookiesolutions.webhookie.common.model.dto
 
+import com.hookiesolutions.webhookie.common.extension.capitalize
 import java.time.Instant
 
 /**
@@ -34,6 +35,10 @@ data class StatusUpdate(
   val reason: String?,
   val time: Instant
 ) {
+  fun capitalizedName(): String {
+    return status.capitalize()
+  }
+
   class Keys {
     companion object {
       const val KEY_STATUS = "status"
