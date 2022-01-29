@@ -38,7 +38,7 @@ import java.util.*
  */
 @Service
 class SubscriptionStateManager {
-  fun canBeValidated(subscription: Subscription): Mono<List<SubscriptionStatus>> {
+  fun canBeVerified(subscription: Subscription): Mono<List<SubscriptionStatus>> {
     return verifyAction(subscription, SubscriptionStatus.VALIDATED, SubscriptionStatueAction.VALIDATE)
   }
 

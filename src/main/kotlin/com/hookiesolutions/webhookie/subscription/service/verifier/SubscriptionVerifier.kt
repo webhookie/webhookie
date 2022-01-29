@@ -20,17 +20,35 @@
  * You should also get your employer (if you work as a programmer) or school, if any, to sign a "copyright disclaimer" for the program, if necessary. For more information on this, and how to apply and follow the GNU AGPL, see <https://www.gnu.org/licenses/>.
  */
 
-package com.hookiesolutions.webhookie.subscription.service.model.subscription
+package com.hookiesolutions.webhookie.subscription.service.verifier
 
-import javax.validation.constraints.NotBlank
+import com.hookiesolutions.webhookie.subscription.domain.Subscription
+import com.hookiesolutions.webhookie.subscription.service.model.CallbackValidationSampleRequest
+import com.hookiesolutions.webhookie.subscription.service.model.subscription.VerifySubscriptionRequest
+import org.slf4j.Logger
+import org.springframework.http.ResponseEntity
+import org.springframework.stereotype.Service
+import reactor.core.publisher.Mono
 
 /**
  *
  * @author Arthur Kazemi<bidadh@gmail.com>
- * @since 11/2/21 13:17
+ * @since 11/2/21 15:04
  */
-data class ValidateSubscriptionRequest(
-  @field:NotBlank
-  val payload: String,
-  val headers: Map<String, Any>,
-)
+@Service
+class SubscriptionVerifier(
+  private val log: Logger,
+  private val requestValidator: RequestValidator
+) {
+  fun verify(subscription: Subscription, request: VerifySubscriptionRequest): Mono<ResponseEntity<ByteArray>> {
+    val sampleRequest = CallbackValidationSampleRequest.Builder()
+      .callbackDetails(subscription.callback)
+      .payload(request.payload)
+      .headers(request.headers)
+      .build()
+
+    log.info("Validating Subscription '{}' with callback: '{}'...", subscription.id, subscription.callback.requestTarget())
+
+    return requestValidator.validateRequest(sampleRequest)
+  }
+}

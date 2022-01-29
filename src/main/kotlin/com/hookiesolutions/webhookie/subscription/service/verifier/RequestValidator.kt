@@ -20,35 +20,60 @@
  * You should also get your employer (if you work as a programmer) or school, if any, to sign a "copyright disclaimer" for the program, if necessary. For more information on this, and how to apply and follow the GNU AGPL, see <https://www.gnu.org/licenses/>.
  */
 
-package com.hookiesolutions.webhookie.subscription.service.validator
+package com.hookiesolutions.webhookie.subscription.service.verifier
 
-import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.subscription.service.model.CallbackValidationSampleRequest
-import com.hookiesolutions.webhookie.subscription.service.model.subscription.ValidateSubscriptionRequest
 import org.slf4j.Logger
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
+import org.springframework.web.reactive.function.BodyInserters
+import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.util.UriUtils
 import reactor.core.publisher.Mono
+import java.nio.charset.StandardCharsets
 
 /**
  *
  * @author Arthur Kazemi<bidadh@gmail.com>
- * @since 11/2/21 15:04
+ * @since 11/2/21 15:17
  */
 @Service
-class SubscriptionValidator(
+class RequestValidator(
   private val log: Logger,
-  private val requestValidator: RequestValidator
+  private val headerProvider: RequestHeaderProvider
 ) {
-  fun validate(subscription: Subscription, request: ValidateSubscriptionRequest): Mono<ResponseEntity<ByteArray>> {
-    val sampleRequest = CallbackValidationSampleRequest.Builder()
-      .callbackDetails(subscription.callback)
-      .payload(request.payload)
-      .headers(request.headers)
-      .build()
-
-    log.info("Validating Subscription '{}' with callback: '{}'...", subscription.id, subscription.callback.requestTarget())
-
-    return requestValidator.validateRequest(sampleRequest)
+  fun validateRequest(sampleRequest: CallbackValidationSampleRequest): Mono<ResponseEntity<ByteArray>> {
+    val decodedUrl = UriUtils.decode(sampleRequest.url, StandardCharsets.UTF_8)
+    log.info("Validating request to '{}'", sampleRequest.callback.requestTarget())
+    return headerProvider.headers(sampleRequest)
+      .flatMap { headers ->
+        WebClient
+          .create(decodedUrl)
+          .method(sampleRequest.httpMethod)
+          .accept(MediaType.ALL)
+          .body(BodyInserters.fromValue(sampleRequest.payload.encodeToByteArray()))
+          .headers{
+            it.putAll(headers)
+          }
+          .retrieve()
+          .toEntity(ByteArray::class.java)
+          .doOnNext { log.debug("Received '{}' response", it.statusCode) }
+          .map {
+            return@map if(it.hasBody()) {
+              ResponseEntity
+                .ok()
+                .headers(it.headers)
+                .body(it.body)
+            } else {
+              ResponseEntity
+                .ok()
+                .headers(it.headers)
+                .build()
+            }
+          }
+          .doOnError { log.warn("Validation Failed: '{}'", it.localizedMessage) }
+      }
   }
 }
+

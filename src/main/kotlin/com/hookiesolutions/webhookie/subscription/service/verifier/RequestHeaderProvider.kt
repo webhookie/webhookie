@@ -1,4 +1,4 @@
-package com.hookiesolutions.webhookie.subscription.service.validator
+package com.hookiesolutions.webhookie.subscription.service.verifier
 
 import com.hookiesolutions.webhookie.subscription.config.auth.AuthorizationHeaderProvider
 import com.hookiesolutions.webhookie.subscription.service.model.CallbackValidationSampleRequest

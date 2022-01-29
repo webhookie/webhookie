@@ -30,7 +30,7 @@ import com.hookiesolutions.webhookie.subscription.service.SubscriptionService
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.CreateSubscriptionRequest
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.ReasonRequest
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.UpdateSubscriptionRequest
-import com.hookiesolutions.webhookie.subscription.service.model.subscription.ValidateSubscriptionRequest
+import com.hookiesolutions.webhookie.subscription.service.model.subscription.VerifySubscriptionRequest
 import com.hookiesolutions.webhookie.subscription.web.SubscriptionAPIDocs.Companion.REQUEST_MAPPING_SUBSCRIPTIONS
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.slf4j.Logger
@@ -120,15 +120,15 @@ class SubscriptionController(
   }
 
   @PostMapping(
-    "/{id}/validate",
+    "/{id}/verify",
     consumes = [MediaType.APPLICATION_JSON_VALUE],
     produces = [MediaType.APPLICATION_JSON_VALUE]
   )
-  fun validateSubscription(
+  fun verifySubscription(
     @PathVariable id: String,
-    @RequestBody @Valid request: ValidateSubscriptionRequest
+    @RequestBody @Valid request: VerifySubscriptionRequest
   ): Mono<ResponseEntity<ByteArray>> {
-    return service.validateSubscription(id, request)
+    return service.verifySubscription(id, request)
   }
 
   @PostMapping(

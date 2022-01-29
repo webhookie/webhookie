@@ -87,7 +87,7 @@ class SubscriptionService(
   private val callbackRepository: CallbackRepository,
   private val applicationRepository: ApplicationRepository,
   private val stateManager: SubscriptionStateManager,
-  private val subscriptionValidator: SubscriptionValidator,
+  private val subscriptionVerifier: SubscriptionVerifier,
   private val unblockedSubscriptionChannel: MessageChannel,
   private val subscriptionActivatedChannel: MessageChannel,
   private val subscriptionDeactivatedChannel: MessageChannel,
@@ -189,13 +189,13 @@ class SubscriptionService(
   }
 
   @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")
-  fun validateSubscription(id: String, request: ValidateSubscriptionRequest): Mono<ResponseEntity<ByteArray>> {
-    log.info("Validating Subscription '{}'...", id)
+  fun verifySubscription(id: String, request: VerifySubscriptionRequest): Mono<ResponseEntity<ByteArray>> {
+    log.info("Verifying Subscription '{}'...", id)
 
     return repository
       .findByIdVerifyingWriteAccess(id)
-      .zipWhen { stateManager.canBeValidated(it) }
-      .zipWhen { subscriptionValidator.validate(it.t1, request) }
+      .zipWhen { stateManager.canBeVerified(it) }
+      .zipWhen { subscriptionVerifier.verify(it.t1, request) }
       .flatMap {
         repository.statusUpdate(id, validated(timeMachine.now()), it.t1.t2)
           .map { _ -> it.t2 }
