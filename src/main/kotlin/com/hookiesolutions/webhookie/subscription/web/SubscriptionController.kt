@@ -32,6 +32,7 @@ import com.hookiesolutions.webhookie.subscription.service.model.subscription.Rea
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.UpdateSubscriptionRequest
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.VerifySubscriptionRequest
 import com.hookiesolutions.webhookie.subscription.web.SubscriptionAPIDocs.Companion.REQUEST_MAPPING_SUBSCRIPTIONS
+import com.hookiesolutions.webhookie.subscription.service.model.subscription.SubscriptionApprovalRequest
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.slf4j.Logger
 import org.springframework.data.domain.Pageable
@@ -140,6 +141,18 @@ class SubscriptionController(
   ): Mono<String> {
     return service.activateSubscription(id)
       .map { it.name }
+  }
+
+  @PostMapping(
+    "/{id}/submit",
+    produces = [MediaType.APPLICATION_JSON_VALUE]
+  )
+  fun submitSubscriptionForApproval(
+    @PathVariable id: String,
+    @RequestBody @Valid approvalRequest: SubscriptionApprovalRequest
+  ): Mono<SubscriptionDTO> {
+    return service.submitSubscriptionForApproval(id, approvalRequest)
+      .map { it.dto() }
   }
 
   @PostMapping(

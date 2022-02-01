@@ -22,6 +22,7 @@
 
 package com.hookiesolutions.webhookie.webhook.service
 
+import com.hookiesolutions.webhookie.common.model.dto.WebhookApiDetails
 import com.hookiesolutions.webhookie.security.service.SecurityHandler
 import org.slf4j.Logger
 import org.springframework.stereotype.Service
@@ -59,6 +60,11 @@ class WebhookApiServiceDelegate(
       }
       .map { TopicsWithAccess(it.t2, it.t1) }
       .onErrorReturn(TopicsWithAccess.NO_ACCESS)
+  }
+
+  fun webhookApiDetailsByTopic(topic: String): Mono<WebhookApiDetails> {
+    return webhookApiService.readWebhookApiByTopic(topic)
+      .map { api -> WebhookApiDetails(api.approvalDetails, api.webhooks.map { it.topic.name }) }
   }
 }
 

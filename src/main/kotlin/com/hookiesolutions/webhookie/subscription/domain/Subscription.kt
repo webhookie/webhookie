@@ -162,6 +162,7 @@ data class Subscription(
       const val KEY_CALLBACK = "callback"
       const val KEY_STATUS_UPDATE = "statusUpdate"
       const val SUBSCRIPTION_COLLECTION_NAME = "subscription"
+      const val KEY_APPROVAL_DETAILS = "approvalDetails"
     }
   }
 }

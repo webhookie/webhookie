@@ -209,13 +209,21 @@ class SubscriptionRepository(
     )
   }
 
-  fun statusUpdate(id: String, statusUpdate: StatusUpdate, validStatusList: List<SubscriptionStatus>): Mono<Subscription> {
-    val criteria = byId(id)
-      .andOperator(statusIsIn(validStatusList))
+  fun statusUpdate(
+    id: String,
+    statusUpdate: StatusUpdate,
+    validStatusList: List<SubscriptionStatus>,
+    vararg updates: Pair<String, Any>
+  ): Mono<Subscription> {
+    val criteria = byId(id).andOperator(statusIsIn(validStatusList))
+    val update = subscriptionStatusUpdate(statusUpdate)
+    updates.forEach {
+      update.set(it.first, it.second)
+    }
     return mongoTemplate
       .findAndModify(
         query(criteria),
-        subscriptionStatusUpdate(statusUpdate),
+        update,
         FindAndModifyOptions.options().returnNew(true),
         Subscription::class.java
       )

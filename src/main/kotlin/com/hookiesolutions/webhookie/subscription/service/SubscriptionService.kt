@@ -228,6 +228,20 @@ class SubscriptionService(
   }
 
   @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")
+  fun submitSubscriptionForApproval(id: String, approvalRequest: SubscriptionApprovalRequest): Mono<Subscription> {
+    log.info("Submitting Subscription '{}' for approval", id)
+
+    return repository.findByIdVerifyingWriteAccess(id)
+      .zipWhen { stateManager.canBeSubmitted(it) }
+      .flatMap {
+        val approvalDetails = Pair(Subscription.Keys.KEY_APPROVAL_DETAILS, approvalRequest.toSubscriptionApprovalDetails())
+        repository.statusUpdate(id, submitted(timeMachine.now()), it.t2.validStatusList, approvalDetails)
+      }
+      .flatMap { s -> callbackRepository.lockCallback(s.callback.callbackId).map { s } }
+      .doOnNext { log.info("Subscription '{}' submitted for approval successfully", id) }
+  }
+
+  @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")
   fun deactivateSubscription(id: String, request: ReasonRequest): Mono<SubscriptionStatus> {
     log.info("Deactivating Subscription '{}'...", id)
 
