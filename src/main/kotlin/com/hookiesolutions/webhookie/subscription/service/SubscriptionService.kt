@@ -40,19 +40,26 @@ import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate
 import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Companion.activated
 import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Companion.blocked
 import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Companion.deactivated
+import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Companion.submitted
 import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Companion.suspended
-import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Companion.validated
+import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Companion.updateStatus
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionStatus
 import com.hookiesolutions.webhookie.common.service.TimeMachine
 import com.hookiesolutions.webhookie.security.service.SecurityHandler
-import com.hookiesolutions.webhookie.subscription.domain.*
+import com.hookiesolutions.webhookie.subscription.domain.ApplicationRepository
+import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
+import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessageRepository
+import com.hookiesolutions.webhookie.subscription.domain.Subscription
+import com.hookiesolutions.webhookie.subscription.domain.SubscriptionRepository
 import com.hookiesolutions.webhookie.subscription.domain.callback.CallbackRepository
 import com.hookiesolutions.webhookie.subscription.service.factory.ConversionsFactory
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.CreateSubscriptionRequest
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.ReasonRequest
+import com.hookiesolutions.webhookie.subscription.service.model.subscription.SubscriptionApprovalRequest
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.UpdateSubscriptionRequest
-import com.hookiesolutions.webhookie.subscription.service.model.subscription.ValidateSubscriptionRequest
-import com.hookiesolutions.webhookie.subscription.service.validator.SubscriptionValidator
+import com.hookiesolutions.webhookie.subscription.service.model.subscription.VerifySubscriptionRequest
+import com.hookiesolutions.webhookie.subscription.service.state.SubscriptionStateManager
+import com.hookiesolutions.webhookie.subscription.service.verifier.SubscriptionVerifier
 import com.hookiesolutions.webhookie.webhook.service.WebhookApiServiceDelegate
 import org.slf4j.Logger
 import org.springframework.data.domain.Pageable
@@ -194,10 +201,10 @@ class SubscriptionService(
 
     return repository
       .findByIdVerifyingWriteAccess(id)
-      .zipWhen { stateManager.canBeVerified(it) }
-      .zipWhen { subscriptionVerifier.verify(it.t1, request) }
+      .flatMap { stateManager.canBeVerified(it) }
+      .zipWhen { subscriptionVerifier.verify(it.subscription, request) }
       .flatMap {
-        repository.statusUpdate(id, validated(timeMachine.now()), it.t1.t2)
+        repository.statusUpdate(id, updateStatus(timeMachine.now(), it.t1.toBe), it.t1.validStatusList)
           .map { _ -> it.t2 }
       }
       .doOnNext { log.info("Subscription '{}' validated successfully", id) }
@@ -210,7 +217,7 @@ class SubscriptionService(
     return repository
       .findByIdVerifyingWriteAccess(id)
       .zipWhen { stateManager.canBeActivated(it) }
-      .flatMap { repository.statusUpdate(id, activated(timeMachine.now()), it.t2) }
+      .flatMap { repository.statusUpdate(id, activated(timeMachine.now()), it.t2.validStatusList) }
       .flatMap { s -> callbackRepository.lockCallback(s.callback.callbackId).map { s } }
       .doOnNext { log.info("Subscription '{}' activated successfully", id) }
       .doOnNext {
@@ -227,7 +234,7 @@ class SubscriptionService(
     return repository
       .findByIdVerifyingWriteAccess(id)
       .zipWhen { stateManager.canBeDeactivated(it) }
-      .flatMap { repository.statusUpdate(id, deactivated(timeMachine.now(), request.reason), it.t2) }
+      .flatMap { repository.statusUpdate(id, deactivated(timeMachine.now(), request.reason), it.t2.validStatusList) }
       .doOnNext { log.info("Subscription '{}' deactivated successfully", id) }
       .doOnNext {
         log.info("Decreasing no of subscriptions for '{}' ...", it.id, it.topic)
@@ -244,7 +251,7 @@ class SubscriptionService(
       .findByIdVerifyingProviderAccess(id)
       .zipWhen { stateManager.canBeSuspended(it) }
       .flatMap { data ->
-        repository.statusUpdate(id, suspended(timeMachine.now(), request.reason), data.t2)
+        repository.statusUpdate(id, suspended(timeMachine.now(), request.reason), data.t2.validStatusList)
           .map { Tuples.of(data.t1, it) }
       }
       .doOnNext { log.info("Subscription '{}' suspended successfully", id) }
@@ -267,7 +274,7 @@ class SubscriptionService(
     return repository
       .findByIdVerifyingProviderAccess(id)
       .zipWhen { stateManager.canBeUnsuspended(it) }
-      .flatMap { repository.statusUpdate(id, deactivated(timeMachine.now(), request.reason), it.t2) }
+      .flatMap { repository.statusUpdate(id, deactivated(timeMachine.now(), request.reason), it.t2.validStatusList) }
       .doOnNext { log.info("Subscription '{}' unsuspended successfully", id) }
       .map { it.statusUpdate.status }
   }

@@ -20,23 +20,31 @@
  * You should also get your employer (if you work as a programmer) or school, if any, to sign a "copyright disclaimer" for the program, if necessary. For more information on this, and how to apply and follow the GNU AGPL, see <https://www.gnu.org/licenses/>.
  */
 
-package com.hookiesolutions.webhookie.common.model.dto
+package com.hookiesolutions.webhookie.subscription.service.state
+
+import com.hookiesolutions.webhookie.common.model.dto.SubscriptionStatus
+import org.springframework.stereotype.Service
 
 /**
  *
  * @author Arthur Kazemi<bidadh@gmail.com>
- * @since 11/2/21 14:31
+ * @since 11/2/21 14:50
  */
-enum class SubscriptionStatus {
-  DRAFT,
-  VALIDATED,
-  READY_TO_SUBMIT,
-  SUBMITTED,
-  APPROVED,
-  REJECTED,
-  ACTIVATED,
-  DEACTIVATED,
-  BLOCKED,
-  SUSPENDED,
-  UNSUSPENDED,
+@Service
+class OpenWebhookSubscriptionStateManager: AbstractSubscriptionStateManager() {
+  override val statusTransitionMap: Map<SubscriptionStatus, List<SubscriptionStatus>> = basicStatusTransitionMap.plus(
+    listOf (
+      SubscriptionStatus.VALIDATED to listOf(
+        SubscriptionStatus.DRAFT,
+        SubscriptionStatus.VALIDATED,
+        SubscriptionStatus.BLOCKED,
+        SubscriptionStatus.DEACTIVATED
+      ),
+      SubscriptionStatus.ACTIVATED to listOf(
+        SubscriptionStatus.VALIDATED,
+        SubscriptionStatus.DEACTIVATED
+      )
+    )
+  )
 }
+

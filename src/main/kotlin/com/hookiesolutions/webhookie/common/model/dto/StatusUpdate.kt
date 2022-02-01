@@ -59,49 +59,32 @@ data class StatusUpdate(
   }
 
   companion object {
-    fun draft(at: Instant): StatusUpdate {
+    fun updateStatus(at: Instant, status: SubscriptionStatus, reason: String? = null): StatusUpdate {
       return Builder()
-        .status(SubscriptionStatus.DRAFT)
+        .status(status)
+        .reason(reason)
         .at(at)
         .build()
     }
 
-    fun validated(at: Instant): StatusUpdate {
-      return Builder()
-        .status(SubscriptionStatus.VALIDATED)
-        .at(at)
-        .build()
+    fun draft(at: Instant): StatusUpdate {
+      return updateStatus(at, SubscriptionStatus.DRAFT)
     }
 
     fun activated(at: Instant): StatusUpdate {
-      return Builder()
-        .status(SubscriptionStatus.ACTIVATED)
-        .at(at)
-        .build()
+      return updateStatus(at, SubscriptionStatus.ACTIVATED)
     }
 
     fun deactivated(at: Instant, reason: String?): StatusUpdate {
-      return Builder()
-        .status(SubscriptionStatus.DEACTIVATED)
-        .reason(reason)
-        .at(at)
-        .build()
+      return updateStatus(at, SubscriptionStatus.DEACTIVATED, reason)
     }
 
     fun suspended(at: Instant, reason: String?): StatusUpdate {
-      return Builder()
-        .status(SubscriptionStatus.SUSPENDED)
-        .reason(reason)
-        .at(at)
-        .build()
+      return updateStatus(at, SubscriptionStatus.SUSPENDED, reason)
     }
 
     fun blocked(at: Instant, reason: String?): StatusUpdate {
-      return Builder()
-        .status(SubscriptionStatus.BLOCKED)
-        .reason(reason)
-        .at(at)
-        .build()
+      return updateStatus(at, SubscriptionStatus.BLOCKED, reason)
     }
   }
 }
