@@ -33,6 +33,7 @@ import com.hookiesolutions.webhookie.subscription.service.model.subscription.Upd
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.VerifySubscriptionRequest
 import com.hookiesolutions.webhookie.subscription.web.SubscriptionAPIDocs.Companion.REQUEST_MAPPING_SUBSCRIPTIONS
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.SubscriptionApprovalRequest
+import com.hookiesolutions.webhookie.subscription.service.model.subscription.SubscriptionApprovalResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.slf4j.Logger
 import org.springframework.data.domain.Pageable
@@ -216,5 +217,14 @@ class SubscriptionController(
         log.info("Subscription({}) was blocked because '{}'", id, reason)
       }
       .map { it.status.name }
+  }
+
+  @GetMapping(
+    "/{id}/submitRequest",
+    produces = [MediaType.APPLICATION_JSON_VALUE]
+  )
+  fun readSubmitRequest(@PathVariable id: String): Mono<SubscriptionApprovalResponse> {
+    return service.readSubmitRequest(id)
+      .map { SubscriptionApprovalResponse.create(it) }
   }
 }

@@ -50,6 +50,7 @@ import com.hookiesolutions.webhookie.subscription.domain.ApplicationRepository
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessage
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessageRepository
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
+import com.hookiesolutions.webhookie.subscription.domain.SubscriptionApprovalDetails
 import com.hookiesolutions.webhookie.subscription.domain.SubscriptionRepository
 import com.hookiesolutions.webhookie.subscription.domain.callback.CallbackRepository
 import com.hookiesolutions.webhookie.subscription.service.factory.ConversionsFactory
@@ -395,5 +396,12 @@ class SubscriptionService(
       .subscribe {
         log.info("'{}'/'{}' subscription(s) have been suspended due to deleted webhook api", it.t2, it.t1)
       }
+  }
+
+  fun readSubmitRequest(id: String): Mono<SubscriptionApprovalDetails> {
+    log.info("Getting Subscription '{}' submit request..", id)
+    return repository.findByIdVerifyingReadAccess(id)
+      .filter { it.statusUpdate.status == SubscriptionStatus.SUBMITTED }
+      .map { it.approvalDetails!! }
   }
 }
