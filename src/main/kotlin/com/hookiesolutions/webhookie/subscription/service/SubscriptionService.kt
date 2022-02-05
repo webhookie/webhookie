@@ -38,12 +38,15 @@ import com.hookiesolutions.webhookie.common.model.TimedResult
 import com.hookiesolutions.webhookie.common.model.UpdatableEntity.Companion.updatable
 import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate
 import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Companion.activated
+import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Companion.approved
 import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Companion.blocked
 import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Companion.deactivated
+import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Companion.rejected
 import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Companion.submitted
 import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Companion.suspended
 import com.hookiesolutions.webhookie.common.model.dto.StatusUpdate.Companion.updateStatus
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionStatus
+import com.hookiesolutions.webhookie.common.repository.GenericRepository.Companion.fieldName
 import com.hookiesolutions.webhookie.common.service.TimeMachine
 import com.hookiesolutions.webhookie.security.service.SecurityHandler
 import com.hookiesolutions.webhookie.subscription.domain.ApplicationRepository
@@ -51,11 +54,14 @@ import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMess
 import com.hookiesolutions.webhookie.subscription.domain.BlockedSubscriptionMessageRepository
 import com.hookiesolutions.webhookie.subscription.domain.Subscription
 import com.hookiesolutions.webhookie.subscription.domain.SubscriptionApprovalDetails
+import com.hookiesolutions.webhookie.subscription.domain.SubscriptionApprovalResult
 import com.hookiesolutions.webhookie.subscription.domain.SubscriptionRepository
 import com.hookiesolutions.webhookie.subscription.domain.callback.CallbackRepository
 import com.hookiesolutions.webhookie.subscription.service.factory.ConversionsFactory
+import com.hookiesolutions.webhookie.subscription.service.model.subscription.ApproveSubscriptionRequest
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.CreateSubscriptionRequest
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.ReasonRequest
+import com.hookiesolutions.webhookie.subscription.service.model.subscription.RejectSubscriptionRequest
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.SubscriptionApprovalRequest
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.UpdateSubscriptionRequest
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.VerifySubscriptionRequest
@@ -240,6 +246,42 @@ class SubscriptionService(
       }
       .flatMap { s -> callbackRepository.lockCallback(s.callback.callbackId).map { s } }
       .doOnNext { log.info("Subscription '{}' submitted for approval successfully", id) }
+  }
+
+  @PreAuthorize("hasAuthority('$ROLE_PROVIDER')")
+  fun approveSubscription(id: String, request: ApproveSubscriptionRequest): Mono<Subscription> {
+    log.info("Approving Submitted Subscription '{}'", id)
+
+    return repository.findByIdVerifyingProviderAccess(id)
+      .zipWhen { stateManager.canBeApproved(it) }
+      .flatMap {
+        val approvalResult = SubscriptionApprovalResult(request.user, timeMachine.now(), SubscriptionStatus.APPROVED)
+        val fieldName = fieldName(
+          Subscription.Keys.KEY_APPROVAL_DETAILS,
+          SubscriptionApprovalDetails.Keys.KEY_APPROVAL_RESULT
+        )
+        val approvalDetails = Pair(fieldName, approvalResult)
+        repository.statusUpdate(id, approved(timeMachine.now()), it.t2.validStatusList, approvalDetails)
+      }
+      .doOnNext { log.info("Subscription '{}' approved successfully", id) }
+  }
+
+  @PreAuthorize("hasAuthority('$ROLE_PROVIDER')")
+  fun rejectSubscription(id: String, request: RejectSubscriptionRequest): Mono<Subscription> {
+    log.info("Rejecting Submitted Subscription '{}'", id)
+
+    return repository.findByIdVerifyingProviderAccess(id)
+      .zipWhen { stateManager.canBeRejected(it) }
+      .flatMap {
+        val approvalResult = SubscriptionApprovalResult(request.user, timeMachine.now(), SubscriptionStatus.REJECTED, request.reason)
+        val fieldName = fieldName(
+          Subscription.Keys.KEY_APPROVAL_DETAILS,
+          SubscriptionApprovalDetails.Keys.KEY_APPROVAL_RESULT
+        )
+        val approvalDetails = Pair(fieldName, approvalResult)
+        repository.statusUpdate(id, rejected(timeMachine.now()), it.t2.validStatusList, approvalDetails)
+      }
+      .doOnNext { log.info("Subscription '{}' rejected successfully", id) }
   }
 
   @PreAuthorize("hasAuthority('$ROLE_CONSUMER')")

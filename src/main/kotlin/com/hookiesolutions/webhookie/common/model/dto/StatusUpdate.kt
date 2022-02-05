@@ -79,6 +79,14 @@ data class StatusUpdate(
       return updateStatus(at, SubscriptionStatus.SUBMITTED)
     }
 
+    fun approved(at: Instant): StatusUpdate {
+      return updateStatus(at, SubscriptionStatus.APPROVED)
+    }
+
+    fun rejected(at: Instant): StatusUpdate {
+      return updateStatus(at, SubscriptionStatus.REJECTED)
+    }
+
     fun deactivated(at: Instant, reason: String?): StatusUpdate {
       return updateStatus(at, SubscriptionStatus.DEACTIVATED, reason)
     }

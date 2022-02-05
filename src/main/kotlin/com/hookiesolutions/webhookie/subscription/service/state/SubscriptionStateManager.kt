@@ -45,6 +45,16 @@ class SubscriptionStateManager(
       .flatMap { verifyAction(subscription, SubscriptionStatus.SUBMITTED, it) }
   }
 
+  fun canBeApproved(subscription: Subscription): Mono<SubscriptionStatusUpdate> {
+    return webhookServiceDelegate.webhookApiDetailsByTopic(subscription.topic)
+      .flatMap { verifyAction(subscription, SubscriptionStatus.APPROVED, it) }
+  }
+
+  fun canBeRejected(subscription: Subscription): Mono<SubscriptionStatusUpdate> {
+    return webhookServiceDelegate.webhookApiDetailsByTopic(subscription.topic)
+      .flatMap { verifyAction(subscription, SubscriptionStatus.REJECTED, it) }
+  }
+
   fun canBeDeactivated(subscription: Subscription): Mono<SubscriptionStatusUpdate> {
     return verifyAction(subscription, SubscriptionStatus.DEACTIVATED, null)
   }

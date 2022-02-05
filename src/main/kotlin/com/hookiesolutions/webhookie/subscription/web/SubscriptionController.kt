@@ -27,8 +27,10 @@ import com.hookiesolutions.webhookie.common.model.RoleActor
 import com.hookiesolutions.webhookie.common.model.RoleActor.Companion.PARAM_CONSUMER
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
 import com.hookiesolutions.webhookie.subscription.service.SubscriptionService
+import com.hookiesolutions.webhookie.subscription.service.model.subscription.ApproveSubscriptionRequest
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.CreateSubscriptionRequest
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.ReasonRequest
+import com.hookiesolutions.webhookie.subscription.service.model.subscription.RejectSubscriptionRequest
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.UpdateSubscriptionRequest
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.VerifySubscriptionRequest
 import com.hookiesolutions.webhookie.subscription.web.SubscriptionAPIDocs.Companion.REQUEST_MAPPING_SUBSCRIPTIONS
@@ -153,6 +155,30 @@ class SubscriptionController(
     @RequestBody @Valid approvalRequest: SubscriptionApprovalRequest
   ): Mono<SubscriptionDTO> {
     return service.submitSubscriptionForApproval(id, approvalRequest)
+      .map { it.dto() }
+  }
+
+  @PatchMapping(
+    "/{id}/approve",
+    produces = [MediaType.APPLICATION_JSON_VALUE]
+  )
+  fun approveSubmittedSubscription(
+    @PathVariable id: String,
+    @RequestBody @Valid request: ApproveSubscriptionRequest
+  ): Mono<SubscriptionDTO> {
+    return service.approveSubscription(id, request)
+      .map { it.dto() }
+  }
+
+  @PatchMapping(
+    "/{id}/reject",
+    produces = [MediaType.APPLICATION_JSON_VALUE]
+  )
+  fun rejectSubmittedSubscription(
+    @PathVariable id: String,
+    @RequestBody @Valid request: RejectSubscriptionRequest
+  ): Mono<SubscriptionDTO> {
+    return service.rejectSubscription(id, request)
       .map { it.dto() }
   }
 
