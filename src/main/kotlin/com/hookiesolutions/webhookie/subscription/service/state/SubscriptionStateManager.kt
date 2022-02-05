@@ -37,7 +37,8 @@ class SubscriptionStateManager(
   }
 
   fun canBeActivated(subscription: Subscription): Mono<SubscriptionStatusUpdate> {
-    return verifyAction(subscription, SubscriptionStatus.ACTIVATED, null)
+    return webhookServiceDelegate.webhookApiDetailsByTopic(subscription.topic)
+      .flatMap { verifyAction(subscription, SubscriptionStatus.ACTIVATED, it) }
   }
 
   fun canBeSubmitted(subscription: Subscription): Mono<SubscriptionStatusUpdate> {
