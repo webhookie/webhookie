@@ -73,7 +73,11 @@ class SubscriptionStateManager(
   }
 
   fun canBeUpdated(subscription: Subscription): Mono<Subscription> {
-    val editableStatusList = listOf(SubscriptionStatus.DRAFT, SubscriptionStatus.VALIDATED)
+    val editableStatusList = listOf(
+      SubscriptionStatus.DRAFT,
+      SubscriptionStatus.READY_TO_SUBMIT,
+      SubscriptionStatus.VALIDATED
+    )
     return if(subscription.statusUpdate.status in editableStatusList) {
       subscription.toMono()
     } else {
