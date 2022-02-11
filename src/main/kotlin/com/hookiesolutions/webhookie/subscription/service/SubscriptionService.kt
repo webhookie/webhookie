@@ -26,6 +26,7 @@ import com.hookiesolutions.webhookie.common.Constants.Channels.Webhook.Companion
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_ADMIN
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_CONSUMER
 import com.hookiesolutions.webhookie.common.Constants.Security.Roles.Companion.ROLE_PROVIDER
+import com.hookiesolutions.webhookie.common.exception.EntityNotFoundException
 import com.hookiesolutions.webhookie.common.message.ConsumerMessage
 import com.hookiesolutions.webhookie.common.message.publisher.PublisherErrorMessage
 import com.hookiesolutions.webhookie.common.message.subscription.GenericSubscriptionMessage
@@ -347,6 +348,21 @@ class SubscriptionService(
       .map { it.statusUpdate.status }
   }
 
+
+  @PreAuthorize("hasAnyAuthority('$ROLE_CONSUMER', '$ROLE_PROVIDER')")
+  fun readSubmitRequest(id: String): Mono<SubscriptionApprovalDetails> {
+    log.info("Getting Subscription '{}' submit request..", id)
+    val validStatusList = listOf(
+      SubscriptionStatus.SUBMITTED,
+      SubscriptionStatus.APPROVED,
+      SubscriptionStatus.REJECTED
+    )
+    return repository.findByIdVerifyingReadAccess(id)
+      .filter { validStatusList.contains(it.statusUpdate.status) }
+      .switchIfEmpty { EntityNotFoundException("Subscription or the submit request does not exists~").toMono() }
+      .map { it.approvalDetails!! }
+  }
+
   fun findSubscriptionsFor(consumerMessage: ConsumerMessage): Flux<Subscription> {
     val topic = consumerMessage.topic
     val authorizedSubscribers = consumerMessage.authorizedSubscribers
@@ -438,12 +454,5 @@ class SubscriptionService(
       .subscribe {
         log.info("'{}'/'{}' subscription(s) have been suspended due to deleted webhook api", it.t2, it.t1)
       }
-  }
-
-  fun readSubmitRequest(id: String): Mono<SubscriptionApprovalDetails> {
-    log.info("Getting Subscription '{}' submit request..", id)
-    return repository.findByIdVerifyingReadAccess(id)
-      .filter { it.statusUpdate.status == SubscriptionStatus.SUBMITTED }
-      .map { it.approvalDetails!! }
   }
 }
