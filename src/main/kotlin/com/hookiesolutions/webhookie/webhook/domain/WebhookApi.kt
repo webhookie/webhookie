@@ -23,7 +23,6 @@
 package com.hookiesolutions.webhookie.webhook.domain
 
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
-import com.hookiesolutions.webhookie.common.model.EmailValue
 import com.hookiesolutions.webhookie.common.repository.GenericRepository.Companion.fieldName
 import com.hookiesolutions.webhookie.webhook.domain.Topic.Keys.Companion.KEY_TOPIC_NAME
 import com.hookiesolutions.webhookie.webhook.domain.Webhook.Keys.Companion.KEY_NUMBER_OF_SUBSCRIPTIONS
@@ -61,7 +60,7 @@ data class WebhookApi(
   val providerIAMGroups: Set<String>,
   val consumerAccess: ConsumerAccess,
   val providerAccess: ProviderAccess,
-  val approvalDetails: WebhookApiApprovalDetails,
+  val requiresApproval: Boolean,
   @Indexed(name = "webhook_api.numberOfWebhooks")
   val numberOfWebhooks: Int = webhooks.size
 ) : AbstractEntity() {
@@ -129,7 +128,7 @@ data class WebhookApi(
       const val KEY_NUMBER_OF_WEBHOOKS = "numberOfWebhooks"
       const val KEY_PROVIDER_ACCESS = "providerAccess"
       const val KEY_WEBHOOKS = "webhooks"
-      const val KEY_APPROVAL_DETAILS = "approvalDetails"
+      const val KEY_REQUIRES_APPROVAL = "requiresApproval"
       const val WEBHOOK_API_COLLECTION_NAME = "webhook_api"
       val KEY_WEBHOOK_API_TOPIC = fieldName(KEY_WEBHOOKS, KEY_TOPIC, KEY_TOPIC_NAME)
       val KEY_WEBHOOKS_No_OS_SUBSCRIPTIONS = fieldName(KEY_WEBHOOKS, "$", KEY_NUMBER_OF_SUBSCRIPTIONS)
@@ -142,12 +141,6 @@ data class WebhookApi(
       request: WebhookApiRequest,
       webhooks: List<Webhook>? = null
     ): WebhookApi {
-      val email = if (request.approvalDetails.email == null) {
-        null
-      } else {
-        EmailValue(request.approvalDetails.email)
-      }
-      val approvalDetails = WebhookApiApprovalDetails(request.approvalDetails.required, email)
       return WebhookApi(
         spec.name,
         spec.version,
@@ -158,7 +151,7 @@ data class WebhookApi(
         request.providerGroups,
         request.consumerAccess,
         request.providerAccess,
-        approvalDetails
+        request.requiresApproval
       )
     }
 

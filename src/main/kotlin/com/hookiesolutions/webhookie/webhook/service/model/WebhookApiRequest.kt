@@ -24,21 +24,12 @@ package com.hookiesolutions.webhookie.webhook.service.model
 
 import com.hookiesolutions.webhookie.webhook.domain.ConsumerAccess
 import com.hookiesolutions.webhookie.webhook.domain.ProviderAccess
-import javax.validation.constraints.Email
-import javax.validation.constraints.NotBlank
 
 data class WebhookApiRequest(
   val asyncApiSpec: String,
-  val approvalDetails: WebhookApiApprovalDetailsRequest,
+  val requiresApproval: Boolean,
   val consumerGroups: Set<String>,
   val providerGroups: Set<String>,
   val consumerAccess: ConsumerAccess,
   val providerAccess: ProviderAccess,
-)
-
-data class WebhookApiApprovalDetailsRequest(
-  val required: Boolean,
-  @field:Email
-  @field:NotBlank
-  val email: String?
 )

@@ -3,7 +3,6 @@ package com.hookiesolutions.webhookie.instance.migration.versions.v130
 import com.hookiesolutions.webhookie.common.model.AbstractEntity.Queries.Companion.all
 import com.hookiesolutions.webhookie.instance.migration.VersionMigration
 import com.hookiesolutions.webhookie.webhook.domain.WebhookApi
-import com.hookiesolutions.webhookie.webhook.domain.WebhookApiApprovalDetails
 import org.slf4j.Logger
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.query.Update
@@ -19,7 +18,7 @@ class VersionMigration130(
     get() = "1.3.0"
 
   override fun doMigrate(): Mono<String> {
-    val updateWebhookApis = Update.update(WebhookApi.Keys.KEY_APPROVAL_DETAILS, WebhookApiApprovalDetails.ALLOW_ALL)
+    val updateWebhookApis = Update.update(WebhookApi.Keys.KEY_REQUIRES_APPROVAL, false)
     return mongoTemplate.updateMulti(all(), updateWebhookApis, WebhookApi::class.java)
       .doOnNext { log.info("All webhook APIs have been updated with approval details") }
       .map { toVersion }

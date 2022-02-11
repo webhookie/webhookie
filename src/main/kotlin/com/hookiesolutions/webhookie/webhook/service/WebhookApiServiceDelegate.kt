@@ -64,7 +64,7 @@ class WebhookApiServiceDelegate(
 
   fun webhookApiDetailsByTopic(topic: String): Mono<WebhookApiDetails> {
     return webhookApiService.readWebhookApiByTopic(topic)
-      .map { api -> WebhookApiDetails(api.approvalDetails, api.webhooks.map { it.topic.name }) }
+      .map { api -> WebhookApiDetails(api.requiresApproval, api.webhooks.map { it.topic.name }) }
   }
 }
 
