@@ -23,6 +23,7 @@
 package com.hookiesolutions.webhookie.webhook.domain
 
 import com.hookiesolutions.webhookie.common.model.AbstractEntity
+import com.hookiesolutions.webhookie.common.model.EmailValue
 import com.hookiesolutions.webhookie.common.repository.GenericRepository.Companion.fieldName
 import com.hookiesolutions.webhookie.webhook.domain.Topic.Keys.Companion.KEY_TOPIC_NAME
 import com.hookiesolutions.webhookie.webhook.domain.Webhook.Keys.Companion.KEY_NUMBER_OF_SUBSCRIPTIONS
@@ -141,6 +142,12 @@ data class WebhookApi(
       request: WebhookApiRequest,
       webhooks: List<Webhook>? = null
     ): WebhookApi {
+      val email = if (request.approvalDetails.email == null) {
+        null
+      } else {
+        EmailValue(request.approvalDetails.email)
+      }
+      val approvalDetails = WebhookApiApprovalDetails(request.approvalDetails.required, email)
       return WebhookApi(
         spec.name,
         spec.version,
@@ -151,7 +158,7 @@ data class WebhookApi(
         request.providerGroups,
         request.consumerAccess,
         request.providerAccess,
-        WebhookApiApprovalDetails(request.requiresApproval)
+        approvalDetails
       )
     }
 

@@ -34,6 +34,28 @@ function install_app() {
     ./deployment/helm/mcp
 }
 
+function install_webhookie() {
+    echo -e "Installing webhookie only"
+    helm install webhookie \
+    --set WH_DB_USERNAME=wh-user \
+    --set WH_DB_PASSWORD=Th0Wqc8hN8Mxyzf1 \
+    --set WH_DB_HOST=cluster0.47igq.mongodb.net \
+    --set WH_DB_NAME=wh-dev-db \
+    --set WH_AMQP_PASSWORD=CGc2Q72jafhBj3dk0uycGDxAVfe8JAPt \
+    --set WH_AMQP_V_HOST=nbcwvmaw \
+    --set WH_AMQP_USERNAME=nbcwvmaw \
+    --set WH_AMQP_HOST=vulture.rmq.cloudamqp.com \
+    --set WH_MONGODB_URI=mongodb+srv://"${WH_DB_USERNAME}":"${WH_DB_PASSWORD}"@"${WH_DB_HOST}"/"${WH_DB_NAME}"?retryWrites=true\&w=majority \
+    --set WH_SUBSCRIPTION_RETRY_INITIAL_INTERVAL=5 \
+    --set WH_SUBSCRIPTION_RETRY_MULTIPLIER=2 \
+    --set WH_CONSUMER_ADD_DEFAULT_GROUP=true \
+    --set WH_SUBSCRIPTION_RETRY_MAX=2 \
+    --set WH_ANALYTICS_SEND=true \
+    --set WH_CONSUMER_QUEUE=wh-customer.event \
+    --set WH_CONSUMER_MISSING_HEADER_EXCHANGE=wh-customer \
+    ./webhookie-repo/webhookie
+}
+
 function install_ic() {
     echo -e "\e[32mInstalling ingress controller\e[0m"
     helm install ${PRODUCT_NAME}ic \
