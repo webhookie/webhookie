@@ -27,7 +27,7 @@ class SubscriptionStateManager(
   fun canBeVerified(subscription: Subscription): Mono<SubscriptionStatusUpdate> {
     return webhookServiceDelegate.webhookApiDetailsByTopic(subscription.topic)
       .flatMap { apiDetails ->
-        val toBeStatus = if(apiDetails.approvalDetails.required) {
+        val toBeStatus = if(apiDetails.requiresApproval) {
           SubscriptionStatus.READY_TO_SUBMIT
         } else {
           SubscriptionStatus.VALIDATED
@@ -69,7 +69,7 @@ class SubscriptionStateManager(
   }
 
   private fun verifyAction(subscription: Subscription, status: SubscriptionStatus, webhookApiDetails: WebhookApiDetails?): Mono<SubscriptionStatusUpdate> {
-    val stateManager = if(webhookApiDetails != null && webhookApiDetails.approvalDetails.required) {
+    val stateManager = if(webhookApiDetails != null && webhookApiDetails.requiresApproval) {
       closedWebhookSubscriptionStateManager
     } else {
       openWebhookSubscriptionStateManager

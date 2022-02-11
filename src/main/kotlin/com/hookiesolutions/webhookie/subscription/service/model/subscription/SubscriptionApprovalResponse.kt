@@ -5,12 +5,11 @@ import com.hookiesolutions.webhookie.subscription.domain.SubscriptionApprovalDet
 
 data class SubscriptionApprovalResponse(
   val reason: String,
-  val email: String,
   val requester: UserProfile
 ) {
   companion object {
     fun create(details: SubscriptionApprovalDetails): SubscriptionApprovalResponse {
-      return SubscriptionApprovalResponse(details.reason, details.email.value, details.requester)
+      return SubscriptionApprovalResponse(details.reason, details.requester)
     }
   }
 }

@@ -1,11 +1,11 @@
 package com.hookiesolutions.webhookie.subscription.domain
 
-import com.hookiesolutions.webhookie.common.model.EmailValue
 import com.hookiesolutions.webhookie.common.model.UserProfile
+import javax.validation.constraints.NotBlank
 
 data class SubscriptionApprovalDetails(
+  @field:NotBlank
   val reason: String,
-  val email: EmailValue,
   val requester: UserProfile,
   val result: SubscriptionApprovalResult? = null
 ) {
