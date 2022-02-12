@@ -26,6 +26,7 @@ import com.hookiesolutions.webhookie.common.config.web.OpenAPIConfig.Companion.O
 import com.hookiesolutions.webhookie.common.model.RoleActor
 import com.hookiesolutions.webhookie.common.model.RoleActor.Companion.PARAM_CONSUMER
 import com.hookiesolutions.webhookie.common.model.dto.SubscriptionDTO
+import com.hookiesolutions.webhookie.subscription.domain.SubscriptionApprovalDetails
 import com.hookiesolutions.webhookie.subscription.service.SubscriptionService
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.ApproveSubscriptionRequest
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.CreateSubscriptionRequest
@@ -35,7 +36,6 @@ import com.hookiesolutions.webhookie.subscription.service.model.subscription.Upd
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.VerifySubscriptionRequest
 import com.hookiesolutions.webhookie.subscription.web.SubscriptionAPIDocs.Companion.REQUEST_MAPPING_SUBSCRIPTIONS
 import com.hookiesolutions.webhookie.subscription.service.model.subscription.SubscriptionApprovalRequest
-import com.hookiesolutions.webhookie.subscription.service.model.subscription.SubscriptionApprovalResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.slf4j.Logger
 import org.springframework.data.domain.Pageable
@@ -249,8 +249,7 @@ class SubscriptionController(
     "/{id}/submitRequest",
     produces = [MediaType.APPLICATION_JSON_VALUE]
   )
-  fun readSubmitRequest(@PathVariable id: String): Mono<SubscriptionApprovalResponse> {
+  fun readSubmitRequest(@PathVariable id: String): Mono<SubscriptionApprovalDetails> {
     return service.readSubmitRequest(id)
-      .map { SubscriptionApprovalResponse.create(it) }
   }
 }

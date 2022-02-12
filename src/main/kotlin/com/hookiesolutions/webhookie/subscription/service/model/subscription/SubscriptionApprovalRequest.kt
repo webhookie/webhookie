@@ -2,6 +2,7 @@ package com.hookiesolutions.webhookie.subscription.service.model.subscription
 
 import com.hookiesolutions.webhookie.common.model.UserProfile
 import com.hookiesolutions.webhookie.subscription.domain.SubscriptionApprovalDetails
+import java.time.Instant
 import javax.validation.constraints.NotBlank
 
 data class SubscriptionApprovalRequest(
@@ -9,7 +10,7 @@ data class SubscriptionApprovalRequest(
   val reason: String,
   val requester: UserProfile
 ) {
-  fun toSubscriptionApprovalDetails(): SubscriptionApprovalDetails {
-    return SubscriptionApprovalDetails(reason, requester)
+  fun toSubscriptionApprovalDetails(at: Instant): SubscriptionApprovalDetails {
+    return SubscriptionApprovalDetails(reason, requester, at)
   }
 }

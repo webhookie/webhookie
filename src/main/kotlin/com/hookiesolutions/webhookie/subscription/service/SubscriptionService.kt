@@ -242,8 +242,9 @@ class SubscriptionService(
     return repository.findByIdVerifyingWriteAccess(id)
       .zipWhen { stateManager.canBeSubmitted(it) }
       .flatMap {
-        val approvalDetails = Pair(Subscription.Keys.KEY_APPROVAL_DETAILS, approvalRequest.toSubscriptionApprovalDetails())
-        repository.statusUpdate(id, submitted(timeMachine.now()), it.t2.validStatusList, approvalDetails)
+        val details = approvalRequest.toSubscriptionApprovalDetails(timeMachine.now())
+        val approvalDetailsPair = Pair(Subscription.Keys.KEY_APPROVAL_DETAILS, details)
+        repository.statusUpdate(id, submitted(timeMachine.now()), it.t2.validStatusList, approvalDetailsPair)
       }
       .flatMap { s -> callbackRepository.lockCallback(s.callback.callbackId).map { s } }
       .doOnNext { log.info("Subscription '{}' submitted for approval successfully", id) }
