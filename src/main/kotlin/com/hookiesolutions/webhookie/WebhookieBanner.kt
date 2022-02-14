@@ -31,21 +31,23 @@ import org.springframework.core.env.Environment
 import java.io.PrintStream
 import java.lang.StringBuilder
 
-open class WebhookieBanner: Banner {
+open class WebhookieBanner(
+  private val productVersion: String
+): Banner {
   override fun printBanner(environment: Environment?, sourceClass: Class<*>, out: PrintStream) {
     for (line in BANNER) {
       out.println(line)
     }
-    val implementationVersion = javaClass.`package`.implementationVersion?: ""
     var version = SpringBootVersion.getVersion()
     version = if (version != null) " (v$version)" else ""
+    val appVersion = " (v$productVersion)"
     val bootPadding = StringBuilder()
     while (bootPadding.length < STRAP_LINE_SIZE - (version.length + SPRING_BOOT.length)) {
       bootPadding.append(" ")
     }
 
     val webhookiePadding = StringBuilder()
-    while (webhookiePadding.length < STRAP_LINE_SIZE - (implementationVersion.length + WEBHOOKIE.length)) {
+    while (webhookiePadding.length < STRAP_LINE_SIZE - (appVersion.length + WEBHOOKIE.length)) {
       webhookiePadding.append(" ")
     }
 
@@ -56,7 +58,7 @@ open class WebhookieBanner: Banner {
         AnsiColor.DEFAULT,
         webhookiePadding.toString(),
         AnsiStyle.FAINT,
-        implementationVersion,
+        appVersion,
       )
     )
     out.println(
