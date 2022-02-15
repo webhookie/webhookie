@@ -55,3 +55,11 @@ services:
       webhookie:
     depends_on:
       - mongodb
+
+  subscription:
+    container_name: webhookie-subscription-sample
+    image: hookiesolutions/webhookie-subscription-sample:1
+    ports:
+      - "9000:9000"
+    networks:
+      webhookie:
