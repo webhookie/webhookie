@@ -8,9 +8,9 @@ import javax.validation.constraints.NotBlank
 data class SubscriptionApprovalRequest(
   @field:NotBlank
   val reason: String,
-  val requester: UserProfile
+  val requester: UserProfileRequest
 ) {
-  fun toSubscriptionApprovalDetails(at: Instant): SubscriptionApprovalDetails {
-    return SubscriptionApprovalDetails(reason, requester, at)
+  fun toSubscriptionApprovalDetails(at: Instant, userId: String): SubscriptionApprovalDetails {
+    return SubscriptionApprovalDetails(reason, UserProfile(userId, requester.name, requester.email), at)
   }
 }

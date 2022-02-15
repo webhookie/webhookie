@@ -241,10 +241,13 @@ class SubscriptionService(
 
     return repository.findByIdVerifyingWriteAccess(id)
       .zipWhen { stateManager.canBeSubmitted(it) }
+      .zipWhen { securityHandler.data() }
       .flatMap {
-        val details = approvalRequest.toSubscriptionApprovalDetails(timeMachine.now())
+        val at = timeMachine.now()
+        val details = approvalRequest.toSubscriptionApprovalDetails(at, it.t2.email)
         val approvalDetailsPair = Pair(Subscription.Keys.KEY_APPROVAL_DETAILS, details)
-        repository.statusUpdate(id, submitted(timeMachine.now()), it.t2.validStatusList, approvalDetailsPair)
+        val validStatusList = it.t1.t2.validStatusList
+        repository.statusUpdate(id, submitted(at), validStatusList, approvalDetailsPair)
       }
       .flatMap { s -> callbackRepository.lockCallback(s.callback.callbackId).map { s } }
       .doOnNext { log.info("Subscription '{}' submitted for approval successfully", id) }
@@ -256,14 +259,18 @@ class SubscriptionService(
 
     return repository.findByIdVerifyingProviderAccess(id)
       .zipWhen { stateManager.canBeApproved(it) }
+      .zipWhen { securityHandler.data() }
       .flatMap {
-        val approvalResult = SubscriptionApprovalResult(request.user, timeMachine.now(), SubscriptionStatus.APPROVED)
+        val at = timeMachine.now()
+        val validStatusList = it.t1.t2.validStatusList
+        val profile = request.user.toUserProfile(it.t2.email)
+        val approvalResult = SubscriptionApprovalResult(profile, at, SubscriptionStatus.APPROVED)
         val fieldName = fieldName(
           Subscription.Keys.KEY_APPROVAL_DETAILS,
           SubscriptionApprovalDetails.Keys.KEY_APPROVAL_RESULT
         )
         val approvalDetails = Pair(fieldName, approvalResult)
-        repository.statusUpdate(id, approved(timeMachine.now()), it.t2.validStatusList, approvalDetails)
+        repository.statusUpdate(id, approved(at), validStatusList, approvalDetails)
       }
       .doOnNext { log.info("Subscription '{}' approved successfully", id) }
   }
@@ -274,14 +281,18 @@ class SubscriptionService(
 
     return repository.findByIdVerifyingProviderAccess(id)
       .zipWhen { stateManager.canBeRejected(it) }
+      .zipWhen { securityHandler.data() }
       .flatMap {
-        val approvalResult = SubscriptionApprovalResult(request.user, timeMachine.now(), SubscriptionStatus.REJECTED, request.reason)
+        val at = timeMachine.now()
+        val validStatusList = it.t1.t2.validStatusList
+        val profile = request.user.toUserProfile(it.t2.email)
+        val approvalResult = SubscriptionApprovalResult(profile, at, SubscriptionStatus.REJECTED, request.reason)
         val fieldName = fieldName(
           Subscription.Keys.KEY_APPROVAL_DETAILS,
           SubscriptionApprovalDetails.Keys.KEY_APPROVAL_RESULT
         )
         val approvalDetails = Pair(fieldName, approvalResult)
-        repository.statusUpdate(id, rejected(timeMachine.now()), it.t2.validStatusList, approvalDetails)
+        repository.statusUpdate(id, rejected(at), validStatusList, approvalDetails)
       }
       .doOnNext { log.info("Subscription '{}' rejected successfully", id) }
   }

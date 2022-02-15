@@ -5,8 +5,8 @@ import javax.validation.constraints.NotBlank
 
 data class UserProfile(
   @field:NotBlank
-  val name: String,
+  val userId: String,
+  val name: String?,
   @field:Email
-  @field:NotBlank
-  val email: String
+  val email: String?
 )
