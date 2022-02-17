@@ -38,13 +38,13 @@ function install_webhookie() {
     echo -e "Installing webhookie only"
     helm install webhookie \
     --set WH_DB_USERNAME=wh-user \
-    --set WH_DB_PASSWORD=Th0Wqc8hN8Mxyzf1 \
-    --set WH_DB_HOST=cluster0.47igq.mongodb.net \
+    --set WH_DB_PASSWORD=YOUR_PASSWORD \
+    --set WH_DB_HOST=DB_HOST \
     --set WH_DB_NAME=wh-dev-db \
-    --set WH_AMQP_PASSWORD=CGc2Q72jafhBj3dk0uycGDxAVfe8JAPt \
-    --set WH_AMQP_V_HOST=nbcwvmaw \
-    --set WH_AMQP_USERNAME=nbcwvmaw \
-    --set WH_AMQP_HOST=vulture.rmq.cloudamqp.com \
+    --set WH_AMQP_PASSWORD=YOUR_AMQP_PASSWORD \
+    --set WH_AMQP_V_HOST= YOUR_AMQP_V_HOST\
+    --set WH_AMQP_USERNAME=YOUR_AMQP_USERNAME \
+    --set WH_AMQP_HOST=YOUR_AMQP_HOST \
     --set WH_MONGODB_URI=mongodb+srv://"${WH_DB_USERNAME}":"${WH_DB_PASSWORD}"@"${WH_DB_HOST}"/"${WH_DB_NAME}"?retryWrites=true\&w=majority \
     --set WH_SUBSCRIPTION_RETRY_INITIAL_INTERVAL=5 \
     --set WH_SUBSCRIPTION_RETRY_MULTIPLIER=2 \
