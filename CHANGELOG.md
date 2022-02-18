@@ -1,3 +1,14 @@
+<a name="v1.3.4"></a>
+## v1.3.3
+
+### Features
+
+* Added Submit action to the subscription menu so that consumer can go to submit subscription step from the menu
+
+### Bug Fixes
+
+* Fix click issue in the context-menu
+
 <a name="v1.3.3"></a>
 ## v1.3.3
 
