@@ -9,9 +9,7 @@ class ClosedWebhookSubscriptionStateManager: AbstractSubscriptionStateManager() 
     listOf (
       SubscriptionStatus.READY_TO_SUBMIT to listOf(
         SubscriptionStatus.DRAFT,
-        SubscriptionStatus.READY_TO_SUBMIT,
-        SubscriptionStatus.BLOCKED,
-        SubscriptionStatus.DEACTIVATED
+        SubscriptionStatus.READY_TO_SUBMIT
       ),
       SubscriptionStatus.SUBMITTED to listOf(SubscriptionStatus.READY_TO_SUBMIT),
       SubscriptionStatus.APPROVED to listOf(SubscriptionStatus.SUBMITTED),

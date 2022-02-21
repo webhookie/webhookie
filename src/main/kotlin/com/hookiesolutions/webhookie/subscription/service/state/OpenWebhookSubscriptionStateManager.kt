@@ -36,9 +36,7 @@ class OpenWebhookSubscriptionStateManager: AbstractSubscriptionStateManager() {
     listOf (
       SubscriptionStatus.VALIDATED to listOf(
         SubscriptionStatus.DRAFT,
-        SubscriptionStatus.VALIDATED,
-        SubscriptionStatus.BLOCKED,
-        SubscriptionStatus.DEACTIVATED
+        SubscriptionStatus.VALIDATED
       ),
       SubscriptionStatus.ACTIVATED to listOf(
         SubscriptionStatus.VALIDATED,

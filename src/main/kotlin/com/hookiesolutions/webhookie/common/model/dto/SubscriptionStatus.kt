@@ -38,5 +38,4 @@ enum class SubscriptionStatus {
   DEACTIVATED,
   BLOCKED,
   SUSPENDED,
-  UNSUSPENDED,
 }
