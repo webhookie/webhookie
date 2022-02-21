@@ -1,3 +1,13 @@
+<a name="v1.3.5"></a>
+## v1.3.5
+
+### Bug Fixes
+
+* Fixed the issue when some valid subscription status transitions could not be made 
+* Fixed 3 dot menu icon positioning on top of the menu
+* Hide 3 dot menu when there is no item in the menu
+* Fixed the issue when Suspend action is available for non-suspendable subscriptions
+
 <a name="v1.3.4"></a>
 ## v1.3.4
 
