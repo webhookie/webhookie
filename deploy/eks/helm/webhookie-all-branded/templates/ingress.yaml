@@ -26,3 +26,17 @@ spec:
                 name: {{.Values.app}}
                 port:
                   number: 8080
+          - path: /kc/*
+            pathType: Prefix
+            backend:
+              service:
+                name: {{.Values.app}}
+                port:
+                  number: 8800
+          - path: /admin/*
+            pathType: Prefix
+            backend:
+              service:
+                name: {{.Values.app}}
+                port:
+                  number: 9900
