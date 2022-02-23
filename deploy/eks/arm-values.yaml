@@ -1,0 +1,4 @@
+keycloak:
+  replicas: 1
+  imageName: wizzn/keycloak
+  imageVersion: 14

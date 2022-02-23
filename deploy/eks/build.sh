@@ -33,6 +33,11 @@ function install_webhookie_all() {
   helm install webhookie-all webhookie-repo/webhookie-all
 }
 
+function install_webhookie_all_arm() {
+  echo "Installing webhookie all"
+  helm install webhookie-all -f ./arm-values.yaml webhookie-repo/webhookie-all
+}
+
 function install_webhookie_branded() {
   echo "Installing webhookie branded"
   helm install webhookie-branded -f ./branding/my-values.yaml \
@@ -47,6 +52,19 @@ function install_webhookie_branded() {
 function install_webhookie_all_branded() {
   echo "Installing webhookie all branded"
   helm install webhookie-all-branded \
+    --set-file instanceTitle="./branding/detectify_assets/title.html" \
+    --set-file instanceBody="./branding/detectify_assets/body.html" \
+    --set-file instanceIcon="./branding/detectify_assets/favicon.ico" \
+    --set-file instanceLogo="./branding/detectify_assets/logo.svg" \
+    --set-file instanceHero="./branding/detectify_assets/hero.svg" \
+    webhookie-repo/webhookie-all-branded
+}
+
+function install_webhookie_all_branded_arm() {
+  echo "Installing webhookie all branded form ARM"
+  helm install webhookie-all-branded -f ./arm-values.yaml \
+    --set WEBHOOKIE_MAIN_COLOR="'#090A3A'" \
+    --set WEBHOOKIE_PAGE_TITLE="The API Hunt by webhookie" \
     --set-file instanceTitle="./branding/detectify_assets/title.html" \
     --set-file instanceBody="./branding/detectify_assets/body.html" \
     --set-file instanceIcon="./branding/detectify_assets/favicon.ico" \
@@ -153,7 +171,9 @@ case "$1" in
 --cleanup) clean_up;;
 --webhookie) install_webhookie;;
 --webhookie-all) install_webhookie_all;;
+--webhookie-all-arm) install_webhookie_all_arm;;
 --webhookie-branded) install_webhookie_branded;;
 --webhookie-all-branded) install_webhookie_all_branded;;
+--webhookie-all-branded-arm) install_webhookie_all_branded_arm;;
 *) help;;
 esac
