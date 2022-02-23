@@ -1,6 +1,6 @@
 apiVersion: v2
 name: webhookie-all-arm
-description: Webhookie Community Edition Helm chart for Kubernetes with all dependencies for M1 Macs
+description: Webhookie with mongodb and keycloak Helm chart for arm architecture
 
 type: application
 

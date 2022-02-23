@@ -1,6 +1,6 @@
 apiVersion: v2
 name: webhookie-all-branded
-description: Webhookie, mongodb, keycloak with branding capability Helm chart for Kubernetes
+description: Webhookie with mongodb and keycloak with branding capability Helm chart for Kubernetes
 
 type: application
 

@@ -1,6 +1,6 @@
 apiVersion: v2
 name: webhookie-branded
-description: Webhookie with branding capability Helm chart for Kubernetes
+description: Webhookie with branding capability Helm chart
 
 type: application
 

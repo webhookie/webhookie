@@ -1,6 +1,6 @@
 apiVersion: v2
 name: webhookie-all
-description: Webhookie Community Edition Helm chart for Kubernetes with all dependencies
+description: Webhookie with mongodb and keycloak Helm chart for Kubernetes
 
 type: application
 
