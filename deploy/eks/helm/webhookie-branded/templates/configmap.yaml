@@ -1,0 +1,17 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: instance-branding-config
+  namespace: default
+data:
+  title.html: |
+{{ .Values.instanceTitle | indent 4 }}
+  body.html: |
+{{ .Values.instanceBody | indent 4 }}
+  logo.svg: |
+{{ .Values.instanceLogo | indent 4 }}
+  hero.svg: |
+{{ .Values.instanceHero | indent 4 }}
+binaryData:
+  favicon.ico: |
+{{ .Values.instanceIcon | b64enc | indent 4 }}
