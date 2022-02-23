@@ -2,23 +2,19 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-app: webhookie-all
+app: webhookie # metered container product
 productCode:
 region:
 vpcId:
 
-webhookie: # metered container product
-  replicas: 1
-  imageName: hookiesolutions/webhookie
-  imageVersion: latest
 keycloak: # metered container product
   replicas: 1
   imageName: quay.io/keycloak/keycloak
   imageVersion: 14.0.0
-mongodb: # metered container product
+webhookie: # metered container product
   replicas: 1
-  imageName: mongo
-  imageVersion: 4.4
+  imageName: hookiesolutions/webhookie
+  imageVersion: latest
 
 WH_IAM_ISSUER_URI: "http://localhost:8800/auth/realms/webhookie"
 WH_IAM_JWK_SET_URI: "http://webhookie-all-keycloak:8800/auth/realms/webhookie/protocol/openid-connect/certs"
@@ -35,4 +31,3 @@ WH_MONGODB_URI: "mongodb://webhookie-all-mongodb/webhookie-db?retryWrites=true&w
 WEBHOOKIE_SECURITY_ALLOWED_ORIGINS: "http://localhost:4200"
 WEBHOOKIE_MAIN_COLOR: "'#0151cc'"
 WEBHOOKIE_PAGE_TITLE: "webhookie"
-

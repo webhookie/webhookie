@@ -39,27 +39,27 @@ spec:
           protocol: TCP
         env:
         - name: WH_IAM_ISSUER_URI
-          value: "http://localhost:8800/auth/realms/webhookie"
+          value: {{.Values.WH_IAM_ISSUER_URI}}
         - name: WH_IAM_JWK_SET_URI
-          value: "http://webhookie-all-keycloak:8800/auth/realms/webhookie/protocol/openid-connect/certs"
+          value: {{.Values.WH_IAM_JWK_SET_URI}}
         - name: WH_IAM_JWS_ALG
-          value: "RS256"
+          value: {{.Values.WH_IAM_JWS_ALG}}
         - name: WH_SECURITY_AUD
-          value: "webhookie_client"
+          value: {{.Values.WH_SECURITY_AUD}}
         - name: WH_SECURITY_CLIENT_ID
-          value: "webhookie_client"
+          value: {{.Values.WH_SECURITY_CLIENT_ID}}
         - name: WH_SECURITY_ROLES_JSON_PATH
-          value: "$.resource_access.webhookie_client.roles"
+          value: {{.Values.WH_SECURITY_ROLES_JSON_PATH}}
         - name: WH_SECURITY_GROUPS_JSON_PATH
-          value: "$.groups"
+          value: {{.Values.WH_SECURITY_GROUPS_JSON_PATH}}
         - name: WH_SECURITY_ENTITY_JSON_PATH
-          value: "$.entity"
+          value: {{.Values.WH_SECURITY_ENTITY_JSON_PATH}}
         - name: WH_SECURITY_AUTO_ASSIGN_CONSUMER_ROLE
-          value: "true"
+          value: "{{.Values.WH_SECURITY_AUTO_ASSIGN_CONSUMER_ROLE}}"
         - name: WH_SECURITY_OAUTH2_AUTHORIZATION_URI
-          value: "/protocol/openid-connect/auth"
+          value: {{.Values.WH_SECURITY_OAUTH2_AUTHORIZATION_URI}}
         - name: WH_SECURITY_OAUTH2_TOKEN_URI
-          value: "/protocol/openid-connect/token"
+          value: {{.Values.WH_SECURITY_OAUTH2_TOKEN_URI}}
         - name: WH_AMQP_PASSWORD
           value: {{.Values.WH_AMQP_PASSWORD}}
         - name: WH_AMQP_V_HOST
@@ -73,9 +73,13 @@ spec:
         - name: WH_CONSUMER_MISSING_HEADER_EXCHANGE
           value: {{.Values.WH_CONSUMER_MISSING_HEADER_EXCHANGE}}
         - name: WH_MONGODB_URI
-          value: "mongodb://webhookie-all-mongodb/webhookie-db?retryWrites=true&w=majority&maxPoolSize=200"
+          value: {{.Values.WH_MONGODB_URI}}
         - name: WEBHOOKIE_SECURITY_ALLOWED_ORIGINS
-          value: "http://localhost:4200"
+          value: {{.Values.WEBHOOKIE_SECURITY_ALLOWED_ORIGINS}}
+        - name: WEBHOOKIE_MAIN_COLOR
+          value: {{.Values.WEBHOOKIE_MAIN_COLOR}}
+        - name: WEBHOOKIE_PAGE_TITLE
+          value: {{.Values.WEBHOOKIE_PAGE_TITLE}}
 ---
 apiVersion: apps/v1
 kind: Deployment
