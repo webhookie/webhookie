@@ -28,8 +28,13 @@ function install_webhookie() {
     webhookie-repo/webhookie
 }
 
+function install_webhookie_all() {
+  echo "Installing webhookie all"
+  helm install webhookie-all webhookie-repo/webhookie-all
+}
+
 function install_webhookie_branded() {
-  echo "Installing webhookie only"
+  echo "Installing webhookie branded"
   helm install webhookie-branded -f ./branding/my-values.yaml \
     --set-file instanceTitle="./branding/detectify_assets/title.html" \
     --set-file instanceBody="./branding/detectify_assets/body.html" \
@@ -37,6 +42,17 @@ function install_webhookie_branded() {
     --set-file instanceLogo="./branding/detectify_assets/logo.svg" \
     --set-file instanceHero="./branding/detectify_assets/hero.svg" \
     webhookie-repo/webhookie-branded
+}
+
+function install_webhookie_all_branded() {
+  echo "Installing webhookie all branded"
+  helm install webhookie-all-branded \
+    --set-file instanceTitle="./branding/detectify_assets/title.html" \
+    --set-file instanceBody="./branding/detectify_assets/body.html" \
+    --set-file instanceIcon="./branding/detectify_assets/favicon.ico" \
+    --set-file instanceLogo="./branding/detectify_assets/logo.svg" \
+    --set-file instanceHero="./branding/detectify_assets/hero.svg" \
+    webhookie-repo/webhookie-all-branded
 }
 
 function install_ic() {
@@ -136,6 +152,8 @@ case "$1" in
 --upgrade) upgrade;;
 --cleanup) clean_up;;
 --webhookie) install_webhookie;;
+--webhookie-all) install_webhookie_all;;
 --webhookie-branded) install_webhookie_branded;;
+--webhookie-all-branded) install_webhookie_all_branded;;
 *) help;;
 esac
