@@ -22,37 +22,21 @@ function build_and_push() {
 	docker push ${ECR_REPOSITORY}:${PRODUCT_VERSION}
 }
 
-function install_app() {
-    echo -e "\e[32mInstalling app\e[0m"
-    helm install ${PRODUCT_NAME} \
-    --set region=${AWS_REGION} \
-    echo -e "Installing webhookie only"
-    helm install webhookie \
-    --set WH_AMQP_PASSWORD=AMQP_PASS \
-    --set WH_AMQP_V_HOST=AMQP_V_HOST \
-    --set WH_AMQP_USERNAME=AMQP_USER \
-    --set WH_AMQP_HOST=AMQP_HOST \
-    --set WH_MONGODB_URI=mongodb+srv://DB_USER:DB_PASS@DB_HOST/DB_NAME?retryWrites=true\&w=majority \
-    --set WH_SUBSCRIPTION_RETRY_INITIAL_INTERVAL=5 \
-    --set WH_SUBSCRIPTION_RETRY_MULTIPLIER=2 \
-    --set WH_CONSUMER_ADD_DEFAULT_GROUP=true \
-    --set WH_SUBSCRIPTION_RETRY_MAX=2 \
-    --set WH_ANALYTICS_SEND=true \
-    --set WH_CONSUMER_QUEUE=wh-customer.event \
-    --set WH_CONSUMER_MISSING_HEADER_EXCHANGE=wh-customer \
-    --set WH_ANALYTICS_SEND=false \
-    --set WH_IAM_JWK_SET_URI=JWK_SET_URI \
-    --set WH_IAM_ISSUER_URI=ISSUER_URI \
-    --set WH_IAM_JWS_ALG=RS256 \
-    --set WH_SECURITY_AUD=http://localhost:8080 \
-    --set WH_SECURITY_CLIENT_ID=nvKDmIK9Q5Zw1UKwpON8LE3tg9vZcXb4 \
-    --set WH_SECURITY_GROUPS_JSON_PATH=$$['https://webhookie.com/groups'] \
-    --set WH_SECURITY_OAUTH2_AUTHORIZATION_URI=authorize \
-    --set WH_SECURITY_OAUTH2_TOKEN_URI=oauth/token \
-    --set WH_SECURITY_ENTITY_JSON_PATH=$$['https://webhookie.com/entity'] \
-    --set WH_SECURITY_ROLES_JSON_PATH=$$['https://webhookie.com/roles'] \
-    --set WH_SECURITY_AUTO_ASSIGN_CONSUMER_ROLE=true \
+function install_webhookie() {
+  echo "Installing webhookie only"
+  helm install webhookie -f ./branding/my-values.yaml \
     webhookie-repo/webhookie
+}
+
+function install_webhookie_branded() {
+  echo "Installing webhookie only"
+  helm install webhookie-branded -f ./branding/my-values.yaml \
+    --set-file instanceTitle="./branding/detectify_assets/title.html" \
+    --set-file instanceBody="./branding/detectify_assets/body.html" \
+    --set-file instanceIcon="./branding/detectify_assets/favicon.ico" \
+    --set-file instanceLogo="./branding/detectify_assets/logo.svg" \
+    --set-file instanceHero="./branding/detectify_assets/hero.svg" \
+    webhookie-repo/webhookie-branded
 }
 
 function install_ic() {
@@ -152,5 +136,6 @@ case "$1" in
 --upgrade) upgrade;;
 --cleanup) clean_up;;
 --webhookie) install_webhookie;;
+--webhookie-branded) install_webhookie_branded;;
 *) help;;
 esac
