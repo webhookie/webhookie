@@ -15,6 +15,10 @@ webhookie: # metered container product
   replicas: 1
   imageName: hookiesolutions/webhookie
   imageVersion: latest
+mongodb: # metered container product
+  replicas: 1
+  imageName: mongo
+  imageVersion: 4.4
 
 WH_IAM_ISSUER_URI: "http://localhost:8800/auth/realms/webhookie"
 WH_IAM_JWK_SET_URI: "http://webhookie-all-keycloak:8800/auth/realms/webhookie/protocol/openid-connect/certs"
