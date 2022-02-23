@@ -2,20 +2,20 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-app: webhookie # metered container product
+app: webhookie
 productCode:
 region:
 vpcId:
 
-keycloak: # metered container product
-  replicas: 1
-  imageName: quay.io/keycloak/keycloak
-  imageVersion: 14.0.0
-webhookie: # metered container product
+webhookie:
   replicas: 1
   imageName: hookiesolutions/webhookie
   imageVersion: latest
-mongodb: # metered container product
+keycloak:
+  replicas: 1
+  imageName: quay.io/keycloak/keycloak
+  imageVersion: 14.0.0
+mongodb:
   replicas: 1
   imageName: mongo
   imageVersion: 4.4

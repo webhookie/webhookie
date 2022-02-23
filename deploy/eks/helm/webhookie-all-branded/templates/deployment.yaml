@@ -38,12 +38,6 @@ spec:
             - containerPort: 80
               protocol: TCP
           env:
-            - name: AWS_REGION
-              value: {{ .Values.region}}
-            - name: PRODUCT_CODE
-              value: {{ .Values.productCode}}
-            - name: PRODUCT_VERSION
-              value: {{.Values.webhookie.imageVersion}}
             - name: WH_IAM_ISSUER_URI
               value: {{.Values.WH_IAM_ISSUER_URI}}
             - name: WH_IAM_JWK_SET_URI

@@ -5,11 +5,13 @@ metadata:
     alb.ingress.kubernetes.io/target-type: ip
   labels:
     app: {{.Values.app}}
+    role: main
   name: {{.Values.app}}
   namespace: "default"
 spec:
   selector:
     app: {{.Values.app}}
+    role: main
   type: NodePort
   ports:
     - protocol: TCP
