@@ -20,3 +20,43 @@ spec:
       port: 4200
       targetPort: 80
       name: frontend
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ .Values.app }}-mongodb"
+  labels:
+    app: {{.Values.app}}
+    role: db
+spec:
+  type: NodePort
+  ports:
+    - protocol: TCP
+      port: 27017
+      targetPort: 27017
+      name: db
+  selector:
+    app: {{.Values.app}}
+    role: db
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ .Values.app }}-keycloak"
+  labels:
+    app: {{.Values.app}}
+    role: iam
+spec:
+  type: NodePort
+  ports:
+    - protocol: TCP
+      port: 9900
+      targetPort: 9990
+      name: admin
+    - protocol: TCP
+      port: 8800
+      targetPort: 8080
+      name: auth
+  selector:
+    app: {{.Values.app}}
+    role: iam
